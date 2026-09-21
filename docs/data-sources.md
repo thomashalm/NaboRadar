@@ -91,6 +91,10 @@ Observerte `dokumenttype`-verdier: `ref-data-as-pdf` (Varsel om oppstart av plan
 > Den skal **aldri** hentes, lagres, lenkes eller sendes til AI. NaboRadar bruker en allowlist:
 > `ref-data-as-pdf`, `PlanomraadePdf`, `ReferatOppstartsmoete`.
 
+**Server-side filter (testet):** `plandokument/items?dokumenttype=<type>` fungerer. Totalt 12 933 dokumenter; av tillatte typer:
+`ref-data-as-pdf` 284, `PlanomraadePdf` 1 758, `ReferatOppstartsmoete` 1 284. NaboRadar henter dokumenter **kun** med dette filteret,
+slik at berørte parter-poster aldri forespørres.
+
 Nedlasting: `GET` gir 200 `application/octet-stream` med `content-disposition: attachment`. `HEAD` gir 405.
 
 ### Eksempelrespons — `planomrade` (forkortet)
