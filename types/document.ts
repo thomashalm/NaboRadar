@@ -18,3 +18,6 @@ export interface EventDocument extends NormalizedDocument {
   id: string;
   eventId: string;
 }
+
+/** Dokument slik detaljsiden viser det (uten externalId). */
+export type EventDocumentView = Pick<EventDocument, "id" | "type" | "title" | "url" | "mimeType" | "documentDate">;

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { SearchBox } from "@/components/search/SearchBox";
 
 /** «Endre sted»: viser søkefeltet på resultatsiden. Valgt radius følger med til nytt sted. */
-export function ChangeLocation({ radius }: { radius: number }) {
+export function ChangeLocation({ radius, onNavigate }: { radius: number; onNavigate?: (href: string) => void }) {
   const [open, setOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const wasOpen = useRef(false);
@@ -39,7 +39,7 @@ export function ChangeLocation({ radius }: { radius: number }) {
         if (event.key === "Escape" && !(event.target as HTMLInputElement).value) setOpen(false);
       }}
     >
-      <SearchBox radius={radius} autoFocus onSelected={() => setOpen(false)} />
+      <SearchBox radius={radius} autoFocus onSelected={() => setOpen(false)} onNavigate={onNavigate} />
       <button
         type="button"
         onClick={() => setOpen(false)}

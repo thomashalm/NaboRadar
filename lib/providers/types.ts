@@ -33,12 +33,18 @@ export interface RawBatch {
 }
 
 export interface RejectedRecord {
-  /** Kildens ID hvis den kunne leses. */
+  kind: "feature" | "document";
+  /** Kildens ID hvis den kunne leses (for DiBK: arealplan). */
   externalId: string | null;
+  /** Kort årsak — aldri hele payloaden. */
   reason: string;
 }
 
 export interface NormalizeResult {
+  /**
+   * Normaliserte events. Kan inneholde flere fragmenter med samme externalId
+   * (DiBK: én per planomrade-feature) — sync-laget grupperer og slår dem sammen.
+   */
   events: NormalizedEvent[];
   rejected: RejectedRecord[];
 }
@@ -72,7 +78,7 @@ export interface DataProvider {
    */
   fetch(options: SyncOptions): AsyncIterable<RawBatch>;
 
-  /** Ren funksjon: validerer (Zod), grupperer og mapper til intern modell. Ingen I/O. */
+  /** Ren funksjon: validerer (Zod) og mapper til intern modell. Ingen I/O. Gruppering skjer i lib/sync. */
   normalize(batch: RawBatch): NormalizeResult;
 
   healthCheck(): Promise<ProviderHealth>;
@@ -83,8 +89,17 @@ export interface SyncResult {
   mode: SyncMode;
   startedAt: string;
   completedAt: string;
+  /** success: alt skrevet (avviste features er datakvalitet, ikke feil). partial: noen skrivefeil. failed: fatal feil. */
   status: "success" | "partial" | "failed";
+  /** Antall rå features hentet fra kilden. */
   fetched: number;
+  /** Features som besto validering. */
+  accepted: number;
+  /** Features som ikke besto validering. */
+  rejected: number;
+  /** Events etter gruppering (én per arealplan). */
+  events: number;
+  documents: number;
   inserted: number;
   updated: number;
   unchanged: number;

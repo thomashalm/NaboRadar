@@ -1,8 +1,8 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
-import { getSupabasePublicEnv, hasSupabaseSecretKey } from "./env";
+import { getSupabasePublicEnv } from "./env";
 
 /**
  * Server-klient med publishable key og brukerens cookies (RLS gjelder).
@@ -23,17 +23,5 @@ export async function createSupabaseServerClient(): Promise<SupabaseClient | nul
         }
       },
     },
-  });
-}
-
-/**
- * Admin-klient med secret key. Omgår RLS — kun for sync og admin, aldri i kode som når klienten.
- * null hvis ikke konfigurert.
- */
-export function createSupabaseAdminClient(): SupabaseClient | null {
-  const env = getSupabasePublicEnv();
-  if (!env || !hasSupabaseSecretKey()) return null;
-  return createClient(env.url, process.env.SUPABASE_SECRET_KEY!, {
-    auth: { persistSession: false, autoRefreshToken: false },
   });
 }

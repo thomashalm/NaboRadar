@@ -10,3 +10,4 @@ supabase/.temp/
 next-env.d.ts
 .claude/
 public/vendor/
+.data/

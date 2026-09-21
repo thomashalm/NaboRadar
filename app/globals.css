@@ -12,6 +12,8 @@
   --color-accent: #2447d4;
   --color-accent-hover: #1c39ad;
   --color-accent-soft: #eef1fd;
+  --color-plan: #c2410c;
+  --color-plan-soft: #fff4ed;
   --color-danger: #b42318;
   --color-danger-soft: #fef3f2;
 
@@ -52,4 +54,46 @@
 .maplibregl-ctrl-group button {
   width: 36px !important;
   height: 36px !important;
+}
+
+/* Kart-popup (innhold bygges i AreaMap med textContent). */
+.maplibregl-popup-content {
+  border-radius: 14px;
+  padding: 14px 16px 12px;
+  box-shadow: var(--shadow-pop);
+  font-family: var(--font-sans);
+}
+
+.maplibregl-popup-close-button {
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  color: var(--color-muted);
+  border-radius: 0 14px 0 8px;
+}
+
+.naboradar-popup-title {
+  margin-right: 20px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-ink);
+}
+
+.naboradar-popup-line {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.naboradar-popup-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-accent);
+}
+
+.naboradar-popup-link:hover {
+  text-decoration: underline;
 }

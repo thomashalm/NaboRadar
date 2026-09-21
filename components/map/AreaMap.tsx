@@ -1,13 +1,11 @@
 "use client";
 
 import "maplibre-gl/dist/maplibre-gl.css";
-import type { GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
+import type { Map as MapLibreMap, MapLayerMouseEvent, Popup } from "maplibre-gl";
 import { useEffect, useRef, useState } from "react";
-import { formatRadius } from "@/lib/format";
-import { circlePolygon, radiusBounds } from "@/lib/geo/radius";
+import type { LngLatBounds } from "@/lib/geo/bounds";
 import type { MapTileConfig } from "@/lib/map/config";
-
-const ACCENT = "#2447d4";
+import type { LayerBinding } from "@/lib/map/layers/types";
 
 const LOCALE_NB = {
   "Map.Title": "Kart",
@@ -18,47 +16,97 @@ const LOCALE_NB = {
   "CooperativeGesturesHandler.WindowsHelpText": "Hold Ctrl og scroll for å zoome",
   "CooperativeGesturesHandler.MacHelpText": "Hold ⌘ og scroll for å zoome",
   "CooperativeGesturesHandler.MobileHelpText": "Bruk to fingre for å flytte kartet",
+  "Popup.Close": "Lukk",
 };
 
+export interface MapPopupContent {
+  lngLat: [number, number];
+  title: string;
+  lines: string[];
+  href?: string;
+  linkLabel?: string;
+}
+
 interface AreaMapProps {
-  lat: number;
-  lng: number;
-  radiusM: number;
-  label: string;
   tiles: MapTileConfig;
-}
-
-function radiusFeature(lat: number, lng: number, radiusM: number) {
-  return { type: "Feature" as const, properties: {}, geometry: circlePolygon(lat, lng, radiusM) };
-}
-
-function centerFeature(lat: number, lng: number) {
-  return { type: "Feature" as const, properties: {}, geometry: { type: "Point" as const, coordinates: [lng, lat] } };
-}
-
-function mapTitle(radiusM: number, label: string) {
-  return `Kart over området innen ${formatRadius(radiusM)} fra ${label}`;
+  /** Beskrivelse for skjermlesere. */
+  title: string;
+  layers: readonly LayerBinding[];
+  /** Kartet tilpasses disse grensene ved oppstart og når fitKey endres. */
+  fitBounds: LngLatBounds;
+  fitKey: string;
+  maxFitZoom?: number;
+  selectedId?: string | null;
+  onSelect?: (id: string | null) => void;
+  popupFor?: (id: string) => MapPopupContent | null;
+  /** Klientnavigasjon for lenker i popup. */
+  onNavigate?: (href: string) => void;
 }
 
 function fitPadding(container: HTMLElement) {
-  return Math.round(Math.min(container.clientWidth, container.clientHeight) * 0.08) + 12;
+  return Math.round(Math.min(container.clientWidth, container.clientHeight) * 0.08) + 16;
 }
 
-export function AreaMap({ lat, lng, radiusM, label, tiles }: AreaMapProps) {
+function interactiveLayerIds(map: MapLibreMap, bindings: readonly LayerBinding[]): string[] {
+  return bindings.flatMap((b) => [...(b.layer.interactiveLayerIds ?? [])]).filter((id) => map.getLayer(id));
+}
+
+/** Popup-innhold bygget med textContent — aldri HTML fra data. */
+function popupElement(content: MapPopupContent, onNavigate?: (href: string) => void): HTMLElement {
+  const root = document.createElement("div");
+  root.className = "naboradar-popup";
+  const title = document.createElement("p");
+  title.className = "naboradar-popup-title";
+  title.textContent = content.title;
+  root.append(title);
+  for (const line of content.lines) {
+    const p = document.createElement("p");
+    p.className = "naboradar-popup-line";
+    p.textContent = line;
+    root.append(p);
+  }
+  if (content.href) {
+    const href = content.href;
+    const link = document.createElement("a");
+    link.className = "naboradar-popup-link";
+    link.href = href;
+    link.textContent = content.linkLabel ?? "Se saken";
+    link.addEventListener("click", (event) => {
+      if (!onNavigate || event.metaKey || event.ctrlKey || event.shiftKey) return;
+      event.preventDefault();
+      onNavigate(href);
+    });
+    root.append(link);
+  }
+  return root;
+}
+
+/**
+ * Generisk kart: Kartverket-fliser + vilkårlige datalag (MapLayer).
+ * Kartet opprettes én gang og beholdes når data, radius eller valgt objekt endres.
+ */
+export function AreaMap(props: AreaMapProps) {
+  const { tiles, title, layers, fitKey, selectedId = null } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
+  const mountedLayers = useRef(new Set<string>());
+  const previousSelected = useRef<string | null>(null);
+  const popupRef = useRef<Popup | null>(null);
+  const suppressPopupClose = useRef(false);
+  const latestProps = useRef(props);
   const [loaded, setLoaded] = useState(false);
   const [tilesFailed, setTilesFailed] = useState(false);
-  const latest = useRef({ lat, lng, radiusM });
+
   useEffect(() => {
-    latest.current = { lat, lng, radiusM };
+    latestProps.current = props;
   });
 
-  // Opprett kartet én gang. MapLibre importeres dynamisk fordi den krever nettleser (window/WebGL).
+  // Opprett kartet én gang. MapLibre lastes dynamisk (krever window/WebGL).
   useEffect(() => {
     let cancelled = false;
     let map: MapLibreMap | undefined;
     let tileErrors = 0;
+    const mounted = mountedLayers.current;
 
     (async () => {
       const container = containerRef.current;
@@ -83,8 +131,8 @@ export function AreaMap({ lat, lng, radiusM, label, tiles }: AreaMapProps) {
           },
           layers: [{ id: "base", type: "raster", source: "base" }],
         },
-        bounds: radiusBounds(lat, lng, radiusM),
-        fitBoundsOptions: { padding: fitPadding(container) },
+        bounds: latestProps.current.fitBounds,
+        fitBoundsOptions: { padding: fitPadding(container), maxZoom: latestProps.current.maxFitZoom ?? 16 },
         attributionControl: { compact: false },
         locale: LOCALE_NB,
         // På touch krever kartet to fingre, slik at siden fortsatt kan scrolles.
@@ -94,70 +142,106 @@ export function AreaMap({ lat, lng, radiusM, label, tiles }: AreaMapProps) {
         touchPitch: false,
       });
       map = instance;
+      mapRef.current = instance;
       instance.touchZoomRotate.disableRotation();
       instance.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
-      mapRef.current = instance;
 
-      instance.on("load", () => {
-        const map = instance;
-        const current = latest.current;
-        map.addSource("radius", { type: "geojson", data: radiusFeature(current.lat, current.lng, current.radiusM) });
-        map.addSource("center", { type: "geojson", data: centerFeature(current.lat, current.lng) });
-        map.addLayer({ id: "radius-fill", type: "fill", source: "radius", paint: { "fill-color": ACCENT, "fill-opacity": 0.07 } });
-        map.addLayer({ id: "radius-line", type: "line", source: "radius", paint: { "line-color": ACCENT, "line-width": 2, "line-opacity": 0.85 } });
-        map.addLayer({ id: "center-halo", type: "circle", source: "center", paint: { "circle-radius": 14, "circle-color": ACCENT, "circle-opacity": 0.16 } });
-        map.addLayer({
-          id: "center-dot",
-          type: "circle",
-          source: "center",
-          paint: { "circle-radius": 7, "circle-color": ACCENT, "circle-stroke-color": "#ffffff", "circle-stroke-width": 2.5 },
-        });
-        setLoaded(true);
+      const popup = new maplibregl.Popup({ closeButton: true, closeOnClick: false, maxWidth: "280px", offset: 12 });
+      popup.on("close", () => {
+        if (!suppressPopupClose.current) latestProps.current.onSelect?.(null);
+      });
+      popupRef.current = popup;
+
+      instance.on("load", () => setLoaded(true));
+
+      // Klikk: første interaktive lag som treffer vinner. Klikk i tomt område fjerner valget.
+      instance.on("click", (event: MapLayerMouseEvent) => {
+        const bindings = latestProps.current.layers;
+        const ids = interactiveLayerIds(instance, bindings);
+        const [feature] = ids.length ? instance.queryRenderedFeatures(event.point, { layers: ids }) : [];
+        if (!feature) {
+          latestProps.current.onSelect?.(null);
+          return;
+        }
+        const owner = bindings.find((b) => b.layer.interactiveLayerIds?.includes(feature.layer.id));
+        latestProps.current.onSelect?.(owner?.layer.idFromFeature?.(feature.properties ?? {}) ?? null);
+      });
+      instance.on("mousemove", (event) => {
+        const ids = interactiveLayerIds(instance, latestProps.current.layers);
+        const hit = ids.length > 0 && instance.queryRenderedFeatures(event.point, { layers: ids }).length > 0;
+        instance.getCanvas().style.cursor = hit ? "pointer" : "";
       });
 
       // Kartverket nede → vis melding i stedet for et tomt grått felt.
       instance.on("error", (event) => {
-        if ("sourceId" in event && event.sourceId === "base") {
-          tileErrors++;
-          if (tileErrors >= 4) setTilesFailed(true);
-        }
+        if ("sourceId" in event && event.sourceId === "base" && ++tileErrors >= 4) setTilesFailed(true);
       });
     })();
 
     return () => {
       cancelled = true;
+      popupRef.current?.remove();
       map?.remove();
       mapRef.current = null;
+      mounted.clear();
     };
-    // Kartet opprettes kun ved mount; endringer i posisjon håndteres i neste effekt.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tiles.tileUrl]);
+  }, [tiles.tileUrl, tiles.tileSize, tiles.maxZoom, tiles.attribution]);
 
-  // Oppdater radius/punkt og zoom når brukeren endrer radius eller sted.
-  // Merk: map.isStyleLoaded() er false mens fliser lastes, så vi bruker egen ready-state.
+  // Monter nye lag og oppdater data i eksisterende. Valgt tilstand settes på nytt etter dataendring.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !loaded) return;
-    const radiusSource = map.getSource("radius") as GeoJSONSource | undefined;
-    const centerSource = map.getSource("center") as GeoJSONSource | undefined;
-    if (!radiusSource || !centerSource) return;
-    // MapLibre gir canvaset role="region"; hold beskrivelsen oppdatert for skjermlesere.
-    map.getCanvas().setAttribute("aria-label", mapTitle(radiusM, label));
-    radiusSource.setData(radiusFeature(lat, lng, radiusM));
-    centerSource.setData(centerFeature(lat, lng));
-    map.fitBounds(radiusBounds(lat, lng, radiusM), { padding: fitPadding(map.getContainer()), duration: 600 });
-  }, [lat, lng, radiusM, label, loaded]);
+    for (const { layer, data } of layers) {
+      if (mountedLayers.current.has(layer.id)) layer.update(map, data);
+      else {
+        layer.mount(map, data);
+        mountedLayers.current.add(layer.id);
+      }
+      layer.setSelected?.(map, previousSelected.current, null);
+    }
+  }, [layers, loaded]);
+
+  // Tilpass utsnitt når området (radius/sted) endres.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !loaded) return;
+    map.fitBounds(latestProps.current.fitBounds, {
+      padding: fitPadding(map.getContainer()),
+      maxZoom: latestProps.current.maxFitZoom ?? 16,
+      duration: 500,
+    });
+  }, [fitKey, loaded]);
+
+  // Valgt objekt: marker i alle lag, vis popup, og panorer hvis objektet er utenfor utsnittet.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !loaded) return;
+    for (const { layer } of latestProps.current.layers) {
+      layer.setSelected?.(map, selectedId, previousSelected.current);
+    }
+    previousSelected.current = selectedId;
+
+    const popup = popupRef.current;
+    suppressPopupClose.current = true;
+    popup?.remove();
+    suppressPopupClose.current = false;
+    if (!selectedId || !popup) return;
+    const content = latestProps.current.popupFor?.(selectedId);
+    if (!content) return;
+    popup.setLngLat(content.lngLat).setDOMContent(popupElement(content, latestProps.current.onNavigate)).addTo(map);
+    if (!map.getBounds().contains(content.lngLat)) map.easeTo({ center: content.lngLat, duration: 400 });
+  }, [selectedId, loaded]);
+
+  // MapLibre gir canvaset role="region"; hold beskrivelsen oppdatert for skjermlesere.
+  useEffect(() => {
+    if (loaded) mapRef.current?.getCanvas().setAttribute("aria-label", title);
+  }, [title, loaded]);
 
   return (
     <div className="relative size-full overflow-hidden bg-[#eeeeec]">
-      <div
-        ref={containerRef}
-        // Ikke `absolute`: MapLibre setter selv position: relative på containeren.
-        className="h-full w-full"
-      />
-      {!loaded && (
-        <div className="pointer-events-none absolute inset-0 animate-pulse bg-[#eeeeec]" aria-hidden="true" />
-      )}
+      {/* Ikke `absolute` på containeren: MapLibre setter selv position: relative. */}
+      <div ref={containerRef} className="h-full w-full" />
+      {!loaded && <div className="pointer-events-none absolute inset-0 animate-pulse bg-[#eeeeec]" aria-hidden="true" />}
       {tilesFailed && (
         <div className="absolute inset-x-4 top-4 rounded-xl bg-surface/95 px-4 py-3 text-sm text-ink shadow-float" role="status">
           Kartet kunne ikke lastes akkurat nå. Prøv igjen litt senere.

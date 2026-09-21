@@ -153,6 +153,33 @@ Nedlasting: `GET` gir 200 `application/octet-stream` med `content-disposition: a
 }
 ```
 
+### Faktisk datasett (første fulle sync, 2026-09-21)
+
+| | |
+|---|---|
+| `planomrade`-features | 3 898 (0 avvist av Zod) |
+| Planer etter gruppering på `arealplan` | **1 536** |
+| Planer med én feature | 1 440 |
+| Største gruppe | 220 features (arealplan 1176, Austevoll) → 81 polygoner etter `ST_MakeValid` |
+| Varslet siste 24 mnd | 1 330 |
+| Tidsrom `kunngjøringsdato…` | 2024-05-08 → 2026-09-21 |
+| `link` gyldig http(s) | 258 planer; resten får DiBK-siden som kilde |
+| Features med `oppdateringsdato = null` | 677 (fanges ikke av incremental sync) |
+| Tillatte dokumenter hentet / knyttet til plan | 3 326 / 3 094 (232 tilhører planer uten planområde i datasettet) |
+| Per type | `PlanomraadePdf` 1 643 · `ReferatOppstartsmoete` 1 217 · `ref-data-as-pdf` 234 |
+
+Datasettet er altså ~1 500 planer, ikke ~3 900: mange planer består av flere polygoner, som DiBK leverer som separate features.
+
+### Filtre testet i fase 4
+
+| Kall | Resultat |
+|---|---|
+| `planomrade?filter=oppdateringsdato>'2026-09-01T00:00:00Z'` (ISO-tidsstempel) | ✅ |
+| `planomrade?filter=oppdateringsdato > TIMESTAMP('…')` | ❌ HTTP 500 |
+| `planomrade?filter=…&offset=5&limit=5` | ✅ paginering fungerer med filter |
+| `plandokument?arealplan=2053&dokumenttype=ref-data-as-pdf` | ✅ kombinert filter — brukes av incremental sync |
+| `planomrade?filter=oppdateringsdato IS NULL` | ✅ (677 treff) |
+
 ### Kjente problemer
 
 1. **Dubletter:** én plan kan ha flere `planomrade`-features med samme `arealplan` (observert: 449, 875, 910). → grupperes til ett event med MultiPolygon.

@@ -2,7 +2,7 @@
 
 Hva skjer rundt deg? NaboRadar viser offentlige plan- og byggehendelser rundt en adresse, forklart på forståelig norsk.
 
-**Status:** fase 3 (fundament) er ferdig: søk, resultatside og kart fungerer. Plandata fra DiBK kobles på i fase 4.
+**Status:** fase 4 er ferdig. Adresse eller sted → radius → ekte planoppstarter fra DiBK → kart, feed og detaljside.
 
 - [docs/data-sources.md](docs/data-sources.md) — testede datakilder, tilgang og lisens
 - [docs/architecture.md](docs/architecture.md) — datamodell, providers, geo-strategi, sync, personvern
@@ -14,33 +14,41 @@ Krever Node.js 20.9 eller nyere (utviklet på Node 24).
 
 ```bash
 npm install
+echo "LOCAL_DATABASE=pglite" > .env.local   # eller Supabase-variabler, se under
+npm run sync:dibk                           # henter alle planoppstarter fra DiBK (~20 s)
 npm run dev
 ```
 
-Åpne http://localhost:3000. Appen virker uten miljøvariabler: søk og kart bruker åpne Kartverket-tjenester, og Supabase er ikke nødvendig ennå.
+Åpne http://localhost:3000.
+
+- Søk og kart virker uten database, fordi de bruker åpne Kartverket-tjenester.
+- Plansakene krever en database: hosted Supabase eller lokal PGlite.
+- Uten database viser resultatsiden «Vi får ikke hentet plansaker akkurat nå.»
 
 | Kommando | Hva |
 |---|---|
 | `npm run dev` | Utviklingsserver |
 | `npm run build && npm start` | Produksjonsbygg |
 | `npm test` | Enhetstester (ingen nettverk) |
-| `npm run test:network` | Integrasjonstester mot ekte Kartverket-API |
+| `npm run sync:dibk` | Full sync av DiBK-plandata (`-- --mode=incremental` for inkrementell) |
+| `npm run test:network` | Integrasjonstester mot ekte Kartverket- og DiBK-API |
 | `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
 
-`/dev` viser diagnostikk (status for Kartverket, kartkonfig, om Supabase er konfigurert, provider-status). Siden finnes bare i development.
+`/dev` viser diagnostikk: DiBK-sync (siste kjøring, antall events, avviste) med «Sync now», Kartverket-status, kartkonfig, hvilken database som er i bruk, og provider-status. Siden og sync-knappen finnes bare i development. Server-action-en avviser kall utenfor development, selv om noen kaller den direkte.
 
 ## Miljøvariabler
 
-Kopier `.env.example` til `.env.local`. Alle variabler er valgfrie i fase 3.
+Kopier `.env.example` til `.env.local`.
 
 | Variabel | Hvor | Formål |
 |---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | klient + server | Supabase-prosjektets URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | klient + server | Publishable key (`sb_publishable_…`) eller legacy anon key. RLS beskytter data. |
-| `SUPABASE_SECRET_KEY` | **kun server** | Secret key (`sb_secret_…`) eller legacy service_role. Brukes av sync fra fase 4. |
+| `SUPABASE_SECRET_KEY` | **kun server** | Secret key (`sb_secret_…`) eller legacy service_role. Kreves for sync. |
+| `LOCAL_DATABASE` | server | `pglite` gir lokal Postgres + PostGIS i `.data/pglite` når Supabase ikke er satt. Kun development/test. |
 | `NEXT_PUBLIC_MAP_TILE_URL` | klient | XYZ-mal for bakgrunnskart. Standard er Kartverket topograatone. |
 | `NEXT_PUBLIC_MAP_ATTRIBUTION` | klient | Attribusjon for kartet. Standard er `© Kartverket`. |
-| `RUN_NETWORK_TESTS` | tester | `1` aktiverer integrasjonstester mot Kartverket |
+| `RUN_NETWORK_TESTS` | tester | `1` aktiverer integrasjonstester mot Kartverket og DiBK |
 
 Ekte nøkler skal aldri committes. `.env*.local` er git-ignorert.
 
@@ -48,9 +56,11 @@ Ekte nøkler skal aldri committes. `.env*.local` er git-ignorert.
 
 1. Opprett et prosjekt på supabase.com (region: Stockholm `eu-north-1` eller Frankfurt).
 2. **Database → Extensions:** aktiver `postgis` (migrasjonen gjør det også).
-3. Kjør migrasjonen [`supabase/migrations/20260921000000_init.sql`](supabase/migrations/20260921000000_init.sql). Enten lim den inn i SQL Editor, eller bruk `npx supabase link --project-ref <ref>` og så `npx supabase db push`.
-4. **Settings → API:** legg URL, publishable key og secret key i `.env.local`.
-5. Sjekk `/dev`: begge Supabase-linjene skal vise «Konfigurert».
+3. Kjør migrasjonene i `supabase/migrations/` i navnerekkefølge. Enten lim dem inn i SQL Editor, eller bruk `npx supabase link --project-ref <ref>` og så `npx supabase db push`.
+4. **Settings → API:** legg URL, publishable key og secret key i `.env.local`, og fjern `LOCAL_DATABASE`.
+5. Kjør `npm run sync:dibk`.
+6. Sjekk `/dev`: databasen skal vise «Hosted Supabase», og DiBK skal ha events.
+7. Sett opp periodisk sync (se [Sync](#plandata-og-sync)).
 
 Migrasjonsfilene er source of truth for schemaet. Endringer gjøres i nye migrasjoner, ikke i dashboardet.
 
@@ -99,7 +109,91 @@ Alle parametre valideres med Zod ([`lib/area-params.ts`](lib/area-params.ts)):
 | `radius` | `500`, `1000` eller `3000`. Alt annet gir standardverdien 1 km. |
 | `label` | Valgfri visningstekst. Kontrolltegn fjernes, og den kan være maks 120 tegn. |
 
-## Hva fungerer etter fase 3
+## Plandata og sync
+
+Kilde: DiBK «Planlegging igangsatt», collection `planomrade` (NLOD 2.0). Detaljer i [docs/data-sources.md](docs/data-sources.md).
+
+```
+DibkPlanningStartedProvider           lib/sync/run.ts                          Postgres (SQL-funksjoner)
+  fetch: paginering (500/side),   →   samle alle sider                    →    upsert_events (ST_MakeValid, ST_Multi,
+         timeout 20 s, 3 retry        normalize (provider, Zod)                 hash-sammenligning, dokumenter)
+  normalize: Zod → NormalizedEvent    grupper på arealplan → MultiPolygon       mark_removed_from_source (kun full)
+                                      contentHash → rader                       sync_run_start / sync_run_finish
+```
+
+- **Full sync** (standard i CLI):
+  - Henter alle ~3 900 `planomrade`-features og alle tillatte dokumenter.
+  - Grupperer til ~1 500 planer (én per `arealplan`).
+  - Events som ikke lenger finnes i kilden får `removed_from_source_at`. De slettes ikke, og skjules i brukerspørringer.
+- **Incremental:**
+  - CQL `oppdateringsdato > siste vellykkede sync − 24 t`.
+  - Deretter hentes hele gruppen (`?arealplan=`) og tillatte dokumenter for hver endret plan.
+  - Markerer aldri noe som fjernet.
+- **Anbefalt drift:** incremental hver 2. time og full hver natt ([ADR 003](docs/adr/003-central-data-sync.md)). Cron-oppsett kommer ved deploy.
+- **Hash:** `contentHash` dekker kun normalisert kildeinnhold (tittel, geometri, datoer, lenke, attributter, dokumenter, rå metadata). Uendret hash gir `unchanged`, og bare `synced_at` oppdateres.
+- **Feilhåndtering:**
+  - En ugyldig feature blir `rejected`, og resten fortsetter.
+  - En rad som ikke kan skrives blir `failed`, og status blir `partial`.
+  - En ugyldig side eller et nettverksbrudd blir `failed`, og da gjøres ingen reconciliation.
+- **Logging:** hver kjøring logges i `sync_runs` (fetched, accepted, rejected, inserted, updated, unchanged, removed, failed, feil). Payloads logges aldri.
+
+```text
+$ npm run sync:dibk
+Provider:   dibk-planning-started (full)
+Status:     success  (20.6 s)
+Fetched:    3898
+Accepted:   3898
+Rejected:   0
+Events:     1536  (etter gruppering på arealplan)
+Documents:  3094
+Inserted:   1536
+Updated:    0
+Unchanged:  0
+Removed:    0
+Failed:     0
+```
+
+Exit-kode 0 betyr OK, 1 fatal feil og 2 delvis feil. Med lokal PGlite kan CLI-en ikke kjøre mens dev-serveren holder databasen, fordi lockfila hindrer korrupsjon. Bruk da «Sync now» på `/dev`.
+
+### Geografisk spørring
+
+`events_within(lat, lng, radius_m, announced_since, sort)` bruker `ST_DWithin(geom::geography, punkt, radius)` mot hele planpolygonet. En sak tas med hvis noen del av polygonet ligger innenfor radius, og avstanden er til nærmeste kant (0 hvis punktet ligger inni). Centroid brukes bare til markør og popup. Resultatsiden viser saker varslet de siste 24 månedene. Dette er et visningsfilter, og eldre saker ligger fortsatt i databasen.
+
+### Dokumenter og personvern
+
+- Dokumentmetadata hentes kun med `?dokumenttype=` for allowlisten (`ref-data-as-pdf`, `PlanomraadePdf`, `ReferatOppstartsmoete`). `beroerteParter.json` blir derfor aldri forespurt.
+- `isAllowedDocument()` avviser berørte parter og ukjente typer også hvis kilden skulle sende dem.
+- Databasen har en CHECK-constraint som gjør det samme.
+- Dokumentene lastes aldri ned. Vi lagrer tittel, type, dato og DiBK-URL, og brukeren åpner originalen hos kilden.
+
+### Kildelenker
+
+1. Feltet `link` brukes bare hvis det er en fullstendig http(s)-URL, og vises da som kommunens/forslagsstillers lenke.
+2. Ellers lenker vi til DiBKs egen side for planen (verifisert 200).
+3. Vi konstruerer aldri kommunale URL-er.
+
+## Lokal database (PGlite)
+
+Uten Supabase kan `LOCAL_DATABASE=pglite` brukes i development:
+
+- Det er Postgres + PostGIS kompilert til WASM, i `.data/pglite` (git-ignorert).
+- Migrasjonene kjøres automatisk med de samme SQL-filene som i Supabase, pluss stubber for `auth`-skjemaet og rollene.
+- Samme `Db.rpc()`-grensesnitt brukes mot begge, så koden er identisk.
+- Testene bruker PGlite i minnet.
+
+## Hva fungerer etter fase 4
+
+- **Forside:** autocomplete mot Kartverket (adresser og stedsnavn).
+- **`/omrade`:**
+  - Ekte planoppstarter innen radius, med polygoner i kartet og feed.
+  - Sortering: nærmest eller nyeste.
+  - Valg synkronisert mellom kart og feed, med popup.
+  - Lastetilstand ved bytte av radius, sortering og sted. Kartet beholdes.
+  - Tom-tilstand med «Prøv 3 km», og feiltilstand når databasen mangler.
+- **`/sak/[id]`:** planområde i kart, avstand fra søkt sted (fra URL-kontekst), fakta fra kilden, beregnet areal, tillatte dokumenter og kildelenke.
+- **Sync:** CLI og `/dev`-knapp, full og incremental, med reconciliation.
+
+## Hva fungerte etter fase 3
 
 - Forside med stort søkefelt og autocomplete mot Kartverket. Den kan brukes med tastatur og mus, og har loading-, tom- og feiltilstand.
 - `/omrade` med valgt sted, radiusvalg (500 m / 1 km / 3 km) og Kartverket-kart med geografisk korrekt radius.
@@ -109,13 +203,16 @@ Alle parametre valideres med Zod ([`lib/area-params.ts`](lib/area-params.ts)):
 - Loading-skjelett, feilside, 404 og `/dev`-diagnostikk.
 - Supabase-klienter for server og klient. De er valgfrie, og appen starter uten dem.
 
-## Neste: fase 4
+## Ikke implementert ennå
 
-- `DibkPlanningStartedProvider`: henting, normalisering og deduplisering av ekte plandata.
-- Sync-jobb til Supabase, og `events_within()` koblet til resultatsiden.
-- Event-feed i «Saker i området» og polygoner på kartet.
+AI-oppsummering, varsling og utsending, innlogging, cron-oppsett i drift, og flere datakilder.
 
 ## Kjente begrensninger
+
+- **Kilden mangler felt:** DiBK har ikke formål, status eller sluttdato. Vi viser derfor bare «Planoppstart varslet …» og antyder aldri at arbeidet pågår.
+- **Kommunenavn:** DiBK leverer bare kommunenummer, så detaljsiden viser nummeret.
+- **Incremental sync:** fanger ikke planer med `oppdateringsdato = null` (~680 features), eller dokumenter som endres uten at planen gjør det. Nattlig full sync dekker dette.
+- **Lokal PGlite:** én prosess om gangen. CLI og dev-server kan ikke bruke samme lokale database samtidig.
 
 - Adresser med samme navn i flere kommuner (f.eks. «Karl Johans gate 1») kommer i Kartverkets rekkefølge. Undertittelen (postnummer og kommune) skiller dem.
 - Geokodingscachen er per serverinstans.

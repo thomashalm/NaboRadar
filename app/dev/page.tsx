@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { SyncPanel } from "@/components/dev/SyncPanel";
+import { getDbMode, getWriteDb } from "@/lib/db";
 import { geocoder } from "@/lib/geocoding";
+import { formatDate } from "@/lib/format";
 import { getMapTileConfig } from "@/lib/map/config";
 import { providers } from "@/lib/providers/registry";
 import { getSupabasePublicEnv, hasSupabaseSecretKey } from "@/lib/supabase/env";
@@ -33,10 +36,39 @@ async function probeGeocoding() {
   );
 }
 
+interface ProviderOverviewRow {
+  id: string;
+  status: string;
+  last_sync_at: string | null;
+  last_success_at: string | null;
+  last_error: string | null;
+  active_events: number | string;
+  removed_events: number | string;
+  documents: number | string;
+  last_run: { status: string; mode: string; fetched: number; accepted: number; rejected: number; inserted: number; updated: number; unchanged: number; removed: number; failed: number; started_at: string } | null;
+}
+
+async function loadProviderOverview(): Promise<{ rows: ProviderOverviewRow[] } | { error: string }> {
+  try {
+    const db = await getWriteDb();
+    if (!db) return { error: getDbMode() === "supabase" ? "SUPABASE_SECRET_KEY mangler" : "Ingen database konfigurert" };
+    return { rows: await db.rpc<ProviderOverviewRow>("provider_overview") };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Ukjent feil" };
+  }
+}
+
+function formatTime(value: string | null) {
+  if (!value) return "aldri";
+  return `${formatDate(value)} ${new Date(value).toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" })}`;
+}
+
 export default async function DevPage() {
   if (process.env.NODE_ENV !== "development") notFound();
 
-  const probes = await probeGeocoding();
+  const [probes, overview] = await Promise.all([probeGeocoding(), loadProviderOverview()]);
+  const dibk = "rows" in overview ? overview.rows.find((r) => r.id === "dibk-planning-started") : undefined;
+  const dbMode = getDbMode();
   const map = getMapTileConfig();
   const supabase = getSupabasePublicEnv();
 
@@ -44,6 +76,45 @@ export default async function DevPage() {
     <main className="mx-auto max-w-4xl px-5 py-12 sm:px-8">
       <p className="text-sm font-medium text-muted">Kun synlig i development</p>
       <h1 className="mt-1 text-3xl font-semibold tracking-[-0.03em]">Diagnostikk</h1>
+
+      <Section title="DiBK Planlegging igangsatt">
+        {"error" in overview ? (
+          <p className="text-sm text-danger">Databasen er ikke tilgjengelig: {overview.error}</p>
+        ) : dibk ? (
+          <dl className="grid grid-cols-[12rem_1fr] gap-y-2 text-sm">
+            <dt className="text-muted">Status</dt>
+            <dd>{dibk.status}</dd>
+            <dt className="text-muted">Last sync</dt>
+            <dd>{formatTime(dibk.last_sync_at)}{dibk.last_run ? ` (${dibk.last_run.mode}, ${dibk.last_run.status})` : ""}</dd>
+            <dt className="text-muted">Last success</dt>
+            <dd>{formatTime(dibk.last_success_at)}</dd>
+            <dt className="text-muted">Events</dt>
+            <dd>{Number(dibk.active_events).toLocaleString("nb-NO")} aktive · {Number(dibk.removed_events).toLocaleString("nb-NO")} fjernet fra kilden</dd>
+            <dt className="text-muted">Dokumenter</dt>
+            <dd>{Number(dibk.documents).toLocaleString("nb-NO")}</dd>
+            <dt className="text-muted">Rejected last run</dt>
+            <dd>{dibk.last_run ? dibk.last_run.rejected : "–"}</dd>
+            {dibk.last_run && (
+              <>
+                <dt className="text-muted">Siste kjøring</dt>
+                <dd className="font-mono text-xs">
+                  fetched {dibk.last_run.fetched} · inserted {dibk.last_run.inserted} · updated {dibk.last_run.updated} · unchanged{" "}
+                  {dibk.last_run.unchanged} · removed {dibk.last_run.removed} · failed {dibk.last_run.failed}
+                </dd>
+              </>
+            )}
+            {dibk.last_error && (
+              <>
+                <dt className="text-muted">Siste feil</dt>
+                <dd className="whitespace-pre-wrap text-danger">{dibk.last_error}</dd>
+              </>
+            )}
+          </dl>
+        ) : (
+          <p className="text-sm text-muted">Ingen provider-rad funnet — er migrasjonene kjørt?</p>
+        )}
+        <SyncPanel />
+      </Section>
 
       <Section title="Kartverket geokoding">
         <table className="w-full text-left text-sm">
@@ -81,6 +152,19 @@ export default async function DevPage() {
         </dl>
       </Section>
 
+      <Section title="Database">
+        <dl className="grid grid-cols-[10rem_1fr] gap-y-2 text-sm">
+          <dt className="text-muted">I bruk</dt>
+          <dd>
+            {dbMode === "supabase"
+              ? "Hosted Supabase"
+              : dbMode === "pglite"
+                ? "Lokal PGlite (.data/pglite) — kun development"
+                : "Ingen — resultatsiden viser «Vi får ikke hentet plansaker»"}
+          </dd>
+        </dl>
+      </Section>
+
       <Section title="Supabase">
         <dl className="grid grid-cols-[10rem_1fr] gap-y-2 text-sm">
           <dt className="text-muted">URL + publishable key</dt>
@@ -94,7 +178,7 @@ export default async function DevPage() {
             </>
           )}
         </dl>
-        <p className="mt-3 text-sm text-muted">Verdiene vises aldri. Søk og kart fungerer uten Supabase i fase 3.</p>
+        <p className="mt-3 text-sm text-muted">Verdiene vises aldri. Uten Supabase brukes lokal PGlite (LOCAL_DATABASE=pglite) i development.</p>
       </Section>
 
       <Section title="Providers (registry)">

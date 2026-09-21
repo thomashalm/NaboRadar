@@ -226,6 +226,45 @@ flowchart LR
   - ESLint 9, fordi `eslint-plugin-react` ikke støtter 10.
   - MapLibre-workeren serveres fra `public/vendor/`.
 
+## Fase 4: implementasjon og avvik fra fase 2
+
+Arkitekturen fra fase 2 er beholdt. Konkrete justeringer:
+
+| Fase 2 | Fase 4 | Hvorfor |
+|---|---|---|
+| `normalize()` grupperer | `normalize()` returnerer ett fragment per feature. `lib/sync/merge.ts` grupperer på `(providerId, externalId)` | Grupper kan krysse sidegrenser, og sammenslåing er generisk på tvers av providers |
+| Polygon eller MultiPolygon | Alltid MultiPolygon for polygon-events (`ST_Multi(ST_CollectionExtract(ST_MakeValid(g), 3))`) | Én form, gyldig geometri, og ingen dobbelttelling av areal ved overlapp |
+| Skriving via tabell-API | All skriving via SQL-funksjoner: `upsert_events`, `mark_removed_from_source`, `sync_run_start` og `sync_run_finish` | Samme kall mot Supabase (`rpc`) og PGlite. EXECUTE er trukket fra anon/authenticated |
+| — | `Db`-grensesnitt (`lib/db`) med `SupabaseDb` og `PgliteDb` | Lokal dev og tester uten Docker, med de samme migrasjonene |
+| `events_within(… include_removed)` | `events_within(lat, lng, radius_m, announced_since, sort, max_results)`. Fjernede events er alltid utelatt, og GeoJSON har 6 desimaler | Sortering i SQL, mindre payload |
+| — | `get_event(id, lat?, lng?)`, `data_status()` (offentlig) og `provider_overview()` (service role) | Detaljside, «data ikke hentet ennå» og `/dev` |
+| `sync_runs` | + `accepted`, `rejected` | Skiller valideringsavvisning fra skrivefeil |
+
+### Sync-status
+
+| Status | Betydning |
+|---|---|
+| `success` | Alt hentet og skrevet. Avviste features er et datakvalitetsproblem, ikke en feil |
+| `partial` | Noen rader kunne ikke skrives (se `errors`). Reconciliation kjøres, men feilede id-er beskyttes |
+| `failed` | Fatal feil (side, nettverk, DB). Ingen reconciliation, så ingenting markeres som fjernet |
+
+### Kart: lag-konsept
+
+`components/map/AreaMap.tsx` er en generisk vert. Datalag implementerer `MapLayer<T>` (`lib/map/layers/`), med disse metodene:
+
+| Metode | Hva den gjør |
+|---|---|
+| `mount` | Legger laget inn i kartet |
+| `update` | Oppdaterer data |
+| `interactiveLayerIds` / `idFromFeature` | Gjør laget klikkbart og gir id for klikket objekt |
+| `setSelected` | Markerer valgt objekt |
+
+Dagens lag er `radiusLayer` (søkepunkt og sirkel) og `planAreasLayer` (planpolygoner og punkt for små områder, med valgt-tilstand via `feature-state`). Byggesaker, reguleringsplaner, veiarbeid og eiendommer blir nye lag uten endring i kartkomponenten.
+
+### Resultatsiden
+
+`/omrade` er en server component som validerer URL-en og kaller `events_within`. `AreaExplorer` (klient) eier valgt sak, som deles mellom kart og feed. Radius, sortering og sted endres via URL i en React-transition. Feeden viser da «Oppdaterer …», mens kartet beholdes og bare får nye data og nytt utsnitt.
+
 ## Alder og «nye» saker
 
 Kilden har ingen status eller sluttdato. Produktet viser som standard saker varslet de siste **24 månedene**

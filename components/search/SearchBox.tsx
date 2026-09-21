@@ -20,9 +20,11 @@ interface SearchBoxProps {
   autoFocus?: boolean;
   /** Kalles etter at et treff er valgt (f.eks. for å lukke «Endre sted»). */
   onSelected?: () => void;
+  /** Overstyr navigasjon (f.eks. i en transition for å vise lastetilstand). Standard: router.push. */
+  onNavigate?: (href: string) => void;
 }
 
-export function SearchBox({ radius, size = "compact", autoFocus, onSelected }: SearchBoxProps) {
+export function SearchBox({ radius, size = "compact", autoFocus, onSelected, onNavigate }: SearchBoxProps) {
   const router = useRouter();
   const id = useId();
   const inputId = `${id}-input`;
@@ -82,10 +84,12 @@ export function SearchBox({ radius, size = "compact", autoFocus, onSelected }: S
   function select(location: SearchLocation) {
     setOpen(false);
     setQuery(location.label);
-    setNavigating(true);
-    router.push(
-      buildAreaHref({ lat: location.latitude, lng: location.longitude, radius, label: location.label }),
-    );
+    const href = buildAreaHref({ lat: location.latitude, lng: location.longitude, radius, label: location.label });
+    if (onNavigate) onNavigate(href);
+    else {
+      setNavigating(true);
+      router.push(href);
+    }
     onSelected?.();
   }
 

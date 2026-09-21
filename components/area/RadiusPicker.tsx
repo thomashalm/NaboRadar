@@ -1,30 +1,37 @@
+"use client";
+
 import Link from "next/link";
-import { buildAreaHref } from "@/lib/area-params";
 import { formatRadius } from "@/lib/format";
 import { RADIUS_OPTIONS_M } from "@/lib/geo/constants";
 
 interface RadiusPickerProps {
-  lat: number;
-  lng: number;
   radius: number;
-  label?: string;
+  hrefFor: (radius: number) => string;
+  /** Navigasjon i en transition (feeden viser lastetilstand, kartet beholdes). */
+  onNavigate: (href: string) => void;
 }
 
-/** Radiusvalg som lenker: delbar URL, fungerer uten JavaScript, og tilbake-knappen virker. */
-export function RadiusPicker({ lat, lng, radius, label }: RadiusPickerProps) {
+/** Radiusvalg som ekte lenker (delbare, fungerer uten JS), men navigerer i en transition. */
+export function RadiusPicker({ radius, hrefFor, onNavigate }: RadiusPickerProps) {
   return (
     <nav aria-label="Velg radius">
       <ul className="inline-flex rounded-full border border-line bg-surface p-1 shadow-float">
         {RADIUS_OPTIONS_M.map((option) => {
           const selected = option === radius;
+          const href = hrefFor(option);
           return (
             <li key={option}>
               <Link
-                href={buildAreaHref({ lat, lng, radius: option, label })}
+                href={href}
                 replace
                 scroll={false}
                 aria-current={selected ? "true" : undefined}
-                className={`flex h-11 min-w-[3.75rem] items-center justify-center rounded-full px-3 sm:min-w-[4.5rem] sm:px-4 text-[15px] font-medium transition-colors ${
+                onClick={(event) => {
+                  if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+                  event.preventDefault();
+                  if (!selected) onNavigate(href);
+                }}
+                className={`flex h-11 min-w-[3.75rem] items-center justify-center rounded-full px-3 text-[15px] font-medium transition-colors sm:min-w-[4.5rem] sm:px-4 ${
                   selected ? "bg-ink text-white" : "text-muted hover:bg-canvas hover:text-ink"
                 }`}
               >

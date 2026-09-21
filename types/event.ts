@@ -83,3 +83,26 @@ export interface EventWithDistance extends StoredEvent {
   /** Korteste avstand fra punkt til geometri i meter. 0 hvis punktet ligger inni. */
   distanceM: number;
 }
+
+/**
+ * Det resultatsiden trenger for ett event — et utsnitt av EventWithDistance.
+ * Aldri rawData til nettleseren.
+ */
+export type AreaEvent = Pick<
+  EventWithDistance,
+  | "id"
+  | "type"
+  | "title"
+  | "announcedAt"
+  | "sourceUpdatedAt"
+  | "distanceM"
+  | "computedAreaM2"
+  | "centroid"
+  | "geometry"
+  | "municipalityNumber"
+  | "sourceUrl"
+  | "sourceUrlType"
+  | "attributes"
+>;
+
+export type AreaSort = "distance" | "newest";
