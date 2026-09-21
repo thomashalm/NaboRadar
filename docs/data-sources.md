@@ -213,6 +213,10 @@ Ikke brukt: `gardsnummer`, `bruksnummer`, `bruksenhetsnummer` (unødvendig for o
 - Stedsnavn som «Sognsvann» gir **0 treff** — trenger Stedsnavn-API i tillegg.
 - `kommunenavn`/`poststed` er i STORE BOKSTAVER → normaliseres for visning.
 - Uten `kommunenummer` returneres treff fra hele landet («Jernbanetorget 1» → Halden først).
+- **Prefiks vs. eksakt (testet 2026-09-21, fase 3):** `sok=sognsv*` gir gode prefikstreff. `sok=Karl Johans gate 1*` gir derimot
+  ikke Oslo blant de 10 første, mens `sok=Karl Johans gate 1` (eksakt) gir Sarpsborg, Halden og Oslo. NaboRadar søker derfor eksakt
+  når siste ord inneholder et siffer, og ellers med prefiks.
+- `fuzzy=true` gir mye støy («sognsv» → «Rognså», «Sognan»). Brukes ikke.
 
 ---
 
@@ -250,6 +254,10 @@ Parametere testet: `sok`, `fuzzy=true`, `treffPerSide`, `utkoordsys=4258`.
 - `side` starter på **1** (Adresse-API starter på 0).
 - `fuzzy=true` gir mange støytreff (Sognsvann → 128); uten `fuzzy` → 2 presise treff. Rangering må håndteres.
 - «Oslo S» → «Oslo sentralstasjon» (Stasjon) som første treff.
+- **Prefiks (`sok=majorst*`) fungerer, men `fuzzy=true` sammen med `*` gir feilrespons** (testet fase 3). NaboRadar bruker prefiks uten fuzzy.
+- Prefikstreff kommer i ikke-relevant rekkefølge («Sognsvannsbanen» før «Sognsvann») og inkluderer havområder, olje- og gassfelt.
+  NaboRadar rangerer selv og filtrerer bort offshore-typer.
+- Enkelte navn kommer på samisk (`språk: "Lulesamisk"`, f.eks. «Oslo suohkan»). Norsk skrivemåte får litt høyere vekt.
 
 ---
 

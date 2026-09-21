@@ -1,0 +1,112 @@
+{
+    "metadata": {
+        "side": 1,
+        "sokeStreng": "sok=majorstuen*&treffPerSide=20&utkoordsys=4258",
+        "totaltAntallTreff": 4,
+        "treffPerSide": 20,
+        "viserFra": 1,
+        "viserTil": 20
+    },
+    "navn": [
+        {
+            "fylker": [
+                {
+                    "fylkesnavn": "Oslo",
+                    "fylkesnummer": "03"
+                }
+            ],
+            "kommuner": [
+                {
+                    "kommunenavn": "Oslo",
+                    "kommunenummer": "0301"
+                }
+            ],
+            "navneobjekttype": "Stasjon",
+            "navnestatus": "hovednavn",
+            "representasjonspunkt": {
+                "nord": 59.92992,
+                "øst": 10.71488
+            },
+            "skrivemåte": "Majorstuen",
+            "skrivemåtestatus": "godkjent og prioritert",
+            "språk": "Norsk",
+            "stedsnummer": 854920,
+            "stedstatus": "aktiv"
+        },
+        {
+            "fylker": [
+                {
+                    "fylkesnavn": "Oslo",
+                    "fylkesnummer": "03"
+                }
+            ],
+            "kommuner": [
+                {
+                    "kommunenavn": "Oslo",
+                    "kommunenummer": "0301"
+                }
+            ],
+            "navneobjekttype": "Tettbebyggelse",
+            "navnestatus": "hovednavn",
+            "representasjonspunkt": {
+                "nord": 59.92881,
+                "øst": 10.7153
+            },
+            "skrivemåte": "Majorstuen",
+            "skrivemåtestatus": "godkjent og prioritert",
+            "språk": "Norsk",
+            "stedsnummer": 874800,
+            "stedstatus": "aktiv"
+        },
+        {
+            "fylker": [
+                {
+                    "fylkesnavn": "Oslo",
+                    "fylkesnummer": "03"
+                }
+            ],
+            "kommuner": [
+                {
+                    "kommunenavn": "Oslo",
+                    "kommunenummer": "0301"
+                }
+            ],
+            "navneobjekttype": "Kirke",
+            "navnestatus": "hovednavn",
+            "representasjonspunkt": {
+                "nord": 59.93132,
+                "øst": 10.72121
+            },
+            "skrivemåte": "Majorstuen kirke",
+            "skrivemåtestatus": "godkjent og prioritert",
+            "språk": "Norsk",
+            "stedsnummer": 934739,
+            "stedstatus": "aktiv"
+        },
+        {
+            "fylker": [
+                {
+                    "fylkesnavn": "Oslo",
+                    "fylkesnummer": "03"
+                }
+            ],
+            "kommuner": [
+                {
+                    "kommunenavn": "Oslo",
+                    "kommunenummer": "0301"
+                }
+            ],
+            "navneobjekttype": "Skole",
+            "navnestatus": "hovednavn",
+            "representasjonspunkt": {
+                "nord": 59.92883,
+                "øst": 10.71321
+            },
+            "skrivemåte": "Majorstuen skole",
+            "skrivemåtestatus": "godkjent og prioritert",
+            "språk": "Norsk",
+            "stedsnummer": 229854,
+            "stedstatus": "aktiv"
+        }
+    ]
+}

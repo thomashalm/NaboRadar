@@ -205,6 +205,27 @@ sequenceDiagram
 - **Anbefalt frekvens:** incremental hver 2. time, full reconciliation hver natt. Begrunnelse i ADR 003.
 - **HTTP:** 20 s timeout, 3 retries med eksponentiell backoff og jitter på nettverksfeil og 5xx. Ingen retry på 4xx.
 
+## Geokoding og kart (fase 3)
+
+```mermaid
+flowchart LR
+  SB[SearchBox<br/>debounce 250 ms, min 2 tegn] --> API[/api/geocode<br/>Zod-validering/]
+  API --> KGP[KartverketGeocodingProvider<br/>in-memory TTL-cache]
+  KGP -->|parallelt, 3,5 s timeout| ADR[Adresse-API]
+  KGP --> STN[Stedsnavn-API]
+  KGP --> M[merge + rangering] --> API
+  SB -->|valgt treff| URL["/omrade?lat&lng&radius&label"]
+  URL --> MAP[AreaMap · MapLibre<br/>tiles fra lib/map/config]
+```
+
+- `GeocodingProvider` er implementert som `KartverketGeocodingProvider`. Feiler én kilde, returneres treff fra den andre. Feiler begge, kastes `GeocodingUnavailableError`, og API-et svarer 503.
+- Radius tegnes som en geodetisk polygon (`lib/geo/radius.ts`). Samme meter-semantikk som `ST_DWithin` på serveren.
+- `/omrade` er en server component: validerer parametre og sender kartkonfig til en klientkomponent. Kartet lastes dynamisk, bare i nettleseren.
+- Tekniske valg som avviker fra fase 2:
+  - TypeScript er låst til 6.0.x. TypeScript 7 mangler JS-API-et som `typescript-eslint` og Next.js-typesjekken bruker.
+  - ESLint 9, fordi `eslint-plugin-react` ikke støtter 10.
+  - MapLibre-workeren serveres fra `public/vendor/`.
+
 ## Alder og «nye» saker
 
 Kilden har ingen status eller sluttdato. Produktet viser som standard saker varslet de siste **24 månedene**

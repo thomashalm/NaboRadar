@@ -42,7 +42,6 @@ class UnavailableProvider implements DataProvider {
     this.statusReason = config.statusReason;
   }
 
-  // eslint-disable-next-line require-yield
   async *fetch(): AsyncIterable<RawBatch> {
     throw new ProviderUnavailableError(this.id, this.statusReason);
   }

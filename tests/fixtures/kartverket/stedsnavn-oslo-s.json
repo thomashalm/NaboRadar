@@ -1,0 +1,87 @@
+{
+    "metadata": {
+        "side": 1,
+        "sokeStreng": "sok=Oslo%20S*&treffPerSide=20&utkoordsys=4258",
+        "totaltAntallTreff": 3,
+        "treffPerSide": 20,
+        "viserFra": 1,
+        "viserTil": 20
+    },
+    "navn": [
+        {
+            "fylker": [
+                {
+                    "fylkesnavn": "Oslo",
+                    "fylkesnummer": "03"
+                }
+            ],
+            "kommuner": [
+                {
+                    "kommunenavn": "Oslo",
+                    "kommunenummer": "0301"
+                }
+            ],
+            "navneobjekttype": "Kommune",
+            "navnestatus": "hovednavn",
+            "representasjonspunkt": {
+                "nord": 59.91192,
+                "øst": 10.73359
+            },
+            "skrivemåte": "Oslo suohkan",
+            "skrivemåtestatus": "vedtatt",
+            "språk": "Lulesamisk",
+            "stedsnummer": 239083,
+            "stedstatus": "aktiv"
+        },
+        {
+            "fylker": [
+                {
+                    "fylkesnavn": "Oslo",
+                    "fylkesnummer": "03"
+                }
+            ],
+            "kommuner": [
+                {
+                    "kommunenavn": "Oslo",
+                    "kommunenummer": "0301"
+                }
+            ],
+            "navneobjekttype": "Stasjon",
+            "navnestatus": "hovednavn",
+            "representasjonspunkt": {
+                "nord": 59.91067,
+                "øst": 10.75226
+            },
+            "skrivemåte": "Oslo sentralstasjon",
+            "skrivemåtestatus": "godkjent og prioritert",
+            "språk": "Norsk",
+            "stedsnummer": 369108,
+            "stedstatus": "aktiv"
+        },
+        {
+            "fylker": [
+                {
+                    "fylkesnavn": "Oslo",
+                    "fylkesnummer": "03"
+                }
+            ],
+            "kommuner": [
+                {
+                    "kommunenavn": "Oslo",
+                    "kommunenummer": "0301"
+                }
+            ],
+            "navneobjekttype": "Annen kulturdetalj",
+            "navnestatus": "hovednavn",
+            "representasjonspunkt": {
+                "nord": 59.91285,
+                "øst": 10.75474
+            },
+            "skrivemåte": "Oslo Spektrum",
+            "skrivemåtestatus": "godkjent og prioritert",
+            "språk": "Norsk",
+            "stedsnummer": 751807,
+            "stedstatus": "aktiv"
+        }
+    ]
+}

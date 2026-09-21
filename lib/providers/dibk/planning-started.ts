@@ -29,7 +29,6 @@ export class DibkPlanningStartedProvider implements DataProvider {
   readonly defaultStatus = "active" as const;
   readonly statusReason = null;
 
-  // eslint-disable-next-line require-yield
   async *fetch(_options: SyncOptions): AsyncIterable<RawBatch> {
     throw new Error("Ikke implementert ennå (fase 4)");
   }

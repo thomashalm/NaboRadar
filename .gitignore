@@ -7,3 +7,6 @@ coverage/
 .DS_Store
 *.tsbuildinfo
 supabase/.temp/
+next-env.d.ts
+.claude/
+public/vendor/

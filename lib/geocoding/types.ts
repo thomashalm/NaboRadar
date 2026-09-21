@@ -29,16 +29,30 @@ export interface GeocodingProvider {
   search(query: string, options?: GeocodingSearchOptions): Promise<SearchLocation[]>;
 }
 
+/** Et normalisert treff med kildespesifikk vekt (f.eks. stedstype), brukt til rangering. */
+export interface ScoredLocation {
+  location: SearchLocation;
+  /** Tillegg fra kilden: stedsnavn av relevante typer (Vann, Stasjon, Bydel …) får positiv vekt. */
+  boost: number;
+}
+
 /**
- * Regel for sammenslåing av flere kilder:
- * 1. adresser før stedsnavn ved tilsvarende relevans
- * 2. eksakt navnetreff på stedsnavn (f.eks. «Sognsvann») løftes over svake adressetreff
- * 3. dedupe på label + koordinat avrundet til ~10 m
- * Implementeres i lib/geocoding/merge.ts i fase 3.
+ * Regel for sammenslåing av flere kilder (implementert i lib/geocoding/merge.ts):
+ * 1. tekstrelevans mot søket: eksakt > starter med > et ord starter med > øvrige
+ * 2. adresser får et lite tillegg, så de rangeres foran stedsnavn ved tilsvarende relevans
+ * 3. kildens boost (stedstype, språk)
+ * 4. dedupe på label + koordinat avrundet til ~10 m
  */
 export type MergeGeocodingResults = (
-  addresses: SearchLocation[],
-  places: SearchLocation[],
+  addresses: ScoredLocation[],
+  places: ScoredLocation[],
   query: string,
   limit: number,
 ) => SearchLocation[];
+
+export class GeocodingUnavailableError extends Error {
+  constructor(message = "Ingen geokodingstjenester svarte") {
+    super(message);
+    this.name = "GeocodingUnavailableError";
+  }
+}

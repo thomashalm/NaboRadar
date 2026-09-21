@@ -1,0 +1,137 @@
+{
+    "metadata": {
+        "side": 1,
+        "sokeStreng": "sok=sognsvann*&treffPerSide=20&utkoordsys=4258",
+        "totaltAntallTreff": 5,
+        "treffPerSide": 20,
+        "viserFra": 1,
+        "viserTil": 20
+    },
+    "navn": [
+        {
+            "fylker": [
+                {
+                    "fylkesnavn": "Oslo",
+                    "fylkesnummer": "03"
+                }
+            ],
+            "kommuner": [
+                {
+                    "kommunenavn": "Oslo",
+                    "kommunenummer": "0301"
+                }
+            ],
+            "navneobjekttype": "Banestrekning",
+            "navnestatus": "hovednavn",
+            "representasjonspunkt": {
+                "nord": 59.96273,
+                "øst": 10.73533
+            },
+            "skrivemåte": "Sognsvannsbanen",
+            "skrivemåtestatus": "godkjent og prioritert",
+            "språk": "Norsk",
+            "stedsnummer": 630745,
+            "stedstatus": "aktiv"
+        },
+        {
+            "fylker": [
+                {
+                    "fylkesnavn": "Oslo",
+                    "fylkesnummer": "03"
+                }
+            ],
+            "kommuner": [
+                {
+                    "kommunenavn": "Oslo",
+                    "kommunenummer": "0301"
+                }
+            ],
+            "navneobjekttype": "Vann",
+            "navnestatus": "hovednavn",
+            "representasjonspunkt": {
+                "nord": 59.97499,
+                "øst": 10.72891
+            },
+            "skrivemåte": "Sognsvann",
+            "skrivemåtestatus": "godkjent og prioritert",
+            "språk": "Norsk",
+            "stedsnummer": 308554,
+            "stedstatus": "aktiv"
+        },
+        {
+            "fylker": [
+                {
+                    "fylkesnavn": "Oslo",
+                    "fylkesnummer": "03"
+                }
+            ],
+            "kommuner": [
+                {
+                    "kommunenavn": "Oslo",
+                    "kommunenummer": "0301"
+                }
+            ],
+            "navneobjekttype": "Bekk",
+            "navnestatus": "hovednavn",
+            "representasjonspunkt": {
+                "nord": 59.93729,
+                "øst": 10.71032
+            },
+            "skrivemåte": "Sognsvannsbekken",
+            "skrivemåtestatus": "godkjent og prioritert",
+            "språk": "Norsk",
+            "stedsnummer": 569620,
+            "stedstatus": "aktiv"
+        },
+        {
+            "fylker": [
+                {
+                    "fylkesnavn": "Oslo",
+                    "fylkesnummer": "03"
+                }
+            ],
+            "kommuner": [
+                {
+                    "kommunenavn": "Oslo",
+                    "kommunenummer": "0301"
+                }
+            ],
+            "navneobjekttype": "Holdeplass",
+            "navnestatus": "hovednavn",
+            "representasjonspunkt": {
+                "nord": 59.96711,
+                "øst": 10.73382
+            },
+            "skrivemåte": "Sognsvann",
+            "skrivemåtestatus": "godkjent og prioritert",
+            "språk": "Norsk",
+            "stedsnummer": 794548,
+            "stedstatus": "aktiv"
+        },
+        {
+            "fylker": [
+                {
+                    "fylkesnavn": "Oslo",
+                    "fylkesnummer": "03"
+                }
+            ],
+            "kommuner": [
+                {
+                    "kommunenavn": "Oslo",
+                    "kommunenummer": "0301"
+                }
+            ],
+            "navneobjekttype": "Adressenavn",
+            "navnestatus": "hovednavn",
+            "representasjonspunkt": {
+                "nord": 59.94708,
+                "øst": 10.71044
+            },
+            "skrivemåte": "Sognsvannsveien",
+            "skrivemåtestatus": "godkjent og prioritert",
+            "språk": "Norsk",
+            "stedsnummer": 997167,
+            "stedstatus": "aktiv"
+        }
+    ]
+}
