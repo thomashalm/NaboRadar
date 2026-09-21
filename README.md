@@ -31,6 +31,8 @@ npm run dev
 | `npm run build && npm start` | Produksjonsbygg |
 | `npm test` | Enhetstester (ingen nettverk) |
 | `npm run sync:dibk` | Full sync av DiBK-plandata (`-- --mode=incremental` for inkrementell) |
+| `npm run db:push` | Kjør migrasjoner mot `SUPABASE_DB_URL` (Supabase CLI) |
+| `npm run db:verify` | Verifiser PostGIS, RLS, grants og data i hosted database |
 | `npm run test:network` | Integrasjonstester mot ekte Kartverket- og DiBK-API |
 | `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
 
@@ -45,6 +47,7 @@ Kopier `.env.example` til `.env.local`.
 | `NEXT_PUBLIC_SUPABASE_URL` | klient + server | Supabase-prosjektets URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | klient + server | Publishable key (`sb_publishable_…`) eller legacy anon key. RLS beskytter data. |
 | `SUPABASE_SECRET_KEY` | **kun server** | Secret key (`sb_secret_…`) eller legacy service_role. Kreves for sync. |
+| `SUPABASE_DB_URL` | **kun lokalt/CI** | Postgres-tilkobling for `db:push` og `db:verify`. Brukes ikke av appen. |
 | `LOCAL_DATABASE` | server | `pglite` gir lokal Postgres + PostGIS i `.data/pglite` når Supabase ikke er satt. Kun development/test. |
 | `NEXT_PUBLIC_MAP_TILE_URL` | klient | XYZ-mal for bakgrunnskart. Standard er Kartverket topograatone. |
 | `NEXT_PUBLIC_MAP_ATTRIBUTION` | klient | Attribusjon for kartet. Standard er `© Kartverket`. |
@@ -52,17 +55,46 @@ Kopier `.env.example` til `.env.local`.
 
 Ekte nøkler skal aldri committes. `.env*.local` er git-ignorert.
 
-## Hosted Supabase
+## Hosted Supabase (fra scratch)
 
-1. Opprett et prosjekt på supabase.com (region: Stockholm `eu-north-1` eller Frankfurt).
-2. **Database → Extensions:** aktiver `postgis` (migrasjonen gjør det også).
-3. Kjør migrasjonene i `supabase/migrations/` i navnerekkefølge. Enten lim dem inn i SQL Editor, eller bruk `npx supabase link --project-ref <ref>` og så `npx supabase db push`.
-4. **Settings → API:** legg URL, publishable key og secret key i `.env.local`, og fjern `LOCAL_DATABASE`.
-5. Kjør `npm run sync:dibk`.
-6. Sjekk `/dev`: databasen skal vise «Hosted Supabase», og DiBK skal ha events.
-7. Sett opp periodisk sync (se [Sync](#plandata-og-sync)).
+Verifisert 2026-09-21 mot Supabase med PostgreSQL 17.6 og PostGIS 3.3.7.
 
-Migrasjonsfilene er source of truth for schemaet. Endringer gjøres i nye migrasjoner, ikke i dashboardet.
+1. **Opprett prosjekt** på supabase.com. Velg en region i EU, for eksempel `eu-west-1` (Irland) eller `eu-north-1` (Stockholm), og noter database-passordet.
+2. **Legg nøkler i `.env.local`** (git-ignorert). Se `.env.example`.
+
+   | Variabel | Hvor i dashboardet |
+   |---|---|
+   | `NEXT_PUBLIC_SUPABASE_URL` | Project Settings → API → Project URL |
+   | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Project Settings → API Keys → Publishable key |
+   | `SUPABASE_SECRET_KEY` | Project Settings → API Keys → Secret key (kun server) |
+   | `SUPABASE_DB_URL` | Connect → Connection string → **Session pooler** (port 5432), med passordet |
+
+   `LOCAL_DATABASE=pglite` kan stå. Supabase brukes automatisk når variablene over er satt.
+3. **Kjør migrasjonene:**
+   ```bash
+   npm run db:push -- --dry-run   # viser hva som vil kjøres
+   npm run db:push                # kjører supabase/migrations/*.sql med offisiell Supabase CLI
+   ```
+   Historikken lagres i `supabase_migrations.schema_migrations`, så `supabase db push` og `db:push` kan brukes om hverandre. Passordet maskeres i all output. Migrasjonen aktiverer selv PostGIS i `extensions`-skjemaet.
+4. **Verifiser skjemaet:**
+   ```bash
+   npm run db:verify
+   ```
+   Skriptet viser PostgreSQL- og PostGIS-versjon, en geografi-test, migrasjonshistorikk, RLS per tabell, tilganger per funksjon (anon skal bare ha `events_within`, `get_event` og `data_status`), antall rader og en sjekk av at ingen berørte parter er lagret.
+5. **Hent data:**
+   ```bash
+   npm run sync:dibk
+   ```
+   Tar ca. 1 min mot hosted. En ny kjøring skal gi `Unchanged: <alle>`.
+6. **Start appen** med `npm run dev`. `/dev` skal vise «Database: Hosted Supabase», og `/omrade` viser saker fra Supabase.
+
+**Sikkerhet:**
+- Appen leser med publishable key (RLS og funksjons-grants gjelder).
+- Bare sync bruker secret key.
+- `SUPABASE_DB_URL` trengs bare for migrasjoner og verifisering. Den brukes ikke av appen, og skal ikke settes i produksjonsmiljøet til webappen.
+- Nøkler som har vært delt i klartekst (chat, e-post) bør roteres.
+
+Migrasjonsfilene er source of truth. Endringer gjøres i nye migrasjoner, aldri i dashboardet.
 
 ## Geokoding (Kartverket)
 
