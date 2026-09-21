@@ -96,6 +96,28 @@ Verifisert 2026-09-21 mot Supabase med PostgreSQL 17.6 og PostGIS 3.3.7.
 
 Migrasjonsfilene er source of truth. Endringer gjøres i nye migrasjoner, aldri i dashboardet.
 
+## Deploy (Netlify)
+
+Netlify bygger fra GitHub (`main`) med `netlify.toml`: `npm run build`, Node 24, og Next.js via OpenNext-adapteren, som Netlify legger til automatisk.
+
+**Miljøvariabler i produksjon.** Kartlagt fra koden (`grep process.env`):
+
+| Variabel | I Netlify? | Hvorfor |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | **Ja** | `/omrade` og `/sak` leser plansaker (`events_within`, `get_event`, `data_status`) |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | **Ja** | Samme. Publishable key, der RLS og funksjons-grants begrenser tilgangen |
+| `SUPABASE_SECRET_KEY` | **Nei** | Brukes bare av `npm run sync:dibk` og `/dev`, som gir 404 i produksjon |
+| `SUPABASE_DB_URL` | **Nei** | Brukes bare av `db:push` og `db:verify` lokalt |
+| `LOCAL_DATABASE` | **Nei** | Kun development. Ignoreres uansett når `NODE_ENV=production` |
+| `NEXT_PUBLIC_MAP_TILE_URL` / `NEXT_PUBLIC_MAP_ATTRIBUTION` | Valgfritt | Standard er Kartverket topograatone |
+| `RUN_NETWORK_TESTS` | Nei | Kun tester |
+
+`NEXT_PUBLIC_*` bakes inn ved build. Endrer du dem, må du trigge en ny deploy.
+
+**Data i produksjon:** syncen kjører ikke på Netlify ennå. Oppdater hosted data lokalt med `npm run sync:dibk`, med Supabase-nøklene i `.env.local`. Periodisk sync (cron) kommer senere.
+
+**Produksjonsbundle:** PGlite og `.data/` er ekskludert fra serverfunksjonene (`outputFileTracingExcludes`), så den lokale databasen og 44 MB WASM aldri deployes.
+
 ## Geokoding (Kartverket)
 
 Frontenden kaller aldri Kartverket direkte. Flyten er:

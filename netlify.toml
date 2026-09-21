@@ -1,0 +1,8 @@
+# Netlify bygger Next.js med OpenNext-adapteren (@netlify/plugin-nextjs), som oppdages automatisk.
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "24"
+  # Kartfliser/geokoding er offentlige. Supabase-variablene settes i Netlify UI (se README → Deploy).
