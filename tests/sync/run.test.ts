@@ -91,12 +91,21 @@ describe("runSync mot PGlite + PostGIS", { timeout: 30_000 }, () => {
   });
 
   it("markerer ikke avviste features som fjernet", async () => {
+    // Nok saker til at én avvist feature holder seg under terskelen for andel avviste
+    // (se lib/sync/guards.ts) — her testes keep-lista, ikke datafall-vakten.
+    for (let id = 5; id <= 12; id++) {
+      state.features.push(fakeFeature({ id, arealplan: id * 10, name: `Plan ${id}`, center: [10.7 + id / 100, 59.9] }));
+    }
     await sync(db, state);
+
     const broken = fakeFeature({ id: 4, arealplan: 30 });
     (broken as { geometry: unknown }).geometry = null;
     state.features[3] = broken;
     const { result } = await sync(db, state);
+
     expect(result).toMatchObject({ rejected: 1, removed: 0, status: "success" });
+    // En feature vi ikke klarte å lese er ikke bevis på at saken er borte fra kilden.
+    expect(await count(db, "select count(*) n from events where external_id = '30' and removed_from_source_at is null")).toBe(1);
   });
 
   it("en ugyldig rad stopper ikke resten, og gir status partial", async () => {

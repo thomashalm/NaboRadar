@@ -90,13 +90,22 @@ export interface DataProvider<TRecord = NormalizedEvent> {
   healthCheck(): Promise<ProviderHealth>;
 }
 
+/** Hva som startet kjøringen. */
+export type SyncTrigger = "manual" | "scheduled" | "admin";
+
 export interface SyncResult {
   providerId: string;
   mode: SyncMode;
+  trigger: SyncTrigger;
   startedAt: string;
   completedAt: string;
-  /** success: alt skrevet (avviste features er datakvalitet, ikke feil). partial: noen skrivefeil. failed: fatal feil. */
-  status: "success" | "partial" | "failed";
+  /**
+   * success    — alt skrevet (avviste features er datakvalitet, ikke feil)
+   * partial    — noen skrivefeil
+   * suspicious — data ble skrevet, men tallene så feil ut (se lib/sync/guards.ts)
+   * failed     — fatal feil
+   */
+  status: "success" | "partial" | "suspicious" | "failed";
   /** Antall rå features hentet fra kilden. */
   fetched: number;
   /** Features som besto validering. */
@@ -112,6 +121,12 @@ export interface SyncResult {
   /** Markert removed_from_source_at (kun ved full sync). */
   removed: number;
   failed: number;
+  /** Tallene så feil ut — reconciliation ble hoppet over med mindre admin tvang den. */
+  suspicious: boolean;
+  /** Om reconciliation faktisk ble kjørt. */
+  reconciled: boolean;
+  /** Nøytrale merknader om kjøringen. Vises i /admin og i varsler. */
+  warnings: string[];
   errors: string[];
 }
 

@@ -1,5 +1,6 @@
 import type { Db } from "@/lib/db/types";
-import type { DataProvider, RawBatch, SyncOptions, SyncResult } from "@/lib/providers/types";
+import type { DataProvider, RawBatch, SyncOptions, SyncResult, SyncTrigger } from "@/lib/providers/types";
+import { assessRun } from "./guards";
 import { strategyFor } from "./strategy";
 
 /** Overlapp ved incremental sync, slik at klokkeforskjeller og sene oppdateringer ikke faller mellom. */
@@ -16,6 +17,10 @@ export interface RunSyncOptions {
   onProgress?: (progress: SyncProgress) => void;
   /** Overstyr «since» for incremental (ellers: siste vellykkede sync − 24 t). */
   since?: Date;
+  /** Hva som startet kjøringen. Logges på sync_runs. */
+  trigger?: SyncTrigger;
+  /** Admin har bekreftet at et unormalt datafall er reelt: kjør reconciliation likevel. */
+  force?: boolean;
 }
 
 interface UpsertResult {
@@ -63,9 +68,11 @@ export async function runSync<TRecord>(
   const strategy = strategyFor(provider.recordKind) as unknown as import("./strategy").SyncStrategy<TRecord>;
   const startedAt = new Date().toISOString();
   const progress = options.onProgress ?? (() => {});
+  const trigger = options.trigger ?? "manual";
   const result: SyncResult = {
     providerId: provider.id,
     mode: options.mode,
+    trigger,
     startedAt,
     completedAt: startedAt,
     status: "failed",
@@ -79,10 +86,17 @@ export async function runSync<TRecord>(
     unchanged: 0,
     removed: 0,
     failed: 0,
+    suspicious: false,
+    reconciled: false,
+    warnings: [],
     errors: [],
   };
 
-  const [runId] = await db.rpc<string>("sync_run_start", { p_provider_id: provider.id, p_mode: options.mode });
+  const [runId] = await db.rpc<string>("sync_run_start", {
+    p_provider_id: provider.id,
+    p_mode: options.mode,
+    p_trigger: trigger,
+  });
   if (!runId) throw new SyncError("Kunne ikke opprette sync_run");
 
   try {
@@ -139,8 +153,23 @@ export async function runSync<TRecord>(
       progress({ phase: "write", message: `${chunk.done}/${rows.length}` });
     }
 
-    // 4. Full reconciliation: det som ikke ble sett, markeres — slettes ikke.
-    if (options.mode === "full") {
+    // 4. Vakt mot «silent failures»: er tallene til å stole på?
+    const [baseline] = await db.rpc<number | null>("provider_baseline", { p_provider_id: provider.id });
+    const verdict = assessRun({
+      fetched: result.fetched,
+      rejected: result.rejected,
+      records: result.records,
+      baseline: baseline ?? null,
+      mode: options.mode,
+      force: options.force,
+    });
+    result.suspicious = verdict.suspicious;
+    result.warnings = verdict.warnings;
+
+    // 5. Full reconciliation: det som ikke ble sett, markeres — slettes ikke.
+    //    Hoppes over når tallene ikke er til å stole på, slik at en kilde som plutselig
+    //    leverer for lite ikke fører til at alt annet markeres som fjernet.
+    if (verdict.allowReconcile) {
       const keep = [
         ...new Set([...rejectedFeatures.map((r) => r.externalId).filter((id): id is string => id !== null), ...failedIds]),
       ];
@@ -150,22 +179,28 @@ export async function runSync<TRecord>(
         p_keep_external_ids: keep,
       });
       result.removed = removed ?? 0;
+      result.reconciled = true;
       progress({ phase: "reconcile", message: `${result.removed} markert som fjernet fra kilden` });
+    } else if (options.mode === "full") {
+      progress({ phase: "reconcile", message: "hoppet over (mistenkelige tall)" });
     }
 
-    result.status = result.failed > 0 ? "partial" : "success";
+    result.status = verdict.suspicious ? "suspicious" : result.failed > 0 ? "partial" : "success";
   } catch (error) {
     result.status = "failed";
     result.errors.unshift(error instanceof Error ? `${error.name}: ${error.message}`.slice(0, 500) : "Ukjent feil");
   }
 
   result.completedAt = new Date().toISOString();
-  const { errors, ...counts } = result;
+  const { errors, warnings, ...counts } = result;
   await db.rpc("sync_run_finish", {
     p_run_id: runId,
     p_status: result.status,
     p_counts: counts,
-    p_error: result.status === "success" ? null : errors.slice(0, 5).join("\n"),
+    p_error: result.status === "success" ? null : [...warnings, ...errors].slice(0, 5).join("\n"),
+    p_warnings: warnings,
+    p_suspicious: result.suspicious,
+    p_reconciled: result.reconciled,
   });
   return result;
 }
@@ -184,9 +219,10 @@ export function formatSyncResult(r: SyncResult): string {
     `Inserted:   ${r.inserted}`,
     `Updated:    ${r.updated}`,
     `Unchanged:  ${r.unchanged}`,
-    `Removed:    ${r.removed}`,
+    `Removed:    ${r.removed}${r.mode === "full" && !r.reconciled ? "  (reconciliation hoppet over)" : ""}`,
     `Failed:     ${r.failed}`,
   ];
+  if (r.warnings.length > 0) lines.push("", ...r.warnings.map((w) => `  ⚠ ${w}`));
   if (r.errors.length > 0) lines.push("", ...r.errors.slice(0, 10).map((e) => `  • ${e}`));
   return lines.join("\n");
 }

@@ -17,7 +17,9 @@
     "sync:dibk": "tsx scripts/sync-dibk.ts",
     "db:push": "node scripts/db-push.mjs",
     "db:verify": "tsx scripts/verify-db.ts",
-    "sync:area": "tsx scripts/sync-area.ts"
+    "sync:area": "tsx scripts/sync-area.ts",
+    "sync:worker": "tsx scripts/sync-worker.ts",
+    "sync:status": "tsx scripts/sync-status.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

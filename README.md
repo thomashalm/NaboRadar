@@ -32,6 +32,8 @@ npm run dev
 | `npm test` | Enhetstester (ingen nettverk) |
 | `npm run sync:dibk` | Full sync av DiBK-plandata (`-- --mode=incremental` for inkrementell) |
 | `npm run sync:area` | Full sync av områdefakta (forurenset grunn, kvikkleire, nettanlegg, industri) |
+| `npm run sync:worker` | Kjører forespørsler fra /admin og providere som er forfalt. Dette er kommandoen en scheduler skal kalle. |
+| `npm run sync:status` | Helsetilstand per provider (samme regler som /admin og varsling) |
 | `npm run db:push` | Kjør migrasjoner mot `SUPABASE_DB_URL` (Supabase CLI) |
 | `npm run db:verify` | Verifiser PostGIS, RLS, grants og data i hosted database |
 | `npm run test:network` | Integrasjonstester mot ekte Kartverket- og DiBK-API |
@@ -278,6 +280,76 @@ Soner NVE har utredet til «ikke fare for områdeskred» vises aldri som fare, k
 **Personvern.** Vi lagrer kodede verdier fra kildene, og i tillegg lokalitetsnavnet i forurenset grunn — uten det kan brukeren ikke se hvilket sted en registrering gjelder, og navnet er publisert av forvaltningsmyndigheten sammen med flaten. Virksomhetsnavn og næringsgruppe lagres ikke, og NVEs bemerkningsfelt (kan inneholde gnr./bnr.) og oppdragsgiver lagres ikke. Sensitive institusjoner er ikke med i noen kilde vi bruker.
 
 **Kraftsensitiv informasjon.** Vi viser bare det NVE selv publiserer. Jordkabler inngår ikke i datasettene, og vi kombinerer aldri kilder for å utlede kabeltraseer.
+
+## Drift: sync og overvåking
+
+Målet er at systemet skal oppdage at en kilde har sluttet å levere, også når den svarer
+200 OK med for lite data.
+
+### Sync-worker
+
+`npm run sync:worker` gjør to ting, i rekkefølge:
+
+1. tar forespørsler fra køen `sync_requests` («Kjør sync nå» i /admin)
+2. kjører providere som er forfalt etter sin egen tidsplan (`sync_due()`)
+
+Hver provider kjøres for seg. En kilde som feiler stopper aldri de andre: feilen havner på
+providerens egen rad og i `sync_runs`, og workeren går videre. Exit-kode er **0** når alt gikk bra,
+**2** når minst én kilde feilet eller så mistenkelig ut, og **1** ved fatal feil (ingen database).
+
+Tidsplan per kilde ligger i `providers`-tabellen, ikke i koden:
+
+| Kilde | Intervall | Full sync | Utdatert etter |
+|---|---|---|---|
+| DiBK planoppstart | 3 t (inkrementell) | hver 24 t | 24 t |
+| Forurenset grunn, industri | 24 t (full) | hver 24 t | 72 t |
+| Kvikkleiresoner, nettanlegg | 24 t (full) | hver 24 t | 168 t |
+
+Kilder som spørres direkte per søk (støy, kvikkleire-aktsomhet, distribusjonsnett) har ingen
+tidsplan og overvåkes ikke som sync.
+
+### Vakter mot unormale datadrop
+
+`lib/sync/guards.ts` vurderer tallene fra hver kjøring mot forrige kjøring vi stolte på:
+
+- antall poster faller mer enn **30 %** (ved referansetall ≥ 20)
+- kilden svarer **uten data** når vi har historikk
+- **25 %** eller mer av postene avvises i validering (advarsel fra 5 %)
+
+Slår en av disse til, blir kjøringen markert `suspicious`: data skrives som normalt, men
+**full reconciliation hoppes over** — ingenting markeres som fjernet fra kilden. En mistenkelig
+kjøring oppdaterer verken `last_success_at` eller referansetallet, så kilden blir stale av seg selv
+hvis problemet vedvarer. Er fallet reelt, brukes «Full sync og godta datafallet» i /admin (eller
+`npm run sync:worker -- --provider=<id> --mode=full --force`).
+
+### Stale-data
+
+`lib/sync/health.ts` avgjør tilstanden per provider:
+
+| Tilstand | Når | Alvorlighet |
+|---|---|---|
+| `ok` | fersk og feilfri | OK (advarsel fra 75 % av stale-vinduet) |
+| `failing` | siste kjøring feilet, data fortsatt ferske | advarsel (kritisk fra 3 på rad) |
+| `suspicious` | siste kjøring skrev data, men tallene så feil ut | kritisk |
+| `stale` | ingen data vi stolte på innen kildens eget vindu | kritisk |
+| `never_synced` | aktiv kilde som aldri har levert | kritisk |
+
+### /admin
+
+Innlogget driftsside i produksjon (`/admin`). Innlogging er Supabase Auth; tilgang krever at
+e-posten står i tabellen `admin_users`. Siden viser status, dataalder, antall objekter, siste feil,
+siste kjøringer og knappene «Kjør sync nå» og «Kjør full sync».
+
+Knappene kjører ikke syncen i webrequesten: de legger en forespørsel i `sync_requests`, som
+sync-worker plukker opp. Det er derfor **webappen ikke trenger `SUPABASE_SECRET_KEY`** —
+databasefunksjonene sjekker selv at kalleren står i `admin_users`.
+
+Ny admin-bruker:
+
+1. Supabase-dashbordet → Authentication → Users → Add user (e-post + passord).
+2. `insert into admin_users (email) values ('ny@adresse.no');`
+
+`/dev` finnes fortsatt bare i development og er uendret.
 
 ## Lokal database (PGlite)
 
