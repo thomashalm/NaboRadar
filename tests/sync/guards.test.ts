@@ -61,6 +61,39 @@ describe("vakter mot silent failures", () => {
     expect(run({ mode: "incremental" }).allowReconcile).toBe(false);
   });
 
+  describe("incremental sammenlignes ikke med totalen fra forrige full sync", () => {
+    it("DiBK: baseline 1541, incremental henter 3 endrede saker = helt normalt", () => {
+      const verdict = run({ mode: "incremental", baseline: 1541, fetched: 3, records: 3, rejected: 0 });
+      expect(verdict.suspicious).toBe(false);
+      expect(verdict.warnings).toEqual([]);
+    });
+
+    it("samme tall som full sync er derimot mistenkelig", () => {
+      const verdict = run({ mode: "full", baseline: 1541, fetched: 3, records: 3, rejected: 0 });
+      expect(verdict.suspicious).toBe(true);
+      expect(verdict.allowReconcile).toBe(false);
+      expect(verdict.warnings.join(" ")).toContain("1541 → 3");
+    });
+
+    it("incremental uten endringer er ikke et datafall", () => {
+      const verdict = run({ mode: "incremental", baseline: 1541, fetched: 0, records: 0 });
+      expect(verdict.suspicious).toBe(false);
+      expect(verdict.warnings).toEqual([]);
+    });
+
+    it("incremental markeres fortsatt ved høy andel avviste", () => {
+      const verdict = run({ mode: "incremental", baseline: 1541, fetched: 100, rejected: 40, records: 60 });
+      expect(verdict.suspicious).toBe(true);
+      expect(verdict.warnings.join(" ")).toContain("40 % av postene ble avvist");
+    });
+
+    it("små utvalg gir merknad, ikke mistanke — én avvist av tre er ikke 33 % datakvalitetssvikt", () => {
+      const verdict = run({ mode: "incremental", baseline: 1541, fetched: 3, rejected: 1, records: 2 });
+      expect(verdict.suspicious).toBe(false);
+      expect(verdict.warnings).toEqual(["1 av 3 poster ble avvist i validering."]);
+    });
+  });
+
   it("bruker ikke prosentregning på små referansetall", () => {
     expect(run({ baseline: 5, records: 2, fetched: 2 }).suspicious).toBe(false);
   });

@@ -145,6 +145,59 @@ describe("runSync mot PGlite + PostGIS", { timeout: 30_000 }, () => {
     expect(await count(db, "select count(*) n from events where removed_from_source_at is not null")).toBe(0);
   });
 
+  it("incremental med få endringer er ikke et datafall (DiBK-scenarioet)", async () => {
+    // Nok saker til at datafall-vakten faktisk slår inn ved full sync (referansetall ≥ 20).
+    state.features = Array.from({ length: 30 }, (_, i) =>
+      fakeFeature({ id: 100 + i, arealplan: 1000 + i, name: `Plan ${i}`, center: [10.7 + i / 200, 59.9] }),
+    );
+    const first = await sync(db, state);
+    expect(first.result).toMatchObject({ status: "success", records: 30 });
+    expect(await count(db, "select count(*) n from events where removed_from_source_at is null")).toBe(30);
+
+    const baselineBefore = await count(db, "select baseline_record_count n from providers where id = 'dibk-planning-started'");
+    expect(baselineBefore).toBe(30);
+
+    // Kilden svarer med de 3 sakene som er endret: to nye og én oppdatert.
+    state.features = [
+      fakeFeature({ id: 900, arealplan: 9000, name: "Ny plan A", center: [10.9, 59.95], updated: "2026-09-22T09:00:00+00:00" }),
+      fakeFeature({ id: 901, arealplan: 9001, name: "Ny plan B", center: [10.91, 59.95], updated: "2026-09-22T09:00:00+00:00" }),
+      fakeFeature({ id: 100, arealplan: 1000, name: "Plan 0", center: [10.7, 59.9], updated: "2026-09-22T09:00:00+00:00" }),
+    ];
+    const { result } = await sync(db, state, "incremental", new Date("2026-09-01T00:00:00Z"));
+
+    expect(result).toMatchObject({ status: "success", mode: "incremental", fetched: 3, records: 3, inserted: 2, removed: 0 });
+    expect(result.suspicious).toBe(false);
+    expect(result.warnings).toEqual([]);
+    // De to nye er lagt til, ingenting er markert som fjernet.
+    expect(await count(db, "select count(*) n from events where removed_from_source_at is null")).toBe(32);
+    expect(await count(db, "select count(*) n from events where removed_from_source_at is not null")).toBe(0);
+
+    const [provider] = (await db.pg.query<{ baseline_record_count: number; status: string; last_run_status: string }>(
+      "select baseline_record_count, status, last_run_status from providers where id = 'dibk-planning-started'",
+    )).rows;
+    // Referansetallet skal fortsatt komme fra full sync — ikke fra de 3 endrede.
+    expect(Number(provider!.baseline_record_count)).toBe(30);
+    expect(provider!.status).toBe("active");
+    expect(provider!.last_run_status).toBe("success");
+  });
+
+  it("full sync med samme lave antall er derimot mistenkelig og fjerner ingenting", async () => {
+    state.features = Array.from({ length: 30 }, (_, i) =>
+      fakeFeature({ id: 100 + i, arealplan: 1000 + i, name: `Plan ${i}`, center: [10.7 + i / 200, 59.9] }),
+    );
+    await sync(db, state);
+
+    state.features = state.features.slice(0, 3);
+    const { result } = await sync(db, state, "full");
+
+    expect(result.status).toBe("suspicious");
+    expect(result.reconciled).toBe(false);
+    expect(result.warnings.join(" ")).toContain("30 → 3");
+    expect(await count(db, "select count(*) n from events where removed_from_source_at is null")).toBe(30);
+    // En mistenkelig kjøring skal ikke sette nytt referansetall.
+    expect(await count(db, "select baseline_record_count n from providers where id = 'dibk-planning-started'")).toBe(30);
+  });
+
   it("incremental uten tidligere vellykket sync feiler tydelig", async () => {
     const { result } = await sync(db, state, "incremental");
     expect(result.status).toBe("failed");

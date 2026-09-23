@@ -85,6 +85,26 @@ describe("helsevurdering per provider", () => {
     expect(health.reasons.join(" ")).toContain("15936 → 50");
   });
 
+  it("viser samme begrunnelse én gang, selv når den står både i feilmelding og advarsler", () => {
+    const warning = "Antall poster falt 100 % (1541 → 3). Grensen er 30 %.";
+    const health = assessProvider(
+      row({
+        last_run_status: "suspicious",
+        consecutive_failures: 1,
+        // sync_run_finish lagrer advarslene også som last_error.
+        last_error: warning,
+        last_run: {
+          id: "r1", mode: "full", trigger: "scheduled", status: "suspicious", suspicious: true, reconciled: false,
+          started_at: hoursAgo(1), completed_at: hoursAgo(1), fetched: 3, accepted: 3, rejected: 0, records: 3,
+          inserted: 2, updated: 0, unchanged: 1, removed: 0, failed: 0,
+          warnings: [warning], error: warning,
+        },
+      }),
+      NOW,
+    );
+    expect(health.reasons.filter((r) => r === warning)).toHaveLength(1);
+  });
+
   it("kilde som aldri har levert data er kritisk", () => {
     const health = assessProvider(row({ last_success_at: null, last_sync_at: null, last_attempt_at: null }), NOW);
     expect(health.state).toBe("never_synced");

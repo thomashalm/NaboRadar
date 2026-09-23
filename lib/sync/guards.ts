@@ -7,6 +7,11 @@ import type { SyncMode } from "@/lib/providers/types";
  * full reconciliation, altså det som markerer alt vi ikke så som fjernet fra kilden.
  * En kjøring som ikke kan stoles på markeres «suspicious», og teller da som feil
  * for stale-detektoren selv om den skrev data.
+ *
+ * VIKTIG: sammenligning mot forrige kjøring forutsetter at kjøringen er et komplett
+ * snapshot av kilden. Det er bare full sync. En incremental sync henter kun det som er
+ * endret siden sist, og «3 poster» er da et helt normalt svar — ikke et datafall.
+ * Vakter som gir mening uansett modus (andel avviste) gjelder fortsatt.
  */
 
 export const SYNC_GUARDS = {
@@ -17,6 +22,11 @@ export const SYNC_GUARDS = {
   /** Andel avviste features som gir advarsel / som gjør kjøringen mistenkelig. */
   rejectRateWarning: 0.05,
   rejectRateSuspicious: 0.25,
+  /**
+   * Under dette antallet hentede poster er prosentregning på avviste meningsløst:
+   * én avvist av tre er 33 %, men sier ingenting. Da gir vi bare en nøytral merknad.
+   */
+  minFetchedForRateCheck: 20,
   /** Uvanlig vekst gir advarsel (mulig duplisering), men blokkerer ingenting. */
   growthWarningFactor: 3,
 } as const;
@@ -50,31 +60,37 @@ export function assessRun(input: RunAnomalyInput): RunAnomalyVerdict {
   const warnings: string[] = [];
   let suspicious = false;
 
+  // Bare en full sync er et komplett snapshot og kan sammenlignes med forrige kjøring.
+  const isSnapshot = mode === "full";
   const hasHistory = baseline !== null && baseline > 0;
 
-  if (fetched === 0) {
-    if (hasHistory) {
+  if (isSnapshot) {
+    if (fetched === 0) {
+      if (hasHistory) {
+        suspicious = true;
+        warnings.push(`Kilden svarte uten data. Forrige fullstendige kjøring ga ${baseline} poster.`);
+      } else {
+        warnings.push("Kilden svarte uten data, og vi har ingen historikk å sammenligne med.");
+      }
+    } else if (records === 0 && hasHistory) {
       suspicious = true;
-      warnings.push(`Kilden svarte uten data. Forrige kjøring ga ${baseline} poster.`);
-    } else {
-      warnings.push("Kilden svarte uten data, og vi har ingen historikk å sammenligne med.");
-    }
-  } else if (records === 0 && hasHistory) {
-    suspicious = true;
-    warnings.push(`Ingen poster kom gjennom validering. Forrige kjøring ga ${baseline} poster.`);
-  } else if (hasHistory && baseline >= SYNC_GUARDS.minBaselineForDropCheck) {
-    const drop = (baseline - records) / baseline;
-    if (drop > SYNC_GUARDS.maxRecordDropRatio) {
-      suspicious = true;
-      warnings.push(
-        `Antall poster falt ${percent(drop)} (${baseline} → ${records}). Grensen er ${percent(SYNC_GUARDS.maxRecordDropRatio)}.`,
-      );
-    } else if (records > baseline * SYNC_GUARDS.growthWarningFactor) {
-      warnings.push(`Antall poster er mer enn ${SYNC_GUARDS.growthWarningFactor}× forrige kjøring (${baseline} → ${records}).`);
+      warnings.push(`Ingen poster kom gjennom validering. Forrige fullstendige kjøring ga ${baseline} poster.`);
+    } else if (hasHistory && baseline >= SYNC_GUARDS.minBaselineForDropCheck) {
+      const drop = (baseline - records) / baseline;
+      if (drop > SYNC_GUARDS.maxRecordDropRatio) {
+        suspicious = true;
+        warnings.push(
+          `Antall poster falt ${percent(drop)} (${baseline} → ${records}). Grensen er ${percent(SYNC_GUARDS.maxRecordDropRatio)}.`,
+        );
+      } else if (records > baseline * SYNC_GUARDS.growthWarningFactor) {
+        warnings.push(`Antall poster er mer enn ${SYNC_GUARDS.growthWarningFactor}× forrige kjøring (${baseline} → ${records}).`);
+      }
     }
   }
 
-  if (fetched > 0) {
+  // Andelen avviste sier noe om datakvaliteten i det kilden faktisk leverte, uansett modus —
+  // men bare når utvalget er stort nok til at en andel betyr noe.
+  if (rejected > 0 && fetched >= SYNC_GUARDS.minFetchedForRateCheck) {
     const rejectRate = rejected / fetched;
     if (rejectRate >= SYNC_GUARDS.rejectRateSuspicious) {
       suspicious = true;
@@ -82,6 +98,8 @@ export function assessRun(input: RunAnomalyInput): RunAnomalyVerdict {
     } else if (rejectRate >= SYNC_GUARDS.rejectRateWarning) {
       warnings.push(`${percent(rejectRate)} av postene ble avvist i validering (${rejected} av ${fetched}).`);
     }
+  } else if (rejected > 0) {
+    warnings.push(`${rejected} av ${fetched} poster ble avvist i validering.`);
   }
 
   let allowReconcile = mode === "full" && !suspicious;

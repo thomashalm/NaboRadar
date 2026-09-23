@@ -124,7 +124,9 @@ export function assessProvider(row: ProviderHealthRow, now = new Date()): Provid
     severity,
     dataAgeHours,
     hoursUntilStale,
-    reasons,
+    // last_error inneholder ofte de samme advarslene som kjøringen alt har lagret.
+    // Vis hver begrunnelse én gang.
+    reasons: reasons.filter((reason, index) => reasons.findIndex((other) => other.trim() === reason.trim()) === index),
   });
 
   // 'error' betyr aktiv kilde der siste kjøring feilet — den skal fortsatt overvåkes.
@@ -150,7 +152,8 @@ export function assessProvider(row: ProviderHealthRow, now = new Date()): Provid
         ? "Siste kjøring gikk ikke gjennom."
         : `${row.consecutive_failures} kjøringer på rad har ikke gått gjennom.`,
     );
-    if (row.last_error) reasons.push(row.last_error);
+    // Feilmeldingen kan inneholde flere linjer; sammenlign dem hver for seg mot advarslene.
+    for (const line of (row.last_error ?? "").split("\n").map((l) => l.trim()).filter(Boolean)) reasons.push(line);
   }
   for (const warning of row.last_run?.warnings ?? []) reasons.push(warning);
 
