@@ -65,6 +65,8 @@ export interface AreaFact {
   headline: string;
   /** Utfyllende linjer fra kilden, f.eks. klassifisering og undersøkelsesnivå. */
   details: string[];
+  /** Kildens egne koder og klasser. Vises bak «Detaljer», aldri som hovedtekst. */
+  technical: string[];
   /** Kildens eget forbehold. Vises alltid når det finnes. */
   caveat: string | null;
   /** «Ved søkepunktet» når contains er sann, ellers «420 m unna». */

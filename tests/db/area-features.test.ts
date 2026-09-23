@@ -55,7 +55,16 @@ describe("area_features og features_near", { timeout: 30_000 }, () => {
   });
 
   const near = (radius: number, categories: string[] | null = null) =>
-    db.rpc<{ title: string; distance_m: number; contains: boolean; category: string; subtype: string }>("features_near", {
+    db.rpc<{
+      title: string;
+      external_id: string;
+      distance_m: number;
+      contains: boolean;
+      category: string;
+      subtype: string;
+      centroid: { type: string; coordinates: [number, number] } | null;
+      geometry: { type: string; coordinates: unknown[] } | null;
+    }>("features_near", {
       lat: ORIGIN.lat,
       lng: ORIGIN.lng,
       radius_m: radius,
@@ -74,6 +83,33 @@ describe("area_features og features_near", { timeout: 30_000 }, () => {
     expect(nearby.distance_m).toBeLessThan(450);
   });
 
+  it("gir kildens ID, centroid og geometri, slik at objektet kan tegnes i kartet", async () => {
+    const inside = (await near(1000)).find((r) => r.title === "Sone rundt punktet")!;
+    expect(inside.external_id).toBe("inne");
+    expect(inside.geometry?.type).toBe("Polygon");
+    expect(inside.geometry?.coordinates).toHaveLength(1);
+    expect(inside.centroid?.type).toBe("Point");
+  });
+
+  it("utelater geometrien for svært store objekter i stedet for å blåse opp svaret", async () => {
+    // Ring med over 5 000 punkter — typisk for kvikkleiresoner, aldri for en lokalitet.
+    const [lng0, lat0] = destinationPoint(ORIGIN.lat, ORIGIN.lng, 400, 90);
+    const dLat = 100 / 111_195;
+    const ring = Array.from({ length: 5001 }, (_, i) => {
+      const angle = (i / 5000) * 2 * Math.PI;
+      return [lng0 + (dLat * Math.cos(angle)) / Math.cos((lat0 * Math.PI) / 180), lat0 + dLat * Math.sin(angle)];
+    });
+    ring[5000] = ring[0]!;
+    await db.rpc("upsert_area_features", {
+      p_provider_id: "nve-nettanlegg",
+      p_features: [row({ external_id: "stor", category: "infrastruktur", subtype: "kraftledning", title: "Stor flate", geometry: { type: "Polygon", coordinates: [ring] } })],
+      p_synced_at: new Date().toISOString(),
+    });
+    const stor = (await near(1000)).find((r) => r.title === "Stor flate")!;
+    expect(stor.geometry).toBeNull();
+    expect(stor.centroid?.type).toBe("Point");
+  });
+
   it("respekterer radius og sorterer nærmest først", async () => {
     const titles = (await near(1000)).map((r) => r.title);
     expect(titles).not.toContain("Sone langt unna");
@@ -90,7 +126,7 @@ describe("area_features og features_near", { timeout: 30_000 }, () => {
     const [{ n }] = (await db.pg.query<{ n: number }>("select count(*)::int n from events")).rows as [{ n: number }];
     expect(n).toBe(0);
     const [{ m }] = (await db.pg.query<{ m: number }>("select count(*)::int m from area_features")).rows as [{ m: number }];
-    expect(m).toBe(4);
+    expect(m).toBeGreaterThanOrEqual(4);
   });
 
   it("ekskluderer objekter som er fjernet fra kilden", async () => {

@@ -16,19 +16,38 @@ const feature = (properties: Record<string, unknown>, geometry: unknown = square
 
 describe("MdirForurensetGrunnProvider", () => {
   const provider = new MdirForurensetGrunnProvider();
+  /** Minste sett felter kilden alltid leverer. */
+  const BASE = {
+    identifikasjon_lokalid: "1",
+    lokalitet_navn: null,
+    lokalitet_type: null,
+    paavirkningsgrad: null,
+    tilstandsklasse: null,
+    prosess_status: null,
+    status: null,
+    arealbruk: null,
+    areal_totalt: null,
+    datafangstdato: null,
+    faktaark: null,
+    oppdateringsdato: null,
+  };
 
-  it("lagrer aldri lokalitetsnavn (kan være adresse) eller virksomhetsnavn", () => {
+  it("lagrer lokalitetsnavnet, men aldri virksomhetsnavn eller næringsgruppe", () => {
     const { records } = provider.normalize({
       features: [
         feature({
           identifikasjon_lokalid: "27049-A",
-          lokalitet_navn: "Lallakroken 10 - Holtegata",
+          lokalitet_navn: "LALLAKROKEN 10 - HOLTEGATA",
           virksomhet_navn: "Et Firma AS",
+          naeringsgruppe: "20.102-Treimpregnering",
           lokalitet_type: "deponi",
           paavirkningsgrad: "ikkeAkseptabelForurensning",
           tilstandsklasse: "dårlig",
           prosess_status: "tiltakGjennomført",
           status: "Godkjent",
+          arealbruk: "bebyggelseBolig",
+          areal_totalt: 1200,
+          datafangstdato: "2019-12-04T00:00:00Z",
           faktaark: "https://grunnforurensning.miljodirektoratet.no/faktaark.html?lok_id=27049",
           oppdateringsdato: 1770000000000,
         }),
@@ -37,24 +56,50 @@ describe("MdirForurensetGrunnProvider", () => {
     });
     expect(records).toHaveLength(1);
     const dump = JSON.stringify(records[0]);
-    expect(dump).not.toContain("Lallakroken");
     expect(dump).not.toContain("Et Firma AS");
+    expect(dump).not.toContain("Treimpregnering");
     expect(records[0]).toMatchObject({
       externalId: "27049-A",
       category: "miljo",
       subtype: "forurenset_grunn",
-      title: "Nedlagt eller eksisterende deponi",
+      title: "Lallakroken 10 - Holtegata",
       sourceUrlType: "factsheet",
+      attributes: {
+        lokalitetType: "deponi",
+        paavirkningsgrad: "ikkeAkseptabelForurensning",
+        prosessStatus: "tiltakGjennomført",
+        arealbruk: "bebyggelseBolig",
+        arealM2: 1200,
+        registrertAar: 2019,
+        harStoffopplysninger: false,
+      },
     });
   });
 
+  it("faller tilbake til lokalitetstypen når kilden mangler navn", () => {
+    const { records } = provider.normalize({
+      features: [feature({ ...BASE, identifikasjon_lokalid: "1-A", lokalitet_navn: "  ", lokalitet_type: "skytebane" })],
+      documents: [],
+    });
+    expect(records[0]!.title).toBe("Skytebane");
+  });
+
+  it("viser ikke lokaliteter uten brukbar geometri", () => {
+    const flat = { type: "Polygon", coordinates: [[[10.75, 59.91], [10.75, 59.91], [10.75, 59.91], [10.75, 59.91]]] };
+    const { records, rejected } = provider.normalize({
+      features: [feature({ ...BASE, identifikasjon_lokalid: "2-A" }, flat)],
+      documents: [],
+    });
+    expect(records).toEqual([]);
+    expect(rejected[0]).toMatchObject({ externalId: "2-A", reason: "degenerert geometri uten areal" });
+  });
+
   it("godtar oppdateringsdato både som epoch-tall og ISO-streng", () => {
-    const base = { identifikasjon_lokalid: "1", lokalitet_type: null, paavirkningsgrad: null, tilstandsklasse: null, prosess_status: null, status: null, faktaark: null };
     const { records, rejected } = provider.normalize({
       features: [
-        feature({ ...base, identifikasjon_lokalid: "a", oppdateringsdato: 1770000000000 }),
-        feature({ ...base, identifikasjon_lokalid: "b", oppdateringsdato: "2026-02-17T00:00:00Z" }),
-        feature({ ...base, identifikasjon_lokalid: "c", oppdateringsdato: null }),
+        feature({ ...BASE, identifikasjon_lokalid: "a", oppdateringsdato: 1770000000000 }),
+        feature({ ...BASE, identifikasjon_lokalid: "b", oppdateringsdato: "2026-02-17T00:00:00Z" }),
+        feature({ ...BASE, identifikasjon_lokalid: "c", oppdateringsdato: null }),
       ],
       documents: [],
     });
@@ -64,7 +109,7 @@ describe("MdirForurensetGrunnProvider", () => {
 
   it("aksepterer bare faktaark hos Miljødirektoratet", () => {
     const { records } = provider.normalize({
-      features: [feature({ identifikasjon_lokalid: "x", lokalitet_type: null, paavirkningsgrad: null, tilstandsklasse: null, prosess_status: null, status: null, faktaark: "https://example.com/f", oppdateringsdato: null })],
+      features: [feature({ ...BASE, identifikasjon_lokalid: "x", faktaark: "https://example.com/f", oppdateringsdato: null })],
       documents: [],
     });
     expect(records[0]!.sourceUrl).toBeNull();

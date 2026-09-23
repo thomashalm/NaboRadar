@@ -1,6 +1,6 @@
 "use client";
 
-import type { AreaFactsResult } from "@/lib/facts/queries";
+import type { AreaFactsResult, ContaminatedOverview } from "@/lib/facts/queries";
 import { formatRadius } from "@/lib/format";
 import type { AreaFact } from "@/types/area-feature";
 
@@ -16,6 +16,7 @@ interface AreaFactsProps {
  */
 export function AreaFacts({ result, radius, pending }: AreaFactsProps) {
   const groups = result.status === "ok" ? result.groups : [];
+  const contaminated = result.status === "ok" ? result.contaminated : null;
   const total = groups.reduce((sum, group) => sum + group.facts.length, 0);
 
   return (
@@ -55,6 +56,7 @@ export function AreaFacts({ result, radius, pending }: AreaFactsProps) {
                     </li>
                   ))}
                 </ul>
+                {group.category === "miljo" && contaminated && <AllContaminated overview={contaminated} />}
               </div>
             ))}
           </div>
@@ -88,7 +90,7 @@ function FactItem({ fact }: { fact: AreaFact }) {
   return (
     <article className="rounded-2xl border border-line bg-surface px-5 py-4">
       <div className="flex items-baseline justify-between gap-3">
-        <h4 className="text-[15px] leading-snug font-medium text-ink [overflow-wrap:anywhere]">{fact.headline}</h4>
+        <h4 className="text-[15px] leading-snug font-medium text-balance text-ink [overflow-wrap:anywhere]">{fact.headline}</h4>
         {fact.distanceLabel && (
           <span className={`shrink-0 text-sm ${fact.contains ? "font-medium text-ink" : "text-muted"}`}>
             {fact.distanceLabel}
@@ -103,6 +105,13 @@ function FactItem({ fact }: { fact: AreaFact }) {
       ))}
 
       {fact.caveat && <p className="mt-2 text-[13px] leading-relaxed text-muted">{fact.caveat}</p>}
+
+      {fact.technical.length > 0 && (
+        <details className="mt-2">
+          <summary className="cursor-pointer text-[13px] font-medium text-muted hover:text-ink">Detaljer</summary>
+          <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{fact.technical.join(" · ")}</p>
+        </details>
+      )}
 
       <p className="mt-2 text-[13px] text-muted">
         Kilde: {fact.sourceName}
@@ -120,6 +129,55 @@ function FactItem({ fact }: { fact: AreaFact }) {
         </a>
       )}
     </article>
+  );
+}
+
+/**
+ * Alle registreringer med forurenset grunn i området, bak en utvidbar visning.
+ * Antallet alene er misvisende i byer, så det står aldri i standardvisningen.
+ */
+function AllContaminated({ overview }: { overview: ContaminatedOverview }) {
+  return (
+    <details className="mt-3 rounded-2xl border border-line bg-surface px-5 py-4">
+      <summary className="cursor-pointer text-[15px] font-medium text-ink">
+        Se alle registreringer i området ({overview.total})
+      </summary>
+
+      <p className="mt-3 text-[15px] leading-relaxed text-ink">{overview.headline}</p>
+      {overview.details.map((detail) => (
+        <p key={detail} className="mt-1 text-[15px] leading-relaxed text-muted">
+          {detail}
+        </p>
+      ))}
+
+      <ul className="mt-3 divide-y divide-line border-t border-line">
+        {overview.items.map((item) => (
+          <li key={item.id} className="flex items-baseline justify-between gap-3 py-2.5">
+            <span className="min-w-0">
+              {item.href ? (
+                <a
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[15px] text-accent hover:underline [overflow-wrap:anywhere]"
+                >
+                  {item.title} ↗
+                </a>
+              ) : (
+                <span className="text-[15px] text-ink [overflow-wrap:anywhere]">{item.title}</span>
+              )}
+              <span className="block text-[13px] text-muted">{item.gradeLabel}</span>
+            </span>
+            <span className={`shrink-0 text-sm ${item.contains ? "font-medium text-ink" : "text-muted"}`}>
+              {item.distanceLabel}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      {overview.caveat && <p className="mt-3 text-[13px] leading-relaxed text-muted">{overview.caveat}</p>}
+      <p className="mt-2 text-[13px] text-muted">Kilde: {overview.sourceName}</p>
+    </details>
   );
 }
 

@@ -6,10 +6,11 @@ import { AreaMap, type MapPopupContent } from "@/components/map/AreaMap";
 import { buildAreaHref, buildEventHref } from "@/lib/area-params";
 import { EVENT_DATE_LABELS } from "@/lib/events/labels";
 import type { AreaEventsResult } from "@/lib/events/queries";
-import type { AreaFactsResult } from "@/lib/facts/queries";
+import type { AreaFactsResult, AreaMapFeature } from "@/lib/facts/queries";
 import { formatDate, formatDistance, formatRadius } from "@/lib/format";
 import { radiusBounds } from "@/lib/geo/radius";
 import type { MapTileConfig } from "@/lib/map/config";
+import { contaminatedSitesLayer } from "@/lib/map/layers/contaminated-sites";
 import { planAreasLayer } from "@/lib/map/layers/plan-areas";
 import { radiusLayer } from "@/lib/map/layers/radius";
 import { bindLayer } from "@/lib/map/layers/types";
@@ -34,6 +35,7 @@ interface AreaExplorerProps {
 }
 
 const NO_EVENTS: AreaEvent[] = [];
+const NO_SITES: AreaMapFeature[] = [];
 
 /**
  * Resultatsiden: kart og feed deler valgt sak. Radius/sortering/sted endres via URL i en
@@ -46,8 +48,12 @@ export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, 
   const cardRefs = useRef(new Map<string, HTMLElement>());
 
   const events = result.status === "ok" ? result.events : NO_EVENTS;
-  // Valget gjelder bare så lenge saken finnes i gjeldende resultat.
-  const selectedId = selection && events.some((e) => e.id === selection.id) ? selection.id : null;
+  const sites = facts.status === "ok" ? facts.mapFeatures : NO_SITES;
+  // Valget gjelder bare så lenge objektet finnes i gjeldende resultat.
+  const selectedId =
+    selection && (events.some((e) => e.id === selection.id) || sites.some((s) => s.id === selection.id))
+      ? selection.id
+      : null;
 
   const context = useMemo(() => ({ lat, lng, radius, label: urlLabel, sort }), [lat, lng, radius, urlLabel, sort]);
   const navigate = useCallback(
@@ -57,12 +63,29 @@ export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, 
   const navigateToLocation = useCallback((href: string) => startTransition(() => router.push(href)), [router]);
 
   const layers = useMemo(
-    () => [bindLayer(radiusLayer, { lat, lng, radiusM: radius }), bindLayer(planAreasLayer, events)],
-    [lat, lng, radius, events],
+    () => [
+      bindLayer(radiusLayer, { lat, lng, radiusM: radius }),
+      // Lokaliteter tegnes under planområdene, som er hovedinnholdet.
+      bindLayer(contaminatedSitesLayer, sites),
+      bindLayer(planAreasLayer, events),
+    ],
+    [lat, lng, radius, events, sites],
   );
 
   const popupFor = useCallback(
     (id: string): MapPopupContent | null => {
+      const site = sites.find((s) => s.id === id);
+      if (site) {
+        return {
+          lngLat: site.center,
+          title: site.title,
+          lines: [
+            "Registrert lokalitet med forurenset grunn (Miljødirektoratet)",
+            site.contains ? "Søkepunktet ligger innenfor lokaliteten" : site.distanceLabel,
+            site.gradeLabel ? `Myndighetens vurdering: ${site.gradeLabel}` : null,
+          ].filter((line): line is string => line !== null),
+        };
+      }
       const event = events.find((e) => e.id === id);
       if (!event) return null;
       const date = formatDate(event.announcedAt);
@@ -76,7 +99,7 @@ export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, 
         linkLabel: "Se saken",
       };
     },
-    [events, context],
+    [events, sites, context],
   );
 
   // Valg fra kartet: vis kortet i lista (kun desktop — på mobil ville det scrollet kartet bort).
@@ -102,7 +125,7 @@ export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, 
       <div className="mx-5 h-[48vh] min-h-72 overflow-hidden rounded-2xl border border-line sm:mx-8 lg:sticky lg:top-16 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:m-0 lg:h-[calc(100dvh-4rem)] lg:rounded-none lg:border-0 lg:border-l">
         <AreaMap
           tiles={tiles}
-          title={`Kart over området innen ${formatRadius(radius)} fra ${label}${events.length ? `, ${events.length} planområder` : ""}`}
+          title={`Kart over området innen ${formatRadius(radius)} fra ${label}${events.length ? `, ${events.length} planområder` : ""}${sites.length ? `, ${sites.length} registrerte lokaliteter med forurenset grunn` : ""}`}
           layers={layers}
           fitBounds={radiusBounds(lat, lng, radius)}
           fitKey={`${lat},${lng},${radius}`}

@@ -1,3 +1,4 @@
+import { formatArea } from "@/lib/format";
 import type { AreaAttributes } from "@/types/area-feature";
 
 /**
@@ -15,6 +16,8 @@ export interface FactText {
   headline: string;
   details: string[];
   caveat: string | null;
+  /** Kildens egne koder og klasser. Vises bare under «Detaljer». */
+  technical?: string[];
 }
 
 export interface SourceInfo {
@@ -82,19 +85,80 @@ export const SOURCES: Record<string, SourceInfo> = {
   },
 };
 
-const PAAVIRKNINGSGRAD_TEXT: Record<string, string> = {
-  liteForurensning: "Lite eller ikke forurenset – ikke behov for tiltak uansett arealbruk (påvirkningsgrad 1)",
-  akseptabelForurensning: "Akseptabel forurensning med dagens arealbruk (påvirkningsgrad 2)",
-  ikkeAkseptabelForurensning: "Ikke akseptabel forurensning – behov for tiltak (påvirkningsgrad 3)",
-  ukjentPåvirkning: "Mistanke om forurensning, oppfølging uavklart (påvirkningsgrad X)",
+/**
+ * Forurenset grunn — Miljødirektoratets vurdering i klartekst.
+ * Tallkoden («påvirkningsgrad 3») er teknisk og hører hjemme under «Detaljer».
+ */
+const PAAVIRKNINGSGRAD_SETNING: Record<string, string> = {
+  liteForurensning: "Myndigheten har vurdert stedet som lite eller ikke forurenset, uten behov for tiltak uansett arealbruk.",
+  akseptabelForurensning: "Myndigheten har vurdert tilstanden som akseptabel med dagens arealbruk.",
+  ikkeAkseptabelForurensning: "Myndigheten har vurdert tilstanden som ikke akseptabel, og det er behov for tiltak.",
+  ukjentPåvirkning: "Det er mistanke om forurensning eller lite informasjon om stedet, og oppfølgingen er uavklart.",
 };
 
-/** Kort etikett til oppsummeringen av forurenset grunn. */
+/** Kildens offisielle etiketter, ordrett fra tegnforklaringen. Vises under «Detaljer». */
+const PAAVIRKNINGSGRAD_TEKNISK: Record<string, string> = {
+  liteForurensning: "Påvirkningsgrad 1 – lite eller ikke forurenset, ikke behov for tiltak uansett arealbruk",
+  akseptabelForurensning: "Påvirkningsgrad 2 – akseptabel tilstand med dagens arealbruk",
+  ikkeAkseptabelForurensning: "Påvirkningsgrad 3 – ikke akseptabel tilstand, behov for tiltak",
+  ukjentPåvirkning: "Påvirkningsgrad X – mistanke/lite informasjon, oppfølging uavklart",
+};
+
+/** Kort etikett til listen «Se alle registreringer i området». */
 export const PAAVIRKNINGSGRAD_SHORT: Record<string, string> = {
   ikkeAkseptabelForurensning: "ikke akseptabel – behov for tiltak",
   akseptabelForurensning: "akseptabel med dagens arealbruk",
   liteForurensning: "lite eller ikke forurenset",
   ukjentPåvirkning: "uavklart",
+};
+
+/** Hvor langt saken er kommet hos forurensningsmyndigheten. */
+const PROSESS_STATUS_SETNING: Record<string, string> = {
+  uavklart: "Oppfølgingen er foreløpig uavklart.",
+  undersøkelseIgangsatt: "Undersøkelser er igangsatt.",
+  undersøkelseGjennomført: "Undersøkelser er gjennomført.",
+  tiltakIgangsatt: "Tiltak er igangsatt.",
+  tiltakGjennomført: "Tiltak er gjennomført.",
+  overvåking: "Lokaliteten overvåkes.",
+  avsluttet: "Saken er avsluttet.",
+};
+
+/** Hva slags sted kilden har registrert. Oversettelser av kildens egne koder — ingen tolkning. */
+const LOKALITET_TYPE_SETNING: Record<string, string> = {
+  forurensetGrunn: "forurenset grunn",
+  deponi: "et nedlagt eller eksisterende deponi",
+  deponiKommunalt: "et kommunalt deponi",
+  skipsverft: "et skipsverft",
+  industriEllerNæring: "en industri- eller næringslokalitet",
+  krigsetterlatenskaper: "krigsetterlatenskaper",
+  skytebane: "en skytebane",
+  avfall: "avfall",
+  mellomlager: "et mellomlager",
+  nyttiggjøringavfall: "nyttiggjøring av avfall",
+  sedimentFerskvann: "forurenset sediment i ferskvann",
+  sedimentSaltvann: "forurenset sediment i sjø",
+};
+
+/** Arealbruk med Miljødirektoratets egne etiketter, slik de står i faktaarket. */
+const AREALBRUK_TEXT: Record<string, string> = {
+  bebyggelseBolig: "Boligbebyggelse",
+  bebyggelseAnnen: "Annen bebyggelse og anlegg",
+  sentrumsområder: "Sentrumsområder, kontor og forretninger",
+  tjenesteytelse: "Offentlig eller privat tjenesteytelse",
+  industriOgTrafikk: "Industri og trafikkarealer",
+  ubebygd: "Andre ubebygde områder",
+  INFOmråde: "Landbruk-, natur- og friluftslivområde",
+};
+
+/** Målt tilstandsklasse. Oppgitt for om lag en fjerdedel av lokalitetene. */
+const TILSTANDSKLASSE_TEXT: Record<string, string> = {
+  megetGod: "1 – meget god",
+  god: "2 – god",
+  moderat: "3 – moderat",
+  dårlig: "4 – dårlig",
+  sværtDårlig: "5 – svært dårlig",
+  overNormverdi: "over normverdi",
+  farligAvfall: "anses som farlig avfall",
 };
 
 const STABILITET_TEXT: Record<string, string> = {
@@ -123,6 +187,59 @@ const FAREGRAD_TEXT: Record<string, string> = { Lav: "lav", Middels: "middels", 
 
 const str = (value: unknown): string | null => (typeof value === "string" && value.trim() ? value : null);
 const num = (value: unknown): number | null => (typeof value === "number" && Number.isFinite(value) ? value : null);
+
+/**
+ * Én registrert lokalitet med forurenset grunn.
+ *
+ * Kortet skal svare på hvor registreringen ligger, hva slags sted det er, og hva myndigheten
+ * mener om det. Kilden har ingen stoffopplysninger, og det sies eksplisitt i stedet for å gjette.
+ */
+function forurensetGrunn(input: { title: string; attributes: AreaAttributes; contains: boolean; externalId: string | null }): FactText {
+  const { title, attributes: a, contains, externalId } = input;
+  const details: string[] = [];
+
+  details.push(contains ? "Søkepunktet ligger innenfor denne lokaliteten." : "Søkepunktet ligger utenfor lokaliteten.");
+
+  const type = LOKALITET_TYPE_SETNING[str(a.lokalitetType) ?? ""];
+  details.push(
+    type
+      ? `Miljødirektoratet har registrert ${type} her.`
+      : "Miljødirektoratet har registrert denne lokaliteten i databasen over forurenset grunn.",
+  );
+
+  const vurdering = [PAAVIRKNINGSGRAD_SETNING[str(a.paavirkningsgrad) ?? ""], PROSESS_STATUS_SETNING[str(a.prosessStatus) ?? ""]]
+    .filter(Boolean)
+    .join(" ");
+  if (vurdering) details.push(vurdering);
+
+  const tilstand = TILSTANDSKLASSE_TEXT[str(a.tilstandsklasse) ?? ""];
+  if (tilstand) details.push(`Høyeste registrerte tilstandsklasse: ${tilstand}.`);
+
+  // Stofflistene ligger ikke i kildens åpne data, og for mange lokaliteter finnes de ikke i det hele tatt.
+  details.push("Kilden oppgir ikke hvilken type forurensning som er registrert.");
+
+  const arealbruk = AREALBRUK_TEXT[str(a.arealbruk) ?? ""];
+  const areal = num(a.arealM2);
+  const fakta = [
+    arealbruk ? `Arealbruk: ${arealbruk.charAt(0).toLowerCase()}${arealbruk.slice(1)}` : null,
+    areal !== null && areal > 0 ? formatArea(areal) : null,
+    num(a.registrertAar) ? `registrert ${num(a.registrertAar)}` : null,
+  ].filter(Boolean);
+  if (fakta.length > 0) details.push(fakta.join(" · "));
+
+  return {
+    headline: `Registrert lokalitet: ${title}`,
+    details,
+    caveat:
+      "Registreringen gjelder denne lokaliteten i Miljødirektoratets database, ikke nødvendigvis hele eiendommen eller naboeiendommene.",
+    technical: [
+      PAAVIRKNINGSGRAD_TEKNISK[str(a.paavirkningsgrad) ?? ""] ?? null,
+      str(a.lokalitetType) ? `Lokalitetstype: ${str(a.lokalitetType)}` : null,
+      str(a.prosessStatus) ? `Prosesstatus: ${str(a.prosessStatus)}` : null,
+      externalId ? `Lokalitet-ID: ${externalId}` : null,
+    ].filter((line): line is string => line !== null),
+  };
+}
 
 function kvikkleireSone(title: string, a: AreaAttributes, contains: boolean): FactText {
   const omradetype = a.omradetype === "utlopsomrade" ? "utløpsområde" : "løsneområde";
@@ -161,18 +278,14 @@ export function describeFact(input: {
   title: string;
   attributes: AreaAttributes;
   contains: boolean;
+  /** Kildens egen ID, vist under «Detaljer» der kilden har en offentlig lokalitet-ID. */
+  externalId?: string | null;
 }): FactText | null {
   const { subtype, title, attributes: a, contains } = input;
 
   switch (subtype) {
-    case "forurenset_grunn": {
-      const grad = PAAVIRKNINGSGRAD_TEXT[str(a.paavirkningsgrad) ?? ""];
-      return {
-        headline: contains ? `${title} – søkepunktet ligger innenfor` : title,
-        details: grad ? [grad] : [],
-        caveat: "Registreringen gjelder en lokalitet i Miljødirektoratets database, ikke nødvendigvis en enkelt eiendom.",
-      };
-    }
+    case "forurenset_grunn":
+      return forurensetGrunn({ title, attributes: a, contains, externalId: input.externalId ?? null });
 
     case "kvikkleire_sone":
       return kvikkleireSone(title, a, contains);
@@ -283,8 +396,8 @@ export function describeFact(input: {
 }
 
 /**
- * Oppsummering for forurenset grunn. Tettheten i byer gjør en ren opptelling misvisende,
- * så vi viser fordelingen på kildens egne påvirkningsgrader.
+ * Oppsummering for forurenset grunn. Vises bare inne i «Se alle registreringer i området» —
+ * et antall alene er misvisende, fordi databasen er tett i byer.
  */
 export function describeContaminatedSummary(input: {
   total: number;
@@ -295,7 +408,7 @@ export function describeContaminatedSummary(input: {
     .filter((g) => g.count > 0)
     .map((g) => `${g.count} ${PAAVIRKNINGSGRAD_SHORT[g.grade] ?? "uten oppgitt grad"}`);
   return {
-    headline: `${input.total} registrerte lokaliteter med forurenset grunn innen ${input.radiusLabel}`,
+    headline: `${input.total} registrerte lokaliteter innen ${input.radiusLabel}`,
     details: parts.length > 0 ? [`Fordeling etter Miljødirektoratets påvirkningsgrad: ${parts.join(", ")}.`] : [],
     caveat:
       "Databasen inneholder også registreringer fra bygge- og gravesaker, og er derfor tett i byer. Antallet sier ikke noe om forholdene på en enkelt eiendom.",

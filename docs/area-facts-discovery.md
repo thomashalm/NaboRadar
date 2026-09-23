@@ -108,7 +108,7 @@ Eksempelet viser hvorfor presentasjonen må styres. Alle fire Oslo-testpunktene 
    - NVEs publiserte luftledninger og stasjoner er åpne.
    - Jordkabler og detaljerte nett skal ikke publiseres.
    - Vi viser bare NVEs data, og kombinerer ikke kilder for å kartlegge traseer.
-3. **Adresser koblet til forurensning.** `lokalitet_navn` er ofte en gateadresse eller et borettslag. Vis lokalitetstype, påvirkningsgrad og avstand, og lenk til Miljødirektoratets faktaark, i stedet for å gjengi adressen i fritekst.
+3. **Adresser koblet til forurensning.** `lokalitet_navn` er et stedsnavn eller en adresse («Majorstuen skole», «Gladengveien 10»); 8,2 % av navnene er en ren gateadresse. Navnet vises likevel, fordi forvaltningsmyndigheten publiserer det åpent sammen med flaten det gjelder, og fordi flaten vi lagrer er mer presis enn navnet. Uten navnet kan brukeren ikke se hvilket sted registreringen gjelder. `virksomhet_navn` og `naeringsgruppe` lagres ikke — de sier hvem som har drevet der, ikke hvor registreringen ligger. Se «Forurenset grunn: hva kilden faktisk gir» under.
 4. **Enkeltpersoner i fagdata.** Skredfaresoner har `oppdragsgiver = Privatperson` på små områder, og kvikkleire-bemerkninger nevner gnr./bnr. Disse feltene vises ikke.
 5. **Lisenser:**
    - Alle MVP-lag er NLOD eller CC BY 4.0, så kommersiell bruk er tillatt med kildehenvisning.
@@ -120,6 +120,36 @@ Eksempelet viser hvorfor presentasjonen må styres. Alle fire Oslo-testpunktene 
    - Radon: «kan ikke benyttes til å forutsi radonkonsentrasjonen i enkeltbygninger».
    - Kvikkleire: vurdering på kommuneplannivå.
 7. **Ansvar og ordbruk.** Ingen samlet score og ingen vurdering. Hver påstand skal ha kilde og år. Bruk kildens egne klasser, og aldri «fare» der kilden sier «aktsomhet».
+
+## Forurenset grunn: hva kilden faktisk gir
+
+Undersøkt 2026-09-23 mot `grunnforurensning/MapServer` lag 1 (flate), 15 941 lokaliteter.
+
+| Felt | Utfylt | Brukt til |
+|---|---|---|
+| `lokalitet_navn` | 98,6 % | Kortets overskrift |
+| `arealbruk` | 100 % (34 % `uavklart`) | «Arealbruk: boligbebyggelse» |
+| `paavirkningsgrad` | 100 % | Myndighetens vurdering i klartekst |
+| `prosess_status` | 98,6 % | Hvor langt saken er kommet |
+| `lokalitet_type` | 98,6 % | Hva slags sted (deponi, skytebane, skipsverft …) |
+| `areal_totalt`, `datafangstdato`, `oppdateringsdato` | ~99 % | Areal og årstall |
+| `faktaark` | ~100 % | Offentlig lenke per lokalitet |
+| `tilstandsklasse` | 26,1 % | Høyeste målte tilstandsklasse |
+| `virksomhet_navn`, `naeringsgruppe` | 34 % / 44 % | **Brukes ikke** |
+
+**Det finnes ikke noe felt for stoffer, og ikke noe felt for årsak til registrering.** Stofflister finnes i
+Miljødirektoratets database og vises i faktaark-applikasjonen (Boliden Odda har «Påvist forurensning» for arsen, bly,
+kadmium, PAH-16 og PCB7), men de ligger bak et udokumentert internt API som vi ikke bruker (ADR 004). Verken ArcGIS-
+tjenesten, WMS-en eller Geonorge-distribusjonen eksponerer dem. For mange lokaliteter finnes de heller ikke: faktaarket
+for Majorstuen skole sier selv «Forurensning: Ikke registrert». UI-et sier derfor eksplisitt at kilden ikke oppgir
+forurensningstype, og gjetter aldri.
+
+**Geometrikvalitet er god.** Flatene er reelle områdeomriss, ikke buffere: Majorstuen skole har 7 hjørner og beregnet
+areal 3 278 m² mot oppgitt 3 298 m². Vi henter med `geometryPrecision: 6` og forenkler ikke ved lagring.
+
+**Etiketter** for påvirkningsgrad er hentet ordrett fra tjenestens tegnforklaring, og arealbruk-etikettene fra
+Miljødirektoratets eget faktaark (`bebyggelseBolig` → «Boligbebyggelse», `INFOmråde` → «Landbruk-, natur- og
+friluftslivområde»).
 
 ## Tekniske funn som påvirker implementasjonen
 

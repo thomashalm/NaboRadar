@@ -1,6 +1,8 @@
 import { z } from "zod";
 import type { NormalizedAreaFeature } from "@/types/area-feature";
-import { ArcgisClient, arcgisDate, arcgisFeatureSchema, arcgisTimestamp } from "@/lib/providers/arcgis";
+import { toDisplayName } from "@/lib/format";
+import { ArcgisClient, arcgisDate, arcgisFeatureSchema, arcgisTimestamp, arcgisYear } from "@/lib/providers/arcgis";
+import { hasDrawableArea } from "@/lib/providers/geometry";
 import { describeIssues } from "@/lib/providers/issues";
 import type { AreaFeatureProvider, NormalizeResult, ProviderHealth, RawBatch, RejectedRecord, SyncOptions } from "@/lib/providers/types";
 import { DEFAULT_RETRY_POLICY } from "@/lib/sync/types";
@@ -13,9 +15,14 @@ const LAYER = 1;
 /**
  * Miljødirektoratets grunnforurensningsdatabase (NLOD 2.0).
  *
- * Personvern: `lokalitet_navn` er ofte en gateadresse eller et borettslag og lagres derfor ikke.
- * Tittelen er lokalitetstypen, og detaljene er kildens egne klasser. Brukeren sendes til
- * Miljødirektoratets faktaark for resten.
+ * Lokalitetsnavnet lagres og vises: uten det kan brukeren ikke se hvilket sted en registrering
+ * gjelder. Navnet er publisert av forvaltningsmyndigheten sammen med flaten det gjelder, og
+ * flaten vi lagrer er mer presis enn navnet. Virksomhetsnavn og næringsgruppe lagres derimot
+ * ikke — de sier hvem som har drevet der, ikke hvor registreringen ligger.
+ *
+ * Kilden har ingen opplysninger om hvilke stoffer som er registrert. Stofflistene finnes bare
+ * i faktaark-applikasjonen, bak et udokumentert internt API (jf. ADR 004), så vi sier i stedet
+ * eksplisitt at kilden ikke oppgir forurensningstype, og lenker til faktaarket.
  */
 
 /** Kildens egne påvirkningsgrader (tegnforklaringen i tjenesten). */
@@ -26,6 +33,7 @@ export const PAAVIRKNINGSGRAD = {
   ukjentPåvirkning: null,
 } as const;
 
+/** Reservetittel når kilden mangler lokalitetsnavn (1,4 % av lokalitetene). */
 const LOKALITET_TYPE_LABELS: Record<string, string> = {
   forurensetGrunn: "Registrert lokalitet med forurenset grunn",
   deponi: "Nedlagt eller eksisterende deponi",
@@ -33,18 +41,40 @@ const LOKALITET_TYPE_LABELS: Record<string, string> = {
   skipsverft: "Skipsverft",
   industriEllerNæring: "Industri- eller næringslokalitet",
   krigsetterlatenskaper: "Krigsetterlatenskaper",
+  skytebane: "Skytebane",
+  avfall: "Avfallslokalitet",
+  mellomlager: "Mellomlager",
+  nyttiggjøringavfall: "Lokalitet for nyttiggjøring av avfall",
+  sedimentFerskvann: "Forurenset sediment i ferskvann",
+  sedimentSaltvann: "Forurenset sediment i sjø",
 };
+
+/** Tall som enten kommer som tall eller som tallstreng fra ArcGIS. */
+const arcgisNumber = z
+  .union([z.number(), z.string()])
+  .nullable()
+  .transform((value) => {
+    const n = typeof value === "string" ? Number(value.replace(",", ".")) : value;
+    return typeof n === "number" && Number.isFinite(n) ? n : null;
+  });
 
 const propertiesSchema = z.object({
   identifikasjon_lokalid: z.string().min(1),
+  lokalitet_navn: z.string().nullable(),
   lokalitet_type: z.string().nullable(),
   paavirkningsgrad: z.string().nullable(),
   tilstandsklasse: z.string().nullable(),
   prosess_status: z.string().nullable(),
   status: z.string().nullable(),
+  arealbruk: z.string().nullable(),
+  areal_totalt: arcgisNumber,
+  datafangstdato: arcgisTimestamp,
   faktaark: z.string().nullable(),
   oppdateringsdato: arcgisTimestamp,
 });
+
+/** Tomme strenger i kilden betyr «ikke registrert». */
+const code = (value: string | null): string | null => (value?.trim() ? value.trim() : null);
 
 export class MdirForurensetGrunnProvider implements AreaFeatureProvider {
   readonly id = "mdir-forurenset-grunn";
@@ -89,25 +119,40 @@ export class MdirForurensetGrunnProvider implements AreaFeatureProvider {
         continue;
       }
       const p = props.data;
+
+      // Uten brukbar flate kan vi ikke si hvor registreringen ligger, og da vises den ikke.
+      if (!hasDrawableArea(geometry.data)) {
+        rejected.push({ kind: "feature", externalId: p.identifikasjon_lokalid, reason: "degenerert geometri uten areal" });
+        continue;
+      }
+
+      const lokalitetType = code(p.lokalitet_type);
+      const navn = code(p.lokalitet_navn);
       const faktaark = toSafeHttpUrl(p.faktaark);
+      const erFaktaark = faktaark?.startsWith("https://grunnforurensning.miljodirektoratet.no/") ?? false;
 
       records.push({
         providerId: this.id,
         externalId: p.identifikasjon_lokalid,
         category: "miljo",
         subtype: "forurenset_grunn",
-        title: LOKALITET_TYPE_LABELS[p.lokalitet_type ?? ""] ?? "Registrert lokalitet med forurenset grunn",
+        title: navn ? toDisplayName(navn) : (LOKALITET_TYPE_LABELS[lokalitetType ?? ""] ?? "Registrert lokalitet med forurenset grunn"),
         geometry: geometry.data,
         attributes: {
-          // Kun kodede verdier — aldri lokalitetsnavn (kan være adresse) eller virksomhetsnavn.
-          lokalitetType: p.lokalitet_type,
-          paavirkningsgrad: p.paavirkningsgrad,
-          tilstandsklasse: p.tilstandsklasse,
-          prosessStatus: p.prosess_status,
-          status: p.status,
+          // Kodede verdier fra kilden. Aldri virksomhetsnavn eller næringsgruppe.
+          lokalitetType,
+          paavirkningsgrad: code(p.paavirkningsgrad),
+          tilstandsklasse: code(p.tilstandsklasse),
+          prosessStatus: code(p.prosess_status),
+          status: code(p.status),
+          arealbruk: code(p.arealbruk),
+          arealM2: p.areal_totalt,
+          registrertAar: arcgisYear(p.datafangstdato),
+          /** Kilden har ingen stoffopplysninger i åpne data — UI-et sier dette eksplisitt. */
+          harStoffopplysninger: false,
         },
-        sourceUrl: faktaark?.startsWith("https://grunnforurensning.miljodirektoratet.no/") ? faktaark : null,
-        sourceUrlType: faktaark?.startsWith("https://grunnforurensning.miljodirektoratet.no/") ? "factsheet" : null,
+        sourceUrl: erFaktaark ? faktaark : null,
+        sourceUrlType: erFaktaark ? "factsheet" : null,
         sourceUpdatedAt: arcgisDate(p.oppdateringsdato),
       });
     }

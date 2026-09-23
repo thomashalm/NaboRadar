@@ -248,7 +248,7 @@ npm run sync:area                                  # alle synkede kilder
 npm run sync:area -- --provider=nve-kvikkleire-soner
 ```
 
-**Spørring.** `features_near(lat, lng, radius_m, categories)` gir både `distance_m` og `contains` (ligger søkepunktet inne i objektet). Direkte oppslag kjøres parallelt med databasespørringen, med felles tidsbudsjett; kilder som ikke svarer, listes nøytralt i UI-et mens resten vises.
+**Spørring.** `features_near(lat, lng, radius_m, categories)` gir både `distance_m` og `contains` (ligger søkepunktet inne i objektet), samt kildens `external_id` og geometrien, slik at objektet kan tegnes i kartet. Geometrien forenkles til ~0,5 m, og objekter med over 5 000 punkter sendes uten geometri. Direkte oppslag kjøres parallelt med databasespørringen, med felles tidsbudsjett; kilder som ikke svarer, listes nøytralt i UI-et mens resten vises.
 
 **Formuleringsregister.** All tekst kommer fra [`lib/facts/wording.ts`](lib/facts/wording.ts). UI-et setter aldri sammen egne setninger fra rådata, og ukjente typer vises ikke. Reglene:
 
@@ -256,6 +256,14 @@ npm run sync:area -- --provider=nve-kvikkleire-soner
 - ingen score, ingen vurdering, ingen påstand om boligverdi
 - kildens eget forbehold vises alltid
 - år vises når kilden har det
+
+**Forurenset grunn** vises som konkrete lokaliteter, ikke som et antall:
+
+- Hvert kort navngir lokaliteten, sier om søkepunktet ligger **innenfor eller utenfor** den, og gjengir myndighetens vurdering i klartekst («ikke akseptabel tilstand, behov for tiltak») med kildens tallkode under «Detaljer».
+- Kilden har **ingen stoffopplysninger** i åpne data, og for mange lokaliteter finnes de ikke i det hele tatt — heller ikke i Miljødirektoratets eget faktaark. Kortet sier derfor eksplisitt: «Kilden oppgir ikke hvilken type forurensning som er registrert.» Vi gjetter aldri stoff, årsak eller konsekvens for naboeiendommer.
+- Standardvisningen er de nærmeste lokalitetene, pluss lokaliteter kilden mener trenger tiltak. Resten ligger bak «Se alle registreringer i området».
+- Lokaliteter uten brukbar flate vises ikke: da kan vi ikke si hvor registreringen ligger.
+- Flatene tegnes i kartet, med lenke til Miljødirektoratets faktaark per lokalitet.
 
 **Kvikkleire** behandles i tre nivåer som aldri blandes:
 
@@ -267,7 +275,7 @@ npm run sync:area -- --provider=nve-kvikkleire-soner
 
 Soner NVE har utredet til «ikke fare for områdeskred» vises aldri som fare, kun nøytralt når søkepunktet ligger inni.
 
-**Personvern.** Vi lagrer bare kodede verdier fra kildene. Lokalitetsnavn i forurenset grunn (ofte en adresse), NVEs bemerkningsfelt (kan inneholde gnr./bnr.) og oppdragsgiver lagres ikke. Sensitive institusjoner er ikke med i noen kilde vi bruker.
+**Personvern.** Vi lagrer kodede verdier fra kildene, og i tillegg lokalitetsnavnet i forurenset grunn — uten det kan brukeren ikke se hvilket sted en registrering gjelder, og navnet er publisert av forvaltningsmyndigheten sammen med flaten. Virksomhetsnavn og næringsgruppe lagres ikke, og NVEs bemerkningsfelt (kan inneholde gnr./bnr.) og oppdragsgiver lagres ikke. Sensitive institusjoner er ikke med i noen kilde vi bruker.
 
 **Kraftsensitiv informasjon.** Vi viser bare det NVE selv publiserer. Jordkabler inngår ikke i datasettene, og vi kombinerer aldri kilder for å utlede kabeltraseer.
 
