@@ -36,7 +36,7 @@ describe("runSync mot PGlite + PostGIS", { timeout: 30_000 }, () => {
 
   it("full sync: inserted, deretter unchanged ved uendret kilde", async () => {
     const first = await sync(db, state);
-    expect(first.result).toMatchObject({ status: "success", fetched: 4, accepted: 4, rejected: 0, events: 3, inserted: 3, updated: 0, unchanged: 0, removed: 0, failed: 0 });
+    expect(first.result).toMatchObject({ status: "success", fetched: 4, accepted: 4, rejected: 0, records: 3, inserted: 3, updated: 0, unchanged: 0, removed: 0, failed: 0 });
     expect(await count(db, "select count(*) n from events")).toBe(3);
     expect(await count(db, "select count(*) n from events where extensions.st_geometrytype(geom) = 'ST_MultiPolygon'")).toBe(3);
     expect(await count(db, "select extensions.st_numgeometries(geom) n from events where external_id = '10'")).toBe(2);
@@ -131,7 +131,7 @@ describe("runSync mot PGlite + PostGIS", { timeout: 30_000 }, () => {
           : f,
       );
     const { result, requests } = await sync(db, state, "incremental", new Date("2026-09-01T00:00:00Z"));
-    expect(result).toMatchObject({ mode: "incremental", fetched: 1, events: 1, updated: 1, removed: 0 });
+    expect(result).toMatchObject({ mode: "incremental", fetched: 1, records: 1, updated: 1, removed: 0 });
     expect(requests.some((u) => u.searchParams.get("filter")?.startsWith("oppdateringsdato>"))).toBe(true);
     expect(await count(db, "select count(*) n from events where removed_from_source_at is not null")).toBe(0);
   });
@@ -146,9 +146,11 @@ describe("runSync mot PGlite + PostGIS", { timeout: 30_000 }, () => {
     await sync(db, state);
     const [run] = (await db.pg.query<Record<string, unknown>>("select * from sync_runs")).rows;
     expect(run).toMatchObject({ status: "success", mode: "full", fetched: 4, accepted: 4, rejected: 0, inserted: 3 });
-    const [overview] = await db.rpc<{ id: string; active_events: number; last_success_at: string | null }>("provider_overview");
-    expect(overview!.last_success_at).not.toBeNull();
-    const status = await db.rpc<{ last_success_at: string | null }>("data_status");
-    expect(status[0]!.last_success_at).not.toBeNull();
+    const overview = await db.rpc<{ id: string; active_events: number; last_success_at: string | null }>("provider_overview");
+    const dibk = overview.find((row) => row.id === "dibk-planning-started")!;
+    expect(dibk.last_success_at).not.toBeNull();
+    expect(Number(dibk.active_events)).toBe(3);
+    const status = await db.rpc<{ provider_id: string; last_success_at: string | null }>("data_status");
+    expect(status.find((s) => s.provider_id === "dibk-planning-started")!.last_success_at).not.toBeNull();
   });
 });

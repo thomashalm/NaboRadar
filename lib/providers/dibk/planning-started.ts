@@ -69,6 +69,7 @@ export class DibkPlanningStartedProvider implements DataProvider {
   readonly id = "dibk-planning-started";
   readonly name = "Planlegging igangsatt";
   readonly owner = "Direktoratet for byggkvalitet";
+  readonly recordKind = "event" as const;
   readonly eventTypes = ["planning_started"] as const;
   readonly license = {
     name: "Norsk lisens for offentlige data (NLOD) 2.0",
@@ -177,7 +178,7 @@ export class DibkPlanningStartedProvider implements DataProvider {
       documentsByPlan.set(doc.properties.arealplan, list);
     }
 
-    const events: NormalizedEvent[] = [];
+    const records: NormalizedEvent[] = [];
     for (const raw of batch.features) {
       const parsed = planomradeFeatureSchema.safeParse(raw);
       if (!parsed.success) {
@@ -192,7 +193,7 @@ export class DibkPlanningStartedProvider implements DataProvider {
       }
       const municipalUrl = toSafeHttpUrl(p.link);
 
-      events.push({
+      records.push({
         providerId: this.id,
         externalId: String(p.arealplan),
         type: "planning_started",
@@ -228,7 +229,7 @@ export class DibkPlanningStartedProvider implements DataProvider {
       });
     }
 
-    return { events, rejected };
+    return { records, rejected };
   }
 
   private normalizeDocument(doc: PlandokumentFeature): NormalizedDocument | null {

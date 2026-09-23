@@ -31,8 +31,8 @@ describe.skipIf(!enabled)("DiBK Planlegging igangsatt (nettverk)", { timeout: 18
     expect(result.status).toBe("success");
     expect(result.fetched).toBeGreaterThan(1000);
     expect(result.rejected / result.fetched).toBeLessThan(0.01);
-    expect(result.events).toBeGreaterThan(500);
-    expect(result.events).toBeLessThanOrEqual(result.accepted);
+    expect(result.records).toBeGreaterThan(500);
+    expect(result.records).toBeLessThanOrEqual(result.accepted);
   });
 
   it("ingen berørte parter i databasen", async () => {

@@ -7,6 +7,7 @@ import { areaParamsSchema } from "@/lib/area-params";
 import { formatRadius } from "@/lib/format";
 import { DEFAULT_RADIUS_M } from "@/lib/geo/constants";
 import { getAreaEvents } from "@/lib/events/queries";
+import { getAreaFacts } from "@/lib/facts/queries";
 import { getMapTileConfig } from "@/lib/map/config";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -24,7 +25,10 @@ export default async function AreaPage({ searchParams }: { searchParams: SearchP
   if (!parsed.success) return <InvalidArea />;
 
   const { lat, lng, radius, sortering: sort } = parsed.data;
-  const result = await getAreaEvents({ lat, lng, radius, sort });
+  const [result, facts] = await Promise.all([
+    getAreaEvents({ lat, lng, radius, sort }),
+    getAreaFacts({ lat, lng, radius }),
+  ]);
 
   return (
     <AreaShell>
@@ -36,6 +40,7 @@ export default async function AreaPage({ searchParams }: { searchParams: SearchP
         urlLabel={parsed.data.label}
         sort={sort}
         result={result}
+        facts={facts}
         tiles={getMapTileConfig()}
       />
     </AreaShell>

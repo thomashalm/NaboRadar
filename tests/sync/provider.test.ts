@@ -125,7 +125,7 @@ describe("DibkPlanningStartedProvider.normalize", () => {
   const provider = new DibkPlanningStartedProvider();
 
   it("normaliserer ekte DiBK-features (fixture) uten avvisning", () => {
-    const { events, rejected } = provider.normalize({ features: realPage.features, documents: [] });
+    const { records: events, rejected } = provider.normalize({ features: realPage.features, documents: [] });
     expect(rejected).toEqual([]);
     const hegdehaugsveien = events.find((e) => e.externalId === "2053")!;
     expect(hegdehaugsveien).toMatchObject({
@@ -147,7 +147,7 @@ describe("DibkPlanningStartedProvider.normalize", () => {
     const noGeometry = { ...fakeFeature({ id: 2, arealplan: 2 }), geometry: null };
     const badDate = fakeFeature({ id: 3, arealplan: 3, announced: "12.09.2026" });
     const blankName = fakeFeature({ id: 4, arealplan: 4, name: "   " });
-    const { events, rejected } = provider.normalize({ features: [good, noGeometry, badDate, blankName, "tull"], documents: [] });
+    const { records: events, rejected } = provider.normalize({ features: [good, noGeometry, badDate, blankName, "tull"], documents: [] });
 
     expect(events.map((e) => e.externalId)).toEqual(["1"]);
     expect(rejected.map((r) => r.externalId)).toEqual(["2", "3", "4", null]);
@@ -155,7 +155,7 @@ describe("DibkPlanningStartedProvider.normalize", () => {
   });
 
   it("bruker DiBK-siden når link er tom eller fritekst — og gjetter aldri URL", () => {
-    const { events } = provider.normalize({
+    const { records: events } = provider.normalize({
       features: [
         fakeFeature({ id: 1, arealplan: 11, link: "" }),
         fakeFeature({ id: 2, arealplan: 12, link: "Se vedlegg" }),
@@ -175,7 +175,7 @@ describe("DibkPlanningStartedProvider.normalize", () => {
   });
 
   it("knytter kun tillatte dokumenter til riktig plan og blokkerer berørte parter", () => {
-    const { events } = provider.normalize({
+    const { records: events } = provider.normalize({
       features: [fakeFeature({ id: 1, arealplan: 7 }), fakeFeature({ id: 2, arealplan: 8 })],
       documents: [
         fakeDocument({ id: 1, arealplan: 7, type: "ref-data-as-pdf", title: "Varsel om oppstart av planarbeid.pdf" }),
@@ -195,13 +195,13 @@ describe("DibkPlanningStartedProvider.normalize", () => {
   it("avviser dokumenter med URL utenfor DiBK", () => {
     const doc = fakeDocument({ id: 9, arealplan: 7, type: "PlanomraadePdf" });
     doc.properties.referanseDokumentfil = "https://example.com/fil.pdf";
-    const { events, rejected } = provider.normalize({ features: [fakeFeature({ id: 1, arealplan: 7 })], documents: [doc] });
+    const { records: events, rejected } = provider.normalize({ features: [fakeFeature({ id: 1, arealplan: 7 })], documents: [doc] });
     expect(events[0]!.documents).toEqual([]);
     expect(rejected).toEqual([{ kind: "document", externalId: "7", reason: "ugyldig dokument-URL" }]);
   });
 
   it("lagrer kun plan-metadata i rawData", () => {
-    const { events } = provider.normalize({ features: [fakeFeature({ id: 5, arealplan: 9 })], documents: [] });
+    const { records: events } = provider.normalize({ features: [fakeFeature({ id: 5, arealplan: 9 })], documents: [] });
     expect(Object.keys(events[0]!.rawData).sort()).toEqual(["featureId", "properties"]);
     expect(JSON.stringify(events[0]!.rawData)).not.toContain("coordinates");
   });

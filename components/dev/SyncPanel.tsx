@@ -5,12 +5,14 @@ import { syncNowAction, type SyncActionState } from "@/app/dev/actions";
 
 const initial: SyncActionState = { status: "idle" };
 
-export function SyncPanel() {
+export function SyncPanel({ target = "events" }: { target?: "events" | "area" }) {
   const [state, action, pending] = useActionState(syncNowAction, initial);
 
   return (
     <div className="mt-4">
       <form action={action} className="flex flex-wrap items-center gap-3">
+        <input type="hidden" name="target" value={target} />
+        {target === "area" ? null : (
         <select
           name="mode"
           defaultValue="full"
@@ -20,6 +22,7 @@ export function SyncPanel() {
           <option value="full">Full (med reconciliation)</option>
           <option value="incremental">Incremental (oppdateringsdato)</option>
         </select>
+        )}
         <button
           type="submit"
           disabled={pending}
@@ -41,7 +44,7 @@ export function SyncPanel() {
               ["Fetched", state.result.fetched],
               ["Accepted", state.result.accepted],
               ["Rejected", state.result.rejected],
-              ["Events", state.result.events],
+              ["Poster", state.result.records],
               ["Documents", state.result.documents],
               ["Inserted", state.result.inserted],
               ["Updated", state.result.updated],

@@ -6,6 +6,7 @@ import { AreaMap, type MapPopupContent } from "@/components/map/AreaMap";
 import { buildAreaHref, buildEventHref } from "@/lib/area-params";
 import { EVENT_DATE_LABELS } from "@/lib/events/labels";
 import type { AreaEventsResult } from "@/lib/events/queries";
+import type { AreaFactsResult } from "@/lib/facts/queries";
 import { formatDate, formatDistance, formatRadius } from "@/lib/format";
 import { radiusBounds } from "@/lib/geo/radius";
 import type { MapTileConfig } from "@/lib/map/config";
@@ -13,6 +14,7 @@ import { planAreasLayer } from "@/lib/map/layers/plan-areas";
 import { radiusLayer } from "@/lib/map/layers/radius";
 import { bindLayer } from "@/lib/map/layers/types";
 import type { AreaEvent, AreaSort } from "@/types/event";
+import { AreaFacts } from "./AreaFacts";
 import { ChangeLocation } from "./ChangeLocation";
 import { EventFeed } from "./EventFeed";
 import { RadiusPicker } from "./RadiusPicker";
@@ -27,6 +29,7 @@ interface AreaExplorerProps {
   urlLabel?: string;
   sort: AreaSort;
   result: AreaEventsResult;
+  facts: AreaFactsResult;
   tiles: MapTileConfig;
 }
 
@@ -36,7 +39,7 @@ const NO_EVENTS: AreaEvent[] = [];
  * Resultatsiden: kart og feed deler valgt sak. Radius/sortering/sted endres via URL i en
  * transition — kartet beholdes, og feeden viser lastetilstand til nye data er klare.
  */
-export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, tiles }: AreaExplorerProps) {
+export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, facts, tiles }: AreaExplorerProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [selection, setSelection] = useState<{ id: string; from: "map" | "list" } | null>(null);
@@ -124,6 +127,7 @@ export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, 
           onNavigate={navigate}
           cardRefs={cardRefs}
         />
+        <AreaFacts result={facts} radius={radius} pending={pending} />
       </div>
     </main>
   );

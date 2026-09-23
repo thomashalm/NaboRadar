@@ -5,7 +5,7 @@ import { contentHash, stableStringify } from "@/lib/sync/hash";
 import { mergeFragments } from "@/lib/sync/merge";
 
 const provider = new DibkPlanningStartedProvider();
-const normalize = (features: unknown[], documents: unknown[] = []) => provider.normalize({ features, documents }).events;
+const normalize = (features: unknown[], documents: unknown[] = []) => provider.normalize({ features, documents }).records;
 
 describe("mergeFragments (dedupe på arealplan)", () => {
   it("slår sammen flere features for samme arealplan til ett event med MultiPolygon", () => {

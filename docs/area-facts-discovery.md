@@ -1,5 +1,8 @@
 # Discovery: «Hva bør du vite om området?» (fase A)
 
+> **Status:** de fem anbefalte datalagene er implementert (se README → Områdefakta og docs/architecture.md).
+> Resten av kildene under er fortsatt kartlagt, men ikke tatt i bruk.
+
 Testet 2026-09-21 med ekte kall. **[T]** = testet, **[M]** = kun lest i Geonorge-metadata. Ingen produksjonskode er skrevet.
 
 Hvordan data presenteres er like viktig som hvilke data vi har. Hver kilde har her en anbefalt, nøktern formulering, basert på hvordan kilden selv beskriver dataene.

@@ -12,13 +12,20 @@ export function stableStringify(value: unknown): string {
 }
 
 /**
+ * sha256 av stabil JSON. Kalleren er ansvarlig for at innholdet kun inneholder kildedata —
+ * lokale felt (synced_at, id, removed_from_source_at) skal aldri være med, ellers ville
+ * hver sync gitt «updated».
+ */
+export function hashContent(content: unknown): string {
+  return createHash("sha256").update(stableStringify(content)).digest("hex");
+}
+
+/**
  * Hash av relevant kildeinnhold i et normalisert event.
- * NormalizedEvent inneholder bare kildeavledede felt — lokale felt (synced_at, first_seen_at,
- * removed_from_source_at, id) finnes ikke i modellen og kan derfor ikke påvirke hashen.
- * Et event blir bare «updated» når denne hashen endrer seg.
+ * NormalizedEvent inneholder bare kildeavledede felt, så modellen kan ikke inneholde lokale felt.
  */
 export function contentHash(event: NormalizedEvent): string {
-  const content = {
+  return hashContent({
     v: 1,
     type: event.type,
     title: event.title,
@@ -32,6 +39,5 @@ export function contentHash(event: NormalizedEvent): string {
     attributes: event.attributes,
     documents: [...event.documents].sort((a, b) => a.externalId.localeCompare(b.externalId)),
     rawData: event.rawData,
-  };
-  return createHash("sha256").update(stableStringify(content)).digest("hex");
+  });
 }

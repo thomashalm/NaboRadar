@@ -1,11 +1,7 @@
 import type { Db } from "@/lib/db/types";
 import type { DataProvider, RawBatch, SyncOptions, SyncResult } from "@/lib/providers/types";
-import { contentHash } from "./hash";
-import { mergeFragments } from "./merge";
-import { toEventRow } from "./rows";
+import { strategyFor } from "./strategy";
 
-/** Rader per upsert-kall. Holder hvert kall godt under PostgREST sine grenser. */
-const UPSERT_CHUNK = 150;
 /** Overlapp ved incremental sync, slik at klokkeforskjeller og sene oppdateringer ikke faller mellom. */
 const INCREMENTAL_OVERLAP_MS = 24 * 60 * 60 * 1000;
 
@@ -30,6 +26,23 @@ interface UpsertResult {
   errors: { external_id: string; error: string }[];
 }
 
+/** Deler radene i pakker som både har få nok rader og liten nok payload. */
+function* chunkByBytes(rows: unknown[], maxRows: number, maxBytes: number): Generator<{ rows: unknown[]; done: number }> {
+  let current: unknown[] = [];
+  let bytes = 0;
+  for (const [index, row] of rows.entries()) {
+    const size = JSON.stringify(row).length;
+    if (current.length > 0 && (current.length >= maxRows || bytes + size > maxBytes)) {
+      yield { rows: current, done: index };
+      current = [];
+      bytes = 0;
+    }
+    current.push(row);
+    bytes += size;
+  }
+  if (current.length > 0) yield { rows: current, done: rows.length };
+}
+
 export class SyncError extends Error {
   constructor(message: string) {
     super(message);
@@ -42,7 +55,12 @@ export class SyncError extends Error {
  * hent (provider) → valider/normaliser (provider) → grupper/dedupliser → hash → skriv → logg.
  * Providers skriver aldri til databasen selv.
  */
-export async function runSync(provider: DataProvider, db: Db, options: RunSyncOptions): Promise<SyncResult> {
+export async function runSync<TRecord>(
+  provider: DataProvider<TRecord>,
+  db: Db,
+  options: RunSyncOptions,
+): Promise<SyncResult> {
+  const strategy = strategyFor(provider.recordKind) as unknown as import("./strategy").SyncStrategy<TRecord>;
   const startedAt = new Date().toISOString();
   const progress = options.onProgress ?? (() => {});
   const result: SyncResult = {
@@ -54,7 +72,7 @@ export async function runSync(provider: DataProvider, db: Db, options: RunSyncOp
     fetched: 0,
     accepted: 0,
     rejected: 0,
-    events: 0,
+    records: 0,
     documents: 0,
     inserted: 0,
     updated: 0,
@@ -94,22 +112,22 @@ export async function runSync(provider: DataProvider, db: Db, options: RunSyncOp
     result.accepted = result.fetched - result.rejected;
     for (const r of rejectedFeatures.slice(0, 20)) result.errors.push(`avvist ${r.externalId ?? "?"}: ${r.reason}`);
 
-    const events = mergeFragments(normalized.events);
-    result.events = events.length;
-    result.documents = events.reduce((sum, e) => sum + e.documents.length, 0);
-    progress({ phase: "normalize", message: `${result.accepted} godkjent, ${result.rejected} avvist → ${events.length} events` });
+    const records = strategy.merge(normalized.records);
+    result.records = records.length;
+    result.documents = strategy.countDocuments(records);
+    progress({ phase: "normalize", message: `${result.accepted} godkjent, ${result.rejected} avvist → ${records.length} poster` });
 
     // 3. Skriv i biter.
     const syncedAt = new Date().toISOString();
     const failedIds: string[] = [];
-    for (let i = 0; i < events.length; i += UPSERT_CHUNK) {
-      const rows = events.slice(i, i + UPSERT_CHUNK).map((e) => toEventRow(e, contentHash(e)));
-      const [counts] = await db.rpc<UpsertResult>("upsert_events", {
+    const rows = records.map((r) => strategy.toRow(r, strategy.hash(r)));
+    for (const chunk of chunkByBytes(rows, strategy.chunkSize, strategy.maxChunkBytes)) {
+      const [counts] = await db.rpc<UpsertResult>(strategy.upsertFn, {
         p_provider_id: provider.id,
-        p_events: rows,
+        [provider.recordKind === "event" ? "p_events" : "p_features"]: chunk.rows,
         p_synced_at: syncedAt,
       });
-      if (!counts) throw new SyncError("upsert_events returnerte ingen tellere");
+      if (!counts) throw new SyncError(`${strategy.upsertFn} returnerte ingen tellere`);
       result.inserted += counts.inserted;
       result.updated += counts.updated;
       result.unchanged += counts.unchanged;
@@ -118,7 +136,7 @@ export async function runSync(provider: DataProvider, db: Db, options: RunSyncOp
         failedIds.push(e.external_id);
         if (result.errors.length < 40) result.errors.push(`skrivefeil ${e.external_id}: ${e.error}`);
       }
-      progress({ phase: "write", message: `${Math.min(i + UPSERT_CHUNK, events.length)}/${events.length}` });
+      progress({ phase: "write", message: `${chunk.done}/${rows.length}` });
     }
 
     // 4. Full reconciliation: det som ikke ble sett, markeres — slettes ikke.
@@ -126,7 +144,7 @@ export async function runSync(provider: DataProvider, db: Db, options: RunSyncOp
       const keep = [
         ...new Set([...rejectedFeatures.map((r) => r.externalId).filter((id): id is string => id !== null), ...failedIds]),
       ];
-      const [removed] = await db.rpc<number>("mark_removed_from_source", {
+      const [removed] = await db.rpc<number>(strategy.removeFn, {
         p_provider_id: provider.id,
         p_run_synced_at: syncedAt,
         p_keep_external_ids: keep,
@@ -161,7 +179,7 @@ export function formatSyncResult(r: SyncResult): string {
     `Fetched:    ${r.fetched}`,
     `Accepted:   ${r.accepted}`,
     `Rejected:   ${r.rejected}`,
-    `Events:     ${r.events}  (etter gruppering på arealplan)`,
+    `Poster:     ${r.records}  (etter gruppering/dedupe)`,
     `Documents:  ${r.documents}`,
     `Inserted:   ${r.inserted}`,
     `Updated:    ${r.updated}`,

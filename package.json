@@ -16,7 +16,8 @@
     "test:network": "RUN_NETWORK_TESTS=1 vitest run tests/integration",
     "sync:dibk": "tsx scripts/sync-dibk.ts",
     "db:push": "node scripts/db-push.mjs",
-    "db:verify": "tsx scripts/verify-db.ts"
+    "db:verify": "tsx scripts/verify-db.ts",
+    "sync:area": "tsx scripts/sync-area.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

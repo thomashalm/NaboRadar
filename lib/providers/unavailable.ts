@@ -27,6 +27,7 @@ class UnavailableProvider implements DataProvider {
   readonly id: string;
   readonly name: string;
   readonly owner: string;
+  readonly recordKind = "event" as const;
   readonly eventTypes: readonly EventType[];
   readonly license: ProviderLicense | null;
   readonly defaultStatus: ProviderStatus;

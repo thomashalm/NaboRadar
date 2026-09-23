@@ -1,4 +1,5 @@
 import type { EventType, NormalizedEvent } from "@/types/event";
+import type { NormalizedAreaFeature } from "@/types/area-feature";
 
 /**
  * active       — hentes ved sync og vises i produktet
@@ -40,14 +41,17 @@ export interface RejectedRecord {
   reason: string;
 }
 
-export interface NormalizeResult {
+export interface NormalizeResult<TRecord = NormalizedEvent> {
   /**
-   * Normaliserte events. Kan inneholde flere fragmenter med samme externalId
+   * Normaliserte poster. Kan inneholde flere fragmenter med samme externalId
    * (DiBK: én per planomrade-feature) — sync-laget grupperer og slår dem sammen.
    */
-  events: NormalizedEvent[];
+  records: TRecord[];
   rejected: RejectedRecord[];
 }
+
+/** Hva provideren leverer: hendelser (events) eller områdefakta (area_features). */
+export type RecordKind = "event" | "area_feature";
 
 export interface ProviderHealth {
   ok: boolean;
@@ -61,11 +65,13 @@ export interface ProviderHealth {
  * Den henter og normaliserer — den skriver aldri til databasen.
  * Orkestrering (upsert, logging, varsling) ligger i lib/sync.
  */
-export interface DataProvider {
+export interface DataProvider<TRecord = NormalizedEvent> {
   readonly id: string;
   readonly name: string;
   readonly owner: string;
-  readonly eventTypes: readonly EventType[];
+  readonly recordKind: RecordKind;
+  /** Kun for event-providere. */
+  readonly eventTypes?: readonly EventType[];
   readonly license: ProviderLicense | null;
   /** Status fra kode. Kan overstyres i providers-tabellen (f.eks. deaktivere en aktiv provider). */
   readonly defaultStatus: ProviderStatus;
@@ -79,7 +85,7 @@ export interface DataProvider {
   fetch(options: SyncOptions): AsyncIterable<RawBatch>;
 
   /** Ren funksjon: validerer (Zod) og mapper til intern modell. Ingen I/O. Gruppering skjer i lib/sync. */
-  normalize(batch: RawBatch): NormalizeResult;
+  normalize(batch: RawBatch): NormalizeResult<TRecord>;
 
   healthCheck(): Promise<ProviderHealth>;
 }
@@ -97,8 +103,8 @@ export interface SyncResult {
   accepted: number;
   /** Features som ikke besto validering. */
   rejected: number;
-  /** Events etter gruppering (én per arealplan). */
-  events: number;
+  /** Poster etter gruppering (for DiBK: én per arealplan). */
+  records: number;
   documents: number;
   inserted: number;
   updated: number;
@@ -118,3 +124,6 @@ export class ProviderUnavailableError extends Error {
     this.name = "ProviderUnavailableError";
   }
 }
+
+/** Provider som leverer områdefakta. */
+export type AreaFeatureProvider = DataProvider<NormalizedAreaFeature>;

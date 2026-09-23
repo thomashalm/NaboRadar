@@ -265,6 +265,45 @@ Dagens lag er `radiusLayer` (søkepunkt og sirkel) og `planAreasLayer` (planpoly
 
 `/omrade` er en server component som validerer URL-en og kaller `events_within`. `AreaExplorer` (klient) eier valgt sak, som deles mellom kart og feed. Radius, sortering og sted endres via URL i en React-transition. Feeden viser da «Oppdaterer …», mens kartet beholdes og bare får nye data og nytt utsnitt.
 
+## Områdefakta (fase 5)
+
+Plansaker er **hendelser** (dato, forsvinner ikke), områdefakta er **tilstander** (ingen dato). De ligger derfor i hver sin tabell, men deler sync-maskineriet.
+
+```mermaid
+flowchart LR
+  subgraph Synk["Synk (lib/providers, 4 kilder)"]
+    P[ArcGIS-klient] --> N[normalize + Zod] --> M[dedupe + hash] --> U[(area_features)]
+  end
+  subgraph Direkte["Direkte oppslag (lib/facts/lookups, 5 kilder)"]
+    L[punkt-i-polygon / nærmeste] 
+  end
+  U --> Q[features_near]
+  L --> F
+  Q --> F[lib/facts/queries] --> W[wording.ts] --> UI[AreaFacts]
+```
+
+| Beslutning | Valg | Hvorfor |
+|---|---|---|
+| Egen tabell | `area_features` med `category`, `subtype`, `attributes jsonb` | Tilstander uten dato, egen spørring, ingen blanding med events |
+| Synk vs direkte | Synk under ~30 k objekter, ellers direkte oppslag | Strategisk støy er ~300 MB, kvikkleire-aktsomhet 148 k polygoner, distribusjonsnett 141 k linjer |
+| Avstand og «innenfor» | `features_near` gir `distance_m` og `contains` i samme rad | Kravet om å vise begge deler |
+| Tekst | Sentralt register (`lib/facts/wording.ts`) | Ingen setninger bygges i UI-et; ukjent subtype vises ikke |
+| Attributter | Kun kodede verdier | Fritekstfelt kan inneholde gnr./bnr. og personnavn |
+| Generalisering | `maxAllowableOffset ≈ 1 m` for kvikkleire | Største sone har 125 000 hjørner og sprengte skrivetiden |
+| Oppdeling | Flerdelte geometrier over 150 kB deles i flere rader | «Område uten fare» har opptil 1 935 deler (2,3 MB) |
+| Skrivepakker | Både rad- og bytegrense (`strategy.chunkSize`, `maxChunkBytes`) | Supabase har kort statement timeout; `SET LOCAL` kan ikke forlenge et kall som allerede kjører |
+
+### Sync-generalisering
+
+`runSync` er nå generisk: provideren oppgir `recordKind` («event» eller «area_feature»), og `lib/sync/strategy.ts` bestemmer gruppering, hash, radformat og hvilke SQL-funksjoner som brukes. Henting, validering, tellere, `sync_runs`, reconciliation og `/dev` er felles.
+
+### Presentasjonsregler som er kodet
+
+- Forurenset grunn vises som fordeling på påvirkningsgrad, ikke som et rått antall. Bare lokaliteter der kilden sier «behov for tiltak», eller som omfatter søkepunktet, løftes fram.
+- Kvikkleire: aktsomhetsområde, kartlagt sone og klassifisering er tre ulike utsagn. «Mulig» skilles fra «påvist», sikringstiltak vises, og klassifiseringen merkes som sonens.
+- Støy: dB-intervall fra strategisk kartlegging, gul/rød sone fra T-1442, med kildens eget forbehold.
+- Objekter som ligger som flere rader (oppdelte soner, kraftledninger i segmenter) vises som ett faktum — det nærmeste.
+
 ## Alder og «nye» saker
 
 Kilden har ingen status eller sluttdato. Produktet viser som standard saker varslet de siste **24 månedene**

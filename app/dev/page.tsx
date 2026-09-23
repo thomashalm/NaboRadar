@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SyncPanel } from "@/components/dev/SyncPanel";
+import { areaLookups } from "@/lib/facts/lookups";
 import { getDbMode, getWriteDb } from "@/lib/db";
 import { geocoder } from "@/lib/geocoding";
 import { formatDate } from "@/lib/format";
@@ -38,6 +39,7 @@ async function probeGeocoding() {
 
 interface ProviderOverviewRow {
   id: string;
+  kind: string;
   status: string;
   last_sync_at: string | null;
   last_success_at: string | null;
@@ -45,6 +47,8 @@ interface ProviderOverviewRow {
   active_events: number | string;
   removed_events: number | string;
   documents: number | string;
+  active_features: number | string;
+  removed_features: number | string;
   last_run: { status: string; mode: string; fetched: number; accepted: number; rejected: number; inserted: number; updated: number; unchanged: number; removed: number; failed: number; started_at: string } | null;
 }
 
@@ -67,7 +71,9 @@ export default async function DevPage() {
   if (process.env.NODE_ENV !== "development") notFound();
 
   const [probes, overview] = await Promise.all([probeGeocoding(), loadProviderOverview()]);
-  const dibk = "rows" in overview ? overview.rows.find((r) => r.id === "dibk-planning-started") : undefined;
+  const rows = "rows" in overview ? overview.rows : [];
+  const dibk = rows.find((r) => r.id === "dibk-planning-started");
+  const areaRows = rows.filter((r) => r.kind === "area_feature");
   const dbMode = getDbMode();
   const map = getMapTileConfig();
   const supabase = getSupabasePublicEnv();
@@ -114,6 +120,46 @@ export default async function DevPage() {
           <p className="text-sm text-muted">Ingen provider-rad funnet — er migrasjonene kjørt?</p>
         )}
         <SyncPanel />
+      </Section>
+
+      <Section title="Områdefakta (area_features)">
+        {"error" in overview ? (
+          <p className="text-sm text-danger">Databasen er ikke tilgjengelig: {overview.error}</p>
+        ) : (
+          <table className="w-full text-left text-sm">
+            <thead className="text-muted">
+              <tr>
+                <Th>Provider</Th>
+                <Th>Objekter</Th>
+                <Th>Siste sync</Th>
+                <Th>Siste kjøring</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {areaRows.map((row) => (
+                <tr key={row.id} className="border-t border-line align-top">
+                  <Td>
+                    <span className="font-mono text-xs">{row.id}</span>
+                  </Td>
+                  <Td>
+                    {Number(row.active_features).toLocaleString("nb-NO")}
+                    {Number(row.removed_features) > 0 ? ` (+${Number(row.removed_features)} fjernet)` : ""}
+                  </Td>
+                  <Td>{formatTime(row.last_sync_at)}</Td>
+                  <Td className="font-mono text-xs">
+                    {row.last_run
+                      ? `${row.last_run.status} · ins ${row.last_run.inserted} · upd ${row.last_run.updated} · unch ${row.last_run.unchanged} · rem ${row.last_run.removed} · fail ${row.last_run.failed}`
+                      : "–"}
+                  </Td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        <SyncPanel target="area" />
+        <p className="mt-4 text-sm text-muted">
+          Direkte oppslag per søk (ikke synket): {areaLookups.map((l) => l.id).join(", ")}.
+        </p>
       </Section>
 
       <Section title="Kartverket geokoding">
@@ -221,8 +267,8 @@ function Th({ children }: { children: React.ReactNode }) {
   return <th className="pr-4 pb-2 font-medium">{children}</th>;
 }
 
-function Td({ children }: { children: React.ReactNode }) {
-  return <td className="py-2.5 pr-4">{children}</td>;
+function Td({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <td className={`py-2.5 pr-4 ${className}`}>{children}</td>;
 }
 
 function Status({ ok, okText = "OK", failText = "Feil" }: { ok: boolean; okText?: string; failText?: string }) {

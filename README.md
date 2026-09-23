@@ -31,6 +31,7 @@ npm run dev
 | `npm run build && npm start` | Produksjonsbygg |
 | `npm test` | Enhetstester (ingen nettverk) |
 | `npm run sync:dibk` | Full sync av DiBK-plandata (`-- --mode=incremental` for inkrementell) |
+| `npm run sync:area` | Full sync av områdefakta (forurenset grunn, kvikkleire, nettanlegg, industri) |
 | `npm run db:push` | Kjør migrasjoner mot `SUPABASE_DB_URL` (Supabase CLI) |
 | `npm run db:verify` | Verifiser PostGIS, RLS, grants og data i hosted database |
 | `npm run test:network` | Integrasjonstester mot ekte Kartverket- og DiBK-API |
@@ -226,6 +227,50 @@ Exit-kode 0 betyr OK, 1 fatal feil og 2 delvis feil. Med lokal PGlite kan CLI-en
 2. Ellers lenker vi til DiBKs egen side for planen (verifisert 200).
 3. Vi konstruerer aldri kommunale URL-er.
 
+## Områdefakta («Hva bør du vite om området?»)
+
+Objektive, dokumenterbare forhold rundt søkepunktet. Dette er **tilstander uten dato**, til forskjell fra plansaker (hendelser med dato), og ligger derfor i egen tabell `area_features` med egen spørring `features_near`.
+
+| Kategori | Kilde | Lisens | Hvordan |
+|---|---|---|---|
+| Miljø | Forurenset grunn (Miljødirektoratet) | NLOD 2.0 | synk (15 936 lokaliteter) |
+| Grunnforhold | Kartlagte kvikkleiresoner (NVE) | NLOD | synk (4 863 soner) |
+| Grunnforhold | Aktsomhetsområde kvikkleireskred (NVE) | NLOD | direkte oppslag (148 235 polygoner) |
+| Støy | Strategisk støykartlegging veg/bane (Miljødirektoratet) | NLOD | direkte oppslag (~300 MB polygoner) |
+| Støy | Støyvarselkart veg T-1442 (Statens vegvesen) | NLOD | direkte oppslag |
+| Støy | Flystøysoner T-1442 (Avinor) | Åpne data | direkte oppslag (kun GML) |
+| Infrastruktur | Transformatorstasjoner og kraftledninger (NVE) | NLOD | synk (5 645 objekter) |
+| Infrastruktur | Høyspent distribusjonsnett (NVE) | NLOD | direkte oppslag (141 401 linjer) |
+| Industri og anlegg | Anlegg med utslippstillatelse (Miljødirektoratet) | NLOD | synk (866 aktive) |
+
+```bash
+npm run sync:area                                  # alle synkede kilder
+npm run sync:area -- --provider=nve-kvikkleire-soner
+```
+
+**Spørring.** `features_near(lat, lng, radius_m, categories)` gir både `distance_m` og `contains` (ligger søkepunktet inne i objektet). Direkte oppslag kjøres parallelt med databasespørringen, med felles tidsbudsjett; kilder som ikke svarer, listes nøytralt i UI-et mens resten vises.
+
+**Formuleringsregister.** All tekst kommer fra [`lib/facts/wording.ts`](lib/facts/wording.ts). UI-et setter aldri sammen egne setninger fra rådata, og ukjente typer vises ikke. Reglene:
+
+- kildens egne klasser og ord («aktsomhet» er ikke «fare»)
+- ingen score, ingen vurdering, ingen påstand om boligverdi
+- kildens eget forbehold vises alltid
+- år vises når kilden har det
+
+**Kvikkleire** behandles i tre nivåer som aldri blandes:
+
+| Nivå | Hva det betyr |
+|---|---|
+| Aktsomhetsområde | Kan være marin leire i skrånende terreng. Kvikkleire er ikke påvist. NVE krever geoteknisk vurdering ved tiltak. |
+| Kartlagt sone | Vi viser om kvikkleire er **påvist** eller bare **mulig**, undersøkelsesnivå, utførte sikringstiltak og år. |
+| Klassifisering | Faregrad × konsekvens → risikoklasse. Gjelder **sonen**, ikke eiendommen. |
+
+Soner NVE har utredet til «ikke fare for områdeskred» vises aldri som fare, kun nøytralt når søkepunktet ligger inni.
+
+**Personvern.** Vi lagrer bare kodede verdier fra kildene. Lokalitetsnavn i forurenset grunn (ofte en adresse), NVEs bemerkningsfelt (kan inneholde gnr./bnr.) og oppdragsgiver lagres ikke. Sensitive institusjoner er ikke med i noen kilde vi bruker.
+
+**Kraftsensitiv informasjon.** Vi viser bare det NVE selv publiserer. Jordkabler inngår ikke i datasettene, og vi kombinerer aldri kilder for å utlede kabeltraseer.
+
 ## Lokal database (PGlite)
 
 Uten Supabase kan `LOCAL_DATABASE=pglite` brukes i development:
@@ -244,6 +289,7 @@ Uten Supabase kan `LOCAL_DATABASE=pglite` brukes i development:
   - Valg synkronisert mellom kart og feed, med popup.
   - Lastetilstand ved bytte av radius, sortering og sted. Kartet beholdes.
   - Tom-tilstand med «Prøv 3 km», og feiltilstand når databasen mangler.
+- **«Hva bør du vite om området?»** på `/omrade`: registrerte forhold gruppert i Miljø, Grunnforhold, Støy, Infrastruktur og Industri og anlegg, med avstand eller «Ved søkepunktet», kilde, år og forbehold.
 - **`/sak/[id]`:** planområde i kart, avstand fra søkt sted (fra URL-kontekst), fakta fra kilden, beregnet areal, tillatte dokumenter og kildelenke.
 - **Sync:** CLI og `/dev`-knapp, full og incremental, med reconciliation.
 
@@ -259,13 +305,15 @@ Uten Supabase kan `LOCAL_DATABASE=pglite` brukes i development:
 
 ## Ikke implementert ennå
 
-AI-oppsummering, varsling og utsending, innlogging, cron-oppsett i drift, og flere datakilder.
+AI-oppsummering, varsling og utsending, innlogging, cron-oppsett i drift. Neste datalag (etter godkjenning): flomsoner, skredaktsomhet, radon, ÅDT, skoler og barnehager. Se [docs/area-facts-discovery.md](docs/area-facts-discovery.md).
 
 ## Kjente begrensninger
 
 - **Kilden mangler felt:** DiBK har ikke formål, status eller sluttdato. Vi viser derfor bare «Planoppstart varslet …» og antyder aldri at arbeidet pågår.
 - **Kommunenavn:** DiBK leverer bare kommunenummer, så detaljsiden viser nummeret.
 - **Incremental sync:** fanger ikke planer med `oppdateringsdato = null` (~680 features), eller dokumenter som endres uten at planen gjør det. Nattlig full sync dekker dette.
+- **Områdefakta vises ikke i kartet ennå**, bare som tekst med avstand.
+- **Kvikkleiregeometri er generalisert til ~1 m** ved henting, fordi NVEs største sone har 125 000 hjørner.
 - **Lokal PGlite:** én prosess om gangen. CLI og dev-server kan ikke bruke samme lokale database samtidig.
 
 - Adresser med samme navn i flere kommuner (f.eks. «Karl Johans gate 1») kommer i Kartverkets rekkefølge. Undertittelen (postnummer og kommune) skiller dem.

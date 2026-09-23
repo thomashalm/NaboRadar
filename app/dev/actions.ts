@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getWriteDb } from "@/lib/db";
+import { areaFeatureProviders } from "@/lib/providers/area-registry";
 import { DibkPlanningStartedProvider } from "@/lib/providers/dibk/planning-started";
 import type { SyncResult } from "@/lib/providers/types";
 import { runSync } from "@/lib/sync/run";
@@ -22,6 +23,7 @@ export async function syncNowAction(_prev: SyncActionState, formData: FormData):
     return { status: "error", message: "Ikke tilgjengelig utenfor development." };
   }
   const mode = formData.get("mode") === "incremental" ? "incremental" : "full";
+  const target = formData.get("target") === "area" ? "area" : "events";
   const g = globalThis as GlobalWithLock;
   if (g.__naboradarSyncRunning) return { status: "error", message: "En sync kjører allerede." };
 
@@ -29,6 +31,13 @@ export async function syncNowAction(_prev: SyncActionState, formData: FormData):
   try {
     const db = await getWriteDb();
     if (!db) return { status: "error", message: "Ingen database med skrivetilgang er konfigurert." };
+    if (target === "area") {
+      // Alle områdefakta-providere etter hverandre; siste resultat vises.
+      let last: SyncResult | null = null;
+      for (const provider of areaFeatureProviders) last = await runSync(provider, db, { mode: "full" });
+      revalidatePath("/dev");
+      return last ? { status: "done", result: last } : { status: "error", message: "Ingen providere" };
+    }
     const result = await runSync(new DibkPlanningStartedProvider(), db, { mode });
     revalidatePath("/dev");
     return { status: "done", result };
