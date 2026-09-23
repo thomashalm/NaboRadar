@@ -409,8 +409,10 @@ Varslingen fanger ikke opp at hele workflowen slutter å kjøre. Derfor pinger w
 Healthchecks.io: `/start` når jobben begynner, ping ved suksess, og `/fail` ved fatal feil.
 Uteblir pingen, varsler Healthchecks.
 
-1. Opprett en sjekk på healthchecks.io: **Period 15 minutter, Grace 20 minutter**.
-   Grace-perioden må tåle at GitHub forsinker planlagte kjøringer og at en full sync tar noen minutter.
+1. Opprett en sjekk på healthchecks.io: **Period 15 minutter, Grace 25 minutter**.
+   Grace-perioden domineres av at GitHub forsinker planlagte kjøringer, ofte 5–15 minutter.
+   15 + 25 gir varsel etter 40 minutter uten ping: én forsinket eller hoppet kjøring tolereres,
+   mens en scheduler som faktisk har stoppet oppdages innen en drøy halvtime.
 2. Legg ping-URL-en inn som GitHub-secret `HEALTHCHECK_URL` (uten `/start` eller `/fail` på slutten).
 3. Sett opp e-postvarsling i Healthchecks, til samme adresse som `ALERT_EMAIL_TO`.
 

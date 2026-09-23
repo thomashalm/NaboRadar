@@ -110,9 +110,12 @@ jobs:
         if: ${{ steps.config.outputs.configured == 'true' }}
         run: npm run alerts:check
 
+      # En ping som ikke kommer fram skal ikke gjøre en vellykket sync rød — da ville vi
+      # sendt /fail for en kjøring som gikk bra. Blir pingen borte over tid, fanger
+      # Healthchecks det opp med sin egen timeout.
       - name: "Heartbeat: kjøring OK"
         if: ${{ success() && steps.config.outputs.configured == 'true' && env.HEALTHCHECK_URL != '' }}
-        run: curl -fsS -m 10 --retry 3 -o /dev/null "$HEALTHCHECK_URL"
+        run: curl -fsS -m 10 --retry 3 -o /dev/null "$HEALTHCHECK_URL" || echo "::warning::Heartbeat kunne ikke sendes."
 
       - name: "Heartbeat: kjøring feilet"
         if: ${{ failure() && steps.config.outputs.configured == 'true' && env.HEALTHCHECK_URL != '' }}
