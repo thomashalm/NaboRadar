@@ -168,6 +168,23 @@ describe("sync-tilstand i databasen", { timeout: 30_000 }, () => {
     ).rejects.toThrow(/ikke autorisert/);
   });
 
+  it("admin ser driftsdata, innlogget ikke-admin ser ingenting", async () => {
+    /** Kjører spørringen med samme claims som PostgREST setter for en innlogget bruker. */
+    const asUser = async (email: string, sql: string) =>
+      db.pg.transaction(async (tx) => {
+        await tx.query("select set_config('request.jwt.claims', $1, true)", [
+          JSON.stringify({ role: "authenticated", email }),
+        ]);
+        return (await tx.query<{ n: number }>(sql)).rows[0]!.n;
+      });
+
+    expect(Number(await asUser("thomas@fink.no", "select count(*)::int n from public.provider_health()"))).toBeGreaterThan(0);
+    expect(Number(await asUser("thomas@fink.no", "select count(*)::int n from public.recent_sync_runs(10, null)"))).toBeGreaterThan(0);
+
+    expect(Number(await asUser("ikke.admin@example.com", "select count(*)::int n from public.provider_health()"))).toBe(0);
+    expect(Number(await asUser("ikke.admin@example.com", "select count(*)::int n from public.recent_sync_runs(10, null)"))).toBe(0);
+  });
+
   it("provider_health og recent_sync_runs gir det admin trenger", async () => {
     const health = await db.rpc<Record<string, unknown>>("provider_health");
     const row = health.find((h) => h.id === PROVIDER)!;

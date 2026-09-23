@@ -29,6 +29,9 @@ export interface ProviderHealthRow {
   removed_records: number | string;
   documents: number | string;
   alert_state: string;
+  /** Antall påfølgende kritiske sjekker (se lib/alerts/state.ts). */
+  alert_critical_streak: number;
+  alert_state_since: string | null;
   alert_notified_at: string | null;
   last_run: SyncRunSummary | null;
   open_request: { id: string; mode: string; status: string; requested_at: string; requested_by: string | null } | null;

@@ -167,6 +167,30 @@ describe("sync-worker", { timeout: 60_000 }, () => {
     expect(request!.status).toBe("failed");
   });
 
+  it("henter seg inn igjen når kilden kommer tilbake", async () => {
+    b.fail = true;
+    await runSyncWorker(db, { providerIds: [B], providers, skipRequests: true });
+
+    const failed = (await db.pg.query<{ status: string; consecutive_failures: number }>(
+      "select status, consecutive_failures from providers where id = $1",
+      [B],
+    )).rows[0]!;
+    expect(failed.status).toBe("error");
+
+    // Kilden er oppe igjen. Neste kjøring skal nullstille feiltelleren og statusen.
+    b.fail = false;
+    const [result] = (await runProvidersNow(db, [B], { mode: "full", providers })).results;
+    expect(result!.status).toBe("success");
+
+    const recovered = (await db.pg.query<{ status: string; consecutive_failures: number; last_success_at: string | null }>(
+      "select status, consecutive_failures, last_success_at from providers where id = $1",
+      [B],
+    )).rows[0]!;
+    expect(recovered.status).toBe("active");
+    expect(Number(recovered.consecutive_failures)).toBe(0);
+    expect(recovered.last_success_at).not.toBeNull();
+  });
+
   it("kjører forfalte providere etter tidsplanen", async () => {
     const outcome = await runSyncWorker(db, { providerIds: [A, B], providers });
     expect(outcome.results.map((r) => r.providerId).sort()).toEqual([A, B].sort());

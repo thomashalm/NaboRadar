@@ -1,0 +1,119 @@
+# Planlagt sync for NaboRadar.
+#
+# Kjører den samme Node/TypeScript-koden som lokalt (npm run sync:worker) — ingen parallell
+# implementasjon i Edge/Deno. Workeren avgjør selv hva som er forfalt (sync_due) og tar
+# forespørsler fra /admin-køen. Én provider som feiler stopper ikke de andre: da avslutter
+# workeren med kode 2, jobben får fortsette, og e-postvarsleren tar seg av oppfølgingen.
+#
+# Hemmeligheter ligger i GitHub Actions Secrets. Ingen av dem skal ligge i Netlify eller i
+# klientkode. Steg som krever en hemmelighet vi ikke har satt opp ennå, hopper over seg selv.
+name: Sync
+
+on:
+  schedule:
+    # Hvert 15. minutt. GitHub kan forsinke planlagte kjøringer ved last.
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: "Provider-ID (tom = alle som er forfalt)"
+        required: false
+        default: ""
+      mode:
+        description: "Modus"
+        type: choice
+        options: [auto, full, incremental]
+        default: auto
+      force:
+        description: "Godta unormalt datafall og kjør reconciliation likevel"
+        type: boolean
+        default: false
+
+# Én kjøring av gangen. Overlappende syncer mot samme database gir ingen mening.
+concurrency:
+  group: naboradar-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
+      ALERT_EMAIL_FROM: ${{ vars.ALERT_EMAIL_FROM }}
+      ALERT_ADMIN_URL: ${{ vars.ALERT_ADMIN_URL }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+
+      - run: npm ci
+
+      # Uten Supabase-secrets er det ingenting å gjøre. Da hopper vi over i stedet for å
+      # feile hvert 15. minutt — og vi sender heller ingen heartbeat, slik at dead man's
+      # switchen ikke rapporterer «frisk» for et system som ikke kjører.
+      - name: Sjekk konfigurasjon
+        id: config
+        run: |
+          if [ -n "$SUPABASE_SECRET_KEY" ] && [ -n "$NEXT_PUBLIC_SUPABASE_URL" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Supabase-secrets mangler. Sync hoppes over — se README → Scheduler."
+          fi
+
+      - name: "Heartbeat: kjøring startet"
+        if: ${{ steps.config.outputs.configured == 'true' && env.HEALTHCHECK_URL != '' }}
+        run: curl -fsS -m 10 --retry 3 -o /dev/null "$HEALTHCHECK_URL/start" || true
+
+      - name: Sync
+        id: worker
+        if: ${{ steps.config.outputs.configured == 'true' }}
+        env:
+          INPUT_PROVIDER: ${{ inputs.provider }}
+          INPUT_MODE: ${{ inputs.mode }}
+          INPUT_FORCE: ${{ inputs.force }}
+        run: |
+          args=()
+          if [ -n "$INPUT_PROVIDER" ]; then args+=("--provider=$INPUT_PROVIDER"); fi
+          if [ -n "$INPUT_MODE" ] && [ "$INPUT_MODE" != "auto" ]; then args+=("--mode=$INPUT_MODE"); fi
+          if [ "$INPUT_FORCE" = "true" ]; then args+=("--force"); fi
+
+          set +e
+          npm run sync:worker -- "${args[@]}"
+          code=$?
+          set -e
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+
+          # 0 = alt bra, 2 = minst én kilde feilet (håndteres av varsling), 1 = fatal.
+          if [ "$code" -eq 1 ]; then
+            echo "::error::Sync-worker feilet fatalt (ingen database eller ugyldige argumenter)."
+            exit 1
+          fi
+          if [ "$code" -eq 2 ]; then
+            echo "::warning::Minst én provider feilet eller ga mistenkelige tall. Se varsling og /admin."
+          fi
+
+      - name: Varsling
+        if: ${{ steps.config.outputs.configured == 'true' }}
+        run: npm run alerts:check
+
+      - name: "Heartbeat: kjøring OK"
+        if: ${{ success() && steps.config.outputs.configured == 'true' && env.HEALTHCHECK_URL != '' }}
+        run: curl -fsS -m 10 --retry 3 -o /dev/null "$HEALTHCHECK_URL"
+
+      - name: "Heartbeat: kjøring feilet"
+        if: ${{ failure() && steps.config.outputs.configured == 'true' && env.HEALTHCHECK_URL != '' }}
+        run: curl -fsS -m 10 --retry 3 -o /dev/null "$HEALTHCHECK_URL/fail" || true

@@ -19,7 +19,8 @@
     "db:verify": "tsx scripts/verify-db.ts",
     "sync:area": "tsx scripts/sync-area.ts",
     "sync:worker": "tsx scripts/sync-worker.ts",
-    "sync:status": "tsx scripts/sync-status.ts"
+    "sync:status": "tsx scripts/sync-status.ts",
+    "alerts:check": "tsx scripts/alert-check.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -47,7 +48,8 @@
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
-    "vitest": "^5.0.1"
+    "vitest": "^5.0.1",
+    "yaml": "^2.9.1"
   },
   "engines": {
     "node": ">=20.9"

@@ -25,6 +25,8 @@ const row = (over: Partial<ProviderHealthRow> = {}): ProviderHealthRow => ({
   removed_records: 0,
   documents: 0,
   alert_state: "ok",
+  alert_critical_streak: 0,
+  alert_state_since: null,
   alert_notified_at: null,
   last_run: null,
   open_request: null,

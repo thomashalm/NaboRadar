@@ -34,6 +34,7 @@ npm run dev
 | `npm run sync:area` | Full sync av områdefakta (forurenset grunn, kvikkleire, nettanlegg, industri) |
 | `npm run sync:worker` | Kjører forespørsler fra /admin og providere som er forfalt. Dette er kommandoen en scheduler skal kalle. |
 | `npm run sync:status` | Helsetilstand per provider (samme regler som /admin og varsling) |
+| `npm run alerts:check` | Vurderer helsetilstand og sender varsel-e-post (`-- --dry-run` skriver den bare ut) |
 | `npm run db:push` | Kjør migrasjoner mot `SUPABASE_DB_URL` (Supabase CLI) |
 | `npm run db:verify` | Verifiser PostGIS, RLS, grants og data i hosted database |
 | `npm run test:network` | Integrasjonstester mot ekte Kartverket- og DiBK-API |
@@ -308,6 +309,40 @@ Tidsplan per kilde ligger i `providers`-tabellen, ikke i koden:
 Kilder som spørres direkte per søk (støy, kvikkleire-aktsomhet, distribusjonsnett) har ingen
 tidsplan og overvåkes ikke som sync.
 
+### Scheduler (GitHub Actions)
+
+`.github/workflows/sync.yml` kjører `npm run sync:worker` **hvert 15. minutt**, og deretter
+`npm run alerts:check`. Det er den samme Node/TypeScript-koden som kjøres lokalt — ingen
+parallell implementasjon i Edge/Deno. Workeren avgjør selv hva som er forfalt, så en kjøring
+der ingenting skal gjøres koster to databasekall.
+
+- Kjøringene er serialisert (`concurrency: naboradar-sync`), så to syncer aldri overlapper.
+- Provider-feil (exit 2) feller ikke jobben — de håndteres av varslingen. Fatal feil (exit 1,
+  for eksempel ingen database) feller jobben, og da sendes ingen heartbeat.
+- Hemmelighetene ligger i **GitHub Actions Secrets**, ikke i Netlify. Webappen har fortsatt
+  ingen skrivenøkkel.
+- Steg som krever en hemmelighet vi ikke har satt opp, hopper over seg selv.
+
+**Manuell kjøring:** GitHub → Actions → «Sync» → «Run workflow». Feltene er `provider`
+(tom = alle forfalte), `mode` (`auto`/`full`/`incremental`) og `force` (godta unormalt datafall).
+Tilsvarer `npm run sync:worker -- --provider=<id> --mode=full --force` lokalt.
+
+**Merk:** GitHub deaktiverer planlagte workflows i repoer uten aktivitet på 60 dager. Dead man's
+switchen under fanger det opp.
+
+#### Secrets og variabler
+
+| Navn | Type | Kreves | Hva |
+|---|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | secret | ja | Prosjekt-URL |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | secret | ja | Publishable key |
+| `SUPABASE_SECRET_KEY` | secret | ja | Skrivetilgang for sync. **Skal ikke ligge i Netlify.** |
+| `HEALTHCHECK_URL` | secret | nei | Ping-URL fra Healthchecks.io |
+| `RESEND_API_KEY` | secret | nei | Resend API-nøkkel |
+| `ALERT_EMAIL_TO` | secret | nei | Mottaker(e), komma­separert |
+| `ALERT_EMAIL_FROM` | variable | nei | Avsender, standard `NaboRadar <alerts@naboradar.no>` |
+| `ALERT_ADMIN_URL` | variable | nei | Lenke i e-posten, standard `https://naboradar.no/admin` |
+
 ### Vakter mot unormale datadrop
 
 `lib/sync/guards.ts` vurderer tallene fra hver kjøring mot forrige kjøring vi stolte på:
@@ -334,6 +369,54 @@ hvis problemet vedvarer. Er fallet reelt, brukes «Full sync og godta datafallet
 | `stale` | ingen data vi stolte på innen kildens eget vindu | kritisk |
 | `never_synced` | aktiv kilde som aldri har levert | kritisk |
 
+### Varsling på e-post
+
+`npm run alerts:check` kjøres etter hver sync. Den vurderer helsetilstanden, bestemmer hva som
+skal sendes (`lib/alerts/state.ts`), bygger e-posten (`lib/alerts/email.ts`) og sender via Resend
+(`lib/alerts/transport.ts`). Uten `RESEND_API_KEY`/`ALERT_EMAIL_TO` logges det som ville blitt
+sendt, og jobben går OK.
+
+Tilstandsmaskinen per provider:
+
+```
+ok ──(1. kritiske sjekk)──▶ pending ──(2. kritiske sjekk)──▶ alerted ──(frisk)──▶ ok
+                               │                                │
+                               └──(frisk, ingen e-post)─────────┘  påminnelse hver 12. time
+```
+
+- Varsler **kun** ved `critical`. Aldri ved `warning`.
+- To påfølgende kritiske sjekker før første varsel, så en forbigående 503 ikke gir e-post.
+- Høyst én påminnelse hver 12. time så lenge tilstanden varer.
+- Recovery-e-post kun fra `alerted` — har vi aldri varslet, friskmelder vi ingenting.
+- Alle providere samles i **én e-post per kjøring**.
+- Innholdet er providernavn, tilstand, sist vellykkede sync, dataalder, antall objekter, feil på
+  rad og en kort årsak (maks 200 tegn). Aldri nøkler, URL-er med token eller rådata.
+- Feiler utsendingen, lagres tilstanden **uten** «varslet», slik at neste kjøring prøver igjen.
+
+Tilstanden ligger i `providers.alert_state`, `alert_critical_streak` og `alert_notified_at`.
+
+**Oppsett hos Resend** (gjøres én gang):
+
+1. Opprett konto på resend.com og legg til domenet `naboradar.no`.
+2. Legg inn DNS-postene Resend oppgir (SPF/DKIM, se rapport).
+3. Lag en API-nøkkel med kun sending-rettighet, og legg den inn som `RESEND_API_KEY`.
+4. Sett `ALERT_EMAIL_TO` til mottakeradressen.
+5. Verifiser med `npm run alerts:check -- --dry-run` før første ekte utsending.
+
+### Dead man's switch (Healthchecks.io)
+
+Varslingen fanger ikke opp at hele workflowen slutter å kjøre. Derfor pinger workflowen
+Healthchecks.io: `/start` når jobben begynner, ping ved suksess, og `/fail` ved fatal feil.
+Uteblir pingen, varsler Healthchecks.
+
+1. Opprett en sjekk på healthchecks.io: **Period 15 minutter, Grace 20 minutter**.
+   Grace-perioden må tåle at GitHub forsinker planlagte kjøringer og at en full sync tar noen minutter.
+2. Legg ping-URL-en inn som GitHub-secret `HEALTHCHECK_URL` (uten `/start` eller `/fail` på slutten).
+3. Sett opp e-postvarsling i Healthchecks, til samme adresse som `ALERT_EMAIL_TO`.
+
+Ping-URL-en er en hemmelighet: den skal ikke i Netlify, ikke i klientkode og ikke i logger.
+Skal løsningen byttes senere, er det tre `curl`-steg i workflowen.
+
 ### /admin
 
 Innlogget driftsside i produksjon (`/admin`). Innlogging er Supabase Auth; tilgang krever at
@@ -348,6 +431,15 @@ Ny admin-bruker:
 
 1. Supabase-dashbordet → Authentication → Users → Add user (e-post + passord).
 2. `insert into admin_users (email) values ('ny@adresse.no');`
+
+### Feilsøke en provider
+
+1. `npm run sync:status` — hvilken kilde er kritisk, og hvorfor.
+2. `/admin` — siste kjøringer med hentet/avvist/poster, advarsler og siste feil.
+3. `npm run sync:worker -- --provider=<id> --mode=full` — kjør kilden alene og se hele loggen.
+4. Er kjøringen `suspicious`, er det datafall-vakten som har slått til. Stemmer fallet med kilden,
+   brukes «Full sync og godta datafallet» i /admin eller `--force`.
+5. GitHub → Actions → «Sync» viser loggen for hver planlagte kjøring.
 
 `/dev` finnes fortsatt bare i development og er uendret.
 
