@@ -391,7 +391,7 @@ export function contaminatedFacts(rows: FactRow[], radiusM: number, truncated = 
  * i nabogata, og seksjonen blir ensidig selv om kartet viser alt.
  */
 /** Kategoriene som vises i «Nærområdet» — som kort (industri) eller som gruppe. */
-const PLACE_CATEGORIES = new Set<AreaCategory>(["industri", "oppvekst", "helse", "servering"]);
+const PLACE_CATEGORIES = new Set<AreaCategory>(["industri", "oppvekst", "helse", "omsorg", "servering"]);
 
 const PLACE_CARDS_PER_CATEGORY = 4;
 /** Hvor mange steder som vises per undertype før «Se alle …». */
@@ -416,14 +416,14 @@ interface ClusterListSpec {
 const CLUSTER_SPECS: readonly {
   id: string;
   label: string;
-  category: AreaCategory;
+  categories: readonly AreaCategory[];
   caveat: string;
   lists: readonly ClusterListSpec[];
 }[] = [
   {
     id: "skoler-og-barnehager",
     label: "Skoler og barnehager",
-    category: "oppvekst",
+    categories: ["oppvekst"],
     caveat: OPPVEKST_CAVEAT,
     lists: [
       { id: "skoler", label: "Skoler", subtypes: ["grunnskole", "videregaende_skole"], ental: "skole", flertall: "skoler" },
@@ -432,15 +432,24 @@ const CLUSTER_SPECS: readonly {
   },
   {
     id: "helse",
-    label: "Helse",
-    category: "helse",
+    label: "Helse og omsorg",
+    categories: ["helse", "omsorg"],
     caveat: HELSE_CAVEAT,
-    lists: [{ id: "sykehus", label: "Sykehus", subtypes: ["sykehus"], ental: "sykehus", flertall: "sykehus" }],
+    lists: [
+      { id: "sykehus", label: "Sykehus", subtypes: ["sykehus"], ental: "sykehus", flertall: "sykehus" },
+      {
+        id: "omsorgstilbud",
+        label: "Omsorgstilbud",
+        subtypes: ["omsorgstilbud"],
+        ental: "omsorgstilbud",
+        flertall: "omsorgstilbud",
+      },
+    ],
   },
   {
     id: "servering",
     label: "Servering og uteliv",
-    category: "servering",
+    categories: ["servering"],
     caveat: SERVERING_CAVEAT,
     lists: [
       {
@@ -486,7 +495,7 @@ function buildCluster(
   /** Merknad om at kartet bare tegner de nærmeste. */
   kartnote?: string | null,
 ): FactCluster | null {
-  const treff = rows.filter((row) => row.category === spec.category);
+  const treff = rows.filter((row) => spec.categories.includes(row.category));
   if (treff.length === 0) return null;
 
   const lists: ClusterList[] = [];
@@ -536,7 +545,7 @@ function buildCluster(
 /** Eksportert for test: grupperingen er produktlogikk og verifiseres uten database. */
 export function placeFacts(rows: FactRow[], radiusM: number, antallPerKategori: Partial<Record<AreaCategory, number>> = {}) {
   const sorted = [...rows].sort(byRelevance);
-  const gruppert = new Set(CLUSTER_SPECS.map((spec) => spec.category));
+  const gruppert = new Set(CLUSTER_SPECS.flatMap((spec) => spec.categories));
   // Industri og anlegg er egen gruppe: de er få, og hvert anlegg har sine egne opplysninger.
   const anlegg = sorted.filter((row) => !gruppert.has(row.category));
 
@@ -569,8 +578,8 @@ export function placeFacts(rows: FactRow[], radiusM: number, antallPerKategori: 
           spec,
           sorted,
           radiusM,
-          antallPerKategori[spec.category],
-          spec.category === "servering" ? kartnote : null,
+          antallPerKategori[spec.categories[0]!],
+          spec.categories.includes("servering") ? kartnote : null,
         ) ?? [],
     ),
     overview,

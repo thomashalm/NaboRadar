@@ -52,7 +52,7 @@ const cluster = (rows: Row[], id: string, radius = 1000, antall = {}) =>
 describe("sykehus i Nærområdet", () => {
   it("vises som egen gruppe med antall", () => {
     const c = cluster([sykehus("Diakonhjemmet Sykehus", 950, "privat"), sykehus("Ullevål", 2000)], "helse")!;
-    expect(c.label).toBe("Helse");
+    expect(c.label).toBe("Helse og omsorg");
     expect(c.summary).toBe("2 sykehus innen 1 km");
     expect(c.lists.map((l) => l.label)).toEqual(["Sykehus"]);
     expect(c.lists[0]!.items.map((i) => i.title)).toEqual(["Diakonhjemmet Sykehus", "Ullevål"]);
@@ -65,7 +65,7 @@ describe("sykehus i Nærområdet", () => {
 
   it("sier hva som er utelatt, slik at listen ikke leses som komplett helsetilbud", () => {
     const c = cluster([sykehus("Ahus", 500)], "helse")!;
-    expect(c.caveat).toContain("Psykiatri, rusbehandling, legevakt");
+    expect(c.caveat).toContain("Omsorgstilbud er steder der den ansvarlige myndigheten selv publiserer navn og adresse");
   });
 
   it("tar ikke med steder som er merket nedlagt i den kuraterte fila", () => {

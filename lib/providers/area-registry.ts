@@ -3,6 +3,7 @@ import { MdirForurensetGrunnProvider } from "./mdir/forurenset-grunn";
 import { MdirIndustriProvider } from "./mdir/industri";
 import { NveKvikkleireSonerProvider } from "./nve/kvikkleire-soner";
 import { NveNettanleggProvider } from "./nve/nettanlegg";
+import { OmsorgstilbudProvider } from "./omsorg/omsorgstilbud";
 import { OsloSkjenkebevillingProvider } from "./oslo/skjenkebevilling";
 import { UdirBarnehagerProvider } from "./udir/barnehager";
 import { UdirSkolerProvider } from "./udir/skoler";
@@ -21,6 +22,7 @@ export const areaFeatureProviders: readonly AreaFeatureProvider[] = [
   new UdirBarnehagerProvider(),
   new SykehusProvider(),
   new OsloSkjenkebevillingProvider(),
+  new OmsorgstilbudProvider(),
 ];
 
 export function getAreaFeatureProvider(id: string): AreaFeatureProvider | undefined {

@@ -16,6 +16,7 @@ export const AREA_CATEGORIES = [
   "oppvekst",
   "helse",
   "servering",
+  "omsorg",
 ] as const;
 export type AreaCategory = (typeof AREA_CATEGORIES)[number];
 
@@ -46,7 +47,7 @@ export const AREA_SECTIONS: readonly AreaSection[] = [
     label: "Nærområdet",
     // Nøytral ramme: dette er hva som finnes, ikke hva som er bra eller dårlig.
     intro: "Offentlig kjente virksomheter og steder i nærheten. Vi vurderer dem ikke.",
-    categories: ["oppvekst", "helse", "servering", "industri"],
+    categories: ["oppvekst", "helse", "omsorg", "servering", "industri"],
   },
   { id: "infrastruktur", label: "Infrastruktur", intro: null, categories: ["infrastruktur"] },
   // Ligger sist som standard: registreringene er tette i byer, og de fleste gjelder et sted

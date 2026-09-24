@@ -83,6 +83,12 @@ export const SOURCES: Record<string, SourceInfo> = {
     licenseName: "NLOD 2.0",
     licenseUrl: "https://data.norge.no/nlod/no/2.0",
   },
+  omsorgstilbud: {
+    name: "Omsorgstilbud",
+    owner: "Oslo kommune og Helsenorge",
+    licenseName: "NLOD 2.0",
+    licenseUrl: "https://data.norge.no/nlod/no/2.0",
+  },
   "oslo-skjenkebevilling": {
     name: "Skjenkebevillinger i Oslo",
     owner: "Næringsetaten, Oslo kommune",
@@ -555,8 +561,15 @@ export function describeClusterToggle(input: { flertall: string; vist: number; t
 export const OPPVEKST_CAVEAT =
   "Fra Utdanningsdirektoratets registre. Familiebarnehager i private hjem og spesialskoler er ikke med.";
 
+/**
+ * Én nøytral etikett for alle omsorgs-, behandlings- og botilbud. Den presise typen —
+ * sykehjem, rusbehandling, barnevern — lagres internt, men er aldri det brukeren ser.
+ * NaboRadar viser hva som finnes; brukeren vurderer selv betydningen.
+ */
+export const OMSORG_LABEL = "Omsorgstilbud";
+
 export const HELSE_CAVEAT =
-  "Somatiske sykehus som både Helsenorge og Enhetsregisteret fører som sykehus. Psykiatri, rusbehandling, legevakt og klinikker uten sykehusstatus er ikke med.";
+  "Sykehus er somatiske sykehus som både Helsenorge og Enhetsregisteret fører som sykehus. Omsorgstilbud er steder der den ansvarlige myndigheten selv publiserer navn og adresse. Data om omsorgstilbud er foreløpig tilgjengelig i utvalgte områder, så listen er ikke uttømmende.";
 
 export const SERVERING_CAVEAT =
   "Fra Næringsetatens bevillingsoversikt, som foreløpig bare dekker Oslo. Tiden er tillatt stengetid — ikke skjenketid, og ikke stedets faktiske åpningstid, som kan være kortere.";
@@ -567,6 +580,13 @@ export const SERVERING_CAVEAT =
  */
 export function describePlaceLine(input: { subtype: string; attributes: AreaAttributes }): string {
   const a = input.attributes;
+
+  if (input.subtype === "omsorgstilbud") {
+    // Én felles etikett. Den presise typen ligger i dataene, men vises ikke.
+    return [OMSORG_LABEL, [str(a.adresse), str(a.poststed)].filter(Boolean).join(", ") || null]
+      .filter(Boolean)
+      .join(" · ");
+  }
 
   if (input.subtype === "sykehus") {
     // «privat» er kildens eget flagg, og omfatter også ideelle sykehus som Diakonhjemmet.
@@ -628,6 +648,13 @@ export function describeMapLines(input: { subtype: string; attributes: AreaAttri
     return [`${OPPVEKST_TYPE_LABEL[subtype]} (Utdanningsdirektoratet)`, eier ? `${eier} eierforhold` : null].filter(
       (line): line is string => line !== null,
     );
+  }
+  if (subtype === "omsorgstilbud") {
+    return [
+      OMSORG_LABEL,
+      [str(a.adresse), str(a.poststed)].filter(Boolean).join(", ") || null,
+      str(a.kildeAktor) ? `Kilde: ${str(a.kildeAktor)}` : null,
+    ].filter((line): line is string => line !== null);
   }
   if (subtype === "sykehus") {
     return [

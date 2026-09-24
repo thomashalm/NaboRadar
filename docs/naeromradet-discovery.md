@@ -263,3 +263,109 @@ uendret.
 Skjenkesteder finnes bare for Oslo. Utenfor Oslo vises gruppen ikke i det hele tatt — det
 betyr «vi har ikke data», ikke «her finnes ingen serveringssteder». Det samme vil gjelde
 sykehjem hvis den kategorien bygges på Oslo-kilden.
+
+## Runde 4: omsorgstilbud (2026-09-24)
+
+Én visningstype ut mot brukeren — «Omsorgstilbud» — for sykehjem, helsehus, behandlingssteder
+og institusjonsbaserte botilbud. Den presise typen lagres internt for kvalitetssikring og
+filtrering, og vises ikke.
+
+### Verifikasjonsregelen
+
+Et sted tas bare inn når **den ansvarlige aktøren selv publiserer både navnet og den konkrete
+adressen**. Ikke tredjepartskataloger, ikke karttjenester, ikke næringskode alene. At et sted
+finnes i Google Maps er et signal om at lokasjonen er kjent, men aldri en kilde: hvert sted her
+er hentet fra myndighetens egen publisering.
+
+### Kilder som virker
+
+| Kilde | Ansvarlig | Innhold | Tilgang | Koordinat |
+|---|---|---|---|---|
+| Oslo kommunes stedsindeks, «Sykehjem, helsehus og dagsentre» | Oslo kommune | 46 steder med navn, adresse, koordinat | Kommunens egen søkeindeks (Algolia), offentlig lesenøkkel i deres eget nettsted | Kommunens egen |
+| Samme indeks, «Barnevernsinstitusjoner og -tiltak» | Oslo kommune | 23 oppføringer, 13 med publisert adresse | Samme | Kommunens egen |
+| Helsenorge, behandlingssteder med offentlig tilbud | Helsedirektoratet | 346 innen psykisk helse eller rus, 340 med besøksadresse | Åpent JSON-API | Kartverkets adressepunkt |
+
+Kommunens indeks gir per sted: navn, `card_data.address`, `map_data.coordinates`, og
+`meta.parent_name` som sier hvilken liste stedet hører til. Det er dermed kommunens egen
+strukturerte publisering, ikke skraping av HTML.
+
+**Koordinatene er kontrollert.** For de 57 Oslo-stedene ble kommunens koordinat sammenlignet
+med Kartverkets adressepunkt for samme adresse: median 0 m, p90 51 m. Eneste store avvik er
+«Hauger gård – Inn på tunet», som ligger utenfor Oslo og der adressesøket treffer en annen gate.
+
+### Resultat: 367 omsorgstilbud
+
+| internalType | Antall | Kilde |
+|---|---|---|
+| psykisk_helse | 197 | Helsenorge |
+| rusbehandling | 111 | Helsenorge |
+| sykehjem | 40 | Oslo kommune |
+| barnevern | 10 | Oslo kommune |
+| helsehus | 4 | Oslo kommune |
+| akuttinstitusjon | 3 | Oslo kommune |
+| dagsenter | 2 | Oslo kommune |
+
+Sykehjem, helsehus, dagsentre og barnevern dekker Oslo. Psykisk helse og rus er nasjonalt.
+
+### Villa Krogh — verifisert, tatt inn
+
+Villa Krogh akuttinstitusjon for barn er en akutt- og korttidsinstitusjon for barn i alderen
+2–12 år, drevet av Oslo kommune ved Barne- og familieetaten. Oslo kommune publiserer selv
+stedet med navn, adresse **Øvre Langåsvei 11, 0880 Oslo**, telefonnummer, koordinat
+(59.96449, 10.75537) og en egen side under «Barnevernsinstitusjoner og -tiltak».
+
+Det oppfyller regelen: ansvarlig aktør, eksplisitt publisert adresse, egen side å lenke til.
+Stedet vises som «Omsorgstilbud».
+
+### Korsvoll — samme sted, annet navn
+
+«Korsvoll akuttinstitusjon for barn» finnes som navn i karttjenester, men ikke i Oslo kommunes
+egen oversikt. Koordinaten kommunen publiserer for Villa Krogh ligger på Korsvoll, og adressen
+er den samme. Konklusjonen er at det er samme sted under et annet navn, og vi bruker navnet den
+ansvarlige aktøren selv bruker. Ingen egen oppføring er lagt inn for «Korsvoll».
+
+### Hva som ble forkastet
+
+48 oppføringer, alle med begrunnelse i `scripts/build-omsorg.ts --forkastet`:
+
+* **7 ideelle barnevernsinstitusjoner** der kommunens strukturerte oppføring mangler adresse
+  (Othilie, Soldammen, Sortatunet, Lertrøa, Vulubekken, Hiimsmoenkollektivet, Visterflo).
+  Tre av dem har adresse i HTML-listen, men ikke i den strukturerte kilden. Regelen er at tvil
+  betyr nei.
+* **3 oppføringer som ikke er steder med tilbud på adressen**: Beredskapshjemavdelingen og
+  Tangen omsorgshjem og spesialiserte fosterhjem — fosterhjem er private hjem — og
+  Arenafleksibelt team Borger With, som er et team.
+* **Adresser som peker på et administrasjonsbygg** i stedet for institusjonen selv.
+* **Adresser uten husnummer** («Rutlin», «Vegsund», «Sykehuset Innlandet»): en posisjon vi
+  måtte gjettet oss fram til er ikke presis nok.
+* Behandlingssteder der Helsenorge ikke oppgir besøksadresse.
+
+### Slik filtreres skjermede og private adresser
+
+Filteret er en allowlist, ikke en denylist: et sted må ha publisert adresse med husnummer fra
+en navngitt ansvarlig aktør for å komme inn. Publiserer ikke aktøren adressen, finnes stedet
+ikke i datasettet — det er slik de skjermede adressene holdes ute, uten at vi trenger å vite
+hvilke de er. I tillegg kan et sted settes til `skjult` i fila hvis adressen ikke lenger skal
+være offentlig; da blir raden stående som historikk, men synkes ikke.
+
+### Personvern
+
+Datasettet inneholder navn på virksomheten, adresse, koordinat, driftsansvarlig og kilde.
+Ingen opplysninger om beboere, pasienter, barn eller brukere. Ingen telefonnumre eller
+kontaktpersoner. Vi kartlegger stedet, ikke menneskene som bruker det.
+
+### En begrensning ved den nøytrale etiketten
+
+Etiketten er «Omsorgstilbud» overalt, og den interne typen vises aldri. Men navnet kommer fra
+den ansvarlige aktøren, og enkelte navn sier selv hva slags tilbud det er — «Villa Krogh
+akuttinstitusjon for barn», «Bakkehaugen ungdomshjem». Den nøytrale etiketten skjuler altså
+ikke typen når navnet gjør det. Alternativet er å vise adresse uten navn, men da blir stedet
+vanskeligere å kjenne igjen og etterprøve. Vi viser navnet aktøren selv publiserer, og lar
+valget stå åpent.
+
+### Vedlikehold
+
+`scripts/build-omsorg.ts` bygger `data/omsorgstilbud.json` på nytt fra kildene og viser
+forskjellen før noe skrives. Hvert sted bærer `kilde`, `kildeUrl`, `kildeType`, `verifisert`,
+`koordinatKilde` og `status`. Et sted kan settes til `nedlagt` eller `skjult` i fila; slike
+rader beholdes ved neste kjøring og kommer ikke tilbake automatisk.

@@ -7,6 +7,8 @@ export const PLACE_COLOR = "#6b5bd2";
 export const OPPVEKST_COLOR = "#0d7a6b";
 export const HELSE_COLOR = "#2563a8";
 export const SERVERING_COLOR = "#b4622a";
+/** Omsorgstilbud: tydelig, men rolig — og forskjellig fra sykehus, skole og servering. */
+export const OMSORG_COLOR = "#8c5570";
 
 const SOURCE = "nearby-places";
 
@@ -40,6 +42,8 @@ export const nearbyPlacesLayer: MapLayer<AreaMapFeature[]> = {
           OPPVEKST_COLOR,
           "helse",
           HELSE_COLOR,
+          "omsorg",
+          OMSORG_COLOR,
           "servering",
           SERVERING_COLOR,
           PLACE_COLOR,
