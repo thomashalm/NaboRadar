@@ -495,13 +495,41 @@ export function describeContaminatedSummary(input: {
 export const INGEN_FORURENSNING_TIL_OPPFOLGING =
   "Ingen av registreringene i området er vurdert til å kreve tiltak eller oppfølging.";
 
-/** Oppsummering for «Se alle skoler og barnehager i området». */
-export function describeOppvekstSummary(input: { total: number; radiusLabel: string }): FactText {
+/**
+ * Kompakt oppsummering av «Skoler og barnehager», f.eks. «2 skoler · 7 barnehager innen 1 km».
+ * En type som ikke finnes i området nevnes ikke — vi skriver ikke «0 skoler».
+ */
+export function describeOppvekstCluster(input: { skoler: number; barnehager: number; radiusLabel: string }): {
+  summary: string;
+  caveat: string;
+} {
+  const deler = [
+    input.skoler > 0 ? `${input.skoler} ${input.skoler === 1 ? "skole" : "skoler"}` : null,
+    input.barnehager > 0 ? `${input.barnehager} ${input.barnehager === 1 ? "barnehage" : "barnehager"}` : null,
+  ].filter((del): del is string => del !== null);
   return {
-    headline: `${input.total} skoler og barnehager innen ${input.radiusLabel}`,
-    details: [],
+    summary: `${deler.join(" · ")} innen ${input.radiusLabel}`,
     caveat: "Fra Utdanningsdirektoratets registre. Familiebarnehager i private hjem og spesialskoler er ikke med.",
   };
+}
+
+/** Undertekst i skole-/barnehagelistene: type og trinn eller aldersgruppe, ikke mer. */
+export function describeOppvekstLine(input: { subtype: string; attributes: AreaAttributes }): string {
+  const a = input.attributes;
+  const label = OPPVEKST_TYPE_LABEL[input.subtype] ?? "Skole eller barnehage";
+  if (input.subtype === "barnehage") {
+    const fra = num(a.lavesteAlder);
+    const til = num(a.hoyesteAlder);
+    return fra !== null && til !== null ? `${label}, ${fra}–${til} år` : label;
+  }
+  const fra = num(a.lavesteTrinn);
+  const til = num(a.hoyesteTrinn);
+  if (fra === null || til === null) return label;
+  // Udir koder videregående som trinn 11–13. Det heter Vg1–Vg3 på norsk.
+  if (input.subtype === "videregaende_skole") {
+    return fra >= 11 && til <= 13 ? `${label}, Vg${fra - 10}–Vg${til - 10}` : label;
+  }
+  return `${label}, ${fra}.–${til}. trinn`;
 }
 
 /** Oppsummering for «Se alle anlegg i området». */

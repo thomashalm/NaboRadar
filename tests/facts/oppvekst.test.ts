@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { describeFact, describeMapLines, describeOppvekstSummary, OPPVEKST_TYPE_LABEL } from "@/lib/facts/wording";
+import { describeFact, describeMapLines, describeOppvekstCluster, OPPVEKST_TYPE_LABEL } from "@/lib/facts/wording";
 import { UdirBarnehagerProvider } from "@/lib/providers/udir/barnehager";
 import { UdirSkolerProvider } from "@/lib/providers/udir/skoler";
 import type { AreaAttributes } from "@/types/area-feature";
@@ -155,8 +155,8 @@ describe("kort og popup", () => {
       expect([t.headline, ...t.details, t.caveat ?? ""].join(" ")).not.toMatch(ALARMISTISK);
     }
     expect(Object.values(OPPVEKST_TYPE_LABEL).join(" ")).not.toMatch(ALARMISTISK);
-    const s = describeOppvekstSummary({ total: 12, radiusLabel: "1 km" });
-    expect(s.headline).toBe("12 skoler og barnehager innen 1 km");
+    const s = describeOppvekstCluster({ skoler: 2, barnehager: 7, radiusLabel: "1 km" });
+    expect(s.summary).toBe("2 skoler · 7 barnehager innen 1 km");
     expect(s.caveat).toContain("Familiebarnehager i private hjem og spesialskoler er ikke med");
   });
 

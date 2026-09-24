@@ -17,7 +17,8 @@ import type { LookupHit } from "./lookups/types";
 import {
   ANLEGG_TYPE_LABEL,
   describeAnleggSummary,
-  describeOppvekstSummary,
+  describeOppvekstCluster,
+  describeOppvekstLine,
   describeContaminatedSummary,
   describeFact,
   describeMapLines,
@@ -94,6 +95,35 @@ export interface SectionOverview {
   items: OverviewItem[];
 }
 
+/**
+ * Én liste over samme stedstype inne i en gruppe, f.eks. «Skoler». Listen inneholder alle
+ * stedene, sortert nærmest først; UI-et viser `previewCount` av dem og resten bak utvideren.
+ */
+export interface ClusterList {
+  id: string;
+  label: string;
+  /** Tekst på utvideren for resten, f.eks. «Se alle skoler (12)». Null når alle vises. */
+  toggleLabel: string | null;
+  items: OverviewItem[];
+  previewCount: number;
+}
+
+/**
+ * En gruppe av relaterte stedstyper inne i en seksjon. Kompakt til den utvides, slik at
+ * mange nesten like steder ikke skyver resten av siden nedover. Nye typer legges til som
+ * nye lister, uten ny UI-logikk.
+ */
+export interface FactCluster {
+  sectionId: string;
+  id: string;
+  label: string;
+  /** Antall per undertype, f.eks. «2 skoler · 7 barnehager innen 1 km». */
+  summary: string;
+  lists: ClusterList[];
+  caveat: string | null;
+  sourceName: string;
+}
+
 /** Et objekt som skal tegnes i kartet. Flate eller punkt, avhengig av kilden. */
 export interface AreaMapFeature {
   id: string;
@@ -115,6 +145,8 @@ export interface AreaFactGroup {
   label: string;
   intro: string | null;
   facts: AreaFact[];
+  /** Grupperte stedstyper, vist før enkeltkortene. */
+  clusters: FactCluster[];
   overview: SectionOverview | null;
 }
 
@@ -322,55 +354,104 @@ function contaminatedFacts(rows: FactRow[], radiusM: number, truncated = false) 
  * i nabogata, og seksjonen blir ensidig selv om kartet viser alt.
  */
 const PLACE_CARDS_PER_CATEGORY = 4;
+/** Hvor mange steder som vises per undertype før «Se alle …». */
+const CLUSTER_PREVIEW = 3;
+
+/** Undertypene som hører sammen i «Skoler og barnehager». Rekkefølgen er visningsrekkefølgen. */
+const OPPVEKST_LISTS: readonly { id: string; label: string; subtypes: readonly string[] }[] = [
+  { id: "skoler", label: "Skoler", subtypes: ["grunnskole", "videregaende_skole"] },
+  { id: "barnehager", label: "Barnehager", subtypes: ["barnehage"] },
+];
 
 /** Nøytral undertekst per stedstype, brukt i «Se alle»-listen. */
 const placeSubtitle = (subtype: string): string =>
   OPPVEKST_TYPE_LABEL[subtype] ?? ANLEGG_TYPE_LABEL[subtype] ?? "Sted i nærområdet";
 
-function placeFacts(rows: FactRow[], radiusM: number) {
-  const sorted = [...rows].sort(byRelevance);
+const overviewItem = (row: FactRow, subtitle: string): OverviewItem => ({
+  id: row.id,
+  title: row.title,
+  distanceLabel: distanceLabel(row.distance_m, row.contains),
+  subtitle,
+  contains: row.contains,
+  href: row.source_url,
+});
 
-  const perCategory = new Map<string, FactRow[]>();
-  for (const row of sorted) {
-    const list = perCategory.get(row.category) ?? [];
-    if (list.length < PLACE_CARDS_PER_CATEGORY) perCategory.set(row.category, [...list, row]);
-  }
-  const valgte = new Set([...perCategory.values()].flat().map((row) => row.id));
-  const facts = sorted.filter((row) => valgte.has(row.id)).flatMap((row) => factFromRow(row) ?? []);
-
-  // Seksjonen kan ha flere kilder. Oppsummeringen bruker den som dominerer treffene.
-  const oppvekst = sorted.filter((row) => row.category === "oppvekst").length;
-  const summary =
-    oppvekst >= sorted.length - oppvekst
-      ? describeOppvekstSummary({ total: sorted.length, radiusLabel: formatRadius(radiusM) })
-      : describeAnleggSummary({ total: sorted.length, radiusLabel: formatRadius(radiusM) });
-  const kilder = [...new Set(sorted.map((row) => row.provider_id))]
+const sourceNames = (rows: FactRow[]): string =>
+  [...new Set(rows.map((row) => row.provider_id))]
     .flatMap((id) => (SOURCES[id] ? [`${SOURCES[id]!.name} (${SOURCES[id]!.owner})`] : []))
     .join(" · ");
 
+/**
+ * Skoler og barnehager samles i én gruppe med antall per type. Uten grupperingen fyller
+ * noen få nære barnehager hele seksjonen og skyver skolene ut av standardvisningen.
+ * Undertyper uten treff får ingen tom overskrift.
+ */
+function oppvekstCluster(rows: FactRow[], radiusM: number): FactCluster {
+  const lists: ClusterList[] = OPPVEKST_LISTS.flatMap((spec) => {
+    // rows er allerede sortert nærmest først, så filtreringen beholder avstandsrekkefølgen.
+    const items = rows
+      .filter((row) => spec.subtypes.includes(row.subtype))
+      .map((row) => overviewItem(row, describeOppvekstLine({ subtype: row.subtype, attributes: row.attributes })));
+    if (items.length === 0) return [];
+    return [
+      {
+        id: spec.id,
+        label: spec.label,
+        toggleLabel: items.length > CLUSTER_PREVIEW ? `Se alle ${spec.label.toLowerCase()} (${items.length})` : null,
+        items,
+        previewCount: CLUSTER_PREVIEW,
+      },
+    ];
+  });
+
+  const { summary, caveat } = describeOppvekstCluster({
+    skoler: lists.find((list) => list.id === "skoler")?.items.length ?? 0,
+    barnehager: lists.find((list) => list.id === "barnehager")?.items.length ?? 0,
+    radiusLabel: formatRadius(radiusM),
+  });
+
+  return {
+    sectionId: "naeromradet",
+    id: "skoler-og-barnehager",
+    label: "Skoler og barnehager",
+    summary,
+    lists,
+    caveat,
+    sourceName: sourceNames(rows),
+  };
+}
+
+/** Eksportert for test: grupperingen er produktlogikk og verifiseres uten database. */
+export function placeFacts(rows: FactRow[], radiusM: number) {
+  const sorted = [...rows].sort(byRelevance);
+  const oppvekst = sorted.filter((row) => row.category === "oppvekst");
+  // Industri og anlegg er egen gruppe: de er få, og hvert anlegg har sine egne opplysninger.
+  const anlegg = sorted.filter((row) => row.category !== "oppvekst");
+
+  const facts = anlegg.slice(0, PLACE_CARDS_PER_CATEGORY).flatMap((row) => factFromRow(row) ?? []);
+  const summary = describeAnleggSummary({ total: anlegg.length, radiusLabel: formatRadius(radiusM) });
+
   const overview: SectionOverview | null =
-    sorted.length > facts.length
+    anlegg.length > facts.length
       ? {
           sectionId: "naeromradet",
-          toggleLabel: "Se alle steder i området",
-          total: sorted.length,
+          toggleLabel: "Se alle anlegg i området",
+          total: anlegg.length,
           noAttentionNote: null,
           headline: summary.headline,
           details: summary.details,
           caveat: summary.caveat,
-          sourceName: kilder,
-          items: sorted.map((row) => ({
-            id: row.id,
-            title: row.title,
-            distanceLabel: distanceLabel(row.distance_m, row.contains),
-            subtitle: placeSubtitle(row.subtype),
-            contains: row.contains,
-            href: row.source_url,
-          })),
+          sourceName: sourceNames(anlegg),
+          items: anlegg.map((row) => overviewItem(row, placeSubtitle(row.subtype))),
         }
       : null;
 
-  return { facts, overview, mapFeatures: sorted.flatMap(mapFeatureFromRow) };
+  return {
+    facts,
+    clusters: oppvekst.length > 0 ? [oppvekstCluster(oppvekst, radiusM)] : [],
+    overview,
+    mapFeatures: sorted.flatMap(mapFeatureFromRow),
+  };
 }
 
 async function runLookups(lat: number, lng: number, radiusM: number): Promise<{ results: LookupResult[]; failed: string[] }> {
@@ -412,6 +493,7 @@ export function groupFacts(
   facts: AreaFact[],
   overviews: SectionOverview[] = [],
   sections: readonly AreaSection[] = AREA_SECTIONS,
+  clusters: FactCluster[] = [],
 ): AreaFactGroup[] {
   return sections.map((section) => ({
     sectionId: section.id,
@@ -420,8 +502,9 @@ export function groupFacts(
     facts: facts
       .filter((f) => section.categories.includes(f.category))
       .sort((a, b) => Number(b.contains) - Number(a.contains) || (a.distanceM ?? 0) - (b.distanceM ?? 0)),
+    clusters: clusters.filter((cluster) => cluster.sectionId === section.id),
     overview: overviews.find((o) => o.sectionId === section.id) ?? null,
-  })).filter((group) => group.facts.length > 0 || group.overview !== null);
+  })).filter((group) => group.facts.length > 0 || group.clusters.length > 0 || group.overview !== null);
 }
 
 export async function getAreaFacts(params: { lat: number; lng: number; radius: number }): Promise<AreaFactsResult> {
@@ -476,6 +559,7 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
   }
 
   const overviews: SectionOverview[] = [];
+  const clusters: FactCluster[] = [];
   const mapFeatures: AreaMapFeature[] = [];
 
   const contaminatedRows = rows.filter((r) => r.subtype === "forurenset_grunn");
@@ -494,6 +578,7 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
   if (placeRows.length > 0) {
     const result = placeFacts(placeRows, radius);
     facts.push(...result.facts);
+    clusters.push(...result.clusters);
     if (result.overview) overviews.push(result.overview);
     mapFeatures.push(...result.mapFeatures);
     for (const row of placeRows) usedSources.add(row.provider_id);
@@ -540,7 +625,7 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
     }
   }
 
-  const groups = groupFacts(facts, overviews, sectionOrder({ contaminationAtSearchPoint }));
+  const groups = groupFacts(facts, overviews, sectionOrder({ contaminationAtSearchPoint }), clusters);
 
   const unavailable = [...failed, ...(dbFailed ? ["database"] : [])]
     .map((id) => SOURCES[id]?.name ?? (id === "database" ? "lagrede kilder" : id))

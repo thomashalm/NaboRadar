@@ -1,6 +1,6 @@
 "use client";
 
-import type { AreaFactsResult, SectionOverview } from "@/lib/facts/queries";
+import type { AreaFactsResult, FactCluster, OverviewItem, SectionOverview } from "@/lib/facts/queries";
 import { formatRadius } from "@/lib/format";
 import type { AreaFact } from "@/types/area-feature";
 
@@ -50,6 +50,9 @@ export function AreaFacts({ result, radius, pending }: AreaFactsProps) {
               <div key={group.sectionId}>
                 <h3 className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">{group.label}</h3>
                 {group.intro && <p className="mt-1 text-[13px] text-muted">{group.intro}</p>}
+                {group.clusters.map((cluster) => (
+                  <ClusterDetails key={cluster.id} cluster={cluster} />
+                ))}
                 {group.facts.length > 0 && (
                   <ul className="mt-3 flex flex-col gap-3">
                     {group.facts.map((fact) => (
@@ -142,6 +145,72 @@ function FactItem({ fact }: { fact: AreaFact }) {
   );
 }
 
+/** Kompakte rader: navn, kort undertekst og avstand. Samme markup i grupper og oversikter. */
+function PlaceRows({ items }: { items: OverviewItem[] }) {
+  return (
+    <ul className="mt-2 divide-y divide-line border-t border-line">
+      {items.map((item) => (
+        <li key={item.id} className="flex items-baseline justify-between gap-3 py-2.5">
+          <span className="min-w-0">
+            {item.href ? (
+              <a
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[15px] text-accent hover:underline [overflow-wrap:anywhere]"
+              >
+                {item.title} ↗
+              </a>
+            ) : (
+              <span className="text-[15px] text-ink [overflow-wrap:anywhere]">{item.title}</span>
+            )}
+            <span className="block text-[13px] text-muted">{item.subtitle}</span>
+          </span>
+          <span className={`shrink-0 text-sm ${item.contains ? "font-medium text-ink" : "text-muted"}`}>
+            {item.distanceLabel}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * En gruppe av relaterte stedstyper, f.eks. «Skoler og barnehager». Standardvisningen er
+ * bare navn og antall; listene ligger bak utvideren, og hver undertype viser de nærmeste
+ * få før resten. Slik kan mange like steder finnes i området uten å fylle siden.
+ */
+function ClusterDetails({ cluster }: { cluster: FactCluster }) {
+  return (
+    <details className="mt-3 rounded-2xl border border-line bg-surface">
+      <summary className="cursor-pointer px-5 py-3.5">
+        <span className="text-[15px] font-medium text-ink">{cluster.label}</span>
+        <span className="mt-0.5 block text-[13px] text-muted">{cluster.summary}</span>
+      </summary>
+
+      <div className="px-5 pb-4">
+        {cluster.lists.map((list) => (
+          <div key={list.id} className="mt-3">
+            <h5 className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">{list.label}</h5>
+            <PlaceRows items={list.items.slice(0, list.previewCount)} />
+            {list.toggleLabel && (
+              <details className="mt-1">
+                <summary className="inline-flex h-9 cursor-pointer items-center text-[15px] font-medium text-accent">
+                  {list.toggleLabel}
+                </summary>
+                <PlaceRows items={list.items.slice(list.previewCount)} />
+              </details>
+            )}
+          </div>
+        ))}
+
+        {cluster.caveat && <p className="mt-3 text-[13px] leading-relaxed text-muted">{cluster.caveat}</p>}
+        <p className="mt-2 text-[13px] text-muted">Kilde: {cluster.sourceName}</p>
+      </div>
+    </details>
+  );
+}
+
 /**
  * Alt kilden har i området, bak en utvidbar visning. Samme komponent for alle seksjoner,
  * slik at en ny datatype ikke krever ny UI-logikk. Antallet står aldri i standardvisningen.
@@ -160,30 +229,7 @@ function OverviewDetails({ overview }: { overview: SectionOverview }) {
         </p>
       ))}
 
-      <ul className="mt-3 divide-y divide-line border-t border-line">
-        {overview.items.map((item) => (
-          <li key={item.id} className="flex items-baseline justify-between gap-3 py-2.5">
-            <span className="min-w-0">
-              {item.href ? (
-                <a
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[15px] text-accent hover:underline [overflow-wrap:anywhere]"
-                >
-                  {item.title} ↗
-                </a>
-              ) : (
-                <span className="text-[15px] text-ink [overflow-wrap:anywhere]">{item.title}</span>
-              )}
-              <span className="block text-[13px] text-muted">{item.subtitle}</span>
-            </span>
-            <span className={`shrink-0 text-sm ${item.contains ? "font-medium text-ink" : "text-muted"}`}>
-              {item.distanceLabel}
-            </span>
-          </li>
-        ))}
-      </ul>
+      <PlaceRows items={overview.items} />
 
       {overview.caveat && <p className="mt-3 text-[13px] leading-relaxed text-muted">{overview.caveat}</p>}
       <p className="mt-2 text-[13px] text-muted">Kilde: {overview.sourceName}</p>
