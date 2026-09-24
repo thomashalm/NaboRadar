@@ -16,11 +16,13 @@ import type { LookupHit } from "./lookups/types";
 import {
   ANLEGG_TYPE_LABEL,
   describeAnleggSummary,
+  describeOppvekstSummary,
   describeContaminatedSummary,
   describeFact,
   describeMapLines,
   INGEN_FORURENSNING_TIL_OPPFOLGING,
   linkLabelFor,
+  OPPVEKST_TYPE_LABEL,
   PAAVIRKNINGSGRAD_SHORT,
   SOURCES,
   type SourceInfo,
@@ -309,30 +311,53 @@ function contaminatedFacts(rows: FactRow[], radiusM: number, truncated = false) 
  * Nøytral presentasjon — vi løfter ikke fram noe som «problem». De nærmeste vises som kort,
  * resten ligger bak «Se alle anlegg i området», og alle tegnes i kartet.
  */
-const ANLEGG_CARD_LIMIT = 4;
+/**
+ * Kort per kategori, ikke totalt. Ellers kan seks nære barnehager skyve ut anlegget
+ * i nabogata, og seksjonen blir ensidig selv om kartet viser alt.
+ */
+const PLACE_CARDS_PER_CATEGORY = 4;
 
-function anleggFacts(rows: FactRow[], radiusM: number) {
+/** Nøytral undertekst per stedstype, brukt i «Se alle»-listen. */
+const placeSubtitle = (subtype: string): string =>
+  OPPVEKST_TYPE_LABEL[subtype] ?? ANLEGG_TYPE_LABEL[subtype] ?? "Sted i nærområdet";
+
+function placeFacts(rows: FactRow[], radiusM: number) {
   const sorted = [...rows].sort(byRelevance);
-  const facts = sorted.slice(0, ANLEGG_CARD_LIMIT).flatMap((row) => factFromRow(row) ?? []);
-  const source = SOURCES["mdir-industri-tillatelse"]!;
-  const summary = describeAnleggSummary({ total: sorted.length, radiusLabel: formatRadius(radiusM) });
+
+  const perCategory = new Map<string, FactRow[]>();
+  for (const row of sorted) {
+    const list = perCategory.get(row.category) ?? [];
+    if (list.length < PLACE_CARDS_PER_CATEGORY) perCategory.set(row.category, [...list, row]);
+  }
+  const valgte = new Set([...perCategory.values()].flat().map((row) => row.id));
+  const facts = sorted.filter((row) => valgte.has(row.id)).flatMap((row) => factFromRow(row) ?? []);
+
+  // Seksjonen kan ha flere kilder. Oppsummeringen bruker den som dominerer treffene.
+  const oppvekst = sorted.filter((row) => row.category === "oppvekst").length;
+  const summary =
+    oppvekst >= sorted.length - oppvekst
+      ? describeOppvekstSummary({ total: sorted.length, radiusLabel: formatRadius(radiusM) })
+      : describeAnleggSummary({ total: sorted.length, radiusLabel: formatRadius(radiusM) });
+  const kilder = [...new Set(sorted.map((row) => row.provider_id))]
+    .flatMap((id) => (SOURCES[id] ? [`${SOURCES[id]!.name} (${SOURCES[id]!.owner})`] : []))
+    .join(" · ");
 
   const overview: SectionOverview | null =
     sorted.length > facts.length
       ? {
           sectionId: "naeromradet",
-          toggleLabel: "Se alle anlegg i området",
+          toggleLabel: "Se alle steder i området",
           total: sorted.length,
           noAttentionNote: null,
           headline: summary.headline,
           details: summary.details,
           caveat: summary.caveat,
-          sourceName: `${source.name} (${source.owner})`,
+          sourceName: kilder,
           items: sorted.map((row) => ({
             id: row.id,
             title: row.title,
             distanceLabel: distanceLabel(row.distance_m, row.contains),
-            subtitle: ANLEGG_TYPE_LABEL[row.subtype] ?? "Anlegg med utslippstillatelse",
+            subtitle: placeSubtitle(row.subtype),
             contains: row.contains,
             href: row.source_url,
           })),
@@ -436,7 +461,7 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
   // Vis ett faktum per (kilde, type, navn) — det nærmeste.
   const nearestRows = new Map<string, FactRow>();
   for (const row of rows) {
-    if (row.subtype === "forurenset_grunn" || row.subtype === "industrianlegg" || row.subtype === "avfallsanlegg") continue;
+    if (row.subtype === "forurenset_grunn" || row.category === "industri" || row.category === "oppvekst") continue;
     const key = `${row.provider_id}|${row.subtype}|${row.title}`;
     const current = nearestRows.get(key);
     if (!current || Number(row.contains) > Number(current.contains) || row.distance_m < current.distance_m) {
@@ -456,13 +481,14 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
     usedSources.add("mdir-forurenset-grunn");
   }
 
-  const anleggRows = rows.filter((r) => r.subtype === "industrianlegg" || r.subtype === "avfallsanlegg");
-  if (anleggRows.length > 0) {
-    const result = anleggFacts(anleggRows, radius);
+  // Alt som hører hjemme i «Nærområdet», uavhengig av kilde.
+  const placeRows = rows.filter((r) => r.category === "industri" || r.category === "oppvekst");
+  if (placeRows.length > 0) {
+    const result = placeFacts(placeRows, radius);
     facts.push(...result.facts);
     if (result.overview) overviews.push(result.overview);
     mapFeatures.push(...result.mapFeatures);
-    usedSources.add("mdir-industri-tillatelse");
+    for (const row of placeRows) usedSources.add(row.provider_id);
   }
 
   for (const row of nearestRows.values()) {

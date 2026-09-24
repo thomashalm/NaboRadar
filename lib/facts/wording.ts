@@ -65,6 +65,18 @@ export const SOURCES: Record<string, SourceInfo> = {
     licenseName: "NLOD",
     licenseUrl: "https://data.norge.no/nlod/no/1.0",
   },
+  "udir-skoler": {
+    name: "Grunnskoler og videregående skoler",
+    owner: "Utdanningsdirektoratet",
+    licenseName: "CC BY 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
+  },
+  "udir-barnehager": {
+    name: "Barnehager",
+    owner: "Utdanningsdirektoratet",
+    licenseName: "NLOD",
+    licenseUrl: "https://data.norge.no/nlod/no/1.0",
+  },
   "mdir-stoy-strategisk": {
     name: "Strategisk støykartlegging",
     owner: "Miljødirektoratet",
@@ -168,6 +180,13 @@ const TILSTANDSKLASSE_TEXT: Record<string, string> = {
 export const ANLEGG_TYPE_LABEL: Record<string, string> = {
   industrianlegg: "Anlegg med utslippstillatelse",
   avfallsanlegg: "Avfalls- eller gjenvinningsanlegg med utslippstillatelse",
+};
+
+/** Skoler og barnehager. Nøytrale typenavn — dette er steder som finnes, ikke forhold å vurdere. */
+export const OPPVEKST_TYPE_LABEL: Record<string, string> = {
+  grunnskole: "Grunnskole",
+  videregaende_skole: "Videregående skole",
+  barnehage: "Barnehage",
 };
 
 const STABILITET_TEXT: Record<string, string> = {
@@ -367,6 +386,45 @@ export function describeFact(input: {
       };
     }
 
+    case "grunnskole":
+    case "videregaende_skole": {
+      const details: string[] = [];
+      const fra = num(a.lavesteTrinn);
+      const til = num(a.hoyesteTrinn);
+      const trinn = fra !== null && til !== null ? `${fra}.–${til}. trinn` : null;
+      details.push([OPPVEKST_TYPE_LABEL[subtype], trinn].filter(Boolean).join(", ") + ".");
+      const fakta = [
+        num(a.antallElever) !== null ? `${num(a.antallElever)} elever` : null,
+        str(a.eierforhold) ? `${str(a.eierforhold)!.toLowerCase()} skole` : null,
+      ].filter(Boolean);
+      if (fakta.length > 0) details.push(fakta.join(" · "));
+      const adresse = [str(a.adresse), str(a.poststed)].filter(Boolean).join(", ");
+      if (adresse) details.push(adresse);
+      return {
+        headline: title,
+        details,
+        caveat: "Elevtall og opplysninger er hentet fra Utdanningsdirektoratets register.",
+      };
+    }
+
+    case "barnehage": {
+      const details: string[] = [];
+      const fra = num(a.lavesteAlder);
+      const til = num(a.hoyesteAlder);
+      const alder = fra !== null && til !== null ? `${fra}–${til} år` : null;
+      details.push([OPPVEKST_TYPE_LABEL.barnehage, alder].filter(Boolean).join(", ") + ".");
+      const fakta = [
+        num(a.antallBarn) !== null ? `${num(a.antallBarn)} barn` : null,
+        str(a.eierforhold) ? `${str(a.eierforhold)!.toLowerCase()} barnehage` : null,
+      ].filter(Boolean);
+      if (fakta.length > 0) details.push(fakta.join(" · "));
+      return {
+        headline: title,
+        details,
+        caveat: "Opplysningene er hentet fra Utdanningsdirektoratets register.",
+      };
+    }
+
     case "stoy_strategisk_veg":
     case "stoy_strategisk_bane": {
       const level = str(a.niva);
@@ -437,6 +495,15 @@ export function describeContaminatedSummary(input: {
 export const INGEN_FORURENSNING_TIL_OPPFOLGING =
   "Ingen av registreringene i området er vurdert til å kreve tiltak eller oppfølging.";
 
+/** Oppsummering for «Se alle skoler og barnehager i området». */
+export function describeOppvekstSummary(input: { total: number; radiusLabel: string }): FactText {
+  return {
+    headline: `${input.total} skoler og barnehager innen ${input.radiusLabel}`,
+    details: [],
+    caveat: "Fra Utdanningsdirektoratets registre. Familiebarnehager i private hjem og spesialskoler er ikke med.",
+  };
+}
+
 /** Oppsummering for «Se alle anlegg i området». */
 export function describeAnleggSummary(input: { total: number; radiusLabel: string }): FactText {
   return {
@@ -456,6 +523,12 @@ export function describeMapLines(input: { subtype: string; attributes: AreaAttri
   if (subtype === "forurenset_grunn") {
     const grad = PAAVIRKNINGSGRAD_SHORT[str(a.paavirkningsgrad) ?? ""];
     return ["Registrert lokalitet med forurenset grunn (Miljødirektoratet)", grad ? `Myndighetens vurdering: ${grad}` : null].filter(
+      (line): line is string => line !== null,
+    );
+  }
+  if (subtype in OPPVEKST_TYPE_LABEL) {
+    const eier = str(a.eierforhold);
+    return [`${OPPVEKST_TYPE_LABEL[subtype]} (Utdanningsdirektoratet)`, eier ? `${eier} eierforhold` : null].filter(
       (line): line is string => line !== null,
     );
   }

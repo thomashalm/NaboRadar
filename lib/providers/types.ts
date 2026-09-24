@@ -43,6 +43,12 @@ export interface RejectedRecord {
 
 export interface NormalizeResult<TRecord = NormalizedEvent> {
   /**
+   * Poster kilden leverte, men som vi bevisst ikke tar inn — nedlagte enheter, eller typer
+   * vi har bestemt at ikke hører hjemme i produktet. Dette er ikke datafeil, og skal derfor
+   * ikke telle mot andelen avviste (se lib/sync/guards.ts).
+   */
+  skipped?: RejectedRecord[];
+  /**
    * Normaliserte poster. Kan inneholde flere fragmenter med samme externalId
    * (DiBK: én per planomrade-feature) — sync-laget grupperer og slår dem sammen.
    */
@@ -112,6 +118,8 @@ export interface SyncResult {
   accepted: number;
   /** Features som ikke besto validering. */
   rejected: number;
+  /** Features vi bevisst utelot. Teller ikke som datakvalitetsproblem. */
+  skipped: number;
   /** Poster etter gruppering (for DiBK: én per arealplan). */
   records: number;
   documents: number;

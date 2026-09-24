@@ -79,6 +79,7 @@ export async function runSync<TRecord>(
     fetched: 0,
     accepted: 0,
     rejected: 0,
+    skipped: 0,
     records: 0,
     documents: 0,
     inserted: 0,
@@ -122,9 +123,12 @@ export async function runSync<TRecord>(
     // 2. Valider + normaliser (provider), grupper + dedupliser (sync).
     const normalized = provider.normalize(combined);
     const rejectedFeatures = normalized.rejected.filter((r) => r.kind === "feature");
+    const skippedFeatures = (normalized.skipped ?? []).filter((r) => r.kind === "feature");
     result.rejected = rejectedFeatures.length;
-    result.accepted = result.fetched - result.rejected;
+    result.skipped = skippedFeatures.length;
+    result.accepted = result.fetched - result.rejected - result.skipped;
     for (const r of rejectedFeatures.slice(0, 20)) result.errors.push(`avvist ${r.externalId ?? "?"}: ${r.reason}`);
+    for (const r of skippedFeatures.slice(0, 5)) result.errors.push(`utelatt ${r.externalId ?? "?"}: ${r.reason}`);
 
     const records = strategy.merge(normalized.records);
     result.records = records.length;
@@ -156,7 +160,8 @@ export async function runSync<TRecord>(
     // 4. Vakt mot «silent failures»: er tallene til å stole på?
     const [baseline] = await db.rpc<number | null>("provider_baseline", { p_provider_id: provider.id });
     const verdict = assessRun({
-      fetched: result.fetched,
+      // Utelatte poster holdes utenfor: andelen skal måle datakvalitet, ikke våre egne regler.
+      fetched: result.fetched - result.skipped,
       rejected: result.rejected,
       records: result.records,
       baseline: baseline ?? null,
@@ -165,13 +170,19 @@ export async function runSync<TRecord>(
     });
     result.suspicious = verdict.suspicious;
     result.warnings = verdict.warnings;
+    if (result.skipped > 0) {
+      result.warnings.push(`${result.skipped} poster utelatt etter våre egne regler (se loggen for årsak).`);
+    }
 
     // 5. Full reconciliation: det som ikke ble sett, markeres — slettes ikke.
     //    Hoppes over når tallene ikke er til å stole på, slik at en kilde som plutselig
     //    leverer for lite ikke fører til at alt annet markeres som fjernet.
     if (verdict.allowReconcile) {
       const keep = [
-        ...new Set([...rejectedFeatures.map((r) => r.externalId).filter((id): id is string => id !== null), ...failedIds]),
+        ...new Set([
+          ...rejectedFeatures.map((r) => r.externalId).filter((id): id is string => id !== null),
+          ...failedIds,
+        ]),
       ];
       const [removed] = await db.rpc<number>(strategy.removeFn, {
         p_provider_id: provider.id,
@@ -214,6 +225,7 @@ export function formatSyncResult(r: SyncResult): string {
     `Fetched:    ${r.fetched}`,
     `Accepted:   ${r.accepted}`,
     `Rejected:   ${r.rejected}`,
+    `Utelatt:    ${r.skipped}  (bevisst, ikke datafeil)`,
     `Poster:     ${r.records}  (etter gruppering/dedupe)`,
     `Documents:  ${r.documents}`,
     `Inserted:   ${r.inserted}`,

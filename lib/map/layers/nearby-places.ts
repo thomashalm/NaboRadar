@@ -3,6 +3,8 @@ import type { AreaMapFeature } from "@/lib/facts/queries";
 import type { MapLayer } from "./types";
 
 export const PLACE_COLOR = "#6b5bd2";
+/** Skoler og barnehager skiller seg fra anleggene, men i samme dempede register. */
+export const OPPVEKST_COLOR = "#0d7a6b";
 
 const SOURCE = "nearby-places";
 
@@ -27,7 +29,7 @@ export const nearbyPlacesLayer: MapLayer<AreaMapFeature[]> = {
       source: SOURCE,
       paint: {
         "circle-radius": ["case", selected, 9, 6.5],
-        "circle-color": PLACE_COLOR,
+        "circle-color": ["match", ["get", "category"], "oppvekst", OPPVEKST_COLOR, PLACE_COLOR],
         "circle-opacity": 0.9,
         "circle-stroke-color": "#ffffff",
         "circle-stroke-width": 2,
@@ -50,7 +52,7 @@ function collection(places: AreaMapFeature[]) {
     type: "FeatureCollection" as const,
     features: places.map((place) => ({
       type: "Feature" as const,
-      properties: { featureId: place.id },
+      properties: { featureId: place.id, category: place.category },
       // Punktkilder kan ha flate i databasen; i kartet holder det med ett punkt.
       geometry: { type: "Point" as const, coordinates: place.center },
     })),

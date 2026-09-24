@@ -83,6 +83,35 @@ Nytteverdien er reell og risikoen lav, men næringskoden alene holder ikke. Anbe
 enheter — geokodet mot Kartverket og verifisert manuelt én gang. Dette er den svakeste av de to
 anbefalingene; skal noe droppes, droppes denne.
 
+## Runde 2: skoler og barnehager (bygget 2026-09-24)
+
+Helsekategoriene ble undersøkt på nytt og forkastet: RESH ligger bak helsenettet, legevakt
+finnes bare som årlig XLSX uten lisens, og SSR er et navneregister med svært ujevn dekning —
+innen 5 km av sentrum, kun aktive navn: Oslo 11 sykehus og 5 helseinstitusjoner, Bergen 1 og 0,
+Trondheim 3 og 30, Stavanger 1 og 2, Tromsø 2 og 0. Bergen mangler Haraldsplass helt. Det er
+registreringspraksis som varierer, ikke virkeligheten.
+
+Utdanningsdirektoratet har derimot ekte virksomhetsregistre:
+
+| Kilde | Tilgang | Innhold |
+|---|---|---|
+| Grunnskoler og videregående, Geonorge-WFS | Åpne data, CC BY 4.0 / NLOD | navn, org.nr, koordinat, besøksadresse, trinn, elevtall, ansatte, eierforhold, i drift |
+| Barnehager, Geonorge-WFS | Åpne data, NLOD, månedlig | navn, org.nr, koordinat, barnehagetype, aldersgruppe, antall barn, eierforhold, i drift |
+| NSR (data-nsr.udir.no) | Åpent JSON-API | flagget `ErSpesialskole`, som WFS-en mangler |
+
+Begge WFS-ene leverer bare GML, ikke GeoJSON. Elementene er nøstet — `adressenavn` finnes både
+under besøksadresse og postadresse — så vi parser XML i stedet for å lete med regulære uttrykk.
+
+**Hva vi utelater, og hvorfor.** 275 familiebarnehager og 80 åpne barnehager, pluss 26 uten
+oppgitt type. En familiebarnehage drives i et privat hjem, så koordinaten peker på noens bolig.
+Mangler typen, tar vi den ikke med — allowlist, ikke denylist. I tillegg utelates spesialskoler,
+fordi en skole ved en institusjon kan røpe institusjonen; flagget finnes bare i NSR, så vi slår
+opp der og kobler på organisasjonsnummer.
+
+Resultat etter synk: **3 103 skoler og 4 493 barnehager**, av 3 725 og 4 874 hentede.
+
+Datasettene har ingen personopplysninger. Elevtall, barnetall og ansatte er aggregater.
+
 ## Prinsippet bak «Nærområdet»
 
 Seksjonen er nøytral i både navn og ordlyd. «Anlegg med utslippstillatelse · 240 m unna», ikke
