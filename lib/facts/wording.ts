@@ -505,6 +505,22 @@ export function describeContaminatedSummary(input: {
  * Vises når det finnes registreringer i området, men ingen av dem er vurdert til å kreve
  * oppfølging. Da er det ingen hovedkort, og brukeren skal få vite hvorfor.
  */
+/**
+ * Sammendraget på selve gruppen «Forurenset grunn», før den åpnes. Antall som krever
+ * oppfølging telles på myndighetens grad — grad 1 og 2 er kildens egen konklusjon om at
+ * tilstanden er akseptabel, og skal ikke telles som oppfølging selv om de vises.
+ */
+export function describeContaminatedGroupSummary(input: {
+  oppfolging: number;
+  total: number;
+  radiusLabel: string;
+}): string {
+  const registreringer = `${input.total} ${input.total === 1 ? "registrering" : "registreringer"}`;
+  if (input.oppfolging === 0) return `${registreringer} · ingen vurdert til å kreve tiltak eller oppfølging`;
+  const krever = `${input.oppfolging} ${input.oppfolging === 1 ? "registrering krever" : "registreringer krever"} oppfølging`;
+  return `${krever} · ${registreringer} totalt innen ${input.radiusLabel}`;
+}
+
 export const INGEN_FORURENSNING_TIL_OPPFOLGING =
   "Ingen av registreringene i området er vurdert til å kreve tiltak eller oppfølging.";
 

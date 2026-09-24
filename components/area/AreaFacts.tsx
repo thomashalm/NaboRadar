@@ -189,6 +189,16 @@ function ClusterDetails({ cluster }: { cluster: FactCluster }) {
       </summary>
 
       <div className="px-5 pb-4">
+        {cluster.facts.length > 0 && (
+          <ul className="mt-1 flex flex-col gap-3">
+            {cluster.facts.map((fact) => (
+              <li key={fact.id}>
+                <FactItem fact={fact} />
+              </li>
+            ))}
+          </ul>
+        )}
+
         {cluster.lists.map((list) => (
           <div key={list.id} className="mt-3">
             <h5 className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">{list.label}</h5>
@@ -205,7 +215,11 @@ function ClusterDetails({ cluster }: { cluster: FactCluster }) {
         ))}
 
         {cluster.caveat && <p className="mt-3 text-[13px] leading-relaxed text-muted">{cluster.caveat}</p>}
-        <p className="mt-2 text-[13px] text-muted">Kilde: {cluster.sourceName}</p>
+        {cluster.overview && <OverviewDetails overview={cluster.overview} />}
+        {/* Oversikten oppgir sin egen kilde; da skal den ikke stå to ganger. */}
+        {cluster.sourceName !== cluster.overview?.sourceName && (
+          <p className="mt-2 text-[13px] text-muted">Kilde: {cluster.sourceName}</p>
+        )}
       </div>
     </details>
   );

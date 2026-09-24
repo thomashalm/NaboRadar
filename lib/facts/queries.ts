@@ -23,6 +23,7 @@ import {
   HELSE_CAVEAT,
   OPPVEKST_CAVEAT,
   SERVERING_CAVEAT,
+  describeContaminatedGroupSummary,
   describeContaminatedSummary,
   describeFact,
   describeMapLines,
@@ -125,7 +126,11 @@ export interface FactCluster {
   label: string;
   /** Antall per undertype, f.eks. «2 skoler · 7 barnehager innen 1 km». */
   summary: string;
+  /** Hovedfunn som fortjener et helt kort, vist øverst når gruppen åpnes. */
+  facts: AreaFact[];
   lists: ClusterList[];
+  /** Alt kilden har i området, bak en egen utvider inne i gruppen. */
+  overview: SectionOverview | null;
   caveat: string | null;
   sourceName: string;
 }
@@ -302,7 +307,8 @@ export function needsAttention(input: { contains: boolean; grade: string }): boo
   return input.contains || GRADES_NEEDING_ATTENTION.has(input.grade);
 }
 
-function contaminatedFacts(rows: FactRow[], radiusM: number, truncated = false) {
+/** Eksportert for test: hva som løftes fram og hva som telles er produktlogikk. */
+export function contaminatedFacts(rows: FactRow[], radiusM: number, truncated = false) {
   const sorted = [...rows].sort(byRelevance);
 
   const facts = sorted
@@ -325,7 +331,8 @@ function contaminatedFacts(rows: FactRow[], radiusM: number, truncated = false) 
     sectionId: "forurenset-grunn",
     toggleLabel: "Se alle registreringer i området",
     total: sorted.length,
-    noAttentionNote: facts.length === 0 ? INGEN_FORURENSNING_TIL_OPPFOLGING : null,
+    // Sammendraget på gruppen sier allerede dette; det skal ikke stå to ganger.
+    noAttentionNote: null,
     headline: summary.headline,
     details: summary.details,
     caveat: summary.caveat,
@@ -350,7 +357,27 @@ function contaminatedFacts(rows: FactRow[], radiusM: number, truncated = false) 
     (row) => row.contains && GRADES_NEEDING_ATTENTION.has(gradeOf(row)),
   );
 
-  return { facts, overview, mapFeatures, affectsSearchPoint };
+  // Seksjonen vises som én kompakt gruppe, som resten av siden. Kortene, «Se alle» og
+  // ordlyden er de samme — de ligger bare bak utvideren i stedet for å fylle siden.
+  const cluster: FactCluster = {
+    sectionId: "forurenset-grunn",
+    id: "forurenset-grunn",
+    label: "Forurenset grunn",
+    summary: describeContaminatedGroupSummary({
+      // Grad 1 og 2 er myndighetens konklusjon om at tilstanden er akseptabel, og teller
+      // derfor med i totalen, men ikke som oppfølging.
+      oppfolging: sorted.filter((row) => GRADES_NEEDING_ATTENTION.has(gradeOf(row))).length,
+      total: sorted.length,
+      radiusLabel: formatRadius(radiusM),
+    }),
+    facts,
+    lists: [],
+    overview,
+    caveat: facts.length === 0 ? INGEN_FORURENSNING_TIL_OPPFOLGING : null,
+    sourceName: `${source.name} (${source.owner})`,
+  };
+
+  return { cluster, mapFeatures, affectsSearchPoint };
 }
 
 /**
@@ -498,7 +525,9 @@ function buildCluster(
     id: spec.id,
     label: spec.label,
     summary: describeClusterSummary(antall, formatRadius(radiusM)),
+    facts: [],
     lists,
+    overview: null,
     caveat: [spec.caveat, kartnote].filter(Boolean).join(" "),
     sourceName: sourceNames(treff),
   };
@@ -681,8 +710,7 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
   let contaminationAtSearchPoint = false;
   if (contaminatedRows.length > 0) {
     const result = contaminatedFacts(contaminatedRows, radius, contaminatedTruncated);
-    facts.push(...result.facts);
-    overviews.push(result.overview);
+    clusters.push(result.cluster);
     mapFeatures.push(...result.mapFeatures);
     contaminationAtSearchPoint = result.affectsSearchPoint;
     usedSources.add("mdir-forurenset-grunn");
