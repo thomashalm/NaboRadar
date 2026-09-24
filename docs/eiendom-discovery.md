@@ -141,3 +141,28 @@ Tre alternativer, vurdert mot at vi ikke skal laste Norge inn i klienten:
 
 Anbefalt rekkefølge: (1) for en MVP i ett område, (2) når vi vet hvilke kommuner som betyr noe,
 (3) bare hvis bruken forsvarer det.
+
+## Implementert 2026-09-24: klikkbart eiendomskart
+
+MVP-en fra punkt 6 er bygget på åpne data alene — ingen eier, byggeår, bruksareal eller
+salgsopplysninger.
+
+**Oppslag per klikk, ikke synk.** Teigene er 6,4 GB nasjonalt, så vi spør Geonorge per klikk og
+mellomlagrer svaret i 10 minutter (CC BY 4.0 tillater det). Målt responstid på ferske oppslag:
+198–421 ms. Mellomlagret: ~8 ms.
+
+**Buffer og punkt-i-polygon.** bbox-filteret treffer representasjonspunktet, ikke flaten, så vi
+spør med ~65 m buffer og avgjør selv hvilken teig som omslutter klikkpunktet. Finner vi ingen,
+utvides bufferet én gang til ~275 m. Det er nødvendig for store eiendommer: Ullevål sykehus er
+144 000 m², og representasjonspunktet kan ligge langt fra der brukeren klikker.
+
+**Bygg kobles geometrisk.** Bygningspunkter hentes i teigens omsluttende rektangel og filtreres
+med punkt-i-polygon mot teigen. Ullevål gir 21 bygg, en enebolig på Vinderen gir 2–3.
+
+**Nøstet GML.** Arealet ligger i `teigareal.Areal.lagretBeregnetAreal`, og matrikkelflaggene under
+`matrikkelenhet.Matrikkelenhet`. Et regulært uttrykk ville hentet feil felt; vi parser XML.
+
+**Zoomterskel 14.** Målt i kartpanelet: zoom 14 gir 4,7 m per piksel, så en tomt på 20×30 m er
+4×6 piksler. På zoom 13 er den 2×3 piksler. Under terskelen vises et diskret hint i stedet for at
+vi spør kilden om noe brukeren ikke kan ha ment. På mobil (333×388 px panel) lander 500 m-søket på
+zoom 13,2, så der må brukeren zoome ett hakk inn først.

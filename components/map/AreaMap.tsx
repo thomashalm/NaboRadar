@@ -38,6 +38,13 @@ interface AreaMapProps {
   maxFitZoom?: number;
   selectedId?: string | null;
   onSelect?: (id: string | null) => void;
+  /**
+   * Klikk i kartet som ikke traff et objekt i noe lag. Markører og flater har altså
+   * forrang: treffer klikket en plansak, en lokalitet eller et sted, kalles denne ikke.
+   */
+  onEmptyClick?: (position: { lat: number; lng: number }) => void;
+  /** Gjeldende zoomnivå, slik at kalleren kan slå av funksjoner som krever detaljnivå. */
+  onZoomChange?: (zoom: number) => void;
   popupFor?: (id: string) => MapPopupContent | null;
   /** Klientnavigasjon for lenker i popup. */
   onNavigate?: (href: string) => void;
@@ -158,7 +165,11 @@ export function AreaMap(props: AreaMapProps) {
       });
       popupRef.current = popup;
 
-      instance.on("load", () => setLoaded(true));
+      instance.on("load", () => {
+        setLoaded(true);
+        latestProps.current.onZoomChange?.(instance.getZoom());
+      });
+      instance.on("zoomend", () => latestProps.current.onZoomChange?.(instance.getZoom()));
 
       // Klikk: første interaktive lag som treffer vinner. Klikk i tomt område fjerner valget.
       instance.on("click", (event: MapLayerMouseEvent) => {
@@ -167,6 +178,7 @@ export function AreaMap(props: AreaMapProps) {
         const [feature] = ids.length ? instance.queryRenderedFeatures(event.point, { layers: ids }) : [];
         if (!feature) {
           latestProps.current.onSelect?.(null);
+          latestProps.current.onEmptyClick?.({ lat: event.lngLat.lat, lng: event.lngLat.lng });
           return;
         }
         const owner = bindings.find((b) => b.layer.interactiveLayerIds?.includes(feature.layer.id));

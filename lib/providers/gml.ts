@@ -45,6 +45,82 @@ export const asNumber = (value: unknown): number | null => {
   return Number.isFinite(n) ? n : null;
 };
 
+/**
+ * Flategeometri fra GML. WFS-en svarer med lat lon når vi ber om EPSG:4326, mens
+ * GeoJSON krever lon lat — så koordinatparene snus her, ett sted.
+ */
+export function gmlPolygon(feature: GmlFeature, path: string): GeoPolygon | null {
+  const node = feature[path];
+  if (node === null || typeof node !== "object") return null;
+
+  const polygons = collectPolygons(node as Record<string, unknown>);
+  if (polygons.length === 0) return null;
+  return polygons.length === 1
+    ? { type: "Polygon", coordinates: polygons[0]! }
+    : { type: "MultiPolygon", coordinates: polygons.map((p) => p) };
+}
+
+export type GeoPolygon =
+  | { type: "Polygon"; coordinates: number[][][] }
+  | { type: "MultiPolygon"; coordinates: number[][][][] };
+
+/** Én flate = ytre ring først, så eventuelle hull. */
+function collectPolygons(node: Record<string, unknown>): number[][][][] {
+  const ut: number[][][][] = [];
+  const polygonNodes = asArray(node.Polygon ?? (node.MultiSurface as Record<string, unknown> | undefined)?.surfaceMember);
+  for (const raw of polygonNodes) {
+    const polygon = (raw as Record<string, unknown>).Polygon ?? raw;
+    const rings: number[][][] = [];
+    const ytre = ringOf((polygon as Record<string, unknown>).exterior);
+    if (ytre) rings.push(ytre);
+    for (const hull of asArray((polygon as Record<string, unknown>).interior)) {
+      const ring = ringOf(hull);
+      if (ring) rings.push(ring);
+    }
+    if (rings.length > 0) ut.push(rings);
+  }
+  return ut;
+}
+
+function ringOf(node: unknown): number[][] | null {
+  const pos = (node as { LinearRing?: { posList?: string } } | undefined)?.LinearRing?.posList;
+  if (typeof pos !== "string") return null;
+  const tall = pos.trim().split(/\s+/).map(Number);
+  const ring: number[][] = [];
+  for (let i = 0; i + 1 < tall.length; i += 2) ring.push([tall[i + 1]!, tall[i]!]);
+  return ring.length >= 4 ? ring : null;
+}
+
+const asArray = (value: unknown): unknown[] => (value === undefined || value === null ? [] : Array.isArray(value) ? value : [value]);
+
+export interface WfsBboxQuery {
+  baseUrl: string;
+  typeName: string;
+  /** [sørLat, vestLng, nordLat, østLng] — WFS-en forventer lat før lng for EPSG:4326. */
+  bbox: [number, number, number, number];
+  count?: number;
+  signal?: AbortSignal;
+  retry: HttpRetryPolicy;
+}
+
+/** Ett bbox-oppslag. Brukes av eiendomsoppslaget, som spør per klikk og ikke synker. */
+export async function wfsBbox(options: WfsBboxQuery): Promise<GmlFeature[]> {
+  const [sør, vest, nord, øst] = options.bbox;
+  const url =
+    `${options.baseUrl}?` +
+    new URLSearchParams({
+      service: "WFS",
+      version: "2.0.0",
+      request: "GetFeature",
+      typeNames: `app:${options.typeName}`,
+      count: String(options.count ?? 60),
+      srsName: "urn:ogc:def:crs:EPSG::4326",
+      bbox: `${sør},${vest},${nord},${øst},urn:ogc:def:crs:EPSG::4326`,
+    });
+  const xml = await fetchXml(url, { ...options, pageSize: undefined } as unknown as WfsPageOptions);
+  return featuresFrom(xml, options.typeName);
+}
+
 export interface WfsPageOptions {
   baseUrl: string;
   typeName: string;
@@ -70,18 +146,20 @@ export async function* wfsPages(options: WfsPageOptions): AsyncGenerator<GmlFeat
       });
 
     const xml = await fetchXml(url, options);
-    const parsed = parser.parse(xml) as {
-      FeatureCollection?: { member?: unknown; numberReturned?: string };
-    };
-    const members = parsed.FeatureCollection?.member;
-    const list = members === undefined ? [] : Array.isArray(members) ? members : [members];
-    const features = list
-      .map((m) => (m as Record<string, GmlFeature>)[options.typeName])
-      .filter((f): f is GmlFeature => f !== undefined && typeof f === "object");
-
+    const features = featuresFrom(xml, options.typeName);
     if (features.length > 0) yield features;
     if (features.length < pageSize) return;
   }
+}
+
+/** Plukker ut features av én type fra en WFS FeatureCollection. */
+function featuresFrom(xml: string, typeName: string): GmlFeature[] {
+  const parsed = parser.parse(xml) as { FeatureCollection?: { member?: unknown } };
+  const members = parsed.FeatureCollection?.member;
+  const list = members === undefined ? [] : Array.isArray(members) ? members : [members];
+  return list
+    .map((m) => (m as Record<string, GmlFeature>)[typeName])
+    .filter((f): f is GmlFeature => f !== undefined && typeof f === "object");
 }
 
 /** GML er XML, ikke JSON, så vi kan ikke bruke fetchJson direkte — men vi vil ha samme retry. */
