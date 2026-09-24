@@ -67,12 +67,18 @@ function popupElement(content: MapPopupContent, onNavigate?: (href: string) => v
   }
   if (content.href) {
     const href = content.href;
+    // Interne lenker navigeres i appen; eksterne kilder åpnes i ny fane som ellers på siden.
+    const internal = href.startsWith("/");
     const link = document.createElement("a");
     link.className = "naboradar-popup-link";
     link.href = href;
     link.textContent = content.linkLabel ?? "Se saken";
+    if (!internal) {
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+    }
     link.addEventListener("click", (event) => {
-      if (!onNavigate || event.metaKey || event.ctrlKey || event.shiftKey) return;
+      if (!internal || !onNavigate || event.metaKey || event.ctrlKey || event.shiftKey) return;
       event.preventDefault();
       onNavigate(href);
     });

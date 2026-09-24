@@ -161,6 +161,15 @@ const TILSTANDSKLASSE_TEXT: Record<string, string> = {
   farligAvfall: "anses som farlig avfall",
 };
 
+/**
+ * Anlegg i «Nærområdet». Ordlyden er bevisst nøytral: kilden er et tillatelsesregister,
+ * ikke en vurdering av om anlegget er et problem. Ingen «forurensende», «farlig» eller «miljøfare».
+ */
+export const ANLEGG_TYPE_LABEL: Record<string, string> = {
+  industrianlegg: "Anlegg med utslippstillatelse",
+  avfallsanlegg: "Avfalls- eller gjenvinningsanlegg med utslippstillatelse",
+};
+
 const STABILITET_TEXT: Record<string, string> = {
   paavist_lav_sikkerhet: "Kvikkleire er påvist i sonen, med beregnet sikkerhetsfaktor under 1,4",
   paavist_ikke_vurdert: "Kvikkleire er påvist i sonen, stabiliteten er ikke vurdert",
@@ -343,18 +352,16 @@ export function describeFact(input: {
 
     case "industrianlegg":
     case "avfallsanlegg": {
-      const details: string[] = [];
+      const details = [`${ANLEGG_TYPE_LABEL[subtype] ?? "Anlegg med utslippstillatelse"}.`];
       const bransje = str(a.bransje);
-      if (bransje) details.push(bransje);
+      if (bransje) details.push(`Bransje: ${bransje}`);
       const utslipp = [a.utslippLuft === true ? "luft" : null, a.utslippVann === true ? "vann" : null].filter(Boolean);
+      // Bare det kilden faktisk oppgir. Ingen utslipp registrert betyr ikke at anlegget slipper ut noe.
       if (utslipp.length > 0) details.push(`Rapporterer utslipp til ${utslipp.join(" og ")}.`);
       const aar = num(a.sisteRapporteringAar);
       if (aar) details.push(`Siste rapportering: ${aar}.`);
       return {
-        headline:
-          subtype === "avfallsanlegg"
-            ? `Avfalls- eller gjenvinningsanlegg med utslippstillatelse: ${title}`
-            : `Anlegg med utslippstillatelse: ${title}`,
+        headline: title,
         details,
         caveat: `Tillatelse gitt av ${str(a.myndighet) ?? "forurensningsmyndigheten"}. Posisjonen er ett punkt for anlegget, ikke tomtegrensen.`,
       };
@@ -407,12 +414,16 @@ export function describeContaminatedSummary(input: {
   total: number;
   byGrade: { grade: string; count: number }[];
   radiusLabel: string;
+  /** Sann når vi bare hentet de nærmeste. Da skal vi ikke påstå at dette er alle. */
+  truncated?: boolean;
 }): FactText {
   const parts = input.byGrade
     .filter((g) => g.count > 0)
     .map((g) => `${g.count} ${PAAVIRKNINGSGRAD_SHORT[g.grade] ?? "uten oppgitt grad"}`);
   return {
-    headline: `${input.total} registrerte lokaliteter innen ${input.radiusLabel}`,
+    headline: input.truncated
+      ? `De ${input.total} nærmeste registrerte lokalitetene innen ${input.radiusLabel}`
+      : `${input.total} registrerte lokaliteter innen ${input.radiusLabel}`,
     details: parts.length > 0 ? [`Fordeling etter Miljødirektoratets påvirkningsgrad: ${parts.join(", ")}.`] : [],
     caveat:
       "Databasen inneholder også registreringer fra bygge- og gravesaker, og er derfor tett i byer. Antallet sier ikke noe om forholdene på en enkelt eiendom.",
@@ -425,6 +436,34 @@ export function describeContaminatedSummary(input: {
  */
 export const INGEN_FORURENSNING_TIL_OPPFOLGING =
   "Ingen av registreringene i området er vurdert til å kreve tiltak eller oppfølging.";
+
+/** Oppsummering for «Se alle anlegg i området». */
+export function describeAnleggSummary(input: { total: number; radiusLabel: string }): FactText {
+  return {
+    headline: `${input.total} anlegg med utslippstillatelse innen ${input.radiusLabel}`,
+    details: [],
+    caveat:
+      "Registeret omfatter virksomheter som har tillatelse etter forurensningsloven. Det sier ikke noe om hvor mye anlegget faktisk slipper ut.",
+  };
+}
+
+/**
+ * Korte linjer til kartpopup. Samme kilde til tekst som kortene, slik at kartet aldri
+ * sier noe annet enn resten av siden.
+ */
+export function describeMapLines(input: { subtype: string; attributes: AreaAttributes }): string[] {
+  const { subtype, attributes: a } = input;
+  if (subtype === "forurenset_grunn") {
+    const grad = PAAVIRKNINGSGRAD_SHORT[str(a.paavirkningsgrad) ?? ""];
+    return ["Registrert lokalitet med forurenset grunn (Miljødirektoratet)", grad ? `Myndighetens vurdering: ${grad}` : null].filter(
+      (line): line is string => line !== null,
+    );
+  }
+  if (subtype === "industrianlegg" || subtype === "avfallsanlegg") {
+    return [`${ANLEGG_TYPE_LABEL[subtype]} (Miljødirektoratet)`, str(a.bransje)].filter((line): line is string => line !== null);
+  }
+  return [];
+}
 
 /** Lenketekst per kildetype. */
 export function linkLabelFor(sourceUrlType: string | null, providerId: string): string {

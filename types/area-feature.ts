@@ -6,22 +6,46 @@ import type { LineString, MultiLineString, MultiPolygon, Point, Polygon } from "
  * og ligger derfor i egen tabell med egen spørring.
  */
 
-/**
- * Rekkefølgen her er visningsrekkefølgen på resultatsiden, og den er satt etter hva som
- * normalt betyr mest for en beboer: hva grunnen består av, hva man hører, og deretter
- * registreringer i nærheten. Kategorier uten funn faller bort, så resten flytter opp av seg selv.
- */
+/** Kategorien en rad lagres med i databasen. Endringer her krever migrasjon av area_features. */
 export const AREA_CATEGORIES = ["grunnforhold", "stoy", "miljo", "infrastruktur", "industri"] as const;
 export type AreaCategory = (typeof AREA_CATEGORIES)[number];
 
-export const AREA_CATEGORY_LABELS: Record<AreaCategory, string> = {
-  grunnforhold: "Grunnforhold",
-  stoy: "Støy",
-  // Kategorien inneholder i praksis bare forurenset grunn. Da skal den hete det.
-  miljo: "Forurenset grunn",
-  infrastruktur: "Infrastruktur",
-  industri: "Industri og anlegg",
-};
+/**
+ * Seksjonene på resultatsiden, i visningsrekkefølge.
+ *
+ * En seksjon er det brukeren ser; kategoriene er hvordan vi lagrer. Skillet gjør at en seksjon
+ * kan samle flere datatyper uten at hverken databasen eller UI-et må endres: «Nærområdet» har
+ * i dag bare industri og anlegg, og kan senere få sykehus, sykehjem eller andre ordinært
+ * offentlig kjente steder ved at kategorien legges til i listen under.
+ *
+ * Rekkefølgen er satt etter hva som normalt betyr mest for en beboer. Seksjoner uten innhold
+ * faller bort, så resten flytter opp av seg selv.
+ */
+export interface AreaSection {
+  id: string;
+  label: string;
+  /** Nøytral ingress. Brukes der overskriften alene ikke sier hva seksjonen er. */
+  intro: string | null;
+  categories: readonly AreaCategory[];
+}
+
+export const AREA_SECTIONS: readonly AreaSection[] = [
+  { id: "grunnforhold", label: "Grunnforhold", intro: null, categories: ["grunnforhold"] },
+  { id: "stoy", label: "Støy", intro: null, categories: ["stoy"] },
+  { id: "forurenset-grunn", label: "Forurenset grunn", intro: null, categories: ["miljo"] },
+  { id: "infrastruktur", label: "Infrastruktur", intro: null, categories: ["infrastruktur"] },
+  {
+    id: "naeromradet",
+    label: "Nærområdet",
+    // Nøytral ramme: dette er hva som finnes, ikke hva som er bra eller dårlig.
+    intro: "Offentlig kjente virksomheter og steder i nærheten. Vi vurderer dem ikke.",
+    categories: ["industri"],
+  },
+];
+
+export function sectionForCategory(category: AreaCategory): AreaSection | undefined {
+  return AREA_SECTIONS.find((section) => section.categories.includes(category));
+}
 
 export type AreaGeometry = Polygon | MultiPolygon | Point | LineString | MultiLineString;
 

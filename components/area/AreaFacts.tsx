@@ -1,6 +1,6 @@
 "use client";
 
-import type { AreaFactsResult, ContaminatedOverview } from "@/lib/facts/queries";
+import type { AreaFactsResult, SectionOverview } from "@/lib/facts/queries";
 import { formatRadius } from "@/lib/format";
 import type { AreaFact } from "@/types/area-feature";
 
@@ -16,10 +16,8 @@ interface AreaFactsProps {
  */
 export function AreaFacts({ result, radius, pending }: AreaFactsProps) {
   const groups = result.status === "ok" ? result.groups : [];
-  const contaminated = result.status === "ok" ? result.contaminated : null;
-  const total = groups.reduce((sum, group) => sum + group.facts.length, 0);
-  // Registreringer som ikke krever oppfølging gir ingen kort, men skal fortsatt være tilgjengelige.
-  const hasContent = total > 0 || contaminated !== null;
+  // En seksjon kan ha bare en utvidbar oversikt — f.eks. registreringer som ikke krever oppfølging.
+  const hasContent = groups.length > 0;
 
   return (
     <section aria-labelledby="facts-heading" aria-busy={pending} className="mt-12">
@@ -49,8 +47,9 @@ export function AreaFacts({ result, radius, pending }: AreaFactsProps) {
         ) : (
           <div className="flex flex-col gap-8">
             {groups.map((group) => (
-              <div key={group.category}>
+              <div key={group.sectionId}>
                 <h3 className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">{group.label}</h3>
+                {group.intro && <p className="mt-1 text-[13px] text-muted">{group.intro}</p>}
                 {group.facts.length > 0 && (
                   <ul className="mt-3 flex flex-col gap-3">
                     {group.facts.map((fact) => (
@@ -60,12 +59,12 @@ export function AreaFacts({ result, radius, pending }: AreaFactsProps) {
                     ))}
                   </ul>
                 )}
-                {group.category === "miljo" && contaminated && (
+                {group.overview && (
                   <>
-                    {contaminated.noAttentionNote && (
-                      <p className="mt-3 text-[15px] leading-relaxed text-muted">{contaminated.noAttentionNote}</p>
+                    {group.overview.noAttentionNote && (
+                      <p className="mt-3 text-[15px] leading-relaxed text-muted">{group.overview.noAttentionNote}</p>
                     )}
-                    <AllContaminated overview={contaminated} />
+                    <OverviewDetails overview={group.overview} />
                   </>
                 )}
               </div>
@@ -144,14 +143,14 @@ function FactItem({ fact }: { fact: AreaFact }) {
 }
 
 /**
- * Alle registreringer med forurenset grunn i området, bak en utvidbar visning.
- * Antallet alene er misvisende i byer, så det står aldri i standardvisningen.
+ * Alt kilden har i området, bak en utvidbar visning. Samme komponent for alle seksjoner,
+ * slik at en ny datatype ikke krever ny UI-logikk. Antallet står aldri i standardvisningen.
  */
-function AllContaminated({ overview }: { overview: ContaminatedOverview }) {
+function OverviewDetails({ overview }: { overview: SectionOverview }) {
   return (
     <details className="mt-3 rounded-2xl border border-line bg-surface px-5 py-4">
       <summary className="cursor-pointer text-[15px] font-medium text-ink">
-        Se alle registreringer i området ({overview.total})
+        {overview.toggleLabel} ({overview.total})
       </summary>
 
       <p className="mt-3 text-[15px] leading-relaxed text-ink">{overview.headline}</p>
@@ -177,7 +176,7 @@ function AllContaminated({ overview }: { overview: ContaminatedOverview }) {
               ) : (
                 <span className="text-[15px] text-ink [overflow-wrap:anywhere]">{item.title}</span>
               )}
-              <span className="block text-[13px] text-muted">{item.gradeLabel}</span>
+              <span className="block text-[13px] text-muted">{item.subtitle}</span>
             </span>
             <span className={`shrink-0 text-sm ${item.contains ? "font-medium text-ink" : "text-muted"}`}>
               {item.distanceLabel}

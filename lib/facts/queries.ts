@@ -4,17 +4,21 @@ import { getDbMode, getReadDb } from "@/lib/db";
 import { formatDistance, formatRadius } from "@/lib/format";
 import {
   AREA_CATEGORIES,
-  AREA_CATEGORY_LABELS,
+  AREA_SECTIONS,
   type AreaCategory,
   type AreaFact,
   type AreaFeatureHit,
   type AreaGeometry,
+  type AreaSection,
 } from "@/types/area-feature";
 import { areaLookups } from "./lookups";
 import type { LookupHit } from "./lookups/types";
 import {
+  ANLEGG_TYPE_LABEL,
+  describeAnleggSummary,
   describeContaminatedSummary,
   describeFact,
+  describeMapLines,
   INGEN_FORURENSNING_TIL_OPPFOLGING,
   linkLabelFor,
   PAAVIRKNINGSGRAD_SHORT,
@@ -57,53 +61,65 @@ const rowSchema = z.object({
 
 type FactRow = z.infer<typeof rowSchema>;
 
-/** Én rad i «Se alle registreringer i området». */
-export interface ContaminatedListItem {
+/** Én rad i en «Se alle …»-liste. */
+export interface OverviewItem {
   id: string;
   title: string;
   distanceLabel: string;
-  gradeLabel: string;
+  /** Kort, nøytral undertekst — myndighetens vurdering, anleggstype e.l. */
+  subtitle: string;
   contains: boolean;
   href: string | null;
 }
 
-/** Den utvidbare oversikten over alle registreringer med forurenset grunn i området. */
-export interface ContaminatedOverview {
+/**
+ * Utvidbar oversikt for en seksjon: alt kilden har i området, også det som ikke
+ * fortjener et eget kort. Samme form uansett datatype, slik at nye typer ikke
+ * trenger ny UI-logikk.
+ */
+export interface SectionOverview {
+  sectionId: string;
+  /** Tekst på selve utvideren, f.eks. «Se alle registreringer i området». */
+  toggleLabel: string;
   total: number;
-  /** Settes når ingen registreringer er relevante nok til et hovedkort. */
+  /** Settes når ingenting i seksjonen ble løftet til et hovedkort. */
   noAttentionNote: string | null;
   headline: string;
   details: string[];
   caveat: string | null;
   sourceName: string;
-  items: ContaminatedListItem[];
+  items: OverviewItem[];
 }
 
-/** Lokalitet som skal tegnes som flate i kartet. */
+/** Et objekt som skal tegnes i kartet. Flate eller punkt, avhengig av kilden. */
 export interface AreaMapFeature {
   id: string;
+  category: AreaCategory;
   title: string;
   geometry: AreaGeometry;
-  /** Punkt inne i flaten, brukt til å plassere popup. */
+  /** Punkt å plassere popup på. */
   center: [number, number];
   contains: boolean;
   distanceLabel: string;
-  gradeLabel: string | null;
+  /** Ferdig formulerte linjer til popup — fra formuleringsregisteret, aldri satt sammen i UI-et. */
+  lines: string[];
+  href: string | null;
 }
 
+/** En seksjon slik den vises: kort, og eventuelt en utvidbar oversikt. */
 export interface AreaFactGroup {
-  category: AreaCategory;
+  sectionId: string;
   label: string;
+  intro: string | null;
   facts: AreaFact[];
+  overview: SectionOverview | null;
 }
 
 export type AreaFactsResult =
   | {
       status: "ok";
       groups: AreaFactGroup[];
-      /** Alle registreringer med forurenset grunn, bak «Se alle registreringer i området». */
-      contaminated: ContaminatedOverview | null;
-      /** Lokaliteter med geometri, tegnet som flater i kartet. */
+      /** Alt som skal tegnes i kartet, på tvers av seksjoner. */
       mapFeatures: AreaMapFeature[];
       sources: SourceInfo[];
       /** Kilder som ikke svarte. Vises som en nøytral merknad. */
@@ -186,6 +202,9 @@ function toFact(input: {
  * relevant uansett hvilken grad kilden har satt.
  */
 const CONTAMINATED_CARD_LIMIT = 5;
+/** Rader per spørring. Holder svaret — og kartpayloaden — begrenset i tette områder. */
+const FEATURE_LIMIT = 300;
+const OTHER_CATEGORIES = AREA_CATEGORIES.filter((c) => c !== "miljo");
 const GRADES_NEEDING_ATTENTION = new Set(["ikkeAkseptabelForurensning", "ukjentPåvirkning"]);
 
 const byRelevance = (a: FactRow, b: FactRow) => Number(b.contains) - Number(a.contains) || a.distance_m - b.distance_m;
@@ -199,38 +218,57 @@ const toLngLat = (centroid: AreaGeometry | null): [number, number] => {
 const gradeOf = (row: FactRow): string =>
   typeof row.attributes.paavirkningsgrad === "string" ? row.attributes.paavirkningsgrad : "ukjentPåvirkning";
 
+const factFromRow = (row: FactRow): AreaFact | null =>
+  toFact({
+    id: row.id,
+    providerId: row.provider_id,
+    externalId: row.external_id,
+    category: row.category,
+    subtype: row.subtype,
+    title: row.title,
+    attributes: row.attributes,
+    distanceM: row.distance_m,
+    contains: row.contains,
+    sourceUrl: row.source_url,
+    sourceUrlType: row.source_url_type,
+    sourceUpdatedAt: row.source_updated_at,
+  });
+
+/** Ett kartobjekt per rad som har geometri og et punkt å feste popup i. */
+const mapFeatureFromRow = (row: FactRow): AreaMapFeature[] =>
+  row.geometry && row.centroid?.type === "Point"
+    ? [
+        {
+          id: row.id,
+          category: row.category,
+          title: row.title,
+          geometry: row.geometry,
+          center: toLngLat(row.centroid),
+          contains: row.contains,
+          distanceLabel: distanceLabel(row.distance_m, row.contains),
+          lines: describeMapLines({ subtype: row.subtype, attributes: row.attributes }),
+          href: row.source_url,
+        },
+      ]
+    : [];
+
 /** Om en registrering fortjener et eget kort, eller bare hører hjemme i oversikten. */
 export function needsAttention(input: { contains: boolean; grade: string }): boolean {
   return input.contains || GRADES_NEEDING_ATTENTION.has(input.grade);
 }
 
-function contaminatedFacts(rows: FactRow[], radiusM: number) {
+function contaminatedFacts(rows: FactRow[], radiusM: number, truncated = false) {
   const sorted = [...rows].sort(byRelevance);
 
   const facts = sorted
     .filter((row) => needsAttention({ contains: row.contains, grade: gradeOf(row) }))
     .slice(0, CONTAMINATED_CARD_LIMIT)
-    .flatMap((row) => {
-    const fact = toFact({
-      id: row.id,
-      providerId: row.provider_id,
-      externalId: row.external_id,
-      category: row.category,
-      subtype: row.subtype,
-      title: row.title,
-      attributes: row.attributes,
-      distanceM: row.distance_m,
-      contains: row.contains,
-      sourceUrl: row.source_url,
-      sourceUrlType: row.source_url_type,
-      sourceUpdatedAt: row.source_updated_at,
-    });
-    return fact ? [fact] : [];
-  });
+    .flatMap((row) => factFromRow(row) ?? []);
 
   const source = SOURCES["mdir-forurenset-grunn"]!;
   const summary = describeContaminatedSummary({
     total: sorted.length,
+    truncated,
     byGrade: ["ikkeAkseptabelForurensning", "ukjentPåvirkning", "akseptabelForurensning", "liteForurensning"].map((grade) => ({
       grade,
       count: sorted.filter((row) => gradeOf(row) === grade).length,
@@ -238,7 +276,9 @@ function contaminatedFacts(rows: FactRow[], radiusM: number) {
     radiusLabel: formatRadius(radiusM),
   });
 
-  const overview: ContaminatedOverview = {
+  const overview: SectionOverview = {
+    sectionId: "forurenset-grunn",
+    toggleLabel: "Se alle registreringer i området",
     total: sorted.length,
     noAttentionNote: facts.length === 0 ? INGEN_FORURENSNING_TIL_OPPFOLGING : null,
     headline: summary.headline,
@@ -249,30 +289,57 @@ function contaminatedFacts(rows: FactRow[], radiusM: number) {
       id: row.id,
       title: row.title,
       distanceLabel: distanceLabel(row.distance_m, row.contains),
-      gradeLabel: PAAVIRKNINGSGRAD_SHORT[gradeOf(row)] ?? "uten oppgitt grad",
+      subtitle: PAAVIRKNINGSGRAD_SHORT[gradeOf(row)] ?? "uten oppgitt grad",
       contains: row.contains,
       href: row.source_url,
     })),
   };
 
-  // Bare flater kan tegnes; punkter og linjer finnes ikke i dette laget.
-  const mapFeatures: AreaMapFeature[] = sorted.flatMap((row) =>
-    row.geometry && row.centroid?.type === "Point" && (row.geometry.type === "Polygon" || row.geometry.type === "MultiPolygon")
-      ? [
-          {
-            id: row.id,
-            title: row.title,
-            geometry: row.geometry,
-            center: toLngLat(row.centroid),
-            contains: row.contains,
-            distanceLabel: distanceLabel(row.distance_m, row.contains),
-            gradeLabel: PAAVIRKNINGSGRAD_SHORT[gradeOf(row)] ?? null,
-          },
-        ]
-      : [],
-  );
+  // Bare flater tegnes for denne kilden; den har ingen punkter.
+  const mapFeatures = sorted
+    .filter((row) => row.geometry?.type === "Polygon" || row.geometry?.type === "MultiPolygon")
+    .flatMap(mapFeatureFromRow);
 
   return { facts, overview, mapFeatures };
+}
+
+/**
+ * Nærområdet: anlegg med utslippstillatelse.
+ *
+ * Nøytral presentasjon — vi løfter ikke fram noe som «problem». De nærmeste vises som kort,
+ * resten ligger bak «Se alle anlegg i området», og alle tegnes i kartet.
+ */
+const ANLEGG_CARD_LIMIT = 4;
+
+function anleggFacts(rows: FactRow[], radiusM: number) {
+  const sorted = [...rows].sort(byRelevance);
+  const facts = sorted.slice(0, ANLEGG_CARD_LIMIT).flatMap((row) => factFromRow(row) ?? []);
+  const source = SOURCES["mdir-industri-tillatelse"]!;
+  const summary = describeAnleggSummary({ total: sorted.length, radiusLabel: formatRadius(radiusM) });
+
+  const overview: SectionOverview | null =
+    sorted.length > facts.length
+      ? {
+          sectionId: "naeromradet",
+          toggleLabel: "Se alle anlegg i området",
+          total: sorted.length,
+          noAttentionNote: null,
+          headline: summary.headline,
+          details: summary.details,
+          caveat: summary.caveat,
+          sourceName: `${source.name} (${source.owner})`,
+          items: sorted.map((row) => ({
+            id: row.id,
+            title: row.title,
+            distanceLabel: distanceLabel(row.distance_m, row.contains),
+            subtitle: ANLEGG_TYPE_LABEL[row.subtype] ?? "Anlegg med utslippstillatelse",
+            contains: row.contains,
+            href: row.source_url,
+          })),
+        }
+      : null;
+
+  return { facts, overview, mapFeatures: sorted.flatMap(mapFeatureFromRow) };
 }
 
 async function runLookups(lat: number, lng: number, radiusM: number): Promise<{ results: LookupResult[]; failed: string[] }> {
@@ -310,26 +377,45 @@ async function runLookups(lat: number, lng: number, radiusM: number): Promise<{ 
  * så de som har innhold flytter opp av seg selv. Forurenset grunn beholdes selv uten kort,
  * fordi den utvidbare oversikten fortsatt skal være tilgjengelig.
  */
-export function groupFacts(facts: AreaFact[], hasContaminatedOverview: boolean): AreaFactGroup[] {
-  return AREA_CATEGORIES.map((category) => ({
-    category,
-    label: AREA_CATEGORY_LABELS[category],
+export function groupFacts(
+  facts: AreaFact[],
+  overviews: SectionOverview[] = [],
+  sections: readonly AreaSection[] = AREA_SECTIONS,
+): AreaFactGroup[] {
+  return sections.map((section) => ({
+    sectionId: section.id,
+    label: section.label,
+    intro: section.intro,
     facts: facts
-      .filter((f) => f.category === category)
+      .filter((f) => section.categories.includes(f.category))
       .sort((a, b) => Number(b.contains) - Number(a.contains) || (a.distanceM ?? 0) - (b.distanceM ?? 0)),
-  })).filter((group) => group.facts.length > 0 || (group.category === "miljo" && hasContaminatedOverview));
+    overview: overviews.find((o) => o.sectionId === section.id) ?? null,
+  })).filter((group) => group.facts.length > 0 || group.overview !== null);
 }
 
 export async function getAreaFacts(params: { lat: number; lng: number; radius: number }): Promise<AreaFactsResult> {
   const { lat, lng, radius } = params;
   let rows: FactRow[] = [];
+  let contaminatedTruncated = false;
   let dbFailed: string | null = null;
 
   try {
     const db = await getReadDb();
     if (!db) throw new Error("ingen database");
-    const raw = await db.rpc<unknown>("features_near", { lat, lng, radius_m: radius });
-    rows = z.array(rowSchema).parse(raw);
+    // To spørringer: forurenset grunn er så tett i byer at den ellers fyller hele radgrensen
+    // og skyver ut kvikkleire, støy, kraftanlegg og anlegg med utslippstillatelse.
+    const [contaminatedRaw, otherRaw] = await Promise.all([
+      db.rpc<unknown>("features_near", { lat, lng, radius_m: radius, categories: ["miljo"], max_results: FEATURE_LIMIT }),
+      db.rpc<unknown>("features_near", {
+        lat,
+        lng,
+        radius_m: radius,
+        categories: OTHER_CATEGORIES,
+        max_results: FEATURE_LIMIT,
+      }),
+    ]);
+    rows = [...z.array(rowSchema).parse(contaminatedRaw), ...z.array(rowSchema).parse(otherRaw)];
+    contaminatedTruncated = z.array(rowSchema).parse(contaminatedRaw).length >= FEATURE_LIMIT;
   } catch (error) {
     dbFailed =
       getDbMode() === "none"
@@ -350,7 +436,7 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
   // Vis ett faktum per (kilde, type, navn) — det nærmeste.
   const nearestRows = new Map<string, FactRow>();
   for (const row of rows) {
-    if (row.subtype === "forurenset_grunn") continue;
+    if (row.subtype === "forurenset_grunn" || row.subtype === "industrianlegg" || row.subtype === "avfallsanlegg") continue;
     const key = `${row.provider_id}|${row.subtype}|${row.title}`;
     const current = nearestRows.get(key);
     if (!current || Number(row.contains) > Number(current.contains) || row.distance_m < current.distance_m) {
@@ -358,15 +444,25 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
     }
   }
 
+  const overviews: SectionOverview[] = [];
+  const mapFeatures: AreaMapFeature[] = [];
+
   const contaminatedRows = rows.filter((r) => r.subtype === "forurenset_grunn");
-  let contaminated: ContaminatedOverview | null = null;
-  let mapFeatures: AreaMapFeature[] = [];
   if (contaminatedRows.length > 0) {
-    const result = contaminatedFacts(contaminatedRows, radius);
+    const result = contaminatedFacts(contaminatedRows, radius, contaminatedTruncated);
     facts.push(...result.facts);
-    contaminated = result.overview;
-    mapFeatures = result.mapFeatures;
+    overviews.push(result.overview);
+    mapFeatures.push(...result.mapFeatures);
     usedSources.add("mdir-forurenset-grunn");
+  }
+
+  const anleggRows = rows.filter((r) => r.subtype === "industrianlegg" || r.subtype === "avfallsanlegg");
+  if (anleggRows.length > 0) {
+    const result = anleggFacts(anleggRows, radius);
+    facts.push(...result.facts);
+    if (result.overview) overviews.push(result.overview);
+    mapFeatures.push(...result.mapFeatures);
+    usedSources.add("mdir-industri-tillatelse");
   }
 
   for (const row of nearestRows.values()) {
@@ -410,7 +506,7 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
     }
   }
 
-  const groups = groupFacts(facts, contaminated !== null);
+  const groups = groupFacts(facts, overviews);
 
   const unavailable = [...failed, ...(dbFailed ? ["database"] : [])]
     .map((id) => SOURCES[id]?.name ?? (id === "database" ? "lagrede kilder" : id))
@@ -419,7 +515,6 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
   return {
     status: "ok",
     groups,
-    contaminated,
     mapFeatures,
     sources: [...usedSources].flatMap((id) => (SOURCES[id] ? [SOURCES[id]] : [])),
     unavailableSources: unavailable,
