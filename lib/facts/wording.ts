@@ -193,6 +193,16 @@ const TILSTANDSKLASSE_TEXT: Record<string, string> = {
 };
 
 /**
+ * NVE bruker 0 der spenningen ikke er registrert — 15 transformatorstasjoner og én
+ * kraftledning nasjonalt. «0 kV» ville lest som en faktisk spenning, så feltet utelates.
+ * Vi gjetter aldri på en verdi.
+ */
+function spenning(value: unknown): number | null {
+  const kv = num(value);
+  return kv !== null && kv > 0 ? kv : null;
+}
+
+/**
  * Anlegg i «Nærområdet». Ordlyden er bevisst nøytral: kilden er et tillatelsesregister,
  * ikke en vurdering av om anlegget er et problem. Ingen «forurensende», «farlig» eller «miljøfare».
  */
@@ -361,7 +371,7 @@ export function describeFact(input: {
       };
 
     case "transformatorstasjon": {
-      const kv = num(a.spenningKv);
+      const kv = spenning(a.spenningKv);
       return {
         headline: `Transformatorstasjon «${title}»`,
         details: [[kv !== null ? `${kv} kV` : null, str(a.eier)].filter(Boolean).join(" · ")].filter(Boolean),
@@ -370,7 +380,7 @@ export function describeFact(input: {
     }
 
     case "kraftledning": {
-      const kv = num(a.spenningKv);
+      const kv = spenning(a.spenningKv);
       const nett = str(a.nettnivaa) === "transmisjon" ? "transmisjonsnett" : "regionalnett";
       return {
         headline: `Kraftledning i ${nett}${title && title !== "Kraftledning" ? ` («${title}»)` : ""}`,
@@ -380,7 +390,7 @@ export function describeFact(input: {
     }
 
     case "hoyspent_distribusjon": {
-      const kv = num(a.spenningKv);
+      const kv = spenning(a.spenningKv);
       return {
         headline: "Høyspentledning i distribusjonsnettet",
         details: [[kv !== null ? `${kv} kV` : null, str(a.eier)].filter(Boolean).join(" · ")].filter(Boolean),
@@ -556,6 +566,11 @@ export function describeClusterToggle(input: { flertall: string; vist: number; t
   return input.total > input.vist
     ? `Se de ${input.vist} nærmeste av ${input.total}`
     : `Se alle ${input.flertall} (${input.total})`;
+}
+
+/** Oppsummeringen på «Infrastruktur». Typene har lange navn, så vi teller dem samlet. */
+export function describeInfrastrukturSummary(input: { total: number; radiusLabel: string }): string {
+  return `${input.total} ${input.total === 1 ? "registrering" : "registreringer"} innen ${input.radiusLabel}`;
 }
 
 export const OPPVEKST_CAVEAT =

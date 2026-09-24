@@ -95,7 +95,11 @@ export class NveHoyspentDistribusjonLookup implements AreaLookup {
       {
         subtype: "hoyspent_distribusjon",
         title: "Høyspentledning (distribusjonsnett)",
-        attributes: { spenningKv: nearest.props.spenning_kv, eier: nearest.props.eier },
+        // 0 betyr «ikke registrert» hos NVE, ikke null volt.
+        attributes: {
+          spenningKv: nearest.props.spenning_kv !== null && nearest.props.spenning_kv > 0 ? nearest.props.spenning_kv : null,
+          eier: nearest.props.eier,
+        },
         distanceM: Math.round(nearest.distanceM),
         contains: false,
       },

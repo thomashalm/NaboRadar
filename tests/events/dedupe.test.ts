@@ -108,6 +108,19 @@ describe("samme plan varslet flere ganger", () => {
     expect(resultat.map((e) => e.id)).toEqual(["nær", "midt", "fjern"]);
   });
 
+  it("teller ikke en registrering gjort om igjen som et nytt varsel", () => {
+    // Ekte tilfelle: «Skallum» i Bærum lå to ganger med plan-ID 3201_1996020, samme flate
+    // på 1 851 m², samme avstand, og datoer ett døgn fra hverandre.
+    const resultat = mergeRepeatedAnnouncements([
+      sak({ id: "ny", title: "Skallum", announcedAt: "2025-09-24", computedAreaM2: 1851, municipalityNumber: "3201", attributes: { planId: "3201_1996020" } }),
+      sak({ id: "gammel", title: "Skallum", announcedAt: "2025-09-23", computedAreaM2: 1851, municipalityNumber: "3201", attributes: { planId: "3201_1996020" } }),
+    ]);
+    expect(resultat).toHaveLength(1);
+    expect(resultat[0]!.id).toBe("ny");
+    // Ingen «varslet én gang før» — det var samme varsel.
+    expect(resultat[0]!.earlier).toBeUndefined();
+  });
+
   it("lar en enkeltstående sak være urørt", () => {
     const en = sak({ id: "en" });
     expect(mergeRepeatedAnnouncements([en])).toEqual([en]);

@@ -85,7 +85,8 @@ export class NveNettanleggProvider implements AreaFeatureProvider {
         title: p.navn?.trim() || (subtype === "transformatorstasjon" ? "Transformatorstasjon" : "Kraftledning"),
         geometry: geometry.data,
         attributes: {
-          spenningKv: p.spenning_kv,
+          // NVE bruker 0 der spenningen ikke er registrert. Da lagrer vi ingen spenning.
+          spenningKv: p.spenning_kv !== null && p.spenning_kv > 0 ? p.spenning_kv : null,
           eier: p.eier,
           nettnivaa: nett,
           driftsattAar: p.driftsattaar,

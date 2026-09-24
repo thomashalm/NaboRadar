@@ -64,6 +64,12 @@ function toAreaEvent(row: z.infer<typeof areaRowSchema>): AreaEvent {
  * ville alle slike havnet i samme gruppe: «Thaulows vei 19-25» og «Slemdalsveien 125 m.fl.»
  * er to ulike planer i Oslo som begge står med «-».
  */
+/** Varsler nærmere hverandre enn dette er samme varsel, registrert om igjen. */
+const SAMME_VARSEL_DAGER = 30;
+
+const dagerMellom = (fra: string, til: string) =>
+  Math.round((Date.parse(til) - Date.parse(fra)) / 86_400_000);
+
 export function mergeRepeatedAnnouncements(events: AreaEvent[]): AreaEvent[] {
   const grupper = new Map<string, AreaEvent[]>();
   const enkeltstående: AreaEvent[] = [];
@@ -80,11 +86,13 @@ export function mergeRepeatedAnnouncements(events: AreaEvent[]): AreaEvent[] {
     if (gruppe.length === 1) return gruppe[0]!;
     // Nyeste varsel er planen slik den står nå — også geometrien og arealet.
     const sortert = [...gruppe].sort((a, b) => (b.announcedAt ?? "").localeCompare(a.announcedAt ?? ""));
-    const datoer = gruppe.map((e) => e.announcedAt).filter((d): d is string => d !== null);
-    return {
-      ...sortert[0]!,
-      earlier: { count: gruppe.length - 1, firstAnnouncedAt: datoer.sort()[0] ?? null },
-    };
+    const datoer = gruppe.map((e) => e.announcedAt).filter((d): d is string => d !== null).sort();
+    const første = datoer[0] ?? null;
+    const siste = datoer.at(-1) ?? null;
+    // «Skallum» i Bærum lå to ganger med samme plan-ID, samme flate og ett døgns mellomrom.
+    // Det er én registrering gjort om igjen, ikke et nytt varsel, og fortjener ingen historikk.
+    const nyttVarsel = første !== null && siste !== null && dagerMellom(første, siste) >= SAMME_VARSEL_DAGER;
+    return nyttVarsel ? { ...sortert[0]!, earlier: { count: gruppe.length - 1, firstAnnouncedAt: første } } : sortert[0]!;
   });
 
   // Rekkefølgen fra databasen bestemmer fortsatt sorteringen.
