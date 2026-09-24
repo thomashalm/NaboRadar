@@ -51,6 +51,47 @@ function toAreaEvent(row: z.infer<typeof areaRowSchema>): AreaEvent {
   };
 }
 
+/**
+ * Kilden har én rad per varsel om planoppstart, ikke én per plan. Blir samme plan varslet på
+ * nytt — utvidet planområde, nytt varsel etter pause — kommer den flere ganger, med litt ulik
+ * dato og litt ulikt areal. Det er samme sak, og skal telles som én.
+ *
+ * Nøkkelen er den nasjonale plan-ID-en: kommunenummer og planid fra kilden. Bare der begge
+ * finnes — mangler plan-ID-en, er to saker med tomt felt ikke samme sak, og navnelikhet er
+ * uansett ikke bevis nok. Vi viser det nyeste varselet, fordi det er planen slik den står nå.
+ *
+ * Kilden bruker «-» når planen ikke har fått ID ennå. Uten kravet om et tall eller en bokstav
+ * ville alle slike havnet i samme gruppe: «Thaulows vei 19-25» og «Slemdalsveien 125 m.fl.»
+ * er to ulike planer i Oslo som begge står med «-».
+ */
+export function mergeRepeatedAnnouncements(events: AreaEvent[]): AreaEvent[] {
+  const grupper = new Map<string, AreaEvent[]>();
+  const enkeltstående: AreaEvent[] = [];
+
+  for (const event of events) {
+    const planId = event.attributes.planId?.trim();
+    const ekteId = planId && /[0-9a-z]/i.test(planId);
+    const nøkkel = ekteId && event.municipalityNumber ? `${event.municipalityNumber}:${planId}` : null;
+    if (!nøkkel) enkeltstående.push(event);
+    else grupper.set(nøkkel, [...(grupper.get(nøkkel) ?? []), event]);
+  }
+
+  const slått = [...grupper.values()].map((gruppe) => {
+    if (gruppe.length === 1) return gruppe[0]!;
+    // Nyeste varsel er planen slik den står nå — også geometrien og arealet.
+    const sortert = [...gruppe].sort((a, b) => (b.announcedAt ?? "").localeCompare(a.announcedAt ?? ""));
+    const datoer = gruppe.map((e) => e.announcedAt).filter((d): d is string => d !== null);
+    return {
+      ...sortert[0]!,
+      earlier: { count: gruppe.length - 1, firstAnnouncedAt: datoer.sort()[0] ?? null },
+    };
+  });
+
+  // Rekkefølgen fra databasen bestemmer fortsatt sorteringen.
+  const rekkefølge = new Map(events.map((e, i) => [e.id, i]));
+  return [...slått, ...enkeltstående].sort((a, b) => rekkefølge.get(a.id)! - rekkefølge.get(b.id)!);
+}
+
 export type QueryFailure = {
   status: "unavailable";
   /** Kun for utviklere (vises bare i development). */
@@ -105,7 +146,7 @@ export async function getAreaEvents(params: {
       }),
       db.rpc<{ provider_id: string; last_success_at: string | null }>("data_status"),
     ]);
-    const events = z.array(areaRowSchema).parse(rows).map(toAreaEvent);
+    const events = mergeRepeatedAnnouncements(z.array(areaRowSchema).parse(rows).map(toAreaEvent));
     const dataUpdatedAt =
       status.map((s) => s.last_success_at).filter((d): d is string => d !== null).sort().at(-1) ?? null;
     return { status: "ok", events, announcedSince, dataUpdatedAt };

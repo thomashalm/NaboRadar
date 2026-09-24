@@ -103,6 +103,13 @@ export type AreaEvent = Pick<
   | "sourceUrl"
   | "sourceUrlType"
   | "attributes"
->;
+> & {
+  /**
+   * Samme plan varslet flere ganger. Kilden har én rad per varsel, og et utvidet eller
+   * gjentatt varsel om samme plan-ID er ikke en ny sak. Vi viser det nyeste varselet og
+   * teller de tidligere her.
+   */
+  earlier?: { count: number; firstAnnouncedAt: string | null };
+};
 
 export type AreaSort = "distance" | "newest";

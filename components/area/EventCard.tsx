@@ -60,6 +60,14 @@ export const EventCard = forwardRef<HTMLElement, EventCardProps>(function EventC
             .join(" · ")}
         </p>
       )}
+      {event.earlier && event.earlier.count > 0 && (
+        // Samme plan er varslet flere ganger. Vi viser det nyeste varselet og sier fra om resten.
+        <p className="mt-1 text-[13px] text-muted">
+          {event.earlier.count === 1 ? "Varslet én gang før" : `Varslet ${event.earlier.count} ganger før`}
+          {formatDate(event.earlier.firstAnnouncedAt) ? `, første gang ${formatDate(event.earlier.firstAnnouncedAt)}` : ""}
+        </p>
+      )}
+
       <Link
         href={href}
         onClick={(e) => e.stopPropagation()}

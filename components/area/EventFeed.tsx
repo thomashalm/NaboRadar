@@ -20,30 +20,36 @@ interface EventFeedProps {
   hrefForRadius: (radius: number) => string;
   onNavigate: (href: string) => void;
   cardRefs: RefObject<Map<string, HTMLElement>>;
+  /**
+   * Om saksgruppen er åpen. Tilstanden ligger hos kalleren, fordi sortering navigerer og
+   * bygger denne delen av treet på nytt — ellers lukker gruppen seg når man bytter sortering.
+   * null betyr «ikke rørt ennå»; da åpner gruppen seg selv når det er få saker.
+   */
+  expanded: boolean | null;
+  onExpandedChange: (expanded: boolean) => void;
 }
 
 const MONTHS = DEFAULT_ANNOUNCED_WITHIN_MONTHS;
+/** Hvor mange saker som vises når gruppen åpnes. Resten ligger bak «Se alle saker». */
+const PREVIEW = 3;
 
-function countLabel(n: number) {
+function countLabel(n: number, radius: number) {
   if (n === 0) return "Ingen saker i området";
-  return n === 1 ? "1 sak i området" : `${n} saker i området`;
+  return `${n} ${n === 1 ? "sak" : "saker"} innen ${formatRadius(radius)}`;
 }
 
 export function EventFeed(props: EventFeedProps) {
-  const { result, radius, sort, pending, selectedId, onSelect, hrefForEvent, hrefForSort, hrefForRadius, onNavigate, cardRefs } = props;
+  const { result, radius, sort, pending, selectedId, onSelect, hrefForEvent, hrefForSort, hrefForRadius, onNavigate, cardRefs, expanded, onExpandedChange } = props;
 
   return (
     <section aria-labelledby="events-heading" aria-busy={pending} className="relative">
       <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
         <div>
           <h2 id="events-heading" className="text-xl font-semibold tracking-tight">
-            {result.status === "ok" ? countLabel(result.events.length) : "Saker i området"}
+            Planer og saker
           </h2>
           <p className="mt-0.5 text-sm text-muted">Planoppstart varslet siste {MONTHS} måneder</p>
         </div>
-        {result.status === "ok" && result.events.length > 1 && (
-          <SortToggle sort={sort} hrefForSort={hrefForSort} onNavigate={onNavigate} />
-        )}
       </div>
 
       {pending && (
@@ -95,22 +101,47 @@ export function EventFeed(props: EventFeedProps) {
             )}
           </Notice>
         ) : (
-          <ul className="flex flex-col gap-3">
-            {result.events.map((event) => (
-              <li key={event.id}>
-                <EventCard
-                  ref={(el) => {
-                    if (el) cardRefs.current.set(event.id, el);
-                    else cardRefs.current.delete(event.id);
-                  }}
-                  event={event}
-                  href={hrefForEvent(event)}
-                  selected={event.id === selectedId}
-                  onSelect={() => onSelect(event.id)}
-                />
-              </li>
-            ))}
-          </ul>
+          // Kompakt som gruppene i «Nærområdet»: antallet først, sakene når man åpner.
+          <details
+            className="rounded-2xl border border-line bg-surface"
+            open={expanded ?? result.events.length <= PREVIEW}
+            onToggle={(event) => onExpandedChange(event.currentTarget.open)}
+          >
+            <summary className="cursor-pointer px-5 py-3.5 text-[15px] font-medium text-ink">
+              {countLabel(result.events.length, radius)}
+            </summary>
+
+            <div className="px-5 pb-4">
+              {result.events.length > 1 && (
+                <div className="mb-3 flex justify-end">
+                  <SortToggle sort={sort} hrefForSort={hrefForSort} onNavigate={onNavigate} />
+                </div>
+              )}
+
+              <EventList
+                events={result.events.slice(0, PREVIEW)}
+                hrefForEvent={hrefForEvent}
+                selectedId={selectedId}
+                onSelect={onSelect}
+                cardRefs={cardRefs}
+              />
+
+              {result.events.length > PREVIEW && (
+                <details className="mt-3">
+                  <summary className="inline-flex h-9 cursor-pointer items-center text-[15px] font-medium text-accent">
+                    Se alle saker ({result.events.length})
+                  </summary>
+                  <EventList
+                    events={result.events.slice(PREVIEW)}
+                    hrefForEvent={hrefForEvent}
+                    selectedId={selectedId}
+                    onSelect={onSelect}
+                    cardRefs={cardRefs}
+                  />
+                </details>
+              )}
+            </div>
+          </details>
         )}
       </div>
 
@@ -121,6 +152,39 @@ export function EventFeed(props: EventFeedProps) {
         </p>
       )}
     </section>
+  );
+}
+
+function EventList({
+  events,
+  hrefForEvent,
+  selectedId,
+  onSelect,
+  cardRefs,
+}: {
+  events: AreaEvent[];
+  hrefForEvent: (event: AreaEvent) => string;
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+  cardRefs: RefObject<Map<string, HTMLElement>>;
+}) {
+  return (
+    <ul className="mt-3 flex flex-col gap-3">
+      {events.map((event) => (
+        <li key={event.id}>
+          <EventCard
+            ref={(el) => {
+              if (el) cardRefs.current.set(event.id, el);
+              else cardRefs.current.delete(event.id);
+            }}
+            event={event}
+            href={hrefForEvent(event)}
+            selected={event.id === selectedId}
+            onSelect={() => onSelect(event.id)}
+          />
+        </li>
+      ))}
+    </ul>
   );
 }
 

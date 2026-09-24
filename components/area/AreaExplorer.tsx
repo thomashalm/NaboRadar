@@ -62,6 +62,8 @@ export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, 
   /** Flater som lå under klikkpunktet. Eiendommen vant klikket, men planområdet nevnes i kortet. */
   const [covering, setCovering] = useState<readonly string[]>([]);
   const [zoom, setZoom] = useState(0);
+  // Sortering navigerer, og saksgruppen bygges da på nytt. Tilstanden må derfor bo her.
+  const [eventsExpanded, setEventsExpanded] = useState<boolean | null>(null);
   const propertyRequest = useRef<AbortController | null>(null);
   const propertyRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef(new Map<string, HTMLElement>());
@@ -243,6 +245,8 @@ export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, 
           pending={pending}
           selectedId={selectedId}
           onSelect={(id) => setSelection({ id, from: "list" })}
+          expanded={eventsExpanded}
+          onExpandedChange={setEventsExpanded}
           hrefForEvent={(event) => buildEventHref(event.id, context)}
           hrefForSort={(s) => buildAreaHref({ ...context, sort: s })}
           hrefForRadius={(r) => buildAreaHref({ ...context, radius: r })}
