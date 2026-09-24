@@ -206,7 +206,7 @@ export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, 
       <div className="relative mx-5 h-[48vh] min-h-72 overflow-hidden rounded-2xl border border-line sm:mx-8 lg:sticky lg:top-16 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:m-0 lg:h-[calc(100dvh-4rem)] lg:rounded-none lg:border-0 lg:border-l">
         <AreaMap
           tiles={tiles}
-          title={`Kart over området innen ${formatRadius(radius)} fra ${label}${events.length ? `, ${events.length} planområder` : ""}${sites.length ? `, ${sites.length} registrerte lokaliteter med forurenset grunn` : ""}${places.length ? `, ${places.length} anlegg med utslippstillatelse` : ""}`}
+          title={`Kart over området innen ${formatRadius(radius)} fra ${label}${events.length ? `, ${events.length} planområder` : ""}${sites.length ? `, ${sites.length} registrerte lokaliteter med forurenset grunn` : ""}${places.length ? `, ${places.length} steder i nærområdet` : ""}`}
           layers={layers}
           fitBounds={radiusBounds(lat, lng, radius)}
           fitKey={`${lat},${lng},${radius}`}

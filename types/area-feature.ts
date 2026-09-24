@@ -7,7 +7,16 @@ import type { LineString, MultiLineString, MultiPolygon, Point, Polygon } from "
  */
 
 /** Kategorien en rad lagres med i databasen. Endringer her krever migrasjon av area_features. */
-export const AREA_CATEGORIES = ["grunnforhold", "stoy", "miljo", "infrastruktur", "industri", "oppvekst"] as const;
+export const AREA_CATEGORIES = [
+  "grunnforhold",
+  "stoy",
+  "miljo",
+  "infrastruktur",
+  "industri",
+  "oppvekst",
+  "helse",
+  "servering",
+] as const;
 export type AreaCategory = (typeof AREA_CATEGORIES)[number];
 
 /**
@@ -37,7 +46,7 @@ export const AREA_SECTIONS: readonly AreaSection[] = [
     label: "Nærområdet",
     // Nøytral ramme: dette er hva som finnes, ikke hva som er bra eller dårlig.
     intro: "Offentlig kjente virksomheter og steder i nærheten. Vi vurderer dem ikke.",
-    categories: ["oppvekst", "industri"],
+    categories: ["oppvekst", "helse", "servering", "industri"],
   },
   { id: "infrastruktur", label: "Infrastruktur", intro: null, categories: ["infrastruktur"] },
   // Ligger sist som standard: registreringene er tette i byer, og de fleste gjelder et sted

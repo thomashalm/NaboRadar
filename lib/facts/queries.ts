@@ -17,8 +17,12 @@ import type { LookupHit } from "./lookups/types";
 import {
   ANLEGG_TYPE_LABEL,
   describeAnleggSummary,
-  describeOppvekstCluster,
-  describeOppvekstLine,
+  describeClusterSummary,
+  describeClusterToggle,
+  describePlaceLine,
+  HELSE_CAVEAT,
+  OPPVEKST_CAVEAT,
+  SERVERING_CAVEAT,
   describeContaminatedSummary,
   describeFact,
   describeMapLines,
@@ -106,6 +110,8 @@ export interface ClusterList {
   toggleLabel: string | null;
   items: OverviewItem[];
   previewCount: number;
+  /** Hvor mange kilden har i området. Kan være flere enn `items` når listen er kuttet. */
+  total: number;
 }
 
 /**
@@ -239,7 +245,11 @@ function toFact(input: {
 const CONTAMINATED_CARD_LIMIT = 5;
 /** Rader per spørring. Holder svaret — og kartpayloaden — begrenset i tette områder. */
 const FEATURE_LIMIT = 300;
-const OTHER_CATEGORIES = AREA_CATEGORIES.filter((c) => c !== "miljo");
+/** Skjenkesteder hentes for seg: 539 innen 1 km av Karl Johan ville spist hele radgrensen. */
+const SERVERING_LIMIT = 150;
+/** Hvor mange skjenkesteder kartet tegner. Over dette blir kartet uleselig. */
+const SERVERING_MARKER_CAP = 30;
+const OTHER_CATEGORIES = AREA_CATEGORIES.filter((c) => c !== "miljo" && c !== "servering");
 const GRADES_NEEDING_ATTENTION = new Set(["ikkeAkseptabelForurensning", "ukjentPåvirkning"]);
 
 const byRelevance = (a: FactRow, b: FactRow) => Number(b.contains) - Number(a.contains) || a.distance_m - b.distance_m;
@@ -353,14 +363,68 @@ function contaminatedFacts(rows: FactRow[], radiusM: number, truncated = false) 
  * Kort per kategori, ikke totalt. Ellers kan seks nære barnehager skyve ut anlegget
  * i nabogata, og seksjonen blir ensidig selv om kartet viser alt.
  */
+/** Kategoriene som vises i «Nærområdet» — som kort (industri) eller som gruppe. */
+const PLACE_CATEGORIES = new Set<AreaCategory>(["industri", "oppvekst", "helse", "servering"]);
+
 const PLACE_CARDS_PER_CATEGORY = 4;
 /** Hvor mange steder som vises per undertype før «Se alle …». */
 const CLUSTER_PREVIEW = 3;
 
-/** Undertypene som hører sammen i «Skoler og barnehager». Rekkefølgen er visningsrekkefølgen. */
-const OPPVEKST_LISTS: readonly { id: string; label: string; subtypes: readonly string[] }[] = [
-  { id: "skoler", label: "Skoler", subtypes: ["grunnskole", "videregaende_skole"] },
-  { id: "barnehager", label: "Barnehager", subtypes: ["barnehage"] },
+/** Hvor mange steder en enkelt liste viser bak utvideren. Skjenkesteder er så tette at
+ *  «alle» fort er flere hundre; da sier teksten hvor mange av hvor mange vi viser. */
+const CLUSTER_LIST_CAP = 30;
+
+interface ClusterListSpec {
+  id: string;
+  label: string;
+  subtypes: readonly string[];
+  ental: string;
+  flertall: string;
+}
+
+/**
+ * Gruppene i «Nærområdet». Hver gruppe dekker én lagringskategori og deler den i undertyper.
+ * En ny stedstype legges til her — ikke i UI-et.
+ */
+const CLUSTER_SPECS: readonly {
+  id: string;
+  label: string;
+  category: AreaCategory;
+  caveat: string;
+  lists: readonly ClusterListSpec[];
+}[] = [
+  {
+    id: "skoler-og-barnehager",
+    label: "Skoler og barnehager",
+    category: "oppvekst",
+    caveat: OPPVEKST_CAVEAT,
+    lists: [
+      { id: "skoler", label: "Skoler", subtypes: ["grunnskole", "videregaende_skole"], ental: "skole", flertall: "skoler" },
+      { id: "barnehager", label: "Barnehager", subtypes: ["barnehage"], ental: "barnehage", flertall: "barnehager" },
+    ],
+  },
+  {
+    id: "helse",
+    label: "Helse",
+    category: "helse",
+    caveat: HELSE_CAVEAT,
+    lists: [{ id: "sykehus", label: "Sykehus", subtypes: ["sykehus"], ental: "sykehus", flertall: "sykehus" }],
+  },
+  {
+    id: "servering",
+    label: "Servering og uteliv",
+    category: "servering",
+    caveat: SERVERING_CAVEAT,
+    lists: [
+      {
+        id: "skjenkesteder",
+        label: "Steder med skjenkebevilling",
+        subtypes: ["skjenkested"],
+        ental: "sted med skjenkebevilling",
+        flertall: "steder med skjenkebevilling",
+      },
+    ],
+  },
 ];
 
 /** Nøytral undertekst per stedstype, brukt i «Se alle»-listen. */
@@ -382,53 +446,75 @@ const sourceNames = (rows: FactRow[]): string =>
     .join(" · ");
 
 /**
- * Skoler og barnehager samles i én gruppe med antall per type. Uten grupperingen fyller
- * noen få nære barnehager hele seksjonen og skyver skolene ut av standardvisningen.
- * Undertyper uten treff får ingen tom overskrift.
+ * Én gruppe relaterte stedstyper, f.eks. «Skoler og barnehager». Uten grupperingen fyller
+ * noen få nære barnehager — eller tjue skjenkesteder — hele seksjonen og skyver resten ut av
+ * standardvisningen. Undertyper uten treff får ingen tom overskrift.
  */
-function oppvekstCluster(rows: FactRow[], radiusM: number): FactCluster {
-  const lists: ClusterList[] = OPPVEKST_LISTS.flatMap((spec) => {
-    // rows er allerede sortert nærmest først, så filtreringen beholder avstandsrekkefølgen.
-    const items = rows
-      .filter((row) => spec.subtypes.includes(row.subtype))
-      .map((row) => overviewItem(row, describeOppvekstLine({ subtype: row.subtype, attributes: row.attributes })));
-    if (items.length === 0) return [];
-    return [
-      {
-        id: spec.id,
-        label: spec.label,
-        toggleLabel: items.length > CLUSTER_PREVIEW ? `Se alle ${spec.label.toLowerCase()} (${items.length})` : null,
-        items,
-        previewCount: CLUSTER_PREVIEW,
-      },
-    ];
-  });
+function buildCluster(
+  spec: (typeof CLUSTER_SPECS)[number],
+  rows: FactRow[],
+  radiusM: number,
+  /** Kildens faktiske antall i området, når listen er kuttet av radgrensen. */
+  antallIOmradet?: number,
+  /** Merknad om at kartet bare tegner de nærmeste. */
+  kartnote?: string | null,
+): FactCluster | null {
+  const treff = rows.filter((row) => row.category === spec.category);
+  if (treff.length === 0) return null;
 
-  const { summary, caveat } = describeOppvekstCluster({
-    skoler: lists.find((list) => list.id === "skoler")?.items.length ?? 0,
-    barnehager: lists.find((list) => list.id === "barnehager")?.items.length ?? 0,
-    radiusLabel: formatRadius(radiusM),
-  });
+  const lists: ClusterList[] = [];
+  const antall: { antall: number; ental: string; flertall: string }[] = [];
+
+  // Radgrensen kan ha kuttet listen. Da er det databasens telling som er sann.
+  const kuttet = antallIOmradet !== undefined && antallIOmradet > treff.length;
+
+  for (const list of spec.lists) {
+    // rows er allerede sortert nærmest først, så filtreringen beholder avstandsrekkefølgen.
+    const alle = treff.filter((row) => list.subtypes.includes(row.subtype));
+    // Én liste i gruppen: da gjelder gruppens totale antall for den listen.
+    const total = kuttet && spec.lists.length === 1 ? antallIOmradet : alle.length;
+    antall.push({ antall: total, ental: list.ental, flertall: list.flertall });
+    if (alle.length === 0) continue;
+
+    const items = alle
+      .slice(0, CLUSTER_LIST_CAP)
+      .map((row) => overviewItem(row, describePlaceLine({ subtype: row.subtype, attributes: row.attributes })));
+
+    lists.push({
+      id: list.id,
+      label: list.label,
+      toggleLabel:
+        alle.length > CLUSTER_PREVIEW
+          ? describeClusterToggle({ flertall: list.flertall, vist: items.length, total })
+          : null,
+      items,
+      previewCount: CLUSTER_PREVIEW,
+      total,
+    });
+  }
 
   return {
     sectionId: "naeromradet",
-    id: "skoler-og-barnehager",
-    label: "Skoler og barnehager",
-    summary,
+    id: spec.id,
+    label: spec.label,
+    summary: describeClusterSummary(antall, formatRadius(radiusM)),
     lists,
-    caveat,
-    sourceName: sourceNames(rows),
+    caveat: [spec.caveat, kartnote].filter(Boolean).join(" "),
+    sourceName: sourceNames(treff),
   };
 }
 
 /** Eksportert for test: grupperingen er produktlogikk og verifiseres uten database. */
-export function placeFacts(rows: FactRow[], radiusM: number) {
+export function placeFacts(rows: FactRow[], radiusM: number, antallPerKategori: Partial<Record<AreaCategory, number>> = {}) {
   const sorted = [...rows].sort(byRelevance);
-  const oppvekst = sorted.filter((row) => row.category === "oppvekst");
+  const gruppert = new Set(CLUSTER_SPECS.map((spec) => spec.category));
   // Industri og anlegg er egen gruppe: de er få, og hvert anlegg har sine egne opplysninger.
-  const anlegg = sorted.filter((row) => row.category !== "oppvekst");
+  const anlegg = sorted.filter((row) => !gruppert.has(row.category));
 
   const facts = anlegg.slice(0, PLACE_CARDS_PER_CATEGORY).flatMap((row) => factFromRow(row) ?? []);
+  const servering = sorted.filter((row) => row.category === "servering");
+  const kartnote =
+    servering.length > SERVERING_MARKER_CAP ? `Kartet viser de ${SERVERING_MARKER_CAP} nærmeste stedene.` : null;
   const summary = describeAnleggSummary({ total: anlegg.length, radiusLabel: formatRadius(radiusM) });
 
   const overview: SectionOverview | null =
@@ -448,9 +534,21 @@ export function placeFacts(rows: FactRow[], radiusM: number) {
 
   return {
     facts,
-    clusters: oppvekst.length > 0 ? [oppvekstCluster(oppvekst, radiusM)] : [],
+    clusters: CLUSTER_SPECS.flatMap(
+      (spec) =>
+        buildCluster(
+          spec,
+          sorted,
+          radiusM,
+          antallPerKategori[spec.category],
+          spec.category === "servering" ? kartnote : null,
+        ) ?? [],
+    ),
     overview,
-    mapFeatures: sorted.flatMap(mapFeatureFromRow),
+    // Skjenkesteder er så tette i sentrum at alle markørene ville skjult resten av kartet.
+    mapFeatures: [...sorted.filter((row) => row.category !== "servering"), ...servering.slice(0, SERVERING_MARKER_CAP)]
+      .sort(byRelevance)
+      .flatMap(mapFeatureFromRow),
   };
 }
 
@@ -510,6 +608,7 @@ export function groupFacts(
 export async function getAreaFacts(params: { lat: number; lng: number; radius: number }): Promise<AreaFactsResult> {
   const { lat, lng, radius } = params;
   let rows: FactRow[] = [];
+  let antallPerKategori: Partial<Record<AreaCategory, number>> = {};
   let contaminatedTruncated = false;
   let dbFailed: string | null = null;
 
@@ -518,8 +617,15 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
     if (!db) throw new Error("ingen database");
     // To spørringer: forurenset grunn er så tett i byer at den ellers fyller hele radgrensen
     // og skyver ut kvikkleire, støy, kraftanlegg og anlegg med utslippstillatelse.
-    const [contaminatedRaw, otherRaw] = await Promise.all([
+    const [contaminatedRaw, serveringRaw, otherRaw, countsRaw] = await Promise.all([
       db.rpc<unknown>("features_near", { lat, lng, radius_m: radius, categories: ["miljo"], max_results: FEATURE_LIMIT }),
+      db.rpc<unknown>("features_near", {
+        lat,
+        lng,
+        radius_m: radius,
+        categories: ["servering"],
+        max_results: SERVERING_LIMIT,
+      }),
       db.rpc<unknown>("features_near", {
         lat,
         lng,
@@ -527,9 +633,18 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
         categories: OTHER_CATEGORIES,
         max_results: FEATURE_LIMIT,
       }),
+      // Antallet i teksten skal være kildens, ikke radgrensens.
+      db.rpc<unknown>("features_count_near", { lat, lng, radius_m: radius, categories: ["servering"] }),
     ]);
-    rows = [...z.array(rowSchema).parse(contaminatedRaw), ...z.array(rowSchema).parse(otherRaw)];
-    contaminatedTruncated = z.array(rowSchema).parse(contaminatedRaw).length >= FEATURE_LIMIT;
+    const contaminated = z.array(rowSchema).parse(contaminatedRaw);
+    rows = [...contaminated, ...z.array(rowSchema).parse(serveringRaw), ...z.array(rowSchema).parse(otherRaw)];
+    contaminatedTruncated = contaminated.length >= FEATURE_LIMIT;
+    antallPerKategori = Object.fromEntries(
+      z
+        .array(z.object({ category: z.enum(AREA_CATEGORIES), antall: z.coerce.number() }))
+        .parse(countsRaw)
+        .map((rad) => [rad.category, rad.antall]),
+    );
   } catch (error) {
     dbFailed =
       getDbMode() === "none"
@@ -550,7 +665,7 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
   // Vis ett faktum per (kilde, type, navn) — det nærmeste.
   const nearestRows = new Map<string, FactRow>();
   for (const row of rows) {
-    if (row.subtype === "forurenset_grunn" || row.category === "industri" || row.category === "oppvekst") continue;
+    if (row.subtype === "forurenset_grunn" || PLACE_CATEGORIES.has(row.category)) continue;
     const key = `${row.provider_id}|${row.subtype}|${row.title}`;
     const current = nearestRows.get(key);
     if (!current || Number(row.contains) > Number(current.contains) || row.distance_m < current.distance_m) {
@@ -574,9 +689,9 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
   }
 
   // Alt som hører hjemme i «Nærområdet», uavhengig av kilde.
-  const placeRows = rows.filter((r) => r.category === "industri" || r.category === "oppvekst");
+  const placeRows = rows.filter((r) => PLACE_CATEGORIES.has(r.category));
   if (placeRows.length > 0) {
-    const result = placeFacts(placeRows, radius);
+    const result = placeFacts(placeRows, radius, antallPerKategori);
     facts.push(...result.facts);
     clusters.push(...result.clusters);
     if (result.overview) overviews.push(result.overview);

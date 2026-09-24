@@ -121,3 +121,145 @@ vurdering av om anlegget er et problem, og teksten skal ikke si mer enn kilden g
 Teknisk er seksjonen en visningsgruppe over én eller flere lagringskategorier
 (`AREA_SECTIONS` i `types/area-feature.ts`). En ny type legges til ved å føre kategorien inn i
 seksjonens `categories` — ikke ved å endre UI-et.
+
+## Runde 3: datasentre, sykehus, sykehjem, fabrikker og skjenkesteder (2026-09-24)
+
+Seks kategorier ble undersøkt. To ble bygget, fire ble lagt bort med begrunnelse. Alle tall
+under er ekte kall gjort denne dagen.
+
+| Kategori | Kilde som faktisk virker | Maskinlesbar | Koordinat | Dekning | Vurdering |
+|---|---|---|---|---|---|
+| Skjenkesteder | Næringsetatens kart, WFS med GeoJSON | Ja, hele Oslo på 0,4 s | Ja, på adressepunktet | Oslo | **Bygget** |
+| Sykehus | Helsenorge-API ∧ Enhetsregisteret 86.101 | Ja, begge åpne | Geokodet hos Kartverket | Nasjonal | **Bygget** |
+| Sykehjem | oslo.kommune.no, 46 oppføringer i HTML | Nei | Nei | Oslo | Utsatt |
+| Fabrikker | Ingen ut over dagens utslippsregister | – | – | – | Ikke bygget |
+| Datasentre | Operatørenes egne sider | Nei | Delvis | Vilkårlig | Ikke bygget |
+| Åpningstider | Finnes ikke offentlig strukturert | – | – | – | Ikke bygget |
+
+### Skjenkesteder (bygget)
+
+Næringsetaten publiserer alle steder med skjenkebevilling i Oslo i et kart laget av
+Plan- og bygningsetaten. Bak kartet ligger en WFS som svarer med GeoJSON:
+
+```
+https://od2.pbe.oslo.kommune.no/cgi-bin/wms?map=AAPNING&service=wfs&version=1.1.0
+  &request=GetFeature&typename=skjenkebevilling_punkt&outputformat=geojson&bbox=…
+```
+
+Hele Oslo: **1 406 steder**, 541 KB, 0,4 s. Feltene er `OBJEKTNAVN`, `OBJEKTADRESSE`,
+postnummer/-sted, `EIERNAVN`, `ORGNR`, `INNE_TID`, `UTE_TID` og `KOPIDATO`. Kopidatoen var
+dagens dato, så kilden oppdateres daglig.
+
+**Tidene.** Kilden kaller selv feltene «tillatte åpningstider», og kartet skriver: «Faktiske
+åpningstider på stedene kan variere fra de tillatte tidene.» Dette er altså *tillatt stengetid*
+inne og ute — verken skjenketid (som etter alkoholloven slutter før stengetid) eller stedets
+faktiske åpningstid. Vi gjengir tallet med kildens egen betegnelse og regner aldri om mellom de
+tre. 1 380 steder har innetid, 1 036 har utetid.
+
+**Bevillingshaver lagres ikke.** `EIERNAVN` er som regel et selskap, men 73 av 1 406 mangler
+selskapssuffiks, og blant dem står navn som «Loan Rishovd» — enkeltpersonsforetak, altså
+privatpersoner. Vi lagrer verken navnet eller organisasjonsnummeret bak stedet.
+
+**Koordinatene** kommer i EPSG:25832, og tjenesten overser `srsName`. Omregningen ligger i
+`lib/geo/utm.ts`. Kontroll mot Kartverkets adressepunkt for samme adresse: 49 av 49 punkter
+innenfor 41 m, median 0 m — Næringsetaten legger punktet nøyaktig på adressen.
+
+**Tetthet** (målt i datasettet): Karl Johan 201 innen 500 m, 539 innen 1 km, 1 150 innen 3 km.
+Grünerløkka 98/252/1 206. Røa 3/4/16. Holmlia 1/7/17. Derfor tre grep: egen databasespørring
+for kategorien så den ikke spiser radgrensen fra de andre, `features_count_near` for å få riktig
+antall i teksten selv når listen er kuttet, og tak på 30 markører i kartet med en merknad om det.
+
+**Lisens er ikke avklart.** Tjenesten oppgir ingen lisens, og datasettet står ikke i Felles
+datakatalog. Oslo kommune bruker NLOD på sine åpne datasett ellers. Vi navngir Næringsetaten,
+lenker til kartet, og skriver «lisens ikke oppgitt» i kildelisten fremfor å anta. Bør bekreftes
+skriftlig med Næringsetaten.
+
+### Sykehus (bygget)
+
+Ingen enkeltkilde svarer på «hva er et sykehus»: RESH ligger fortsatt bak helsenettet,
+Enhetsregisteret sier bare hva enheten er registrert som, og Helsenorges oversikt over
+behandlingssteder blander sykehus, distriktspsykiatri, rusbehandling og private klinikker.
+
+Et sted tas derfor bare med når to uavhengige offentlige kilder er enige:
+
+1. Helsenorge fører det som behandlingssted med offentlig tilbud innen **fysisk helse**
+   (`tjenester.helsenorge.no/proxy/velgbehandlingssted/api/v1/Behandlingssteder`, åpent JSON,
+   596 steder, 172 innen fysisk helse).
+2. Enhetsregisteret har næringskode **86.101 somatiske sykehustjenester** på enheten.
+
+Regelen skiller godt: av de 172 er 87 kodet 86.101, mens 63 er 86.910 (laboratorier og
+bildediagnostikk), 13 er 86.221, 5 er 86.210 og 1 er 86.102 (voksenpsykiatri). Etter
+dedupe på adresse — Helsenorge har egne rader for f.eks. rehabiliteringsavdelinger i samme bygg —
+står **80 sykehus** igjen, 67 offentlige og 13 private. Koordinat hentes fra Kartverkets
+adresse-API på besøksadressen.
+
+Resultatet ligger i `data/sykehus.json` med `verifisert`-dato per sted, bygget av
+`scripts/build-sykehus.ts`. Uten `--skriv` viser skriptet bare forskjellen mot dagens fil, slik
+at endringer leses før de committes. Et sted som legges ned settes til `nedlagt` og blir
+stående som historikk uten å vises.
+
+Psykiatriske og rusrelaterte behandlingssteder er bevisst holdt utenfor, jf. regelen om at vi
+ikke masseplasserer skjermede eller sårbare institusjoner i kartet.
+
+### Sykehjem (utsatt, ikke forkastet)
+
+Det finnes ingen nasjonal åpen kilde med adresser. Oslo kommune har en egen oversikt med
+**46 oppføringer** med navn, telefon og adresse
+(`oslo.kommune.no/helse-og-omsorg/omsorgsbolig-og-sykehjem/sykehjem/alle-sykehjem-og-helsehus/`),
+men den er HTML uten API, og den blander langtidshjem, helsehus, dagsentre, «Inn på tunet» og
+forsterket rehabilitering. Å skille sykehjem fra dagsenter krever kuratering per oppføring.
+
+Dette er den nærmeste kandidaten til neste runde: kilden er kommunens egen, stedene er ordinært
+offentlig kjente, og volumet er håndterbart. Men da må typene skilles, og dekningen vil være
+Oslo alene — samme forbehold som for skjenkestedene.
+
+### Fabrikker og produksjonsanlegg (ikke bygget)
+
+Vi har allerede 866 anlegg med utslippstillatelse fra Miljødirektoratet, og det er fortsatt den
+eneste kilden som forteller hva som faktisk finnes på et sted. Enhetsregisteret gir
+næringskode på en adresse, ikke bevis for at det produseres noe der — samme svakhet som ble
+dokumentert for helsekategoriene i runde 1, der holdingselskaper og kontorer lå blant
+«somatiske sykehus». Uten en uavhengig kilde som bekrefter at adressen er et produksjonssted,
+ville laget blitt en blanding av fabrikker og hovedkontorer. Det er verre enn ingenting.
+
+### Datasentre (ikke bygget)
+
+Nkoms register gir operatørnavn uten adresser, og etaten sier selv at lokasjoner kan være
+sensitive (runde 1). Operatørene publiserer ujevnt: Green Mountain oppgir bare region for sine
+fem norske anlegg («Stavanger · Mountain hall», «Telemark · Hydropower valley»), mens Lefdal
+Mine oppgir full adresse, «Gate 1 nr 101, 6700 Måløy». Presise koordinater for de øvrige finnes
+bare hos kommersielle datasenterkataloger, som verken er operatøren, eieren eller en offentlig
+myndighet.
+
+Et lag der ett datasenter dukker opp i Måløy mens de større i Rjukan og Enebakk mangler, er
+misvisende i seg selv. Kategorien tas inn den dagen operatørene eller kommunene publiserer
+lokasjonene ordinært — vi rekonstruerer dem ikke.
+
+### Åpningstider (ikke bygget)
+
+Ingen offentlig strukturert kilde for ordinære åpningstider. Det eneste som finnes er de
+tillatte tidene i bevillingsdataene, og de er allerede med, med kildens egen betegnelse.
+
+### Hva som er automatisk og hva som er kurert
+
+| | Skjenkesteder | Sykehus |
+|---|---|---|
+| Henting | WFS ved hver sync | Fil i repoet |
+| Frekvens | Daglig | Ukentlig sync, manuell reverifisering |
+| Endring oppdages av | Vanlig provider/sync-system, med guards | `build-sykehus.ts` viser diff |
+| Nedlagt sted | Forsvinner fra kilden, merkes `removed_from_source_at` | Settes til `nedlagt` i fila |
+| Sist verifisert | `KOPIDATO` fra kilden | `verifisert` per sted |
+
+### Personvern og sikkerhet
+
+Skjenkesteder er virksomheter med offentlig bevilling; bevillingshaver lagres ikke, fordi det
+kan være en privatperson. Sykehus er offentlig kjente institusjoner. Ingen av datasettene
+inneholder opplysninger om pasienter, gjester eller andre privatpersoner. Psykiatri, rus,
+barnevern og skjermede botilbud er fortsatt holdt utenfor, og reglene fra runde 1 gjelder
+uendret.
+
+### Dekningsforbehold
+
+Skjenkesteder finnes bare for Oslo. Utenfor Oslo vises gruppen ikke i det hele tatt — det
+betyr «vi har ikke data», ikke «her finnes ingen serveringssteder». Det samme vil gjelde
+sykehjem hvis den kategorien bygges på Oslo-kilden.

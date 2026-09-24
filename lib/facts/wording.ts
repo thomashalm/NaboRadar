@@ -77,6 +77,19 @@ export const SOURCES: Record<string, SourceInfo> = {
     licenseName: "NLOD",
     licenseUrl: "https://data.norge.no/nlod/no/1.0",
   },
+  "helsenorge-sykehus": {
+    name: "Sykehus",
+    owner: "Helsenorge og Enhetsregisteret",
+    licenseName: "NLOD 2.0",
+    licenseUrl: "https://data.norge.no/nlod/no/2.0",
+  },
+  "oslo-skjenkebevilling": {
+    name: "Skjenkebevillinger i Oslo",
+    owner: "Næringsetaten, Oslo kommune",
+    // Tjenesten oppgir ingen lisens. Vi sier det heller enn å anta.
+    licenseName: "lisens ikke oppgitt",
+    licenseUrl: "https://od2.pbe.oslo.kommune.no/xkart/skjenkebevilling/",
+  },
   "mdir-stoy-strategisk": {
     name: "Strategisk støykartlegging",
     owner: "Miljødirektoratet",
@@ -495,27 +508,67 @@ export function describeContaminatedSummary(input: {
 export const INGEN_FORURENSNING_TIL_OPPFOLGING =
   "Ingen av registreringene i området er vurdert til å kreve tiltak eller oppfølging.";
 
-/**
- * Kompakt oppsummering av «Skoler og barnehager», f.eks. «2 skoler · 7 barnehager innen 1 km».
- * En type som ikke finnes i området nevnes ikke — vi skriver ikke «0 skoler».
- */
-export function describeOppvekstCluster(input: { skoler: number; barnehager: number; radiusLabel: string }): {
-  summary: string;
-  caveat: string;
-} {
-  const deler = [
-    input.skoler > 0 ? `${input.skoler} ${input.skoler === 1 ? "skole" : "skoler"}` : null,
-    input.barnehager > 0 ? `${input.barnehager} ${input.barnehager === 1 ? "barnehage" : "barnehager"}` : null,
-  ].filter((del): del is string => del !== null);
-  return {
-    summary: `${deler.join(" · ")} innen ${input.radiusLabel}`,
-    caveat: "Fra Utdanningsdirektoratets registre. Familiebarnehager i private hjem og spesialskoler er ikke med.",
-  };
+/** Én undertype i en gruppe, med antall: «7 barnehager». */
+export interface ClusterCount {
+  antall: number;
+  ental: string;
+  flertall: string;
 }
 
-/** Undertekst i skole-/barnehagelistene: type og trinn eller aldersgruppe, ikke mer. */
-export function describeOppvekstLine(input: { subtype: string; attributes: AreaAttributes }): string {
+/**
+ * Kompakt oppsummering av en gruppe, f.eks. «2 skoler · 7 barnehager innen 1 km».
+ * En type som ikke finnes i området nevnes ikke — vi skriver ikke «0 skoler».
+ */
+export function describeClusterSummary(deler: readonly ClusterCount[], radiusLabel: string): string {
+  const tekst = deler
+    .filter((del) => del.antall > 0)
+    .map((del) => `${del.antall} ${del.antall === 1 ? del.ental : del.flertall}`);
+  return `${tekst.join(" · ")} innen ${radiusLabel}`;
+}
+
+/**
+ * Tekst på utvideren for resten av en liste. Når kilden har flere enn vi viser, sier vi det
+ * rett ut i stedet for å love «alle».
+ */
+export function describeClusterToggle(input: { flertall: string; vist: number; total: number }): string {
+  return input.total > input.vist
+    ? `Se de ${input.vist} nærmeste av ${input.total}`
+    : `Se alle ${input.flertall} (${input.total})`;
+}
+
+export const OPPVEKST_CAVEAT =
+  "Fra Utdanningsdirektoratets registre. Familiebarnehager i private hjem og spesialskoler er ikke med.";
+
+export const HELSE_CAVEAT =
+  "Somatiske sykehus som både Helsenorge og Enhetsregisteret fører som sykehus. Psykiatri, rusbehandling, legevakt og klinikker uten sykehusstatus er ikke med.";
+
+export const SERVERING_CAVEAT =
+  "Fra Næringsetatens bevillingsoversikt, som foreløpig bare dekker Oslo. Tiden er tillatt stengetid — ikke skjenketid, og ikke stedets faktiske åpningstid, som kan være kortere.";
+
+/**
+ * Undertekst per sted i gruppene under «Nærområdet». Kort og etterprøvbar: type og det ene
+ * kilden faktisk oppgir — trinn, aldersgruppe, eierform eller tillatt stengetid.
+ */
+export function describePlaceLine(input: { subtype: string; attributes: AreaAttributes }): string {
   const a = input.attributes;
+
+  if (input.subtype === "sykehus") {
+    // «privat» er kildens eget flagg, og omfatter også ideelle sykehus som Diakonhjemmet.
+    return str(a.eierform) === "privat" ? "Sykehus, privat drift" : "Sykehus";
+  }
+
+  if (input.subtype === "skjenkested") {
+    const inne = str(a.stengetidInne);
+    const ute = str(a.stengetidUte);
+    if (!inne && !ute) return "Skjenkebevilling";
+    return [
+      inne ? `Tillatt stengetid inne ${inne}` : null,
+      ute ? `ute ${ute}` : null,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+  }
+
   const label = OPPVEKST_TYPE_LABEL[input.subtype] ?? "Skole eller barnehage";
   if (input.subtype === "barnehage") {
     const fra = num(a.lavesteAlder);
@@ -559,6 +612,21 @@ export function describeMapLines(input: { subtype: string; attributes: AreaAttri
     return [`${OPPVEKST_TYPE_LABEL[subtype]} (Utdanningsdirektoratet)`, eier ? `${eier} eierforhold` : null].filter(
       (line): line is string => line !== null,
     );
+  }
+  if (subtype === "sykehus") {
+    return [
+      str(a.eierform) === "privat" ? "Sykehus, privat drift (Helsenorge)" : "Sykehus (Helsenorge)",
+      [str(a.adresse), str(a.poststed)].filter(Boolean).join(", ") || null,
+    ].filter((line): line is string => line !== null);
+  }
+  if (subtype === "skjenkested") {
+    const inne = str(a.stengetidInne);
+    const ute = str(a.stengetidUte);
+    return [
+      "Sted med skjenkebevilling (Næringsetaten, Oslo kommune)",
+      [str(a.adresse), str(a.poststed)].filter(Boolean).join(", ") || null,
+      inne ? `Tillatt stengetid inne ${inne}${ute ? ` · ute ${ute}` : ""}` : null,
+    ].filter((line): line is string => line !== null);
   }
   if (subtype === "industrianlegg" || subtype === "avfallsanlegg") {
     return [`${ANLEGG_TYPE_LABEL[subtype]} (Miljødirektoratet)`, str(a.bransje)].filter((line): line is string => line !== null);

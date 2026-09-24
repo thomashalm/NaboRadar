@@ -32,6 +32,7 @@ npm run dev
 | `npm test` | Enhetstester (ingen nettverk) |
 | `npm run sync:dibk` | Full sync av DiBK-plandata (`-- --mode=incremental` for inkrementell) |
 | `npm run sync:area` | Full sync av områdefakta (forurenset grunn, kvikkleire, nettanlegg, industri) |
+| `npx tsx scripts/build-sykehus.ts` | Reverifiserer den kuraterte sykehuslisten mot kildene. `--skriv` oppdaterer `data/sykehus.json` |
 | `npm run sync:worker` | Kjører forespørsler fra /admin og providere som er forfalt. Dette er kommandoen en scheduler skal kalle. |
 | `npm run sync:status` | Helsetilstand per provider (samme regler som /admin og varsling) |
 | `npm run alerts:check` | Vurderer helsetilstand og sender varsel-e-post (`-- --dry-run` skriver den bare ut) |

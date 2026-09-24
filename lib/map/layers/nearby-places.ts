@@ -3,13 +3,15 @@ import type { AreaMapFeature } from "@/lib/facts/queries";
 import type { MapLayer } from "./types";
 
 export const PLACE_COLOR = "#6b5bd2";
-/** Skoler og barnehager skiller seg fra anleggene, men i samme dempede register. */
+/** Én farge per hovedtype, alle i samme dempede register: dette er steder, ikke varsler. */
 export const OPPVEKST_COLOR = "#0d7a6b";
+export const HELSE_COLOR = "#2563a8";
+export const SERVERING_COLOR = "#b4622a";
 
 const SOURCE = "nearby-places";
 
 /**
- * Punkter i «Nærområdet» — i dag anlegg med utslippstillatelse.
+ * Punkter i «Nærområdet»: anlegg, skoler og barnehager, sykehus og skjenkesteder.
  *
  * Bevisst rolig markør: dette er steder som finnes, ikke varsler. Laget tar imot punkter fra
  * hvilken som helst kategori, så en ny type (sykehus, sykehjem) bare krever at den kommer med
@@ -29,8 +31,19 @@ export const nearbyPlacesLayer: MapLayer<AreaMapFeature[]> = {
       type: "circle",
       source: SOURCE,
       paint: {
-        "circle-radius": ["case", selected, 9, 6.5],
-        "circle-color": ["match", ["get", "category"], "oppvekst", OPPVEKST_COLOR, PLACE_COLOR],
+        // Skjenkesteder er mange og små; de skal kunne trykkes, men ikke dominere kartet.
+        "circle-radius": ["case", selected, 9, ["==", ["get", "category"], "servering"], 5, 6.5],
+        "circle-color": [
+          "match",
+          ["get", "category"],
+          "oppvekst",
+          OPPVEKST_COLOR,
+          "helse",
+          HELSE_COLOR,
+          "servering",
+          SERVERING_COLOR,
+          PLACE_COLOR,
+        ],
         "circle-opacity": 0.9,
         "circle-stroke-color": "#ffffff",
         "circle-stroke-width": 2,
