@@ -18,6 +18,7 @@ const SOURCE = "nearby-places";
 export const nearbyPlacesLayer: MapLayer<AreaMapFeature[]> = {
   id: "nearby-places",
   interactiveLayerIds: ["nearby-places-dot"],
+  markerLayerIds: ["nearby-places-dot"],
   idFromFeature: (properties) => (typeof properties.featureId === "string" ? properties.featureId : null),
 
   mount(map, data) {

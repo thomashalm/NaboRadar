@@ -59,6 +59,8 @@ export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, 
   const [pending, startTransition] = useTransition();
   const [selection, setSelection] = useState<{ id: string; from: "map" | "list" } | null>(null);
   const [property, setProperty] = useState<PropertyState>({ status: "idle" });
+  /** Flater som lå under klikkpunktet. Eiendommen vant klikket, men planområdet nevnes i kortet. */
+  const [covering, setCovering] = useState<readonly string[]>([]);
   const [zoom, setZoom] = useState(0);
   const propertyRequest = useRef<AbortController | null>(null);
   const propertyRef = useRef<HTMLDivElement>(null);
@@ -109,12 +111,22 @@ export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, 
     }
   }, []);
 
-  const handleEmptyClick = useCallback(
-    (position: { lat: number; lng: number }) => {
-      if (zoom < MIN_PROPERTY_ZOOM) return;
+  /** Kartet har allerede avgjort at eiendommen vant klikket, se lib/map/click.ts. */
+  const handlePropertyClick = useCallback(
+    (position: { lat: number; lng: number }, coveringIds: string[]) => {
+      setCovering(coveringIds);
       void lookupProperty(position);
     },
-    [zoom, lookupProperty],
+    [lookupProperty],
+  );
+
+  const coveringPlans = useMemo(
+    () =>
+      covering.flatMap((id) => {
+        const event = events.find((e) => e.id === id);
+        return event ? [{ id, title: event.title, href: buildEventHref(event.id, context) }] : [];
+      }),
+    [covering, events, context],
   );
 
   // På mobil ligger kortet under kartet. Rull det fram når en ny eiendom velges.
@@ -200,7 +212,8 @@ export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, 
           fitKey={`${lat},${lng},${radius}`}
           selectedId={selectedId}
           onSelect={(id) => setSelection(id ? { id, from: "map" } : null)}
-          onEmptyClick={handleEmptyClick}
+          onPropertyClick={handlePropertyClick}
+          propertyLookupActive={zoom >= MIN_PROPERTY_ZOOM}
           onZoomChange={setZoom}
           popupFor={popupFor}
           onNavigate={(href) => router.push(href)}
@@ -214,7 +227,14 @@ export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, 
 
       <div className="px-5 pt-8 pb-16 sm:px-8 lg:col-start-1 lg:row-start-2 lg:px-10 lg:pt-4">
         <div ref={propertyRef} className={property.status === "idle" ? "" : "mb-8"}>
-          <PropertyCard state={property} onClose={() => setProperty({ status: "idle" })} />
+          <PropertyCard
+            state={property}
+            coveringPlans={coveringPlans}
+            onClose={() => {
+              setProperty({ status: "idle" });
+              setCovering([]);
+            }}
+          />
         </div>
         <EventFeed
           result={result}

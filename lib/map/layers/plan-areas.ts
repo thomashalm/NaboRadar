@@ -34,6 +34,7 @@ function setState(map: MapLibreMap, id: string, selected: boolean) {
 export const planAreasLayer: MapLayer<PlanAreaData> = {
   id: "plan-areas",
   interactiveLayerIds: ["plan-areas-fill", "plan-points"],
+  markerLayerIds: ["plan-points"],
   idFromFeature: (properties) => (typeof properties.eventId === "string" ? properties.eventId : null),
 
   mount(map, data) {

@@ -13,6 +13,11 @@ export interface MapLayer<TData> {
   update(map: MapLibreMap, data: TData): void;
   /** MapLibre-lag som kan klikkes. Klikk gir featureId via `idFromFeature`. */
   readonly interactiveLayerIds?: readonly string[];
+  /**
+   * De av `interactiveLayerIds` som er punktmarkører. Markører vinner over eiendomsoppslag;
+   * store flater gjør det ikke, se lib/map/click.ts. Uten denne regnes laget som en flate.
+   */
+  readonly markerLayerIds?: readonly string[];
   idFromFeature?(properties: Record<string, unknown>): string | null;
   /** Markér valgt objekt. `previousId` er forrige valgte (kartet holder tilstanden, ikke laget). */
   setSelected?(map: MapLibreMap, id: string | null, previousId: string | null): void;

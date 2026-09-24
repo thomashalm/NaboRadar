@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { formatArea } from "@/lib/format";
 import { PROPERTY_SOURCES, type PropertyDetails } from "@/lib/property/types";
 
@@ -17,7 +18,22 @@ export type PropertyState =
  * Kartverket (se docs/eiendom-discovery.md). Vi lager ingen tomme plassholdere for dem — bare
  * én diskret linje om at mer kommer.
  */
-export function PropertyCard({ state, onClose }: { state: PropertyState; onClose: () => void }) {
+/** Et planområde som dekker eiendommen. Klikket traff eiendommen, men saken skal fortsatt være ett trykk unna. */
+export interface CoveringPlan {
+  id: string;
+  title: string;
+  href: string;
+}
+
+export function PropertyCard({
+  state,
+  onClose,
+  coveringPlans = [],
+}: {
+  state: PropertyState;
+  onClose: () => void;
+  coveringPlans?: readonly CoveringPlan[];
+}) {
   if (state.status === "idle") return null;
 
   return (
@@ -51,6 +67,28 @@ export function PropertyCard({ state, onClose }: { state: PropertyState; onClose
       )}
 
       {state.status === "ok" && <Details property={state.property} />}
+
+      {state.status === "ok" && coveringPlans.length > 0 && (
+        <div className="mt-3 border-t border-line pt-3">
+          <p className="text-[13px] text-muted">
+            {coveringPlans.length === 1
+              ? "Denne eiendommen ligger i et planområde."
+              : `Denne eiendommen ligger i ${coveringPlans.length} planområder.`}
+          </p>
+          <ul className="mt-1 flex flex-col">
+            {coveringPlans.map((plan) => (
+              <li key={plan.id}>
+                <Link
+                  href={plan.href}
+                  className="inline-flex min-h-9 items-center text-[15px] font-medium text-accent hover:underline [overflow-wrap:anywhere]"
+                >
+                  {plan.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   );
 }

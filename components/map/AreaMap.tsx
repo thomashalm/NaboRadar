@@ -4,6 +4,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import type { Map as MapLibreMap, MapLayerMouseEvent, Popup } from "maplibre-gl";
 import { useEffect, useRef, useState } from "react";
 import type { LngLatBounds } from "@/lib/geo/bounds";
+import { resolveMapClick, type MapClickHit } from "@/lib/map/click";
 import type { MapTileConfig } from "@/lib/map/config";
 import type { LayerBinding } from "@/lib/map/layers/types";
 
@@ -39,10 +40,13 @@ interface AreaMapProps {
   selectedId?: string | null;
   onSelect?: (id: string | null) => void;
   /**
-   * Klikk i kartet som ikke traff et objekt i noe lag. Markører og flater har altså
-   * forrang: treffer klikket en plansak, en lokalitet eller et sted, kalles denne ikke.
+   * Klikk som skal slå opp eiendommen under punktet. Kalles når `propertyLookupActive` er
+   * satt og klikket ikke traff en punktmarkør — også over en flate som et planområde, slik
+   * at flaten ikke gjør huset uklikkbart. `covering` er flatene som lå over samme punkt.
    */
-  onEmptyClick?: (position: { lat: number; lng: number }) => void;
+  onPropertyClick?: (position: { lat: number; lng: number }, covering: string[]) => void;
+  /** Om zoomnivået er høyt nok til at eiendomsoppslag er aktivt. Se lib/map/click.ts. */
+  propertyLookupActive?: boolean;
   /** Gjeldende zoomnivå, slik at kalleren kan slå av funksjoner som krever detaljnivå. */
   onZoomChange?: (zoom: number) => void;
   popupFor?: (id: string) => MapPopupContent | null;
@@ -171,18 +175,29 @@ export function AreaMap(props: AreaMapProps) {
       });
       instance.on("zoomend", () => latestProps.current.onZoomChange?.(instance.getZoom()));
 
-      // Klikk: første interaktive lag som treffer vinner. Klikk i tomt område fjerner valget.
+      // Klikk: punktmarkører først, så eiendom, så flater. Se lib/map/click.ts.
       instance.on("click", (event: MapLayerMouseEvent) => {
         const bindings = latestProps.current.layers;
         const ids = interactiveLayerIds(instance, bindings);
-        const [feature] = ids.length ? instance.queryRenderedFeatures(event.point, { layers: ids }) : [];
-        if (!feature) {
-          latestProps.current.onSelect?.(null);
-          latestProps.current.onEmptyClick?.({ lat: event.lngLat.lat, lng: event.lngLat.lng });
+        const features = ids.length ? instance.queryRenderedFeatures(event.point, { layers: ids }) : [];
+        const hits: MapClickHit[] = features.map((feature) => {
+          const owner = bindings.find((b) => b.layer.interactiveLayerIds?.includes(feature.layer.id));
+          return {
+            layerId: feature.layer.id,
+            kind: owner?.layer.markerLayerIds?.includes(feature.layer.id) ? "marker" : "area",
+            id: owner?.layer.idFromFeature?.(feature.properties ?? {}) ?? null,
+          };
+        });
+
+        const action = resolveMapClick({ hits, propertyLookupActive: latestProps.current.propertyLookupActive === true });
+        if (action.type === "select") {
+          latestProps.current.onSelect?.(action.id);
           return;
         }
-        const owner = bindings.find((b) => b.layer.interactiveLayerIds?.includes(feature.layer.id));
-        latestProps.current.onSelect?.(owner?.layer.idFromFeature?.(feature.properties ?? {}) ?? null);
+        latestProps.current.onSelect?.(null);
+        if (action.type === "property") {
+          latestProps.current.onPropertyClick?.({ lat: event.lngLat.lat, lng: event.lngLat.lng }, action.covering);
+        }
       });
       instance.on("mousemove", (event) => {
         const ids = interactiveLayerIds(instance, latestProps.current.layers);
