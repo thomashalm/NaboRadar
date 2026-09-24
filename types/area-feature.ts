@@ -32,8 +32,6 @@ export interface AreaSection {
 export const AREA_SECTIONS: readonly AreaSection[] = [
   { id: "grunnforhold", label: "Grunnforhold", intro: null, categories: ["grunnforhold"] },
   { id: "stoy", label: "Støy", intro: null, categories: ["stoy"] },
-  { id: "forurenset-grunn", label: "Forurenset grunn", intro: null, categories: ["miljo"] },
-  { id: "infrastruktur", label: "Infrastruktur", intro: null, categories: ["infrastruktur"] },
   {
     id: "naeromradet",
     label: "Nærområdet",
@@ -41,7 +39,25 @@ export const AREA_SECTIONS: readonly AreaSection[] = [
     intro: "Offentlig kjente virksomheter og steder i nærheten. Vi vurderer dem ikke.",
     categories: ["oppvekst", "industri"],
   },
+  { id: "infrastruktur", label: "Infrastruktur", intro: null, categories: ["infrastruktur"] },
+  // Ligger sist som standard: registreringene er tette i byer, og de fleste gjelder et sted
+  // i nærheten — ikke adressen brukeren søkte på. Se sectionOrder() for unntaket.
+  { id: "forurenset-grunn", label: "Forurenset grunn", intro: null, categories: ["miljo"] },
 ];
+
+/**
+ * Visningsrekkefølgen for ett søk.
+ *
+ * Forurenset grunn løftes til toppen når søkepunktet faktisk ligger inne i en registrert
+ * lokalitet som kilden mener krever tiltak eller oppfølging. Da handler det om adressen selv,
+ * ikke om noe i nabolaget. En registrering 760 meter unna løfter ingenting.
+ */
+export function sectionOrder(input: { contaminationAtSearchPoint: boolean }): readonly AreaSection[] {
+  if (!input.contaminationAtSearchPoint) return AREA_SECTIONS;
+  const forurenset = AREA_SECTIONS.find((section) => section.id === "forurenset-grunn");
+  if (!forurenset) return AREA_SECTIONS;
+  return [forurenset, ...AREA_SECTIONS.filter((section) => section.id !== "forurenset-grunn")];
+}
 
 export function sectionForCategory(category: AreaCategory): AreaSection | undefined {
   return AREA_SECTIONS.find((section) => section.categories.includes(category));

@@ -5,6 +5,7 @@ import { formatDistance, formatRadius } from "@/lib/format";
 import {
   AREA_CATEGORIES,
   AREA_SECTIONS,
+  sectionOrder,
   type AreaCategory,
   type AreaFact,
   type AreaFeatureHit,
@@ -302,7 +303,12 @@ function contaminatedFacts(rows: FactRow[], radiusM: number, truncated = false) 
     .filter((row) => row.geometry?.type === "Polygon" || row.geometry?.type === "MultiPolygon")
     .flatMap(mapFeatureFromRow);
 
-  return { facts, overview, mapFeatures };
+  // Gjelder noe av dette adressen selv, og ikke bare nabolaget?
+  const affectsSearchPoint = sorted.some(
+    (row) => row.contains && GRADES_NEEDING_ATTENTION.has(gradeOf(row)),
+  );
+
+  return { facts, overview, mapFeatures, affectsSearchPoint };
 }
 
 /**
@@ -473,11 +479,13 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
   const mapFeatures: AreaMapFeature[] = [];
 
   const contaminatedRows = rows.filter((r) => r.subtype === "forurenset_grunn");
+  let contaminationAtSearchPoint = false;
   if (contaminatedRows.length > 0) {
     const result = contaminatedFacts(contaminatedRows, radius, contaminatedTruncated);
     facts.push(...result.facts);
     overviews.push(result.overview);
     mapFeatures.push(...result.mapFeatures);
+    contaminationAtSearchPoint = result.affectsSearchPoint;
     usedSources.add("mdir-forurenset-grunn");
   }
 
@@ -532,7 +540,7 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
     }
   }
 
-  const groups = groupFacts(facts, overviews);
+  const groups = groupFacts(facts, overviews, sectionOrder({ contaminationAtSearchPoint }));
 
   const unavailable = [...failed, ...(dbFailed ? ["database"] : [])]
     .map((id) => SOURCES[id]?.name ?? (id === "database" ? "lagrede kilder" : id))

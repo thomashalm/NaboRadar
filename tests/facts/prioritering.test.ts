@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { groupFacts, needsAttention, type SectionOverview } from "@/lib/facts/queries";
-import { AREA_SECTIONS, type AreaCategory, type AreaFact } from "@/types/area-feature";
+import { AREA_SECTIONS, sectionOrder, type AreaCategory, type AreaFact } from "@/types/area-feature";
 
 /**
  * Hva som løftes fram rundt en adresse. Poenget er signalverdi: kilden har registreringer
@@ -55,16 +55,51 @@ describe("hvilke registreringer som blir hovedkort", () => {
 });
 
 describe("rekkefølge på kategoriene", () => {
-  it("viser Grunnforhold, så Støy, så Forurenset grunn", () => {
+  it("følger standardrekkefølgen", () => {
     const groups = groupFacts(
       [
-        fact("miljo", { headline: "Majorstuen skole" }),
+        fact("miljo", { headline: "Lokalitet" }),
+        fact("infrastruktur", { headline: "Trafo" }),
         fact("stoy", { headline: "Veitrafikk" }),
+        fact("oppvekst", { headline: "Skole" }),
         fact("grunnforhold", { headline: "Kvikkleiresone" }),
       ],
       [],
     );
-    expect(groups.map((g) => g.label)).toEqual(["Grunnforhold", "Støy", "Forurenset grunn"]);
+    expect(groups.map((g) => g.label)).toEqual([
+      "Grunnforhold",
+      "Støy",
+      "Nærområdet",
+      "Infrastruktur",
+      "Forurenset grunn",
+    ]);
+  });
+
+  it("legger forurenset grunn sist når registreringen ikke gjelder søkepunktet", () => {
+    // Eksempelet fra testingen: en registrering 760 m unna, søkepunktet utenfor lokaliteten.
+    const rekkefølge = sectionOrder({ contaminationAtSearchPoint: false });
+    expect(rekkefølge.at(-1)!.id).toBe("forurenset-grunn");
+
+    const groups = groupFacts(
+      [fact("miljo", { headline: "760 m unna", distanceM: 760, contains: false }), fact("stoy")],
+      [],
+      rekkefølge,
+    );
+    expect(groups.map((g) => g.label)).toEqual(["Støy", "Forurenset grunn"]);
+  });
+
+  it("løfter forurenset grunn når søkepunktet ligger inne i en lokalitet som krever oppfølging", () => {
+    const rekkefølge = sectionOrder({ contaminationAtSearchPoint: true });
+    expect(rekkefølge[0]!.id).toBe("forurenset-grunn");
+    // Resten beholder sin innbyrdes rekkefølge.
+    expect(rekkefølge.slice(1).map((s) => s.id)).toEqual(["grunnforhold", "stoy", "naeromradet", "infrastruktur"]);
+
+    const groups = groupFacts(
+      [fact("miljo", { headline: "Ved søkepunktet", distanceM: 0, contains: true }), fact("grunnforhold")],
+      [],
+      rekkefølge,
+    );
+    expect(groups[0]!.label).toBe("Forurenset grunn");
   });
 
   it("kaller seksjonen «Forurenset grunn», ikke «Miljø»", () => {
@@ -96,6 +131,13 @@ describe("rekkefølge på kategoriene", () => {
     const utenGrunnforhold = groupFacts([fact("stoy"), fact("miljo")]);
     expect(utenGrunnforhold.map((g) => g.label)).toEqual(["Støy", "Forurenset grunn"]);
 
+    const utenStoy = groupFacts([fact("grunnforhold"), fact("oppvekst"), fact("miljo")]);
+    expect(utenStoy.map((g) => g.label)).toEqual(["Grunnforhold", "Nærområdet", "Forurenset grunn"]);
+
+    // Også når forurenset grunn er løftet: de som mangler, faller bort.
+    const løftet = groupFacts([fact("miljo", { contains: true }), fact("oppvekst")], [], sectionOrder({ contaminationAtSearchPoint: true }));
+    expect(løftet.map((g) => g.label)).toEqual(["Forurenset grunn", "Nærområdet"]);
+
     const bareStoy = groupFacts([fact("stoy")]);
     expect(bareStoy.map((g) => g.label)).toEqual(["Støy"]);
 
@@ -103,14 +145,18 @@ describe("rekkefølge på kategoriene", () => {
     expect(bareAnlegg.map((g) => g.label)).toEqual(["Nærområdet"]);
   });
 
-  it("holder infrastruktur og nærområdet etter de tre prioriterte", () => {
+  it("har én seksjon per tema — industri og anlegg ligger under Nærområdet", () => {
     expect(AREA_SECTIONS.map((s) => s.id)).toEqual([
       "grunnforhold",
       "stoy",
-      "forurenset-grunn",
-      "infrastruktur",
       "naeromradet",
+      "infrastruktur",
+      "forurenset-grunn",
     ]);
+    // Ingen kategori skal høre til to seksjoner.
+    const kategorier = AREA_SECTIONS.flatMap((s) => s.categories);
+    expect(new Set(kategorier).size).toBe(kategorier.length);
+    expect(AREA_SECTIONS.map((s) => s.label)).not.toContain("Industri og anlegg");
   });
 
   it("beholder en seksjon som bare har en utvidbar oversikt", () => {
