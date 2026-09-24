@@ -90,10 +90,10 @@ export const SOURCES: Record<string, SourceInfo> = {
  * Tallkoden («påvirkningsgrad 3») er teknisk og hører hjemme under «Detaljer».
  */
 const PAAVIRKNINGSGRAD_SETNING: Record<string, string> = {
-  liteForurensning: "Myndigheten har vurdert stedet som lite eller ikke forurenset, uten behov for tiltak uansett arealbruk.",
-  akseptabelForurensning: "Myndigheten har vurdert tilstanden som akseptabel med dagens arealbruk.",
-  ikkeAkseptabelForurensning: "Myndigheten har vurdert tilstanden som ikke akseptabel, og det er behov for tiltak.",
-  ukjentPåvirkning: "Det er mistanke om forurensning eller lite informasjon om stedet, og oppfølgingen er uavklart.",
+  liteForurensning: "Stedet er vurdert som lite eller ikke forurenset, uten behov for tiltak.",
+  akseptabelForurensning: "Tilstanden er vurdert som akseptabel med dagens arealbruk.",
+  ikkeAkseptabelForurensning: "Tilstanden er vurdert som ikke akseptabel, og det er behov for tiltak.",
+  ukjentPåvirkning: "Det er mistanke om forurensning eller for lite informasjon, og oppfølgingen er uavklart.",
 };
 
 /** Kildens offisielle etiketter, ordrett fra tegnforklaringen. Vises under «Detaljer». */
@@ -198,16 +198,20 @@ function forurensetGrunn(input: { title: string; attributes: AreaAttributes; con
   const { title, attributes: a, contains, externalId } = input;
   const details: string[] = [];
 
+  // Første linje er alltid hvor registreringen ligger i forhold til søkepunktet. Uten den kan
+  // et lokalitetsnavn som er en gateadresse leses som at adressen brukeren søkte på er forurenset.
   details.push(contains ? "Søkepunktet ligger innenfor denne lokaliteten." : "Søkepunktet ligger utenfor lokaliteten.");
 
-  const type = LOKALITET_TYPE_SETNING[str(a.lokalitetType) ?? ""];
-  details.push(
-    type
-      ? `Miljødirektoratet har registrert ${type} her.`
-      : "Miljødirektoratet har registrert denne lokaliteten i databasen over forurenset grunn.",
-  );
+  // Lokalitetstypen sier noe reelt når den ikke bare er «forurenset grunn» — deponi, skytebane, skipsverft.
+  const type = str(a.lokalitetType);
+  const typeSetning = type && type !== "forurensetGrunn" ? LOKALITET_TYPE_SETNING[type] : null;
+  if (typeSetning) details.push(`Registrert som ${typeSetning}.`);
 
-  const vurdering = [PAAVIRKNINGSGRAD_SETNING[str(a.paavirkningsgrad) ?? ""], PROSESS_STATUS_SETNING[str(a.prosessStatus) ?? ""]]
+  const grad = str(a.paavirkningsgrad) ?? "";
+  const prosess = str(a.prosessStatus) ?? "";
+  // Grad X sier allerede at oppfølgingen er uavklart. Da skal ikke prosesstatusen gjenta det.
+  const gjentar = grad === "ukjentPåvirkning" && prosess === "uavklart";
+  const vurdering = [PAAVIRKNINGSGRAD_SETNING[grad], gjentar ? null : PROSESS_STATUS_SETNING[prosess]]
     .filter(Boolean)
     .join(" ");
   if (vurdering) details.push(vurdering);
@@ -220,15 +224,12 @@ function forurensetGrunn(input: { title: string; attributes: AreaAttributes; con
 
   const arealbruk = AREALBRUK_TEXT[str(a.arealbruk) ?? ""];
   const areal = num(a.arealM2);
-  const fakta = [
-    arealbruk ? `Arealbruk: ${arealbruk.charAt(0).toLowerCase()}${arealbruk.slice(1)}` : null,
-    areal !== null && areal > 0 ? formatArea(areal) : null,
-    num(a.registrertAar) ? `registrert ${num(a.registrertAar)}` : null,
-  ].filter(Boolean);
-  if (fakta.length > 0) details.push(fakta.join(" · "));
+  const aar = num(a.registrertAar);
 
   return {
-    headline: `Registrert lokalitet: ${title}`,
+    // Seksjonen heter «Forurenset grunn», så navnet alene er nok — og linjen under sier
+    // hvor registreringen ligger i forhold til søkepunktet.
+    headline: title,
     details,
     caveat:
       "Registreringen gjelder denne lokaliteten i Miljødirektoratets database, ikke nødvendigvis hele eiendommen eller naboeiendommene.",
@@ -236,6 +237,9 @@ function forurensetGrunn(input: { title: string; attributes: AreaAttributes; con
       PAAVIRKNINGSGRAD_TEKNISK[str(a.paavirkningsgrad) ?? ""] ?? null,
       str(a.lokalitetType) ? `Lokalitetstype: ${str(a.lokalitetType)}` : null,
       str(a.prosessStatus) ? `Prosesstatus: ${str(a.prosessStatus)}` : null,
+      arealbruk ? `Arealbruk: ${arealbruk.charAt(0).toLowerCase()}${arealbruk.slice(1)}` : null,
+      areal !== null && areal > 0 ? formatArea(areal) : null,
+      aar ? `registrert ${aar}` : null,
       externalId ? `Lokalitet-ID: ${externalId}` : null,
     ].filter((line): line is string => line !== null),
   };
@@ -414,6 +418,13 @@ export function describeContaminatedSummary(input: {
       "Databasen inneholder også registreringer fra bygge- og gravesaker, og er derfor tett i byer. Antallet sier ikke noe om forholdene på en enkelt eiendom.",
   };
 }
+
+/**
+ * Vises når det finnes registreringer i området, men ingen av dem er vurdert til å kreve
+ * oppfølging. Da er det ingen hovedkort, og brukeren skal få vite hvorfor.
+ */
+export const INGEN_FORURENSNING_TIL_OPPFOLGING =
+  "Ingen av registreringene i området er vurdert til å kreve tiltak eller oppfølging.";
 
 /** Lenketekst per kildetype. */
 export function linkLabelFor(sourceUrlType: string | null, providerId: string): string {

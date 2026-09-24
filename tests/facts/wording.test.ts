@@ -159,8 +159,8 @@ describe("forurenset grunn", () => {
   const majorstuen = (contains = false) =>
     describe_("forurenset_grunn", MAJORSTUEN, contains, "Majorstuen skole", "13919-A")!;
 
-  it("navngir lokaliteten i overskriften", () => {
-    expect(majorstuen().headline).toBe("Registrert lokalitet: Majorstuen skole");
+  it("bruker lokalitetsnavnet som overskrift", () => {
+    expect(majorstuen().headline).toBe("Majorstuen skole");
   });
 
   it("sier tydelig om søkepunktet ligger innenfor eller utenfor", () => {
@@ -168,37 +168,66 @@ describe("forurenset grunn", () => {
     expect(majorstuen(true).details[0]).toBe("Søkepunktet ligger innenfor denne lokaliteten.");
   });
 
+  it("antyder aldri at eiendommen det søkes på er forurenset", () => {
+    const text = [majorstuen().headline, ...majorstuen().details, majorstuen().caveat].join(" ");
+    expect(text).not.toMatch(/forurensning på eiendommen|forurenset eiendom|farlig område|eiendommen din/i);
+    // «her» kan leses som søkepunktet, og skal ikke stå i et kort for en lokalitet ved siden av.
+    expect(majorstuen(false).details.join(" ")).not.toMatch(/registrert .*her\b/i);
+  });
+
   it("sier eksplisitt at kilden ikke oppgir forurensningstype", () => {
     expect(majorstuen().details).toContain("Kilden oppgir ikke hvilken type forurensning som er registrert.");
   });
 
-  it("gjengir myndighetens vurdering og saksgang i klartekst, ikke som kode", () => {
-    const details = majorstuen().details.join(" ");
-    expect(details).toContain("Myndigheten har vurdert tilstanden som ikke akseptabel, og det er behov for tiltak.");
-    expect(details).toContain("Undersøkelser er igangsatt.");
-    expect(details).not.toMatch(/påvirkningsgrad 3|undersøkelseIgangsatt|forurensetGrunn/);
+  it("holder hovedteksten kort og uten kildekoder", () => {
+    const details = majorstuen().details;
+    expect(details).toEqual([
+      "Søkepunktet ligger utenfor lokaliteten.",
+      "Tilstanden er vurdert som ikke akseptabel, og det er behov for tiltak. Undersøkelser er igangsatt.",
+      "Kilden oppgir ikke hvilken type forurensning som er registrert.",
+    ]);
+    expect(details.join(" ")).not.toMatch(/påvirkningsgrad|undersøkelseIgangsatt|forurensetGrunn/);
   });
 
-  it("viser arealbruk, areal og registreringsår", () => {
-    expect(majorstuen().details.join(" ")).toContain(`Arealbruk: offentlig eller privat tjenesteytelse · 3\u00a0300 m² · registrert 2019`);
-  });
-
-  it("holder kildens koder under «Detaljer», med lokalitet-ID", () => {
+  it("flytter kildens koder, arealbruk og årstall under «Detaljer»", () => {
     expect(majorstuen().technical).toEqual([
       "Påvirkningsgrad 3 – ikke akseptabel tilstand, behov for tiltak",
       "Lokalitetstype: forurensetGrunn",
       "Prosesstatus: undersøkelseIgangsatt",
+      "Arealbruk: offentlig eller privat tjenesteytelse",
+      "3\u00a0300 m²",
+      "registrert 2019",
       "Lokalitet-ID: 13919-A",
     ]);
+  });
+
+  it("nevner lokalitetstypen bare når den sier noe mer enn «forurenset grunn»", () => {
+    const deponi = describe_("forurenset_grunn", { ...MAJORSTUEN, lokalitetType: "deponi" }, false, "Grønmo")!;
+    expect(deponi.details.join(" ")).toContain("Registrert som et nedlagt eller eksisterende deponi.");
+    const skytebane = describe_("forurenset_grunn", { ...MAJORSTUEN, lokalitetType: "skytebane" }, false, "Løvenskiold")!;
+    expect(skytebane.details.join(" ")).toContain("Registrert som en skytebane.");
+    expect(majorstuen().details.join(" ")).not.toContain("Registrert som");
   });
 
   it("sier ikke noe om naboeiendommer", () => {
     expect(majorstuen().caveat).toContain("ikke nødvendigvis hele eiendommen eller naboeiendommene");
   });
 
+  it("gjentar ikke «uavklart» både som grad og som prosesstatus", () => {
+    const text = describe_(
+      "forurenset_grunn",
+      { ...MAJORSTUEN, paavirkningsgrad: "ukjentPåvirkning", prosessStatus: "uavklart" },
+      false,
+      "Middelthuns gate 27",
+    )!;
+    const vurdering = text.details.find((d) => d.includes("uavklart"))!;
+    expect(vurdering).toBe("Det er mistanke om forurensning eller for lite informasjon, og oppfølgingen er uavklart.");
+    expect(text.details.join(" ").match(/uavklart/g)).toHaveLength(1);
+  });
+
   it("gjetter ikke type når kilden mangler lokalitetstype", () => {
     const text = describe_("forurenset_grunn", { paavirkningsgrad: "ukjentPåvirkning" }, false, "Sørkedalsveien 7 - 13")!;
-    expect(text.details.join(" ")).toContain("Miljødirektoratet har registrert denne lokaliteten i databasen over forurenset grunn.");
+    expect(text.details.join(" ")).not.toContain("Registrert som");
     expect(text.details.join(" ")).toContain("mistanke om forurensning");
   });
 

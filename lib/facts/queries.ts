@@ -15,6 +15,7 @@ import type { LookupHit } from "./lookups/types";
 import {
   describeContaminatedSummary,
   describeFact,
+  INGEN_FORURENSNING_TIL_OPPFOLGING,
   linkLabelFor,
   PAAVIRKNINGSGRAD_SHORT,
   SOURCES,
@@ -69,6 +70,8 @@ export interface ContaminatedListItem {
 /** Den utvidbare oversikten over alle registreringer med forurenset grunn i området. */
 export interface ContaminatedOverview {
   total: number;
+  /** Settes når ingen registreringer er relevante nok til et hovedkort. */
+  noAttentionNote: string | null;
   headline: string;
   details: string[];
   caveat: string | null;
@@ -172,15 +175,18 @@ function toFact(input: {
 }
 
 /**
- * Forurenset grunn: konkrete lokaliteter, nærmeste først.
+ * Forurenset grunn: bare det brukeren faktisk bør merke seg blir hovedkort.
  *
- * Standardvisningen er et lite antall kort. Lokaliteter kilden mener trenger tiltak tas med
- * selv om de ikke er blant de nærmeste. Resten ligger i den utvidbare oversikten, og alt som
- * har flate tegnes i kartet.
+ * Grad 1 og 2 er myndighetens egen konklusjon om at tilstanden er akseptabel. De skal ikke få
+ * et område til å se problematisk ut, og vises derfor ikke som kort — men de finnes fortsatt
+ * i «Se alle registreringer i området» og tegnes i kartet som før.
+ *
+ * Et kort vises når kilden sier at noe må følges opp (grad 3 eller X), eller når søkepunktet
+ * faktisk ligger inne i lokaliteten. Det siste handler om stedet brukeren spurte om, og er
+ * relevant uansett hvilken grad kilden har satt.
  */
-const CONTAMINATED_CARDS = 4;
-const CONTAMINATED_ATTENTION_CARDS = 2;
-const NEEDS_ACTION = "ikkeAkseptabelForurensning";
+const CONTAMINATED_CARD_LIMIT = 5;
+const GRADES_NEEDING_ATTENTION = new Set(["ikkeAkseptabelForurensning", "ukjentPåvirkning"]);
 
 const byRelevance = (a: FactRow, b: FactRow) => Number(b.contains) - Number(a.contains) || a.distance_m - b.distance_m;
 
@@ -193,15 +199,18 @@ const toLngLat = (centroid: AreaGeometry | null): [number, number] => {
 const gradeOf = (row: FactRow): string =>
   typeof row.attributes.paavirkningsgrad === "string" ? row.attributes.paavirkningsgrad : "ukjentPåvirkning";
 
+/** Om en registrering fortjener et eget kort, eller bare hører hjemme i oversikten. */
+export function needsAttention(input: { contains: boolean; grade: string }): boolean {
+  return input.contains || GRADES_NEEDING_ATTENTION.has(input.grade);
+}
+
 function contaminatedFacts(rows: FactRow[], radiusM: number) {
   const sorted = [...rows].sort(byRelevance);
-  const nearest = sorted.slice(0, CONTAMINATED_CARDS);
-  const needsAction = sorted
-    .slice(CONTAMINATED_CARDS)
-    .filter((row) => gradeOf(row) === NEEDS_ACTION)
-    .slice(0, CONTAMINATED_ATTENTION_CARDS);
 
-  const facts = [...nearest, ...needsAction].flatMap((row) => {
+  const facts = sorted
+    .filter((row) => needsAttention({ contains: row.contains, grade: gradeOf(row) }))
+    .slice(0, CONTAMINATED_CARD_LIMIT)
+    .flatMap((row) => {
     const fact = toFact({
       id: row.id,
       providerId: row.provider_id,
@@ -222,7 +231,7 @@ function contaminatedFacts(rows: FactRow[], radiusM: number) {
   const source = SOURCES["mdir-forurenset-grunn"]!;
   const summary = describeContaminatedSummary({
     total: sorted.length,
-    byGrade: [NEEDS_ACTION, "ukjentPåvirkning", "akseptabelForurensning", "liteForurensning"].map((grade) => ({
+    byGrade: ["ikkeAkseptabelForurensning", "ukjentPåvirkning", "akseptabelForurensning", "liteForurensning"].map((grade) => ({
       grade,
       count: sorted.filter((row) => gradeOf(row) === grade).length,
     })),
@@ -231,6 +240,7 @@ function contaminatedFacts(rows: FactRow[], radiusM: number) {
 
   const overview: ContaminatedOverview = {
     total: sorted.length,
+    noAttentionNote: facts.length === 0 ? INGEN_FORURENSNING_TIL_OPPFOLGING : null,
     headline: summary.headline,
     details: summary.details,
     caveat: summary.caveat,
@@ -293,6 +303,21 @@ async function runLookups(lat: number, lng: number, radiusM: number): Promise<{ 
   // Bare komplette resultater caches.
   if (failed.length === 0) lookupCache.set(key, results);
   return { results, failed };
+}
+
+/**
+ * Grupperer fakta i visningsrekkefølgen fra AREA_CATEGORIES. Tomme kategorier faller bort,
+ * så de som har innhold flytter opp av seg selv. Forurenset grunn beholdes selv uten kort,
+ * fordi den utvidbare oversikten fortsatt skal være tilgjengelig.
+ */
+export function groupFacts(facts: AreaFact[], hasContaminatedOverview: boolean): AreaFactGroup[] {
+  return AREA_CATEGORIES.map((category) => ({
+    category,
+    label: AREA_CATEGORY_LABELS[category],
+    facts: facts
+      .filter((f) => f.category === category)
+      .sort((a, b) => Number(b.contains) - Number(a.contains) || (a.distanceM ?? 0) - (b.distanceM ?? 0)),
+  })).filter((group) => group.facts.length > 0 || (group.category === "miljo" && hasContaminatedOverview));
 }
 
 export async function getAreaFacts(params: { lat: number; lng: number; radius: number }): Promise<AreaFactsResult> {
@@ -385,13 +410,7 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
     }
   }
 
-  const groups: AreaFactGroup[] = AREA_CATEGORIES.map((category) => ({
-    category,
-    label: AREA_CATEGORY_LABELS[category],
-    facts: facts
-      .filter((f) => f.category === category)
-      .sort((a, b) => Number(b.contains) - Number(a.contains) || (a.distanceM ?? 0) - (b.distanceM ?? 0)),
-  })).filter((group) => group.facts.length > 0);
+  const groups = groupFacts(facts, contaminated !== null);
 
   const unavailable = [...failed, ...(dbFailed ? ["database"] : [])]
     .map((id) => SOURCES[id]?.name ?? (id === "database" ? "lagrede kilder" : id))

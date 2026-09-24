@@ -6,13 +6,19 @@ import type { LineString, MultiLineString, MultiPolygon, Point, Polygon } from "
  * og ligger derfor i egen tabell med egen spørring.
  */
 
-export const AREA_CATEGORIES = ["miljo", "grunnforhold", "stoy", "infrastruktur", "industri"] as const;
+/**
+ * Rekkefølgen her er visningsrekkefølgen på resultatsiden, og den er satt etter hva som
+ * normalt betyr mest for en beboer: hva grunnen består av, hva man hører, og deretter
+ * registreringer i nærheten. Kategorier uten funn faller bort, så resten flytter opp av seg selv.
+ */
+export const AREA_CATEGORIES = ["grunnforhold", "stoy", "miljo", "infrastruktur", "industri"] as const;
 export type AreaCategory = (typeof AREA_CATEGORIES)[number];
 
 export const AREA_CATEGORY_LABELS: Record<AreaCategory, string> = {
-  miljo: "Miljø",
   grunnforhold: "Grunnforhold",
   stoy: "Støy",
+  // Kategorien inneholder i praksis bare forurenset grunn. Da skal den hete det.
+  miljo: "Forurenset grunn",
   infrastruktur: "Infrastruktur",
   industri: "Industri og anlegg",
 };

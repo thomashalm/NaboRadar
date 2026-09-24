@@ -18,6 +18,8 @@ export function AreaFacts({ result, radius, pending }: AreaFactsProps) {
   const groups = result.status === "ok" ? result.groups : [];
   const contaminated = result.status === "ok" ? result.contaminated : null;
   const total = groups.reduce((sum, group) => sum + group.facts.length, 0);
+  // Registreringer som ikke krever oppfølging gir ingen kort, men skal fortsatt være tilgjengelige.
+  const hasContent = total > 0 || contaminated !== null;
 
   return (
     <section aria-labelledby="facts-heading" aria-busy={pending} className="mt-12">
@@ -36,7 +38,7 @@ export function AreaFacts({ result, radius, pending }: AreaFactsProps) {
               <p className="mt-3 rounded-lg bg-danger-soft px-3 py-2 font-mono text-xs text-danger">Dev: {result.devReason}</p>
             )}
           </Notice>
-        ) : total === 0 ? (
+        ) : !hasContent ? (
           <Notice>
             <p className="font-medium text-ink">Ingen registrerte forhold i kildene våre innen {formatRadius(radius)}.</p>
             <p className="mt-1 text-muted">
@@ -49,14 +51,23 @@ export function AreaFacts({ result, radius, pending }: AreaFactsProps) {
             {groups.map((group) => (
               <div key={group.category}>
                 <h3 className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">{group.label}</h3>
-                <ul className="mt-3 flex flex-col gap-3">
-                  {group.facts.map((fact) => (
-                    <li key={fact.id}>
-                      <FactItem fact={fact} />
-                    </li>
-                  ))}
-                </ul>
-                {group.category === "miljo" && contaminated && <AllContaminated overview={contaminated} />}
+                {group.facts.length > 0 && (
+                  <ul className="mt-3 flex flex-col gap-3">
+                    {group.facts.map((fact) => (
+                      <li key={fact.id}>
+                        <FactItem fact={fact} />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {group.category === "miljo" && contaminated && (
+                  <>
+                    {contaminated.noAttentionNote && (
+                      <p className="mt-3 text-[15px] leading-relaxed text-muted">{contaminated.noAttentionNote}</p>
+                    )}
+                    <AllContaminated overview={contaminated} />
+                  </>
+                )}
               </div>
             ))}
           </div>
