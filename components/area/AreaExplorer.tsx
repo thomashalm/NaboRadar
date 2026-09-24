@@ -117,7 +117,12 @@ export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, 
           {label}
         </h1>
         <div className="mt-6 flex flex-wrap items-center gap-x-1.5 gap-y-3 sm:gap-x-3">
-          <RadiusPicker radius={radius} hrefFor={(r) => buildAreaHref({ ...context, radius: r })} onNavigate={navigate} />
+          <RadiusPicker
+            radius={radius}
+            hrefFor={(r) => buildAreaHref({ ...context, radius: r })}
+            onNavigate={navigate}
+            pending={pending}
+          />
           <ChangeLocation radius={radius} onNavigate={navigateToLocation} />
         </div>
       </section>
