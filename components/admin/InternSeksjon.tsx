@@ -1,6 +1,8 @@
 import type { AreaResearch, Tillit } from "@/lib/admin/area-research";
 import { tillitFor } from "@/lib/admin/area-research";
+import type { NearbyResearch } from "@/lib/admin/research-types";
 import { formatRadius } from "@/lib/format";
+import { ResearchFunn } from "./ResearchFunn";
 
 /**
  * Intern research under det offentlige resultatet.
@@ -48,7 +50,16 @@ function Merkelapp({ children, stil }: { children: React.ReactNode; stil?: strin
   );
 }
 
-export function InternSeksjon({ research }: { research: AreaResearch | null }) {
+export function InternSeksjon({
+  research,
+  funn,
+  radiusM,
+}: {
+  research: AreaResearch | null;
+  /** Kuraterte interne funn. Null betyr at oppslaget feilet, tom liste at det ikke er noen. */
+  funn: NearbyResearch[] | null;
+  radiusM: number;
+}) {
   return (
     <section className="mt-14 border-t-2 border-dashed border-line-strong pt-8" aria-labelledby="intern">
       <div className="flex flex-wrap items-center gap-2">
@@ -61,13 +72,24 @@ export function InternSeksjon({ research }: { research: AreaResearch | null }) {
         Vises bare for innloggede driftsbrukere. Ikke en del av det offentlige resultatet.
       </p>
 
-      {research === null ? (
+      {funn === null ? (
         <p className="mt-4 rounded-2xl border border-dashed border-line-strong px-5 py-4 text-[15px] text-muted">
-          Fikk ikke hentet den interne oversikten akkurat nå.
+          Fikk ikke hentet interne funn akkurat nå.
         </p>
       ) : (
-        <Datakvalitet research={research} />
+        <ResearchFunn funn={funn} radiusM={radiusM} />
       )}
+
+      {/* Datakvalitet er noe annet enn research: den handler om kildene våre, ikke om funn. */}
+      <div className="mt-8 border-t border-line pt-6">
+        {research === null ? (
+          <p className="rounded-2xl border border-dashed border-line-strong px-5 py-4 text-[15px] text-muted">
+            Fikk ikke hentet den interne oversikten akkurat nå.
+          </p>
+        ) : (
+          <Datakvalitet research={research} />
+        )}
+      </div>
     </section>
   );
 }
@@ -75,8 +97,9 @@ export function InternSeksjon({ research }: { research: AreaResearch | null }) {
 /**
  * Datakvalitet for dette søkepunktet.
  *
- * Den eneste research-seksjonen som er bygget, fordi den er den eneste som kan bygges på data
- * vi faktisk har. De øvrige kategoriene mangler både kilde og modell — se håndboken.
+ * Holdt bevisst utenfor research: dette er avledet av kildene våre og sier hvor mye «ingen
+ * treff» er verdt her. Research er kuraterte funn noen har lagt inn. De to skal ikke leses
+ * som samme slags kunnskap, og blandes derfor ikke i én liste.
  */
 function Datakvalitet({ research }: { research: AreaResearch }) {
   const tillit = tillitFor(research.dekning.flatMap((d) => d.kilder));

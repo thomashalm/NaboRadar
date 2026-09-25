@@ -14,6 +14,7 @@ import { radiusBounds } from "@/lib/geo/radius";
 import type { MapTileConfig } from "@/lib/map/config";
 import { contaminatedSitesLayer } from "@/lib/map/layers/contaminated-sites";
 import { selectedPropertyLayer } from "@/lib/map/layers/selected-property";
+import { internalFindingsLayer, type InternalMapFeature } from "@/lib/map/layers/internal-findings";
 import { nearbyPlacesLayer } from "@/lib/map/layers/nearby-places";
 import { planAreasLayer } from "@/lib/map/layers/plan-areas";
 import { radiusLayer } from "@/lib/map/layers/radius";
@@ -57,6 +58,13 @@ interface AreaExplorerProps {
    * slår derfor gjennom begge steder av seg selv.
    */
   extraSections?: React.ReactNode;
+  /**
+   * Interne kartobjekt som legges på samme kart, med egen dempet markørstil.
+   *
+   * Samme kart, samme valgtilstand, samme MapSelectionProvider — så et trykk i en intern liste
+   * oppfører seg som et trykk i en offentlig. Den offentlige siden sender ingenting hit.
+   */
+  internalFeatures?: readonly InternalMapFeature[];
 }
 
 type Stream<T> = { status: "loading" } | { status: "ready"; data: T } | { status: "failed" };
@@ -94,6 +102,7 @@ function useStream<T>(promise: Promise<T>): Stream<T> {
 
 const NO_EVENTS: AreaEvent[] = [];
 const NO_SITES: AreaMapFeature[] = [];
+const NO_INTERNAL: readonly InternalMapFeature[] = [];
 /**
  * Eiendomsoppslag krever at brukeren faktisk ser enkelttomter.
  *
@@ -121,6 +130,7 @@ export function AreaExplorer({
   tiles,
   skolekrets,
   extraSections,
+  internalFeatures = NO_INTERNAL,
 }: AreaExplorerProps) {
   const router = useRouter();
   const eventStream = useStream(eventsPromise);
@@ -158,7 +168,10 @@ export function AreaExplorer({
   const places = useMemo(() => mapFeatures.filter((f) => f.geometry.type === "Point"), [mapFeatures]);
   // Valget gjelder bare så lenge objektet finnes i gjeldende resultat.
   const selectedId =
-    selection && (events.some((e) => e.id === selection.id) || mapFeatures.some((f) => f.id === selection.id))
+    selection &&
+    (events.some((e) => e.id === selection.id) ||
+      mapFeatures.some((f) => f.id === selection.id) ||
+      internalFeatures.some((f) => f.id === selection.id))
       ? selection.id
       : null;
 
@@ -229,14 +242,20 @@ export function AreaExplorer({
       bindLayer(contaminatedSitesLayer, sites),
       bindLayer(planAreasLayer, events),
       bindLayer(nearbyPlacesLayer, places),
+      // Interne funn ligger over de offentlige punktene, men i en markør som ikke kan forveksles.
+      bindLayer(internalFindingsLayer, internalFeatures),
       // Valgt eiendom tegnes øverst, men med lav fyllopasitet.
       bindLayer(selectedPropertyLayer, { geometry: propertyGeometry }),
     ],
-    [lat, lng, radius, events, sites, places, propertyGeometry],
+    [lat, lng, radius, events, sites, places, internalFeatures, propertyGeometry],
   );
 
   const popupFor = useCallback(
     (id: string): MapPopupContent | null => {
+      const intern = internalFeatures.find((f) => f.id === id);
+      if (intern) {
+        return { lngLat: intern.center, title: intern.title, lines: ["Intern research", ...intern.lines] };
+      }
       const place = mapFeatures.find((f) => f.id === id);
       if (place) {
         // Teksten er ferdig formulert i formuleringsregisteret — kartet finner aldri på noe eget.
@@ -261,11 +280,14 @@ export function AreaExplorer({
         linkLabel: "Se saken",
       };
     },
-    [events, mapFeatures, context],
+    [events, mapFeatures, internalFeatures, context],
   );
 
   /** Ids kartet faktisk tegner. En rad uten kartobjekt skal ikke se klikkbar ut. */
-  const mapFeatureIds = useMemo(() => mapFeatures.map((f) => f.id), [mapFeatures]);
+  const mapFeatureIds = useMemo(
+    () => [...mapFeatures.map((f) => f.id), ...internalFeatures.map((f) => f.id)],
+    [mapFeatures, internalFeatures],
+  );
   /** Trykk i en liste velger samme objekt som et klikk i kartet ville gjort. */
   const velgFraListe = useCallback((id: string) => setSelection({ id, from: "list" }), []);
 

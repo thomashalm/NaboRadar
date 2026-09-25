@@ -85,8 +85,8 @@ function contextSearch(params: AreaContext): URLSearchParams {
   return search;
 }
 
-export function buildAreaHref(params: AreaContext): string {
-  return `/omrade?${contextSearch(params).toString()}`;
+export function buildAreaHref(params: AreaContext, basePath = "/omrade"): string {
+  return `${basePath}?${contextSearch(params).toString()}`;
 }
 
 /** Detaljside med søkekonteksten, slik at avstand og «tilbake» kan vises. */

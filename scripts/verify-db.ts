@@ -40,7 +40,10 @@ async function main() {
   // uten denne sjekken åpner neste funksjon seg selv i det stille — slik
   // trigger_sync_workflow() gjorde til 2026-09-25.
   const ANON_OK = new Set(["data_status", "events_within", "features_near", "features_count_near", "get_event"]);
-  const AUTH_OK = new Set([...ANON_OK, "is_admin", "provider_health", "recent_sync_runs", "request_sync", "scheduler_status"]);
+  // Research er admin-only, men går gjennom authenticated-rollen — is_admin() inne i hver
+  // funksjon er det som faktisk stenger, ikke grantet. Anon skal aldri ha noen av dem.
+  const RESEARCH = ["research_items", "research_sources", "research_near", "save_research_item", "add_research_source", "delete_research_source"];
+  const AUTH_OK = new Set([...ANON_OK, "is_admin", "provider_health", "recent_sync_runs", "request_sync", "scheduler_status", ...RESEARCH]);
 
   const grants = await q<{ proname: string; anon: boolean; auth: boolean; service: boolean }>(
     `select p.proname,

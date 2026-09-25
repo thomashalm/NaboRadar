@@ -20,7 +20,8 @@
     "sync:area": "tsx scripts/sync-area.ts",
     "sync:worker": "tsx scripts/sync-worker.ts",
     "sync:status": "tsx scripts/sync-status.ts",
-    "alerts:check": "tsx scripts/alert-check.ts"
+    "alerts:check": "tsx scripts/alert-check.ts",
+    "research:seed": "tsx scripts/seed-research.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

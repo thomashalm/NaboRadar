@@ -3,12 +3,16 @@ import Link from "next/link";
 import { AreaExplorer } from "@/components/area/AreaExplorer";
 import { AreaShell } from "@/components/area/AreaShell";
 import { SkolekretsNotis } from "@/components/area/SkolekretsNotis";
+import { IkkeTilgang } from "@/components/admin/IkkeTilgang";
 import { InternSeksjon } from "@/components/admin/InternSeksjon";
 import { SearchBox } from "@/components/search/SearchBox";
 import { areaParamsSchema } from "@/lib/area-params";
 import { buildAreaView } from "@/lib/area-view";
 import { getAdminSession } from "@/lib/admin/session";
 import { getAreaResearch } from "@/lib/admin/area-research";
+import { researchNear } from "@/lib/admin/research";
+import { CATEGORY_SHORT, OPERATIONAL_LABEL, VERIFICATION_LABEL, type NearbyResearch } from "@/lib/admin/research-types";
+import type { InternalMapFeature } from "@/lib/map/layers/internal-findings";
 import { DEFAULT_RADIUS_M } from "@/lib/geo/constants";
 import { getMapTileConfig } from "@/lib/map/config";
 
@@ -31,14 +35,26 @@ const FALLBACK_LABEL = "Valgt punkt";
  */
 export default async function AdminAddressPage({ searchParams }: { searchParams: SearchParams }) {
   const session = await getAdminSession();
-  if (session.state !== "admin") return <IkkeTilgang state={session.state} />;
+  if (session.state !== "admin")
+    return (
+      <AreaShell>
+        <IkkeTilgang tittel="Adressesøk" state={session.state} />
+      </AreaShell>
+    );
 
   const parsed = areaParamsSchema.safeParse(await searchParams);
   if (!parsed.success) return <Søk />;
 
   const { lat, lng, radius, sortering: sort } = parsed.data;
   const { events, storedFacts, lookupFacts } = buildAreaView({ lat, lng, radius, sort });
-  const research = await getAreaResearch(session.client, { lat, lng, radiusM: radius });
+  // Research og datakvalitet hentes samtidig, og hver for seg: feiler én, vises den andre.
+  const [research, funn] = await Promise.all([
+    getAreaResearch(session.client, { lat, lng, radiusM: radius }),
+    researchNear(session.client, { lat, lng, radiusM: radius }).catch((error: unknown) => {
+      console.error("[admin/adresse] research_near feilet:", error);
+      return null;
+    }),
+  ]);
 
   return (
     <AreaShell>
@@ -54,10 +70,27 @@ export default async function AdminAddressPage({ searchParams }: { searchParams:
         lookupFacts={lookupFacts}
         tiles={getMapTileConfig()}
         skolekrets={<SkolekretsNotis lat={lat} lng={lng} />}
-        extraSections={<InternSeksjon research={research} />}
+        internalFeatures={funn ? funn.map(kartobjekt) : []}
+        extraSections={<InternSeksjon research={research} funn={funn} radiusM={radius} />}
       />
     </AreaShell>
   );
+}
+
+/**
+ * Et funn som kartobjekt. Popup-linjene formuleres her, på serveren, av samme grunn som ellers
+ * i prosjektet: kartet skal aldri sette sammen tekst selv.
+ */
+function kartobjekt(funn: NearbyResearch): InternalMapFeature {
+  return {
+    id: funn.id,
+    title: funn.title,
+    center: [funn.longitude, funn.latitude],
+    lines: [
+      `${CATEGORY_SHORT[funn.category] ?? funn.category} / ${OPERATIONAL_LABEL[funn.operational_status]}`,
+      VERIFICATION_LABEL[funn.verification_status],
+    ],
+  };
 }
 
 function Søk() {
@@ -74,22 +107,6 @@ function Søk() {
         </div>
         <Link href="/admin" className="mt-6 inline-block text-[15px] font-medium text-accent hover:underline">
           Til driftssiden
-        </Link>
-      </main>
-    </AreaShell>
-  );
-}
-
-function IkkeTilgang({ state }: { state: "unconfigured" | "signed-out" | "not-admin" }) {
-  return (
-    <AreaShell>
-      <main className="mx-auto max-w-xl px-5 pt-[12vh] pb-24 sm:px-8">
-        <h1 className="text-3xl font-semibold tracking-[-0.03em]">Adressesøk</h1>
-        <p className="mt-3 text-lg text-muted">
-          {state === "signed-out" ? "Logg inn for å bruke driftssidene." : "Denne siden krever driftstilgang."}
-        </p>
-        <Link href="/admin" className="mt-6 inline-block text-[15px] font-medium text-accent hover:underline">
-          Til innlogging
         </Link>
       </main>
     </AreaShell>

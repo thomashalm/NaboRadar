@@ -84,9 +84,12 @@ export default async function AdminPage() {
         ))}
       </section>
 
-      <p className="mt-8">
+      <p className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
         <Link href="/admin/adresse" className="text-[15px] font-medium text-accent hover:underline">
           Adressesøk med intern research →
+        </Link>
+        <Link href="/admin/research" className="text-[15px] font-medium text-accent hover:underline">
+          Research →
         </Link>
       </p>
 

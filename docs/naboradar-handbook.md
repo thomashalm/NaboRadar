@@ -35,7 +35,8 @@ Sist kryssjekket mot repoet: **2026-09-25**.
 [27. Backup](#27-backup-og-gjenoppretting) · [28. Eksterne tjenester](#28-eksterne-tjenester) ·
 [29. Secrets](#29-secrets-oversikt) · [30. Kommandoer](#30-viktige-kommandoer) ·
 [31. Arkitekturbeslutninger](#31-viktige-arkitekturbeslutninger) · [32. Roadmap](#32-roadmap--idébank) ·
-[33. Milepæler](#33-milepæler) · [34. Synlighet og indeksering](#34-synlighet-og-indeksering)
+[33. Milepæler](#33-milepæler) · [34. Synlighet og indeksering](#34-synlighet-og-indeksering) ·
+[35. Privat research](#35-privat-research)
 
 ---
 
@@ -368,12 +369,17 @@ En endring i den offentlige visningen slår derfor gjennom her av seg selv.
 | `components/area/SkolekretsNotis.tsx` | Skolekretsnotisen |
 | `extraSections` | **Kun admin.** Offentlig side sender ingenting inn |
 
-Den eneste research-seksjonen som er bygget er **Datakvalitet i området**: antall per kategori
-innen radius, hvilke kategorier som er tomme, og en tillitsgrad utledet av kildenes helse — «lav»
-så snart én områdekilde er kritisk. Poenget er at en operatør ikke skal lese «ingen treff» som et
-svar når kilden er utdatert. Den er bygget på `features_count_near` og `provider_health()`, som
-begge finnes fra før, og bruker `assessAll` fra `lib/sync/health` slik at «stale» betyr det samme
-her som i `/admin` og i varslingen.
+Den interne seksjonen har to deler, og de blandes bevisst ikke:
+
+**Research i området** — kuraterte funn fra det private research-laget, innen valgt radius. Kun
+kategorier som faktisk har funn vises. Se [35. Privat research](#35-privat-research).
+
+**Datakvalitet i området** — antall per kategori innen radius, hvilke kategorier som er tomme, og
+en tillitsgrad utledet av kildenes helse — «lav» så snart én områdekilde er kritisk. Poenget er at
+en operatør ikke skal lese «ingen treff» som et svar når kilden er utdatert. Den er bygget på
+`features_count_near` og `provider_health()`, som begge finnes fra før, og bruker `assessAll` fra
+`lib/sync/health` slik at «stale» betyr det samme her som i `/admin` og i varslingen. Den handler
+om *kildene våre*, ikke om funn, og er derfor ikke en del av research.
 
 **Admin kan ikke** skrive data direkte. Knappene legger en rad i `sync_requests`; sync-workeren
 utfører den. Det er derfor webappen ikke trenger en skrivenøkkel.
@@ -1378,6 +1384,7 @@ npm run typecheck      # tsc --noEmit
 npm run db:push              # kjør migrasjoner mot SUPABASE_DB_URL
 npm run db:push -- --dry-run # vis hva som ville blitt kjørt
 npm run db:verify            # PostGIS, RLS, grants og data. Exit 1 ved tilgangsavvik
+npm run research:seed        # legg inn/oppdater kuraterte research-funn. Idempotent
 ```
 
 ### Sync
@@ -1577,3 +1584,117 @@ Dette er ikke gjort, og kan ikke gjøres fra repoet:
 Bing Webmaster Tools kan importere oppsettet fra Search Console, og dekker samtidig flere
 AI-søkeroboter.
 
+---
+
+## 35. Privat research
+
+Et internt arbeidslag for funn og leads rundt adresser: ting noen har undersøkt, med nok
+provenance til at neste person kan etterprøve vurderingen. Det er **ikke** en kilde til det
+offentlige produktet.
+
+> **Research publiseres aldri automatisk.** Ingen kodevei går fra research til `area_features`,
+> `events`, kartet, `/omrade` eller sitemap. Skal et funn ut til brukerne, må det gjennom den
+> vanlige veien: en provider, en kilde med avklart lisens, normalisering og en visningsregel.
+
+### Modellen
+
+To tabeller, `admin_research_items` og `admin_research_sources`, begge i `public` med RLS.
+
+| Felt | Verdier |
+|---|---|
+| `item_type` | `finding`, `lead`, `note`, `data_issue` |
+| `verification_status` | `unverified`, `partially_verified`, `verified_public_source`, `investigated_not_confirmed`, `rejected`, `archived` |
+| `operational_status` | `active`, `planned`, `under_construction`, `historical`, `closed`, `unknown` |
+| `sensitivity` | `normal`, `internal_only`, `do_not_publish` |
+| `confidence`, `interest_level` | `low`, `medium`, `high` |
+
+**Manuelt vs. importert.** `origin_type` er `manual` eller `imported`. Manuelle leads får
+`origin_type = manual`, `verification_status = unverified` og `sensitivity = internal_only` som
+standard — et nytt funn er internt og ubekreftet til noen har gjort arbeidet. Importerte funn
+**må** ha `origin_provider`; det er en CHECK i databasen, slik at et importert funn alltid kan
+spores til synken som laget det. Samme modell bærer begge, så en senere import ikke krever et
+nytt skjema.
+
+**Flere kilder per funn.** Provenance ligger i `admin_research_sources`, ikke i ett `source_url`.
+Et fysisk sted er **ett** funn med flere kilder. `primary_source` sier hvilke som er hovedkilder;
+`supports_claim` sier om kilden støtter påstanden. En kilde som ble undersøkt og *ikke* fant noe
+lagres på samme måte som en som fant noe — det er nettopp den som gjør
+`investigated_not_confirmed` etterprøvbar et år senere.
+
+**Koordinat.** `latitude`/`longitude` er enten begge satt eller begge tomme (CHECK), og `geom`
+avledes av dem. Uten koordinat vises funnet i `/admin/research`, men ikke i adressesøket.
+
+### Tilgang
+
+Helt admin-only, håndhevet i databasen:
+
+| Lag | Regel |
+|---|---|
+| Grants | `revoke all … from anon, authenticated`, deretter kun `select` til `authenticated` |
+| RLS | Én policy per tabell: `for select to authenticated using (public.is_admin())` |
+| Lesefunksjoner | `research_items`, `research_sources`, `research_near` — security definer, `is_admin()` i WHERE |
+| Skrivefunksjoner | `save_research_item`, `add_research_source`, `delete_research_source` — reiser `42501` uten `is_admin()` |
+| EXECUTE | Revokes fra **både** `public` og `anon`, granted til `authenticated`. `db:verify` håndhever det |
+| Webappen | Ingen skrivenøkkel. Alle kall går via admins egen sesjon, så `is_admin()` avgjør |
+
+Verifisert mot produksjon med publishable key: alle seks funksjonene og begge tabellene svarer
+`42501 permission denied` for `anon`. En innlogget ikke-admin får null rader, ikke en feil — RLS
+filtrerer, og funksjonene returnerer tomt.
+
+`tests/db/admin-research.test.ts` tester rollene direkte i PGlite, og
+`tests/admin/research-isolation.test.ts` tester at den offentlige koden ikke har noen vei inn:
+`/omrade` nevner ikke research, faktalaget leser den ikke, kategoriene overlapper ikke med
+`AREA_CATEGORIES`, og sitemappen inneholder ingen research-URL.
+
+### `/admin/research`
+
+Liste med søk, åtte filtre (kommune, kategori, type, verifisering, driftsstatus, følsomhet,
+sikkerhet, interesse) og fem sorteringer. Søket går mot databasen og dekker tittel, beskrivelse,
+adresse, kommune, sted, kategori, underkategori, notater **og kildenavn** — et søk på
+«Kartverket» finner funnene som hviler på Kartverket. Filtrering og sortering skjer i sideren:
+volumet er lavt, og én spørring pluss URL-parametre er billigere enn åtte kombinerbare
+databasefiltre.
+
+`/admin/research/nytt` oppretter, `/admin/research/[id]` viser funnet med kildene over
+redigeringsskjemaet — det er kildene man skal lese før man endrer en status.
+
+### Adressesøk og kart
+
+I `/admin/adresse` kommer research inn gjennom `extraSections`-sømmen, gruppert per kategori, med
+nærmeste funn først. **Tomme kategorier vises ikke.** Kortene har to metalinjer:
+
+```
+280 m · Datasenter og industri
+Planlagt produksjonsanlegg for eksplosiver
+PLANLAGT · MEDIUM SIKKERHET · INTERESSE HØY · 3 KILDER · INTERN
+```
+
+Funn med koordinat tegnes på **samme** kart som de offentlige objektene, gjennom
+`internalFeatures` og `lib/map/layers/internal-findings.ts`: hul grå ring med en liten kjerne.
+Alle offentlige kategorier bruker fylte, fargede punkter, så formen alene skiller dem. Valget går
+gjennom `MapSelectionProvider`, så et trykk i research-listen uthever markøren, panorerer og åpner
+popupen akkurat som et trykk i en offentlig liste.
+
+### Første research-runde
+
+Kuraterte funn ligger i `scripts/seed-research.ts` (`npm run research:seed`), som er idempotent og
+er kilden: funn kjennes igjen på tittel + adresse, felter settes til det som står i skriptet, og
+kilder legges til hvis de mangler.
+
+Første runde dekket Oslo, Bærum og Asker med utgangspunkt i våre egne 124 DiBK-plansaker i de tre
+kommunene, med krysssjekk mot Kartverket, Enhetsregisteret og kommunenes egne sider. Metodereglene
+som faktisk fikk konsekvenser:
+
+- **Selskapsadresse er ikke fysisk anlegg.** Chemring Nobel er den eneste eksplosivprodusenten
+  registrert i Asker, men adressen ligger 12 km fra planområdet for «produksjonsanlegg for
+  eksplosiver». Koblingen ble undersøkt og lagret som en kilde med `supports_claim = false`.
+- **Stedsnavn er ikke en kilde på bruk.** Kartverket fører Løvenskioldbanen som *idrettsanlegg*,
+  ikke skytebane. Skytefunksjon er derfor ikke verifisert, selv om «Skytterkollen» ligger 155 m
+  unna. Funnet står som `partially_verified` med `confidence = low`.
+- **Negative undersøkelser lagres.** Null datasenter-treff i alle 124 plansaker er lagret som et
+  funn med `investigated_not_confirmed` — DiBK-kilden dekker bare *nylig varslet* planoppstart, så
+  fraværet er ikke en konklusjon om at det ikke finnes datasentre.
+- **Ingen masseimport av omsorgsadresser.** Enhetsregisteret ble vurdert og forkastet som inngang;
+  næringskode viser kontoradresser, ikke tjenester.
+
+---
