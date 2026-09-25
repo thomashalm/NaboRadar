@@ -9,7 +9,7 @@ import { getMapTileConfig } from "@/lib/map/config";
 import { providers } from "@/lib/providers/registry";
 import { getSupabasePublicEnv, hasSupabaseSecretKey } from "@/lib/supabase/env";
 
-export const metadata: Metadata = { title: "Utvikler", robots: { index: false } };
+export const metadata: Metadata = { title: "Utvikler", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 /** Faste testsøk mot offentlige steder — aldri brukerdata. */

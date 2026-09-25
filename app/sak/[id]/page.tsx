@@ -26,10 +26,26 @@ async function readContext(searchParams: Props["searchParams"]) {
   return parsed.success ? parsed.data : null;
 }
 
+/**
+ * Saksidene er ekte, offentlig innhold med hver sin plansak, og de skal kunne finnes.
+ *
+ * Men URL-en bærer søkekonteksten (lat, lng, radius, label) slik at «tilbake» og avstand
+ * virker, og hver variant ville ellers vært en egen side i indeksen. Canonical peker derfor
+ * på saken uten kontekst.
+ */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const result = await getEventDetail(id);
-  return { title: result.status === "ok" ? result.event.title : "Sak" };
+  if (result.status !== "ok") return { title: "Sak", robots: { index: false, follow: true } };
+  const { event } = result;
+  // DiBK gir bare kommunenummer. «Varslet planoppstart i kommune 0301» leser dårlig i et
+  // søkeresultat, så stedet nevnes bare når vi faktisk har et navn.
+  const sted = event.municipalityName ? ` i ${event.municipalityName}` : "";
+  return {
+    title: event.title,
+    description: `Varslet planoppstart${sted}. Se planområdet i kart, fakta fra Direktoratet for byggkvalitet og lenke til kilden.`,
+    alternates: { canonical: `/sak/${id}` },
+  };
 }
 
 export default async function EventPage({ params, searchParams }: Props) {

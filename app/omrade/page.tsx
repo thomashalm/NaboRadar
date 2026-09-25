@@ -22,10 +22,24 @@ const DB_TIMEOUT_MS = 8_000;
 /** Oppslagene har selv et budsjett på 8 s; dette er den ytre grensen. */
 const LOOKUP_TIMEOUT_MS = 12_000;
 
+/**
+ * Resultatsiden er ett oppslag per adresse, ikke en side som skal stå alene i et
+ * søkeresultat. Hver kombinasjon av lat, lng, radius, label og sortering er en ny URL, så
+ * uten noindex ville vi tilbudt Google et ubegrenset antall nesten like sider — og gjort
+ * privatadresser søkbare, som ikke er poenget med tjenesten.
+ *
+ * follow står på: lenkene herfra til saksidene skal fortsatt følges.
+ */
+const RESULTAT_ROBOTS = { index: false, follow: true } as const;
+
 export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
   const parsed = areaParamsSchema.safeParse(await searchParams);
-  if (!parsed.success) return { title: "Område ikke funnet" };
-  return { title: `${parsed.data.label ?? FALLBACK_LABEL} · innen ${formatRadius(parsed.data.radius)}` };
+  if (!parsed.success) return { title: "Område ikke funnet", robots: RESULTAT_ROBOTS };
+  return {
+    title: `${parsed.data.label ?? FALLBACK_LABEL} · innen ${formatRadius(parsed.data.radius)}`,
+    robots: RESULTAT_ROBOTS,
+    alternates: { canonical: "/omrade" },
+  };
 }
 
 export default async function AreaPage({ searchParams }: { searchParams: SearchParams }) {

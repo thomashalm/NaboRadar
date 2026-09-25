@@ -35,7 +35,7 @@ Sist kryssjekket mot repoet: **2026-09-25**.
 [27. Backup](#27-backup-og-gjenoppretting) · [28. Eksterne tjenester](#28-eksterne-tjenester) ·
 [29. Secrets](#29-secrets-oversikt) · [30. Kommandoer](#30-viktige-kommandoer) ·
 [31. Arkitekturbeslutninger](#31-viktige-arkitekturbeslutninger) · [32. Roadmap](#32-roadmap--idébank) ·
-[33. Milepæler](#33-milepæler)
+[33. Milepæler](#33-milepæler) · [34. Synlighet og indeksering](#34-synlighet-og-indeksering)
 
 ---
 
@@ -1392,3 +1392,72 @@ Kun store tekniske skift.
 | Sikkerhetsherding av databasen (`a775ef4`) | Positiv allowlist for grants, kritisk hull lukket, `db:verify` håndhever |
 | Sikkerhetsheadere og Dependabot (`aefe64a`) | CSP Report-Only, klikkjacking-vern, Dependabot |
 | Rate limiting (`bcba3da`, `e57a2b1`) | Netlify-native regler på `/api/*` og `/omrade` |
+
+---
+
+## 34. Synlighet og indeksering
+
+Målet er at **tjenesten** skal være lett å finne — ikke at hver privatadresse skal bli en side i
+Google. Det skillet styrer alt under.
+
+### Hva som indekseres
+
+| Side | Indeks | Canonical | Hvorfor |
+|---|---|---|---|
+| `/` | **Ja** | `/` | Forklarer hva tjenesten dekker, i tekst |
+| `/skolekrets` | **Ja** | `/skolekrets` | Landingsside for et reelt søkebehov |
+| `/sak/[id]` | **Ja** | `/sak/[id]` uten kontekst | Ekte, unikt offentlig innhold per plansak |
+| `/omrade` | **Nei** — `noindex, follow` | `/omrade` | Ett oppslag per adresse. Hver kombinasjon av lat, lng, radius, label og sortering er en ny URL |
+| `/admin` | **Nei** — `noindex, nofollow` | | Driftsside |
+| `/dev` | **Nei** — 404 i produksjon | | Finnes bare i development |
+| `/api/*` | Disallow i robots.txt | | Ikke innhold |
+
+**Hvorfor `/omrade` er noindex:** uten det tilbyr vi Google et ubegrenset antall nesten like
+sider, og gjør privatadresser søkbare. `follow` står på, så lenkene videre til saksidene følges.
+
+**Hvorfor `/sak/[id]` har canonical:** URL-en bærer søkekonteksten (`lat`, `lng`, `radius`,
+`label`) så «tilbake» og avstand virker. Uten canonical ville hver variant vært en egen side.
+
+Skulle saksidene vise seg å bli vurdert som tynt innhold, er det én linje å slå dem av:
+`robots: { index: false, follow: true }` i `generateMetadata`.
+
+### Teknisk oppsett
+
+- **`metadataBase`** settes i `app/layout.tsx` fra `NEXT_PUBLIC_SITE_URL`, med
+  `https://naboradar.no` som standard. Uten den blir canonical og OpenGraph relative, og da
+  ignoreres de.
+- **`robots.txt`** genereres av `app/robots.ts` og peker på sitemap og host.
+- **`sitemap.xml`** genereres av `app/sitemap.ts` og inneholder bare `/` og `/skolekrets`.
+  Saksidene oppdages via lenker, ikke via sitemap — over tusen URL-er der ville vært støy.
+- **Strukturerte data**: `WebSite` og `WebApplication` på forsiden, som JSON-LD. Ingen
+  `FAQPage` — vi har ingen synlig FAQ. Ingen `SearchAction` — søket vårt tar koordinater, ikke
+  en fritekststreng, så en søke-URL-mal ville lovet noe som ikke virker. **Schema skal alltid
+  matche det som faktisk står på siden.**
+- **Språk**: `lang="nb"` på `<html>`, `og:locale: nb_NO`.
+
+### AI-søk
+
+Ingen søkerobot er blokkert — heller ikke OAI-SearchBot eller PerplexityBot. De leser vanlig
+HTML og følger samme `robots.txt` som Googlebot, og der står `Allow: /` for alt utenom
+`/admin`, `/dev` og `/api/`.
+
+Det som gjør innholdet lett å sitere er ikke triks, men det samme som gjør det lett å lese:
+alt er server-renderet og finnes i HTML-en (også skolekretsnotisen, verifisert), kilden står
+ved siden av påstanden, og forbeholdene står i samme avsnitt som tallet. Stabile URL-er, og
+ingen påstand uten kilde.
+
+### Search Console — må gjøres manuelt
+
+Dette er ikke gjort, og kan ikke gjøres fra repoet:
+
+1. Legg til `naboradar.no` på [search.google.com/search-console](https://search.google.com/search-console)
+2. Verifiser som **domeneeiendom** med en TXT-post i DNS hos Domeneshop — den dekker både
+   `www` og apex, og både http og https
+3. Send inn `https://naboradar.no/sitemap.xml` under **Sitemaps**
+4. Bruk **URL-inspeksjon** på `/` og `/skolekrets` og be om indeksering
+5. Følg **Ytelse** for hvilke søk som faktisk treffer, og **Sider** for hva som blir indeksert.
+   Forvent at `/omrade` rapporteres som «Ekskludert av noindex» — det er meningen
+
+Bing Webmaster Tools kan importere oppsettet fra Search Console, og dekker samtidig flere
+AI-søkeroboter.
+
