@@ -20,6 +20,7 @@ export const AREA_CATEGORIES = [
   // Skolekrets er ikke et sted i nærheten, men et område søkepunktet ligger INNE i. Den hører
   // derfor ikke til noen seksjon i AREA_SECTIONS, og vises som en egen liten notis.
   "skolekrets",
+  "tilfluktsrom",
 ] as const;
 export type AreaCategory = (typeof AREA_CATEGORIES)[number];
 
@@ -70,6 +71,9 @@ export const AREA_SECTIONS: readonly AreaSection[] = [
   // Ligger sist som standard: registreringene er tette i byer, og de fleste gjelder et sted
   // i nærheten — ikke adressen brukeren søkte på. Se sectionOrder() for unntaket.
   { id: "forurenset-grunn", label: "Forurenset grunn", intro: null, categories: ["miljo"] },
+  // Sist: dette er referanseinformasjon om beredskap, ikke et funn om området. Høyere oppe
+  // ville den fått en vekt dataene ikke bærer, og lest som et varsel.
+  { id: "tilfluktsrom", label: "Tilfluktsrom", intro: null, categories: ["tilfluktsrom"] },
 ];
 
 /**

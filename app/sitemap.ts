@@ -12,5 +12,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: new URL("/", SITE_URL).toString(), lastModified: nå, changeFrequency: "weekly", priority: 1 },
     { url: new URL("/skolekrets", SITE_URL).toString(), lastModified: nå, changeFrequency: "monthly", priority: 0.8 },
+    { url: new URL("/tilfluktsrom", SITE_URL).toString(), lastModified: nå, changeFrequency: "monthly", priority: 0.8 },
   ];
 }

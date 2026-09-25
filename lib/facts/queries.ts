@@ -19,6 +19,9 @@ import {
   describeAnleggSummary,
   describeClusterSummary,
   describeClusterToggle,
+  describeTilfluktsromLine,
+  describeTilfluktsromSummary,
+  TILFLUKTSROM_CAVEAT,
   describePlaceLine,
   HELSE_CAVEAT,
   OPPVEKST_CAVEAT,
@@ -307,6 +310,51 @@ const mapFeatureFromRow = (row: FactRow): AreaMapFeature[] =>
         },
       ]
     : [];
+
+/**
+ * Offentlige tilfluktsrom som én kompakt gruppe.
+ *
+ * Holdes utenfor dedupliseringen på (kilde, type, tittel): to rom kan dele stedsbeskrivelse
+ * uten å være samme rom, og da skal begge vises. Hvert rom har sin egen lokalId fra DSB.
+ *
+ * Eksportert for test — hva som vises og hvordan det formuleres er produktlogikk.
+ */
+export function shelterFacts(rows: FactRow[], radiusM: number) {
+  const sorted = [...rows].sort(byRelevance);
+  if (sorted.length === 0) return null;
+
+  // Alle rommene peker til samme datasettside, så en kildelenke per rad ville vært åtte
+  // identiske lenker. Kilden står én gang, nederst i gruppen — og i kartpopupen.
+  const items = sorted
+    .slice(0, CLUSTER_LIST_CAP)
+    .map((row) => ({ ...overviewItem(row, describeTilfluktsromLine(row.attributes)), href: null }));
+
+  const cluster: FactCluster = {
+    sectionId: "tilfluktsrom",
+    id: "tilfluktsrom",
+    label: "Tilfluktsrom",
+    summary: describeTilfluktsromSummary({ total: sorted.length, radiusLabel: formatRadius(radiusM) }),
+    facts: [],
+    lists: [
+      {
+        id: "offentlige-tilfluktsrom",
+        label: "Offentlige tilfluktsrom",
+        toggleLabel:
+          sorted.length > CLUSTER_PREVIEW
+            ? describeClusterToggle({ flertall: "tilfluktsrom", vist: items.length, total: sorted.length })
+            : null,
+        items,
+        previewCount: CLUSTER_PREVIEW,
+        total: sorted.length,
+      },
+    ],
+    overview: null,
+    caveat: TILFLUKTSROM_CAVEAT,
+    sourceName: sourceNames(sorted),
+  };
+
+  return { cluster, mapFeatures: sorted.flatMap(mapFeatureFromRow) };
+}
 
 /** Om en registrering fortjener et eget kort, eller bare hører hjemme i oversikten. */
 export function needsAttention(input: { contains: boolean; grade: string }): boolean {
@@ -778,7 +826,7 @@ export async function getAreaFacts(params: {
   // Vis ett faktum per (kilde, type, navn) — det nærmeste.
   const nearestRows = new Map<string, FactRow>();
   for (const row of rows) {
-    if (row.subtype === "forurenset_grunn" || PLACE_CATEGORIES.has(row.category)) continue;
+    if (row.subtype === "forurenset_grunn" || row.category === "tilfluktsrom" || PLACE_CATEGORIES.has(row.category)) continue;
     const key = `${row.provider_id}|${row.subtype}|${row.title}`;
     const current = nearestRows.get(key);
     if (!current || Number(row.contains) > Number(current.contains) || row.distance_m < current.distance_m) {
@@ -798,6 +846,16 @@ export async function getAreaFacts(params: {
     mapFeatures.push(...result.mapFeatures);
     contaminationAtSearchPoint = result.affectsSearchPoint;
     usedSources.add("mdir-forurenset-grunn");
+  }
+
+  const shelterRows = rows.filter((r) => r.category === "tilfluktsrom");
+  if (shelterRows.length > 0) {
+    const result = shelterFacts(shelterRows, radius);
+    if (result) {
+      clusters.push(result.cluster);
+      mapFeatures.push(...result.mapFeatures);
+      for (const row of shelterRows) usedSources.add(row.provider_id);
+    }
   }
 
   // Alt som hører hjemme i «Nærområdet», uavhengig av kilde.

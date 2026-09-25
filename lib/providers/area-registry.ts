@@ -1,3 +1,4 @@
+import { DsbTilfluktsromProvider } from "./dsb/tilfluktsrom";
 import { SykehusProvider } from "./helse/sykehus";
 import { MdirForurensetGrunnProvider } from "./mdir/forurenset-grunn";
 import { MdirIndustriProvider } from "./mdir/industri";
@@ -25,6 +26,7 @@ export const areaFeatureProviders: readonly AreaFeatureProvider[] = [
   new OsloSkjenkebevillingProvider(),
   new OmsorgstilbudProvider(),
   new OsloSkolekretsProvider(),
+  new DsbTilfluktsromProvider(),
 ];
 
 export function getAreaFeatureProvider(id: string): AreaFeatureProvider | undefined {

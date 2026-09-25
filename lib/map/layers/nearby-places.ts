@@ -9,6 +9,11 @@ export const HELSE_COLOR = "#2563a8";
 export const SERVERING_COLOR = "#b4622a";
 /** Omsorgstilbud: tydelig, men rolig — og forskjellig fra sykehus, skole og servering. */
 export const OMSORG_COLOR = "#8c5570";
+/**
+ * Tilfluktsrom. Bevisst en dempet grå-blå i samme register som resten, ikke rødt eller
+ * militært: dette er referanseinformasjon om beredskap, ikke et varsel.
+ */
+export const TILFLUKTSROM_COLOR = "#4a5568";
 
 const SOURCE = "nearby-places";
 
@@ -46,6 +51,8 @@ export const nearbyPlacesLayer: MapLayer<AreaMapFeature[]> = {
           OMSORG_COLOR,
           "servering",
           SERVERING_COLOR,
+          "tilfluktsrom",
+          TILFLUKTSROM_COLOR,
           PLACE_COLOR,
         ],
         "circle-opacity": 0.9,

@@ -104,6 +104,20 @@ export default function HomePage() {
               .
             </p>
           </section>
+
+          <section className="mt-12" aria-labelledby="tilfluktsrom">
+            <h2 id="tilfluktsrom" className="text-xl font-semibold tracking-[-0.02em]">
+              Offentlige tilfluktsrom
+            </h2>
+            <p className="mt-3 leading-relaxed text-muted">
+              Vi viser også de offentlige tilfluktsrommene i nærheten, med avstand og antall plasser, fra
+              Sivilforsvarets egne data.{" "}
+              <Link href="/tilfluktsrom" className="text-accent hover:underline">
+                Finn offentlige tilfluktsrom nær en adresse
+              </Link>
+              .
+            </p>
+          </section>
         </div>
       </main>
 

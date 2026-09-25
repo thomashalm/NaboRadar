@@ -78,7 +78,11 @@ describe("rekkefølge på kategoriene", () => {
   it("legger forurenset grunn sist når registreringen ikke gjelder søkepunktet", () => {
     // Eksempelet fra testingen: en registrering 760 m unna, søkepunktet utenfor lokaliteten.
     const rekkefølge = sectionOrder({ contaminationAtSearchPoint: false });
-    expect(rekkefølge.at(-1)!.id).toBe("forurenset-grunn");
+    const ider = rekkefølge.map((s) => s.id);
+    // Etter alle seksjonene som beskriver funn i området. Tilfluktsrom ligger bakerst, men det
+    // er referanseinformasjon om beredskap, ikke et funn.
+    expect(ider.indexOf("forurenset-grunn")).toBeGreaterThan(ider.indexOf("saker"));
+    expect(ider.at(-1)).toBe("tilfluktsrom");
 
     const groups = groupFacts(
       [fact("miljo", { headline: "760 m unna", distanceM: 760, contains: false }), fact("stoy")],
@@ -98,6 +102,7 @@ describe("rekkefølge på kategoriene", () => {
       "grunnforhold",
       "infrastruktur",
       "saker",
+      "tilfluktsrom",
     ]);
 
     const groups = groupFacts(
@@ -159,6 +164,7 @@ describe("rekkefølge på kategoriene", () => {
       "infrastruktur",
       "saker",
       "forurenset-grunn",
+      "tilfluktsrom",
     ]);
     // Ingen kategori skal høre til to seksjoner.
     const kategorier = AREA_SECTIONS.flatMap((s) => s.categories);

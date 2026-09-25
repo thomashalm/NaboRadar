@@ -612,6 +612,7 @@ testdetaljer og eksempelresponser.
 | Omsorgstilbud | Oslo kommune + Helsenorge | Sykehjem, helsehus, behandlings- og botilbud | Punkt | 367 | NLOD 2.0 | **Kurert liste** i `data/omsorgstilbud.json`. Foreløpig i hovedsak Oslo. Kun steder ansvarlig myndighet selv publiserer med navn og adresse |
 | Skjenkebevillinger | Næringsetaten, Oslo kommune | Serverings- og skjenkesteder | Punkt | 1 406 | **Lisens ikke oppgitt av kilden** | Kun Oslo. Bør avklares med Næringsetaten |
 | Skolekretser | Plan- og bygningsetaten, Oslo kommune | Veiledende inntaksområde for barneskole | Polygon | 105 | **Lisens ikke avklart** — tjenesten oppgir «Copyright Plan- og bygningsetaten» | Kun Oslo, kun barnetrinn. Kilden har ingen datostempling, og grensene revideres hver høst |
+| Offentlige tilfluktsrom | Sivilforsvaret / DSB, via Geonorge-WFS | Tilfluktsrom i nærheten, med antall plasser | Punkt | 556 | **NLOD 1.0** — «Åpne data», «Ugradert» | Hele Norge. Kilden gir ikke areal, type eller status |
 
 ### Direkte oppslag (per søk, ikke synket)
 
@@ -696,6 +697,23 @@ Hele poenget er at NaboRadar ikke skal si mer enn kilden gjør.
 - Kretsnavnet er ikke alltid skolenavnet: kretsen «Majorstua» hører til Majorstuen skole, og
   «Svarttjern og Tiurleiken» deles av to skoler. Koblingen ligger kuratert i
   `data/skolekretser.json`, aldri som navnegjetting i kjøretid.
+
+### Tilfluktsrom
+
+- **Kun offentlige.** Datasettet heter «Tilfluktsrom – Offentlige», og det er hele avgrensningen:
+  private tilfluktsrom publiseres ikke av DSB. Det finnes ingen private rader å filtrere bort.
+- **`plasser` er rommets dimensjonering**, ikke ledige plasser i dag. Vi skriver «Dimensjonert
+  for 620 personer», aldri «620 ledige plasser», «garantert plass» eller «her får du plass».
+- Ett av de 556 rommene har `plasser = 0` i kilden. Det betyr at tallet ikke er satt, ikke at
+  rommet er fullt — da vises kapasitet ikke i det hele tatt.
+- **Avstand er luftlinje fra søkepunktet, ikke en anbefalt rute.**
+- Et tilfluktsrom i nærheten er **ikke en anvisning om hvor noen skal gå**. Forbeholdet viser til
+  myndighetenes egen varsling, og teksten er nøktern med vilje — dette er referanseinformasjon,
+  ikke et varsel.
+- **Areal, type og status finnes ikke i kilden**, og vi finner dem ikke på. Feltene vi har er
+  `lokalId`, `romnr`, `plasser`, `adresse` (en stedsbeskrivelse, ikke en ren adresse) og punkt.
+- Seksjonen ligger **sist**, og faller bort når det ikke er treff — som alle andre seksjoner.
+  Vi skriver ikke «ingen tilfluktsrom her», som ville lest som en påstand om områdets beredskap.
 
 ### Skjenkesteder
 
@@ -972,6 +990,7 @@ Effekten er målt: første synlige innhold gikk fra **4 970 ms til 55 ms** (Oslo
 4. **Infrastruktur**
 5. **Planer og saker**
 6. **Forurenset grunn**
+7. **Tilfluktsrom**
 
 Rekkefølgen følger **hvor nær funnet er adressen selv**. Nærområdet står først fordi det er det
 mest umiddelbart forståelige svaret, og fordi det nesten alltid har innhold. Så det som beskriver
@@ -996,6 +1015,11 @@ Alle seksjoner følger samme form:
 - **Tomme undertyper vises ikke**
 - **Sortering på avstand**, nærmest først
 - **Kartet viser fortsatt alle relevante objekter**, også de som er kuttet fra listen
+- **Rader kan velge objektet i kartet.** Har en rad et tilsvarende kartobjekt, blir den en knapp:
+  markøren utheves, kartet panorerer hvis objektet ligger utenfor utsnittet, og popupen åpner seg
+  — nøyaktig samme tilstand som ved klikk direkte i kartet. Mekanismen ligger i
+  `components/area/map-selection.tsx` som en liten kontekst, og er **generell**: den gjelder alle
+  grupper, ikke én type. Rader uten kartobjekt er ikke klikkbare
 - **Tomtilstander er én linje.** «Ingen varslede planoppstarter innen 500 m siste 24 måneder ·
   Se 3 km» — ikke en stor stiplet boks. Forbeholdet om at kilden ikke sier om planarbeidet pågår
   vises bare når det finnes en sak å ta forbehold om
@@ -1147,6 +1171,8 @@ Ting vi vet om og bevisst ikke har løst nå.
 |---|---|
 | **Skjenkebevillinger dekker bare Oslo** | Næringsetatens register. Lisens ikke oppgitt av kilden — bør avklares |
 | **Skolekretser dekker bare Oslo, og bare barnetrinnet** | Ingen nasjonal kilde finnes: Geonorge har to skolekrets-datasett i hele landet, begge fra Halden. Hver kommune publiserer sitt eget |
+| **Tilfluktsrom har ikke areal, type eller status** | DSBs datasett har dem ikke. Vi viser romnummer, stedsbeskrivelse, plasser og posisjon |
+| **Tilfluktsromseksjonen faller bort uten treff** | 556 rom i hele landet betyr at de fleste adresser ikke har noen i nærheten. En fast «ingen funnet»-linje ville vært støy, og lest som en påstand om områdets beredskap |
 | **Skolekretsenes lisens er ikke avklart** | Tjenesten oppgir «Copyright Plan- og bygningsetaten i Oslo kommune». Tredje Oslo-kilde uten åpen lisens — bør avklares samlet |
 | **Skolekretsene har ingen datostempling** | Grensene revideres hver høst, og innholdshashen i sync-laget er vårt eneste signal om at det har skjedd |
 | **Fem skolekretser mangler organisasjonsnummer** | Manglerud, Munkerud, Nordseter, Rosenholm og Vestli finnes ikke i Geonorge-laget vi synker skoler fra. Da viser vi navnet uten kobling |
@@ -1473,6 +1499,7 @@ Google. Det skillet styrer alt under.
 |---|---|---|---|
 | `/` | **Ja** | `/` | Forklarer hva tjenesten dekker, i tekst |
 | `/skolekrets` | **Ja** | `/skolekrets` | Landingsside for et reelt søkebehov |
+| `/tilfluktsrom` | **Ja** | `/tilfluktsrom` | Samme — offentlige tilfluktsrom nær en adresse |
 | `/sak/[id]` | **Ja** | `/sak/[id]` uten kontekst | Ekte, unikt offentlig innhold per plansak |
 | `/omrade` | **Nei** — `noindex, follow` | `/omrade` | Ett oppslag per adresse. Hver kombinasjon av lat, lng, radius, label og sortering er en ny URL |
 | `/admin` | **Nei** — `noindex, nofollow` | | Driftsside |
@@ -1495,7 +1522,8 @@ Skulle saksidene vise seg å bli vurdert som tynt innhold, er det én linje å s
   ignoreres de.
 - **`robots.txt`** genereres av `app/robots.ts` og peker på sitemap og host.
 - **`sitemap.xml`** genereres av `app/sitemap.ts` og inneholder bare `/` og `/skolekrets`.
-  Saksidene oppdages via lenker, ikke via sitemap — over tusen URL-er der ville vært støy.
+  `/tilfluktsrom` og saksidene oppdages via lenker, ikke via sitemap — over tusen URL-er der ville
+  vært støy. `/skolekrets` og `/tilfluktsrom` står i sitemapet.
 - **Strukturerte data**: `WebSite` og `WebApplication` på forsiden, som JSON-LD. Ingen
   `FAQPage` — vi har ingen synlig FAQ. Ingen `SearchAction` — søket vårt tar koordinater, ikke
   en fritekststreng, så en søke-URL-mal ville lovet noe som ikke virker. **Schema skal alltid

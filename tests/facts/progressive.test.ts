@@ -114,6 +114,7 @@ describe("hvilke seksjoner som vises", () => {
       "infrastruktur",
       "saker",
       "forurenset-grunn",
+      "tilfluktsrom",
     ]);
   });
 

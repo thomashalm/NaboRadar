@@ -21,6 +21,7 @@ import { bindLayer } from "@/lib/map/layers/types";
 import type { AreaEvent, AreaSort } from "@/types/event";
 import { PropertyCard, type PropertyState } from "./PropertyCard";
 import { AreaFacts } from "./AreaFacts";
+import { MapSelectionProvider } from "./map-selection";
 import { ChangeLocation } from "./ChangeLocation";
 import { EventFeed } from "./EventFeed";
 import { RadiusPicker } from "./RadiusPicker";
@@ -254,6 +255,11 @@ export function AreaExplorer({
     [events, mapFeatures, context],
   );
 
+  /** Ids kartet faktisk tegner. En rad uten kartobjekt skal ikke se klikkbar ut. */
+  const mapFeatureIds = useMemo(() => mapFeatures.map((f) => f.id), [mapFeatures]);
+  /** Trykk i en liste velger samme objekt som et klikk i kartet ville gjort. */
+  const velgFraListe = useCallback((id: string) => setSelection({ id, from: "list" }), []);
+
   // Valg fra kartet: vis kortet i lista (kun desktop — på mobil ville det scrollet kartet bort).
   useEffect(() => {
     if (selection?.from !== "map" || !selectedId) return;
@@ -313,6 +319,11 @@ export function AreaExplorer({
             }}
           />
         </div>
+        <MapSelectionProvider
+          selectedId={selectedId}
+          onSelect={velgFraListe}
+          ids={mapFeatureIds}
+        >
         <AreaFacts
           storedFacts={storedFactsPromise}
           lookupFacts={lookupFactsPromise}
@@ -336,6 +347,7 @@ export function AreaExplorer({
           />
           }
         />
+        </MapSelectionProvider>
       </div>
     </main>
   );

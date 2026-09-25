@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, use } from "react";
+import { useMapSelection } from "./map-selection";
 import { grunnforholdCluster, infrastrukturCluster, stoyCluster } from "@/lib/facts/clusters";
 import { mergeFactResults } from "@/lib/facts/merge";
 import type {
@@ -326,31 +327,60 @@ function FactItem({ fact }: { fact: AreaFact }) {
 }
 
 /** Kompakte rader: navn, kort undertekst og avstand. Samme markup i grupper og oversikter. */
+/**
+ * Rader i en kompakt gruppe.
+ *
+ * Når raden har et tilsvarende objekt i kartet, blir den en knapp som velger det: markøren
+ * utheves, kartet panorerer hvis objektet ligger utenfor utsnittet, og popupen åpner seg —
+ * samme tilstand som ved klikk direkte i kartet. Mekanismen er generell og gjelder alle
+ * gruppene, ikke bare én type.
+ *
+ * Rader uten kartobjekt oppfører seg som før. En ekstern kildelenke ligger ved siden av
+ * valget, slik at de to ikke konkurrerer om det samme trykket.
+ */
 function PlaceRows({ items }: { items: OverviewItem[] }) {
+  const { selectedId, select, selectable } = useMapSelection();
   return (
     <ul className="mt-2 divide-y divide-line border-t border-line">
-      {items.map((item) => (
-        <li key={item.id} className="flex items-baseline justify-between gap-3 py-2.5">
-          <span className="min-w-0">
-            {item.href ? (
-              <a
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[15px] text-accent hover:underline [overflow-wrap:anywhere]"
-              >
-                {item.title} ↗
-              </a>
-            ) : (
-              <span className="text-[15px] text-ink [overflow-wrap:anywhere]">{item.title}</span>
-            )}
-            <span className="block text-[13px] text-muted">{item.subtitle}</span>
-          </span>
-          <span className={`shrink-0 text-sm ${item.contains ? "font-medium text-ink" : "text-muted"}`}>
-            {item.distanceLabel}
-          </span>
-        </li>
-      ))}
+      {items.map((item) => {
+        const kanVelges = selectable.has(item.id);
+        const valgt = selectedId === item.id;
+        return (
+          <li
+            key={item.id}
+            className={`flex items-baseline justify-between gap-3 py-2.5 ${valgt ? "bg-accent-soft" : ""}`}
+          >
+            <span className="min-w-0">
+              {kanVelges ? (
+                <button
+                  type="button"
+                  onClick={() => select(item.id)}
+                  aria-pressed={valgt}
+                  className="text-left text-[15px] text-ink hover:underline [overflow-wrap:anywhere]"
+                >
+                  {item.title}
+                </button>
+              ) : (
+                <span className="text-[15px] text-ink [overflow-wrap:anywhere]">{item.title}</span>
+              )}
+              <span className="block text-[13px] text-muted">
+                {item.subtitle}
+                {item.href && (
+                  <>
+                    {" · "}
+                    <a href={item.href} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                      Kilde ↗
+                    </a>
+                  </>
+                )}
+              </span>
+            </span>
+            <span className={`shrink-0 text-sm ${item.contains ? "font-medium text-ink" : "text-muted"}`}>
+              {item.distanceLabel}
+            </span>
+          </li>
+        );
+      })}
     </ul>
   );
 }

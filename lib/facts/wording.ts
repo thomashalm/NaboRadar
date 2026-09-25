@@ -643,6 +643,35 @@ export const HELSE_CAVEAT =
  * kapasitet kan gi plass ved en annen skole. Vi sier derfor «adressen ligger i», aldri
  * «din skole», «du sogner til» eller noe som kan leses som en garanti for skoleplass.
  */
+/**
+ * Offentlige tilfluktsrom.
+ *
+ * Tre ting ordlyden må holde. Kilden oppgir `plasser` — rommets dimensjonering, ikke ledige
+ * plasser i dag — så vi skriver «dimensjonert for», aldri «ledige plasser» eller «her får du
+ * plass». Avstanden er geografisk fra søkepunktet, ikke en anbefalt rute. Og et tilfluktsrom i
+ * nærheten er ikke en anvisning om hvor noen skal gå; det er myndighetenes varsling som gjelder.
+ *
+ * Teksten skal være nøktern. Dette er referanseinformasjon, ikke et varsel.
+ */
+export const TILFLUKTSROM_LABEL = "Offentlig tilfluktsrom";
+
+/** «Dimensjonert for 620 personer» — eller bare typen, når kilden ikke oppgir plasser. */
+export function describeTilfluktsromLine(attributes: AreaAttributes): string {
+  const plasser = num(attributes.plasser);
+  return plasser !== null ? `Dimensjonert for ${plasser} personer` : TILFLUKTSROM_LABEL;
+}
+
+export function describeTilfluktsromSummary(input: { total: number; radiusLabel: string }): string {
+  return input.total === 1
+    ? `1 offentlig tilfluktsrom innen ${input.radiusLabel}`
+    : `${input.total} offentlige tilfluktsrom innen ${input.radiusLabel}`;
+}
+
+export const TILFLUKTSROM_CAVEAT =
+  "Avstanden er målt i luftlinje fra søkepunktet, ikke som anbefalt rute. Et offentlig tilfluktsrom " +
+  "i nærheten er ikke i seg selv en anvisning om hvor du skal gå — følg råd og varsling fra " +
+  "myndighetene. Antall plasser er rommets dimensjonering slik Sivilforsvaret oppgir den.";
+
 export const SKOLEKRETS_LABEL = "Skolekrets";
 export const SKOLEKRETS_UNDERTEKST = "Veiledende inntaksområde";
 
@@ -750,6 +779,14 @@ export function describeMapLines(input: { subtype: string; attributes: AreaAttri
     return [
       str(a.eierform) === "privat" ? "Sykehus, privat drift (Helsenorge)" : "Sykehus (Helsenorge)",
       [str(a.adresse), str(a.poststed)].filter(Boolean).join(", ") || null,
+    ].filter((line): line is string => line !== null);
+  }
+  if (subtype === "offentlig_tilfluktsrom") {
+    const plasser = num(a.plasser);
+    return [
+      `${TILFLUKTSROM_LABEL} (Sivilforsvaret)`,
+      str(a.sted),
+      plasser !== null ? `Dimensjonert for ${plasser} personer` : null,
     ].filter((line): line is string => line !== null);
   }
   if (subtype === "skjenkested") {
