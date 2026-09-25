@@ -90,41 +90,68 @@ describe("kvikkleire: de tre nivåene holdes fra hverandre", () => {
   const sone = (extra: AreaAttributes) =>
     describe_("kvikkleire_sone", { omradetype: "losneomrade", faregrad: "Høy", konsekvens: "meget_alvorlig", risikoklasse: 4, undersokelse: "enkel", vurdertAar: 2011, ...extra }, true, "Alfaset vest")!;
 
-  it("skiller «mulig kvikkleire» fra «påvist»", () => {
-    expect(sone({ stabilitet: "mulig" }).details.join(" ")).toContain("ikke påvist");
-    expect(sone({ stabilitet: "mulig" }).details.join(" ")).toContain("mulig kvikkleire");
-    expect(sone({ stabilitet: "paavist_lav_sikkerhet" }).details.join(" ")).toContain("Kvikkleire er påvist");
+  /**
+   * Standardvisningen er kort, men skillet mellom mulig, påvist og friskmeldt må stå der —
+   * ikke gjemt bak «Detaljer». Det tekniske, som sikkerhetsfaktor og undersøkelsesnivå, er
+   * flyttet dit med ordlyden i behold.
+   */
+  it("skiller «mulig kvikkleire» fra «påvist» i standardvisningen", () => {
+    expect(sone({ stabilitet: "mulig" }).details[0]).toBe("Mulig kvikkleire, ikke påvist");
+    expect(sone({ stabilitet: "paavist_lav_sikkerhet" }).details[0]).toBe("Kvikkleire påvist");
+    expect(sone({ stabilitet: "paavist_tilfredsstillende" }).details[0]).toBe("Kvikkleire påvist");
   });
 
-  it("viser klassifiseringen som sonens, ikke eiendommens", () => {
-    const text = sone({ stabilitet: "mulig" });
-    expect(text.details.join(" ")).toContain("faregrad høy · konsekvens meget alvorlig · risikoklasse 4 av 5");
-    expect(text.caveat).toContain("gjelder hele sonen, ikke den enkelte eiendom");
+  it("beholder sikkerhetsfaktoren under «Detaljer», ikke i standardvisningen", () => {
+    const lav = sone({ stabilitet: "paavist_lav_sikkerhet" });
+    expect(lav.technical?.join(" ")).toContain("sikkerhetsfaktor under 1,4");
+    const høy = sone({ stabilitet: "paavist_tilfredsstillende" });
+    expect(høy.technical?.join(" ")).toContain("sikkerhetsfaktor over 1,4");
+    // De to har samme korte linje, så forskjellen må være etterprøvbar under Detaljer.
+    expect(lav.details).toEqual(høy.details);
   });
 
-  it("viser utførte sikringstiltak og år for vurderingen", () => {
+  it("viser faregrad og risikoklasse i standardvisningen", () => {
+    expect(sone({ stabilitet: "mulig" }).details[1]).toBe("Faregrad høy · risikoklasse 4 av 5");
+  });
+
+  it("holder klassifiseringens forbehold og det tekniske under «Detaljer»", () => {
     const text = sone({ stabilitet: "paavist_lav_sikkerhet", undersokelse: "sikringstiltak_utfort", vurdertAar: 2023 });
-    expect(text.details.join(" ")).toContain("sikringstiltak utført");
-    expect(text.details.join(" ")).toContain("vurdert 2023");
+    const teknisk = text.technical?.join(" ") ?? "";
+    expect(teknisk).toContain("sikringstiltak utført");
+    expect(teknisk).toContain("Vurdert 2023");
+    expect(teknisk).toContain("Konsekvens: meget alvorlig");
+    expect(teknisk).toContain("gjelder hele sonen, ikke den enkelte eiendom");
   });
 
   it("skiller løsneområde og utløpsområde", () => {
-    expect(sone({ omradetype: "utlopsomrade", stabilitet: "mulig" }).headline).toContain("utløpsområde");
-    expect(sone({ omradetype: "losneomrade", stabilitet: "mulig" }).headline).toContain("løsneområde");
+    expect(sone({ omradetype: "utlopsomrade", stabilitet: "mulig" }).technical?.join(" ")).toContain("utløpsområde");
+    expect(sone({ omradetype: "losneomrade", stabilitet: "mulig" }).technical?.join(" ")).toContain("løsneområde");
+  });
+
+  it("skiller kartlagt sone fra sone ved søkepunktet", () => {
+    expect(describe_("kvikkleire_sone", { stabilitet: "mulig" }, false, "Smalvollveien")!.headline).toBe(
+      "Kartlagt kvikkleiresone «Smalvollveien»",
+    );
+    expect(describe_("kvikkleire_sone", { stabilitet: "mulig" }, true, "Smalvollveien")!.headline).toBe(
+      "Søkepunktet ligger i kvikkleiresone «Smalvollveien»",
+    );
   });
 
   it("aktsomhetsområde presenteres som aktsomhet, ikke som påvist fare", () => {
     const text = describe_("kvikkleire_aktsomhet", {}, true)!;
-    expect(text.headline).toContain("aktsomhetsområde");
+    expect(text.headline).toBe("Aktsomhetsområde for kvikkleireskred");
     expect(text.details.join(" ")).toContain("Kvikkleire er ikke påvist");
-    expect(text.details.join(" ")).toContain("geoteknisk vurdering");
+    // Kravet om geoteknisk vurdering og målestokken står fortsatt, under «Detaljer».
+    expect(text.technical?.join(" ")).toContain("geoteknisk vurdering");
+    expect(text.technical?.join(" ")).toContain("1:50 000");
+    expect(text.technical?.join(" ")).toContain("den enkelte eiendom");
   });
 
   it("«ikke fare for områdeskred» vises bare når punktet er innenfor, og aldri som fare", () => {
     expect(describe_("kvikkleire_utredet_uten_fare", { vurdertAar: 2025 }, false)).toBeNull();
     const inside = describe_("kvikkleire_utredet_uten_fare", { vurdertAar: 2025 }, true)!;
     expect(inside.headline).toContain("ikke fare for områdeskred");
-    expect(inside.details.join(" ")).toContain("2025");
+    expect(inside.technical?.join(" ")).toContain("2025");
   });
 });
 

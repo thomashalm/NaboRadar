@@ -1,8 +1,15 @@
 "use client";
 
 import { Suspense, use } from "react";
+import { grunnforholdCluster, infrastrukturCluster } from "@/lib/facts/clusters";
 import { mergeFactResults } from "@/lib/facts/merge";
-import type { AreaFactGroup, AreaFactsResult, FactCluster, OverviewItem, SectionOverview } from "@/lib/facts/queries";
+import type {
+  AreaFactGroup,
+  AreaFactsResult,
+  FactCluster,
+  OverviewItem,
+  SectionOverview,
+} from "@/lib/facts/queries";
 import { combineStates } from "@/lib/facts/section-state";
 import { formatRadius } from "@/lib/format";
 import { AREA_SECTIONS, sectionWaitsForLookups, type AreaFact } from "@/types/area-feature";
@@ -99,10 +106,10 @@ function FactsBody({
                 </SectionShell>
               }
             >
-              <FactSection sectionId={sectionId} db={db} lookupFacts={lookupFacts} />
+              <FactSection sectionId={sectionId} db={db} lookupFacts={lookupFacts} radius={radius} />
             </Suspense>
           ) : (
-            <FactSection key={sectionId} sectionId={sectionId} db={db} />
+            <FactSection key={sectionId} sectionId={sectionId} db={db} radius={radius} />
           ),
         )}
       </div>
@@ -118,11 +125,13 @@ function FactSection({
   sectionId,
   db,
   lookupFacts,
+  radius,
 }: {
   sectionId: string;
   db: AreaFactsResult;
   /** Satt bare for seksjoner som faktisk bruker et direkte oppslag. */
   lookupFacts?: Promise<AreaFactsResult>;
+  radius: number;
 }) {
   // use() kan stå i en betingelse; hvorvidt en seksjon har oppslag er dessuten fast.
   const lookups = lookupFacts ? use(lookupFacts) : null;
@@ -147,6 +156,10 @@ function FactSection({
       null,
     );
 
+  // Grunnforhold og infrastruktur får kilder fra begge hold, så gruppen bygges her — når
+  // delene er slått sammen. Ellers ville seksjonen fått én gruppe per kilde.
+  const samlet = group ? byggGruppe(sectionId, group, radius) : null;
+
   const label = SECTION_LABELS[sectionId] ?? sectionId;
   if (state === "feilet") {
     return (
@@ -157,34 +170,47 @@ function FactSection({
       </SectionShell>
     );
   }
-  if (!group) return null;
+  if (!samlet) return null;
 
   return (
     <div>
-      <h3 className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">{group.label}</h3>
-      {group.intro && <p className="mt-1 text-[13px] text-muted">{group.intro}</p>}
-      {group.clusters.map((cluster) => (
+      <h3 className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">{samlet.label}</h3>
+      {samlet.intro && <p className="mt-1 text-[13px] text-muted">{samlet.intro}</p>}
+      {samlet.clusters.map((cluster) => (
         <ClusterDetails key={cluster.id} cluster={cluster} />
       ))}
-      {group.facts.length > 0 && (
+      {samlet.facts.length > 0 && (
         <ul className="mt-3 flex flex-col gap-3">
-          {group.facts.map((fact) => (
+          {samlet.facts.map((fact) => (
             <li key={fact.id}>
               <FactItem fact={fact} />
             </li>
           ))}
         </ul>
       )}
-      {group.overview && (
+      {samlet.overview && (
         <>
-          {group.overview.noAttentionNote && (
-            <p className="mt-3 text-[15px] leading-relaxed text-muted">{group.overview.noAttentionNote}</p>
+          {samlet.overview.noAttentionNote && (
+            <p className="mt-3 text-[15px] leading-relaxed text-muted">{samlet.overview.noAttentionNote}</p>
           )}
-          <OverviewDetails overview={group.overview} />
+          <OverviewDetails overview={samlet.overview} />
         </>
       )}
     </div>
   );
+}
+
+/** Seksjoner hvis gruppe bygges av de ferdige faktaene, ikke av delsvarene hver for seg. */
+const BYGGES_AV_FAKTA: Record<string, (facts: AreaFact[], radiusM: number) => FactCluster | null> = {
+  grunnforhold: grunnforholdCluster,
+  infrastruktur: infrastrukturCluster,
+};
+
+function byggGruppe(sectionId: string, group: AreaFactGroup, radiusM: number): AreaFactGroup {
+  const bygg = BYGGES_AV_FAKTA[sectionId];
+  if (!bygg || group.facts.length === 0) return group;
+  const cluster = bygg(group.facts, radiusM);
+  return cluster ? { ...group, facts: [], clusters: [...group.clusters, cluster] } : group;
 }
 
 /** Kildelisten nederst kan først skrives når alle kildene har svart. */

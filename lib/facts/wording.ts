@@ -302,31 +302,49 @@ function forurensetGrunn(input: { title: string; attributes: AreaAttributes; con
   };
 }
 
+/** Kort variant av stabiliteten. Skillet mellom mulig, påvist og friskmeldt må bestå. */
+const STABILITET_KORT: Record<string, string> = {
+  paavist_lav_sikkerhet: "Kvikkleire påvist",
+  paavist_ikke_vurdert: "Kvikkleire påvist",
+  paavist_tilfredsstillende: "Kvikkleire påvist",
+  mulig: "Mulig kvikkleire, ikke påvist",
+  ikke_fare: "Utredet: ikke fare for områdeskred",
+};
+
 function kvikkleireSone(title: string, a: AreaAttributes, contains: boolean): FactText {
   const omradetype = a.omradetype === "utlopsomrade" ? "utløpsområde" : "løsneområde";
-  const details: string[] = [];
+  const nøkkel = str(a.stabilitet) ?? "";
 
-  const stabilitet = STABILITET_TEXT[str(a.stabilitet) ?? ""];
-  const undersokelse = UNDERSOKELSE_TEXT[str(a.undersokelse) ?? ""];
-  const aar = num(a.vurdertAar);
-  if (stabilitet) details.push(aar ? `${stabilitet} (vurdert ${aar}).` : `${stabilitet}.`);
-  if (undersokelse) details.push(`Undersøkelsesnivå: ${undersokelse}.`);
+  // Standardvisningen: hva slags sone, og NVEs klassifisering. To korte linjer.
+  const details: string[] = [];
+  if (STABILITET_KORT[nøkkel]) details.push(STABILITET_KORT[nøkkel]!);
 
   const faregrad = FAREGRAD_TEXT[str(a.faregrad) ?? ""];
-  const konsekvens = KONSEKVENS_TEXT[str(a.konsekvens) ?? ""];
   const risiko = num(a.risikoklasse);
-  if (faregrad && faregrad !== "ingen") {
-    const parts = [`faregrad ${faregrad}`];
-    if (konsekvens && konsekvens !== "ingen") parts.push(`konsekvens ${konsekvens}`);
-    if (risiko !== null) parts.push(`risikoklasse ${risiko} av 5`);
-    details.push(`NVEs klassifisering av sonen: ${parts.join(" · ")}.`);
-  }
+  const klassifisering = [
+    faregrad && faregrad !== "ingen" ? `Faregrad ${faregrad}` : null,
+    risiko !== null ? `risikoklasse ${risiko} av 5` : null,
+  ].filter(Boolean);
+  if (klassifisering.length > 0) details.push(klassifisering.join(" · "));
+
+  // Det tekniske: sikkerhetsfaktor, undersøkelsesnivå, konsekvens, årstall og forbehold.
+  const aar = num(a.vurdertAar);
+  const undersokelse = UNDERSOKELSE_TEXT[str(a.undersokelse) ?? ""];
+  const konsekvens = KONSEKVENS_TEXT[str(a.konsekvens) ?? ""];
+  const technical = [
+    STABILITET_TEXT[nøkkel] ?? null,
+    undersokelse ? `Undersøkelsesnivå: ${undersokelse}` : null,
+    konsekvens && konsekvens !== "ingen" ? `Konsekvens: ${konsekvens}` : null,
+    `Områdetype: ${omradetype}`,
+    aar ? `Vurdert ${aar}` : null,
+    "Klassifiseringen gjelder hele sonen, ikke den enkelte eiendom. NVE oppgir at datasettet primært er ment for vurdering på kommuneplannivå.",
+  ].filter((linje): linje is string => linje !== null);
 
   return {
-    headline: `${contains ? "Søkepunktet ligger i" : "Kartlagt"} kvikkleiresone «${title}» (${omradetype})`,
+    headline: `${contains ? "Søkepunktet ligger i kvikkleiresone" : "Kartlagt kvikkleiresone"} «${title}»`,
     details,
-    caveat:
-      "Klassifiseringen gjelder hele sonen, ikke den enkelte eiendom. NVE oppgir at datasettet primært er ment for vurdering på kommuneplannivå.",
+    technical,
+    caveat: null,
   };
 }
 
@@ -355,19 +373,23 @@ export function describeFact(input: {
       // Vises kun når punktet ligger inni. Dette er en positiv opplysning, ikke en fare.
       if (!contains) return null;
       return {
-        headline: `Søkepunktet ligger i et område NVE har utredet: ikke fare for områdeskred`,
-        details: num(a.vurdertAar) ? [`Vurdert ${num(a.vurdertAar)}.`] : [],
+        headline: "Utredet av NVE: ikke fare for områdeskred",
+        details: [],
+        technical: num(a.vurdertAar) ? [`Vurdert ${num(a.vurdertAar)}`] : [],
         caveat: null,
       };
 
     case "kvikkleire_aktsomhet":
       return {
-        headline: "Søkepunktet ligger i aktsomhetsområde for kvikkleireskred",
-        details: [
-          "Aktsomhetskartet viser hvor det kan være marin leire i skrånende terreng. Kvikkleire er ikke påvist.",
-          "Ved byggetiltak i et slikt område krever NVE at det innhentes geoteknisk vurdering.",
+        headline: "Aktsomhetsområde for kvikkleireskred",
+        details: ["Området kan ha marin leire i skrånende terreng. Kvikkleire er ikke påvist."],
+        // Det som forklarer hva kartet betyr og ikke betyr, står under «Detaljer».
+        technical: [
+          "Ved byggetiltak i et slikt område krever NVE at det innhentes geoteknisk vurdering",
+          "Oversiktskart i målestokk 1:50 000",
+          "Sier ikke noe om forholdene på den enkelte eiendom",
         ],
-        caveat: "Kartet er et oversiktskart (1:50 000) og sier ikke noe om forholdene på den enkelte eiendom.",
+        caveat: null,
       };
 
     case "transformatorstasjon": {
@@ -566,6 +588,28 @@ export function describeClusterToggle(input: { flertall: string; vist: number; t
   return input.total > input.vist
     ? `Se de ${input.vist} nærmeste av ${input.total}`
     : `Se alle ${input.flertall} (${input.total})`;
+}
+
+/**
+ * Oppsummeringen på «Grunnforhold». Det som gjelder søkepunktet selv står først; en sone langt
+ * unna skal ikke dominere seksjonen.
+ */
+export function describeGrunnforholdSummary(input: {
+  aktsomhetVedPunkt: boolean;
+  utredetVedPunkt: boolean;
+  soneVedPunkt: boolean;
+  soner: number;
+  radiusLabel: string;
+}): string {
+  const deler = [
+    input.soneVedPunkt ? "Kvikkleiresone ved søkepunktet" : null,
+    input.aktsomhetVedPunkt ? "Aktsomhetsområde ved søkepunktet" : null,
+    input.utredetVedPunkt ? "Utredet: ikke fare for områdeskred ved søkepunktet" : null,
+    input.soner > 0
+      ? `${input.soner} ${input.soner === 1 ? "kartlagt kvikkleiresone" : "kartlagte kvikkleiresoner"} innen ${input.radiusLabel}`
+      : null,
+  ].filter((del): del is string => del !== null);
+  return deler.join(" · ");
 }
 
 /** Oppsummeringen på «Infrastruktur». Typene har lange navn, så vi teller dem samlet. */

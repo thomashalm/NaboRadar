@@ -19,7 +19,6 @@ import {
   describeAnleggSummary,
   describeClusterSummary,
   describeClusterToggle,
-  describeInfrastrukturSummary,
   describePlaceLine,
   HELSE_CAVEAT,
   OPPVEKST_CAVEAT,
@@ -609,80 +608,6 @@ function buildCluster(
   };
 }
 
-/** Undertypene i «Infrastruktur». En ny type legges til her, ikke i UI-et. */
-const INFRA_LISTS: readonly ClusterListSpec[] = [
-  {
-    id: "transformatorstasjoner",
-    label: "Transformatorstasjoner",
-    subtypes: ["transformatorstasjon"],
-    ental: "transformatorstasjon",
-    flertall: "transformatorstasjoner",
-  },
-  {
-    id: "kraftlinjer",
-    label: "Kraftlinjer",
-    subtypes: ["kraftledning", "hoyspent_distribusjon"],
-    ental: "kraftlinje",
-    flertall: "kraftlinjer",
-  },
-];
-
-/**
- * «Infrastruktur» som én kompakt gruppe. Denne bygges av ferdige fakta, ikke av databaserader,
- * fordi kildene er både synk (nettanlegg) og direkte oppslag (distribusjonsnettet). Alnabru har
- * 52 registreringer innen 3 km; som enkeltkort fylte de siden.
- *
- * Eksportert for test: grupperingen er produktlogikk og verifiseres uten database.
- */
-export function infrastrukturCluster(facts: AreaFact[], radiusM: number): FactCluster | null {
-  const sortert = [...facts].sort(
-    (a, b) => Number(b.contains) - Number(a.contains) || (a.distanceM ?? 0) - (b.distanceM ?? 0),
-  );
-  if (sortert.length === 0) return null;
-
-  const lists: ClusterList[] = INFRA_LISTS.flatMap((spec) => {
-    const treff = sortert.filter((fact) => spec.subtypes.includes(fact.subtype));
-    if (treff.length === 0) return [];
-    const items = treff.slice(0, CLUSTER_LIST_CAP).map((fact) => ({
-      id: fact.id,
-      title: fact.headline,
-      distanceLabel: fact.distanceLabel,
-      // Detaljlinjen fra formuleringsregisteret: spenning når kilden oppgir en, og netteier.
-      subtitle: fact.details.filter(Boolean).join(" · ") || spec.label,
-      contains: fact.contains,
-      href: fact.link?.href ?? null,
-    }));
-    return [
-      {
-        id: spec.id,
-        label: spec.label,
-        toggleLabel:
-          treff.length > CLUSTER_PREVIEW
-            ? describeClusterToggle({ flertall: spec.flertall, vist: items.length, total: treff.length })
-            : null,
-        items,
-        previewCount: CLUSTER_PREVIEW,
-        total: treff.length,
-      },
-    ];
-  });
-
-  // Undertypene har hvert sitt forbehold. Vi viser dem for de typene som faktisk er med.
-  const caveats = [...new Set(sortert.flatMap((fact) => (fact.caveat ? [fact.caveat] : [])))];
-  const kilder = [...new Set(sortert.map((fact) => fact.sourceName))];
-
-  return {
-    sectionId: "infrastruktur",
-    id: "infrastruktur",
-    label: "Infrastruktur",
-    summary: describeInfrastrukturSummary({ total: sortert.length, radiusLabel: formatRadius(radiusM) }),
-    facts: [],
-    lists,
-    overview: null,
-    caveat: caveats.join(" ") || null,
-    sourceName: kilder.join(" · "),
-  };
-}
 
 /** Eksportert for test: grupperingen er produktlogikk og verifiseres uten database. */
 export function placeFacts(rows: FactRow[], radiusM: number, antallPerKategori: Partial<Record<AreaCategory, number>> = {}) {
@@ -925,19 +850,11 @@ export async function getAreaFacts(params: {
     }
   }
 
-  const infrastruktur = infrastrukturCluster(
-    facts.filter((fact) => fact.category === "infrastruktur"),
-    radius,
-  );
-  if (infrastruktur) clusters.push(infrastruktur);
-
+  // Grunnforhold og infrastruktur får kilder fra både databasen og direkte oppslag. Gruppene
+  // deres bygges derfor først når delsvarene er slått sammen (lib/facts/clusters.ts), ellers
+  // hadde seksjonen fått én gruppe per kilde.
   const sections = sectionOrder({ contaminationAtSearchPoint });
-  const groups = groupFacts(
-    facts.filter((fact) => fact.category !== "infrastruktur"),
-    overviews,
-    sections,
-    clusters,
-  );
+  const groups = groupFacts(facts, overviews, sections, clusters);
 
   const unavailable = [...failed, ...(dbFailed ? ["database"] : [])]
     .map((id) => SOURCES[id]?.name ?? (id === "database" ? "lagrede kilder" : id))

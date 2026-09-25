@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { infrastrukturCluster } from "@/lib/facts/queries";
+import { grunnforholdCluster, infrastrukturCluster } from "@/lib/facts/clusters";
 import { describeFact } from "@/lib/facts/wording";
 import type { AreaFact } from "@/types/area-feature";
 
@@ -139,5 +139,88 @@ describe("spenning som ikke er oppgitt", () => {
   it("gir ingen tom detaljlinje når verken spenning eller eier finnes", () => {
     const tekst = describeFact({ subtype: "transformatorstasjon", title: "Ukjent", attributes: { spenningKv: 0 }, contains: false })!;
     expect(tekst.details).toEqual([]);
+  });
+});
+
+describe("Grunnforhold som kompakt gruppe", () => {
+  const grunn = (overrides: Partial<AreaFact> & { id: string; subtype: string; distanceM: number }): AreaFact =>
+    ({
+      category: "grunnforhold",
+      headline: `Kartlagt kvikkleiresone «${overrides.id}»`,
+      details: ["Kvikkleire påvist", "Faregrad lav · risikoklasse 2 av 5"],
+      technical: ["Kvikkleire er påvist i sonen, med beregnet sikkerhetsfaktor under 1,4"],
+      caveat: null,
+      distanceLabel: `${overrides.distanceM} m unna`,
+      contains: false,
+      sourceName: "Kartlagte kvikkleiresoner (NVE)",
+      sourceDateLabel: null,
+      link: null,
+      ...overrides,
+    }) as AreaFact;
+
+  const sone = (id: string, distanceM: number, contains = false) =>
+    grunn({ id, subtype: "kvikkleire_sone", distanceM, contains });
+  const aktsomhet = grunn({
+    id: "aktsomhet",
+    subtype: "kvikkleire_aktsomhet",
+    distanceM: 0,
+    contains: true,
+    headline: "Aktsomhetsområde for kvikkleireskred",
+    details: ["Området kan ha marin leire i skrånende terreng. Kvikkleire er ikke påvist."],
+    technical: ["Ved byggetiltak i et slikt område krever NVE at det innhentes geoteknisk vurdering"],
+  });
+  const utredet = grunn({
+    id: "utredet",
+    subtype: "kvikkleire_utredet_uten_fare",
+    distanceM: 0,
+    contains: true,
+    headline: "Utredet av NVE: ikke fare for områdeskred",
+    details: [],
+  });
+
+  it("løfter det som gjelder søkepunktet i sammendraget", () => {
+    const gruppe = grunnforholdCluster([aktsomhet, sone("Alnabru", 0, true), sone("Smalvollveien", 890)], 1000)!;
+    expect(gruppe.summary).toBe(
+      "Kvikkleiresone ved søkepunktet · Aktsomhetsområde ved søkepunktet · 2 kartlagte kvikkleiresoner innen 1 km",
+    );
+  });
+
+  it("lar en sone langt unna ikke dominere", () => {
+    const gruppe = grunnforholdCluster([sone("Smalvollveien", 890)], 1000)!;
+    expect(gruppe.summary).toBe("1 kartlagt kvikkleiresone innen 1 km");
+  });
+
+  it("oppsummerer aktsomhetsområde alene", () => {
+    expect(grunnforholdCluster([aktsomhet], 500)!.summary).toBe("Aktsomhetsområde ved søkepunktet");
+  });
+
+  it("presenterer friskmeldt område som det det er", () => {
+    const gruppe = grunnforholdCluster([utredet], 500)!;
+    expect(gruppe.summary).toBe("Utredet: ikke fare for områdeskred ved søkepunktet");
+    expect(gruppe.facts[0]!.headline).toContain("ikke fare for områdeskred");
+  });
+
+  it("viser maks tre funn før «Se alle funn»", () => {
+    const mange = [1, 2, 3, 4, 5].map((n) => sone(`Sone ${n}`, n * 100));
+    const gruppe = grunnforholdCluster(mange, 1000)!;
+    expect(gruppe.facts.map((f) => f.id)).toEqual(["Sone 1", "Sone 2", "Sone 3"]);
+    expect(gruppe.overview!.toggleLabel).toBe("Se alle funn");
+    expect(gruppe.overview!.total).toBe(5);
+  });
+
+  it("setter det som dekker søkepunktet først", () => {
+    const gruppe = grunnforholdCluster([sone("Fjern", 900), sone("Under huset", 0, true)], 1000)!;
+    expect(gruppe.facts[0]!.id).toBe("Under huset");
+  });
+
+  it("beholder de tekniske opplysningene på kortet, ikke i standardteksten", () => {
+    const gruppe = grunnforholdCluster([sone("Alnabru", 100)], 1000)!;
+    const kort = gruppe.facts[0]!;
+    expect(kort.details).toEqual(["Kvikkleire påvist", "Faregrad lav · risikoklasse 2 av 5"]);
+    expect(kort.technical.join(" ")).toContain("sikkerhetsfaktor under 1,4");
+  });
+
+  it("gir ingen gruppe uten funn", () => {
+    expect(grunnforholdCluster([], 1000)).toBeNull();
   });
 });
