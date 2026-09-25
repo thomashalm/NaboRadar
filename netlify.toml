@@ -25,11 +25,18 @@
 # i det hele tatt, og kartflisene går direkte fra nettleseren til Kartverket —
 # panorering og zoom lager null trafikk mot oss.
 #
-# Hvorfor 120 og ikke 60: en bruker som både søker og klikker i kartet lager
+# Hvorfor 120 på /api/*: en bruker som både søker og klikker i kartet lager
 # realistisk 30–60 kall i minuttet (250 ms debounce på søk, ett kall per
-# eiendomsklikk). 60 ligger for nær ekte bruk. 120 er fortsatt langt under det
-# som koster oss noe. Vi strammer inn når vi har sett ekte trafikk — å løsne
-# etter å ha blokkert noen er verre enn å starte romslig.
+# eiendomsklikk). 60 ligger for nær ekte bruk.
+#
+# Hvorfor det dobbelte på /omrade: én sidevisning teller fire treff på regelen —
+# selve dokumentet pluss tre RSC-prefetcher, én per radiusknapp. Målt i
+# nettverksloggen på deploy preview 7. 120 ville altså vært 30 sidevisninger i
+# minuttet, og ti personer bak samme kontor-IP med tre visninger hver treffer
+# taket. 240 halverer den risikoen og holder misbruk på fire i sekundet.
+#
+# Vi strammer inn når vi har sett ekte trafikk — å løsne etter å ha blokkert
+# noen er verre enn å starte romslig.
 #
 # aggregate_by = ["ip", "domain"] teller per klient-IP slik Netlify selv ser den
 # på sin side av proxyen, ikke fra x-forwarded-for. Den kan altså ikke spoofes
@@ -58,6 +65,6 @@
   to = "/omrade"
   status = 200
   [redirects.rate_limit]
-    window_limit = 120
+    window_limit = 240
     window_size = 60
     aggregate_by = ["ip", "domain"]
