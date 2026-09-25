@@ -8,7 +8,7 @@ import { runSync, type SyncProgress } from "./run";
  *
  * To kilder til arbeid:
  *   1. forespørsler fra /admin («Kjør sync nå») — køen sync_requests
- *   2. providere som er forfalt etter sin egen tidsplan — sync_due()
+ *   2. providere som er forfalt etter sin egen tidsplan — claim_next_due_sync()
  *
  * En provider som feiler stopper aldri de andre: feilen logges på providerens egen rad
  * og i sync_runs, og workeren går videre til neste.
@@ -58,6 +58,8 @@ interface DueRow {
 }
 
 const DEFAULT_MAX_REQUESTS = 10;
+/** Sikkerhetsventil: løkken skal ikke kunne gå evig om noe skulle stemple feil. */
+const MAX_DUE_PER_RUN = 50;
 
 export async function runSyncWorker(db: Db, options: WorkerOptions = {}): Promise<WorkerOutcome> {
   const log = options.log ?? (() => {});
@@ -126,17 +128,30 @@ export async function runSyncWorker(db: Db, options: WorkerOptions = {}): Promis
   }
 
   // 2. Providere som er forfalt etter tidsplan.
+  //
+  // Vi krever én og én i stedet for å spørre hva som er forfalt: claim_next_due_sync
+  // stempler last_attempt_at i samme setning som den velger. Kjører to workere samtidig,
+  // ser den andre ingenting — uten å hvile på at GitHub køer kjøringene for oss.
   if (!options.skipDue) {
-    let due: DueRow[] = [];
-    try {
-      due = await db.rpc<DueRow>("sync_due");
-    } catch (error) {
-      outcome.failures.push({ providerId: "-", message: message(error) });
-    }
     const alreadyRun = new Set(outcome.results.map((r) => r.providerId));
-    for (const row of due) {
-      if (wanted && !wanted.has(row.provider_id)) continue;
-      if (alreadyRun.has(row.provider_id)) continue;
+    const utsatt: DueRow[] = [];
+
+    for (let i = 0; i < MAX_DUE_PER_RUN; i++) {
+      let row: DueRow | undefined;
+      try {
+        [row] = await db.rpc<DueRow>("claim_next_due_sync");
+      } catch (error) {
+        outcome.failures.push({ providerId: "-", message: message(error) });
+        break;
+      }
+      if (!row) break;
+
+      // Kjøringen er begrenset til andre providere. Stemplet står, men det er ufarlig:
+      // raden blir forfalt igjen ved neste intervall.
+      if ((wanted && !wanted.has(row.provider_id)) || alreadyRun.has(row.provider_id)) {
+        utsatt.push(row);
+        continue;
+      }
       try {
         await runOne(row.provider_id, options.mode ?? row.mode, "scheduled", options.force ?? false);
       } catch (error) {
@@ -145,6 +160,7 @@ export async function runSyncWorker(db: Db, options: WorkerOptions = {}): Promis
         log(`  ${row.provider_id}: FEIL — ${message(error)}`);
       }
     }
+    if (utsatt.length > 0) log(`${utsatt.length} forfalt provider(e) hoppet over i denne kjøringen.`);
   }
 
   return outcome;

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LoginForm } from "@/components/admin/LoginForm";
 import { SignOutButton } from "@/components/admin/SignOutButton";
 import { SyncButtons } from "@/components/admin/SyncButtons";
-import { loadAdminOverview, type SyncRunRow } from "@/lib/admin/queries";
+import { loadAdminOverview, type SchedulerStatus, type SyncRunRow } from "@/lib/admin/queries";
 import { getAdminSession } from "@/lib/admin/session";
 import { formatDate } from "@/lib/format";
 import type { ProviderHealth } from "@/lib/sync/health";
@@ -57,7 +57,7 @@ export default async function AdminPage() {
     );
   }
 
-  const { health, runs, errors } = await loadAdminOverview(session.client);
+  const { health, runs, scheduler, errors } = await loadAdminOverview(session.client);
   const scheduled = health.filter((h) => h.state !== "not_scheduled" && h.state !== "inactive");
   const other = health.filter((h) => h.state === "not_scheduled" || h.state === "inactive");
   const critical = scheduled.filter((h) => h.severity === "critical");
@@ -82,6 +82,8 @@ export default async function AdminPage() {
           <ProviderCard key={item.id} item={item} />
         ))}
       </section>
+
+      <SchedulerCard scheduler={scheduler} />
 
       <h2 className="mt-12 text-lg font-semibold">Siste kjøringer</h2>
       <RunsTable runs={runs} />
@@ -165,6 +167,50 @@ function ProviderCard({ item }: { item: ProviderHealth }) {
         />
       </div>
     </article>
+  );
+}
+
+/**
+ * Klokka, ikke kildene. Uten denne ser vi bare at en sync uteble, ikke om det var
+ * scheduleren som stoppet — som er nettopp det som skjedde med GitHubs egen cron.
+ */
+function SchedulerCard({ scheduler }: { scheduler: SchedulerStatus | null }) {
+  if (!scheduler) return null;
+  const sist = scheduler.last_run ? new Date(scheduler.last_run) : null;
+  const minutterSiden = scheduler.minutesSinceLastRun;
+  // To tikk uten kjøring er noe annet enn en forsinkelse.
+  const forsinket = minutterSiden !== null && minutterSiden > 35;
+
+  return (
+    <>
+      <h2 className="mt-12 text-lg font-semibold">Scheduler</h2>
+      <div className="mt-3 rounded-2xl border border-line bg-surface px-5 py-4 text-sm">
+        <p className="text-[15px] font-medium text-ink">
+          pg_cron · {scheduler.schedule} · {scheduler.active ? "aktiv" : "slått av"}
+        </p>
+        <p className="mt-1 text-muted">
+          {sist
+            ? `Sist utløst ${sist.toLocaleString("nb-NO")} (${minutterSiden} min siden)${
+                scheduler.last_status ? ` · ${scheduler.last_status}` : ""
+              }`
+            : "Ikke utløst ennå."}
+        </p>
+        {scheduler.last_http_status !== null && (
+          <p className="mt-1 text-muted">
+            Siste svar fra GitHub: HTTP {scheduler.last_http_status}
+            {scheduler.last_http_at ? ` · ${new Date(scheduler.last_http_at).toLocaleString("nb-NO")}` : ""}
+          </p>
+        )}
+        {scheduler.last_message && <p className="mt-1 text-muted">{scheduler.last_message}</p>}
+        {(!scheduler.active || forsinket) && (
+          <p className="mt-2 rounded-lg bg-danger-soft px-3 py-2 text-danger">
+            {scheduler.active
+              ? "Klokka har ikke utløst på over to intervaller. GitHubs egen schedule er reserve."
+              : "Cron-jobben er slått av. Bare GitHubs egen schedule utløser sync nå."}
+          </p>
+        )}
+      </div>
+    </>
   );
 }
 

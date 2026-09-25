@@ -148,3 +148,96 @@ varsle noen. Overvåkingen må derfor fortsatt være Healthchecks — som den er
 * **Beholde `schedule:` i workflowen?** Den koster ingenting og fyrer av og til. Med
   `concurrency` og `cancel-in-progress: false` vil en overlappende kjøring bare køe. Å beholde
   den som reserve virker fornuftig.
+
+---
+
+# Implementert: pg_cron som primær scheduler
+
+Satt opp 2026-10-01. GitHubs egen `schedule` står urørt som reserve.
+
+## Hva som kjører
+
+```sql
+select cron.schedule('naboradar-sync-dispatch', '*/15 * * * *',
+                     $$select public.trigger_sync_workflow()$$);
+```
+
+`trigger_sync_workflow()` leser tokenet fra Vault og gjør ett `net.http_post` mot
+`POST /repos/thomashalm/NaboRadar/actions/workflows/sync.yml/dispatches` med `{"ref": "main"}`.
+Mangler tokenet, skriver den en notice og returnerer — jobben skal ikke feile hvert kvarter
+mens hemmeligheten ennå ikke finnes.
+
+## Dobbelkjøring kan ikke skje
+
+Spørsmålet var om pg_cron og GitHubs schedule kan gi to reelle synker av samme provider.
+Tre mekanismer, i lag:
+
+1. **GitHub Actions concurrency.** Workflowen har `group: naboradar-sync` med
+   `cancel-in-progress: false`. Gruppen gjelder på tvers av hendelsestype, så en
+   `workflow_dispatch` og en `schedule` havner i samme gruppe: den ene kjører, den andre
+   venter. Historikken bekrefter det — ingen kjøring har status `cancelled`, og ingen varer
+   i nærheten av 15 minutter.
+2. **`claim_next_due_sync()`.** Tidligere spurte workeren `sync_due()`, som er read-only: to
+   samtidige workere fikk samme svar. Nå stemples `last_attempt_at` i samme setning som
+   providere velges, med `for update skip locked`. Den andre workeren ser ingenting forfalt.
+   Én provider av gangen, slik at en krasj midtveis bare utsetter den ene.
+3. **`claim_sync_request()`.** Admin-køen var allerede trygg: `for update skip locked` og
+   statusbytte til `running` i én setning.
+
+Punkt 2 var en reell luke før dette: garantien hvilte på GitHubs concurrency-funksjon alene.
+Nå holder den uansett hvor mange klokker vi kobler på.
+
+En kjøring som starter rett etter en annen gjør dessuten ingenting dobbelt: `sync_run_start`
+setter `last_attempt_at` ved oppstart, og intervallene er 1 440 minutter for de fleste kildene.
+
+## Hemmeligheten
+
+Tokenet ligger i Supabase Vault under navnet `github_workflow_dispatch_token`. Det står ikke i
+migrasjonen, ikke i noen applikasjonstabell og ikke i logger. Funksjonen slår det opp ved hvert
+kall.
+
+Ett forbehold, sagt rett ut: `pg_net` legger forespørselen med `Authorization`-headeren i
+`net.http_request_queue` til bakgrunnsprosessen har sendt den, og sletter raden da. Svaret i
+`net._http_response` inneholder ikke forespørselens headere. Skjemaet `net` er ikke eksponert
+gjennom API-et.
+
+## Slik settes tokenet opp
+
+1. Lag en fine-grained PAT på GitHub: kun repoet `thomashalm/NaboRadar`, kun tillatelsen
+   **Actions: Read and write**, med utløpsdato.
+2. Legg den i Vault (SQL Editor i Supabase, ikke i en migrasjon):
+
+   ```sql
+   select vault.create_secret('ghp_…', 'github_workflow_dispatch_token',
+                              'Utløser sync-workflowen fra pg_cron');
+   ```
+
+3. Kontroller at det virker: `select public.trigger_sync_workflow();` og se etter en ny
+   kjøring i GitHub Actions innen et halvt minutt.
+
+## Slik roteres PAT-en
+
+Den utløper, og da stopper klokka stille. Healthchecks fanger det innen 15 minutter pluss
+grace, og /admin viser «Sist utløst» med advarsel etter to intervaller.
+
+```sql
+select vault.update_secret(
+  (select id from vault.secrets where name = 'github_workflow_dispatch_token'),
+  'ghp_ny_token'
+);
+```
+
+Ingen omstart, ingen deploy: neste tikk bruker den nye verdien. Sett en påminnelse i kalenderen
+før utløpsdatoen.
+
+## Overvåking
+
+Healthchecks er uendret, og fanger fortsatt hele kjeden: stopper klokka, kommer det ingen
+heartbeat. `/admin` har fått et «Scheduler»-felt som sier hvilket ledd som røk — siste
+utløsning fra `cron.job_run_details`, og siste HTTP-status fra `net._http_response`.
+
+`cron.job_run_details` vokser. Den kan trimmes ved behov:
+
+```sql
+delete from cron.job_run_details where start_time < now() - interval '30 days';
+```
