@@ -87,3 +87,64 @@ inputene har standardverdier, så et kall uten parametre oppfører seg som en pl
 Det som trengs er en PAT med `actions: write` og et sted å legge den.
 
 Ikke øk grace-tiden i Healthchecks. Den fanger nettopp dette.
+
+---
+
+# Valg av ekstern scheduler (vurdering, ikke besluttet)
+
+Vurdert 2026-09-25. Oppgaven er avgrenset: noe utenfor GitHub skal kalle `workflow_dispatch`
+hvert 15. minutt. Worker, workflow og secrets står urørt, og «Run workflow»-knappen fungerer
+som før uansett hvilket alternativ som velges.
+
+## Healthchecks.io kan ikke brukes
+
+Healthchecks er en mottaker. Tjenesten lytter etter pinger og varsler når de uteblir; den har
+ingen planlagt utgående HTTP. Integrasjonene fyrer på statusendring, ikke på klokkeslett. Den
+blir stående som overvåking, ikke som klokke.
+
+## De tre reelle alternativene
+
+| | Supabase `pg_cron` + `pg_net` | Cloudflare Worker cron | cron-job.org |
+|---|---|---|---|
+| **Kostnad** | 0 — vi bruker allerede Supabase | 0 på gratisplan (3–5 cron-utløsere per Worker) | 0, ingen betalt nivå |
+| **Token** | Supabase Vault, kryptert, aktivert på alle prosjekter | `wrangler secret put`, kryptert | Egendefinert header lagret i deres webgrensesnitt |
+| **Oppsett** | Én SQL-migrasjon: aktiver utvidelsene, legg PAT i Vault, opprett jobben | Ny konto, ny Worker (~15 linjer), wrangler-config, egen deploy | Fem minutter i et skjema, ingen kode |
+| **Driftssikkerhet** | Ekte cron-daemon i vår egen Postgres | 99,99 % SLA på plattformen. Ingen automatisk retry: feiler en kjøring, er den tapt til neste tikk | Fellesskapsprosjekt uten SLA. Oppgir selv at de ikke kan garantere punktlighet |
+| **Lock-in** | Ingen ny — allerede vår database | Ny leverandør, men liten flate | Ingen |
+| **Ny drift** | Ingen ny plattform. Migrasjonen er versjonert som resten | Ny konto, nytt deploy-artefakt å vedlikeholde | Ingen, men en tjeneste til å holde styr på |
+| **Minste intervall** | 1 minutt | 1 minutt | 1 minutt |
+
+## Hvordan vi oppdager at scheduleren selv stopper
+
+Det samme for alle tre, og det er allerede på plass: stopper klokka, kommer det ingen kjøring,
+og da kommer det ingen heartbeat. Healthchecks går DOWN etter 15 minutter pluss grace. Det er
+nettopp det den er til for, og det er grunnen til ikke å skru opp grace-tiden.
+
+Det Healthchecks ikke sier, er *hvilket* ledd som røk. For Supabase-varianten kan vi senere
+vise `cron.job_run_details` på /admin og få svaret uten å gå utenfor huset.
+
+## Anbefaling: Supabase `pg_cron` + `pg_net`
+
+1. **Ingen ny leverandør, ingen ny konto, intet nytt deploy-artefakt.** Databasen er allerede i
+   produksjon, og migrasjoner er allerede vår kilde til sannhet. Jobben blir en migrasjon som
+   leses og versjoneres som all annen infrastruktur hos oss.
+2. **PAT-en havner i Vault**, kryptert, i infrastruktur vi allerede betror service-role-nøkkelen.
+   Ikke i et gratis tredjepartsskjema som kan utløse kjøringer i repoet vårt.
+3. **pg_cron er en ekte cron-daemon**, ikke en best effort-kø. Det er hele poenget med byttet.
+4. **Felles feilområde med databasen er riktig her.** Er Postgres nede, har sync-workeren
+   likevel ingenting å skrive til. Et tapt tikk i den situasjonen er ikke en tapt mulighet.
+
+Forbeholdet: `pg_net` er asynkron og uten retry, og feil havner i `net._http_response` uten å
+varsle noen. Overvåkingen må derfor fortsatt være Healthchecks — som den er.
+
+**Andrevalg:** Cloudflare Worker, hvis vi heller vil holde klokka utenfor databasen.
+**Tredjevalg:** cron-job.org, og da bare midlertidig.
+
+## Å ta stilling til før implementasjon
+
+* **PAT-en.** Fine-grained, kun dette repoet, kun `Actions: read and write`, med utløpsdato.
+  Når den utløper, stopper scheduleren stille — Healthchecks fanger det, men rotering bør inn
+  i kalenderen.
+* **Beholde `schedule:` i workflowen?** Den koster ingenting og fyrer av og til. Med
+  `concurrency` og `cancel-in-progress: false` vil en overlappende kjøring bare køe. Å beholde
+  den som reserve virker fornuftig.
