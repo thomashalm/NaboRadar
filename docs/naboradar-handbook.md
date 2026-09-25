@@ -1044,6 +1044,64 @@ adressededuplisering.
 Hver gruppe har et forbehold som sier hva som er utelatt, slik at en tom liste ikke leses som
 «det finnes ingenting».
 
+### Dekning for kommunale omsorgstilbud
+
+Datasettet har to kilder, og de dekker ulike ting:
+
+| Kilde | Antall | Hva den dekker |
+|---|---|---|
+| Oslo kommunes egen stedsindeks | 59 | Sykehjem, helsehus, dagsentre og barnevernsinstitusjoner — **kun Oslo** |
+| Helsenorge, behandlingssteder med offentlig tilbud | 308 | Nasjonalt, men **kun spesialisthelsetjeneste**: psykisk helse og rusbehandling |
+
+Konsekvensen er at **kommunale sykehjem, omsorgsboliger og bofellesskap i praksis bare er dekket
+for Oslo**. For andre kommuner finnes bare det Helsenorge har, som er BUP, DPS og lignende — altså
+helseforetak, ikke kommunen. Bærum har for eksempel fire oppføringer, alle Vestre Viken.
+
+**Det finnes ingen nasjonal kilde å tette dette med.** Geonorge har null datasett for sykehjem,
+omsorgsbolig eller bofellesskap. Hver kommune publiserer på sin egen måte, på sine egne sider.
+
+### Enhetsregisteret skal ikke brukes til dette
+
+Enhetsregisteret ser ut som løsningen — nasjonalt, strukturert, NLOD — og NACE 87.202
+«omsorgstjenester i botilbud» gir treff i hele landet. Bærum alene har 58 underenheter der.
+
+**Vi bruker det likevel ikke**, fordi de fleste av dem er bofellesskap for personer med
+utviklingshemming eller psykiske lidelser. Det er hjemmene til noen. At en virksomhet må registreres
+med en adresse i et foretaksregister, er ikke det samme som at ansvarlig myndighet har publisert
+stedet som et offentlig tilbud — og kommunene lar som regel være, bevisst.
+
+Regelen er derfor uendret, og den gjelder kilden, ikke bare stedet:
+
+> Et omsorgstilbud vises bare når **ansvarlig myndighet eller en offisiell kilde selv publiserer et
+> navngitt tilbud med konkret adresse**. Private boliger, skjermede adresser og bofellesskap som
+> ikke er publisert som et offentlig tilbud, vises aldri.
+
+### Regresjonseksempel: Egne Hjems vei 5, 1356 Bekkestua
+
+Et konkret tilfelle, undersøkt 2026-09-25, som viser hvorfor regelen finnes.
+
+Adressen finnes i Kartverket (5A og 5B). Den er **ikke** i noen av våre kilder, og heller ikke i
+råkildene bak dem: ingen enhet i Enhetsregisteret i hele postnummer 1356 ligger på nr. 5, og Bærum
+kommune omtaler adressen ingen steder på sine omsorgssider — eneste treff på nettstedet er en side
+om stedsutvikling.
+
+**Den skal ikke vises.** Ikke fordi vi mangler en kilde, men fordi ingen ansvarlig myndighet har
+publisert et navngitt omsorgstilbud der. Hadde vi tatt den inn via Enhetsregisteret eller ved å
+gjette ut fra nærhet, hadde vi brutt regelen over.
+
+Dette er skillet som må holdes når noen melder at «noe mangler»: et manglende sted kan være et
+datagap, eller det kan være riktig oppførsel. Her er det begge deler — gapet er ekte for Bærum
+generelt, men denne adressen ville ikke dukket opp uansett.
+
+### Bærum: på vent
+
+Bærum kommune publiserer selv 14 omsorgstilbud med navn og adresse — 6 sykehjem og
+bo- og behandlingssentre, 3 helsehus og 5 omsorgsboliger. De er innenfor regelen og kan integreres.
+
+Det er **satt på vent** sammen med den øvrige utvidelsen utenfor Oslo (se skolekretser for Bærum og
+Asker): kilden er kommunens egne nettsider uten API, og lisensen er ikke avklart. Begge deler hører
+hjemme i samme henvendelse til kommunen.
+
 ---
 
 ## 24. Personvern
@@ -1092,7 +1150,7 @@ Ting vi vet om og bevisst ikke har løst nå.
 | **Skolekretsenes lisens er ikke avklart** | Tjenesten oppgir «Copyright Plan- og bygningsetaten i Oslo kommune». Tredje Oslo-kilde uten åpen lisens — bør avklares samlet |
 | **Skolekretsene har ingen datostempling** | Grensene revideres hver høst, og innholdshashen i sync-laget er vårt eneste signal om at det har skjedd |
 | **Fem skolekretser mangler organisasjonsnummer** | Manglerud, Munkerud, Nordseter, Rosenholm og Vestli finnes ikke i Geonorge-laget vi synker skoler fra. Da viser vi navnet uten kobling |
-| **Omsorgstilbud dekker i hovedsak Oslo** | Bygget på kommunens egen publisering |
+| **Omsorgstilbud dekker i hovedsak Oslo** | Bygget på kommunens egen publisering. Helsenorge gir nasjonal dekning for spesialisthelsetjeneste, men ikke for kommunale sykehjem, omsorgsboliger og bofellesskap. Ingen nasjonal kilde finnes, og Enhetsregisteret skal ikke brukes til formålet — se seksjon 23 |
 | **Sykehus og omsorgstilbud er kuraterte filer** | Reverifiseres med scripts, ikke live-synk |
 | **DiBK mangler formål, status og sluttdato** | Vi viser bare at oppstart er varslet |
 | **DiBK gir kommunenummer, ikke navn** | Detaljsiden viser nummeret |
