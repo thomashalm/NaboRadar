@@ -1,28 +1,15 @@
 -- ---------------------------------------------------------------------------
--- Scheduler: pg_cron utløser GitHub-workflowen hvert 15. minutt.
+-- Gjør scheduler-funksjonene portable i miljøer uten pg_cron, pg_net og Vault.
 --
--- GitHubs egen `schedule` er best effort. Målt over 41 timer opprettet den 11 av rundt
--- 165 kjøringer, med hull på opptil 338 minutter — se docs/drift-scheduler.md. Klokka
--- flyttes derfor hit, mens alt annet står: samme worker, samme workflow, samme secrets,
--- samme «Run workflow»-knapp. GitHubs schedule beholdes som reserve.
+-- Den forrige migrasjonen opprettet scheduler_status() som ren SQL. Den formen slår opp
+-- cron.job og net._http_response allerede ved opprettelse, og brøt dermed testoppsettet,
+-- som spiller av hele historikken mot PGlite. Begge funksjonene erstattes av versjoner
+-- som sjekker at avhengighetene finnes før de brukes.
 --
--- Tokenet står ikke her. Funksjonen leser det fra Vault under navnet
--- «github_workflow_dispatch_token». Uten et token gjør jobben ingenting — den skal ikke
--- feile hvert kvarter mens hemmeligheten ennå ikke er satt opp.
---
--- Alt som krever pg_cron, pg_net eller Vault er betinget. Testene kjører mot PGlite, som
--- ikke har dem, og skal kunne spille av hele migrasjonshistorikken.
+-- Produksjon får samme resultat som før: der finnes både pg_cron, pg_net og Vault.
 -- ---------------------------------------------------------------------------
-do $$
-begin
-  if exists (select 1 from pg_available_extensions where name = 'pg_cron') then
-    execute 'create extension if not exists pg_cron';
-  end if;
-  if exists (select 1 from pg_available_extensions where name = 'pg_net') then
-    execute 'create extension if not exists pg_net';
-  end if;
-end;
-$$;
+drop function if exists public.scheduler_status();
+drop function if exists public.trigger_sync_workflow();
 
 create function public.trigger_sync_workflow()
 returns void
