@@ -49,6 +49,14 @@ interface AreaExplorerProps {
    * teksten i HTML-en uten at denne klientkomponenten må kjenne til oppslaget.
    */
   skolekrets?: React.ReactNode;
+  /**
+   * Innhold som legges under resultatet, etter de offentlige seksjonene.
+   *
+   * Sømmen som lar admin vise «samme resultat + noe mer» uten en egen implementasjon av
+   * siden. Den offentlige /omrade sender ingenting inn her, og en endring i resultatvisningen
+   * slår derfor gjennom begge steder av seg selv.
+   */
+  extraSections?: React.ReactNode;
 }
 
 type Stream<T> = { status: "loading" } | { status: "ready"; data: T } | { status: "failed" };
@@ -112,6 +120,7 @@ export function AreaExplorer({
   lookupFacts: lookupFactsPromise,
   tiles,
   skolekrets,
+  extraSections,
 }: AreaExplorerProps) {
   const router = useRouter();
   const eventStream = useStream(eventsPromise);
@@ -347,6 +356,7 @@ export function AreaExplorer({
           />
           }
         />
+        {extraSections}
         </MapSelectionProvider>
       </div>
     </main>

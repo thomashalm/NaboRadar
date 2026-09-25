@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LoginForm } from "@/components/admin/LoginForm";
 import { SignOutButton } from "@/components/admin/SignOutButton";
 import { SyncButtons } from "@/components/admin/SyncButtons";
@@ -82,6 +83,12 @@ export default async function AdminPage() {
           <ProviderCard key={item.id} item={item} />
         ))}
       </section>
+
+      <p className="mt-8">
+        <Link href="/admin/adresse" className="text-[15px] font-medium text-accent hover:underline">
+          Adressesøk med intern research →
+        </Link>
+      </p>
 
       <SchedulerCard scheduler={scheduler} />
 

@@ -355,6 +355,26 @@ sesjonen, og kjører kun på `/admin`.
 kjøringene, scheduler-status (jobb, tidsplan, siste kjøring, siste HTTP-status), og legge
 «Kjør sync nå» / «Kjør full sync» i kø.
 
+**`/admin/adresse`** er adressesøk for drift: **samme resultatside som brukeren ser**, med intern
+research under. Den er ikke en egen implementasjon — den bruker `AreaExplorer` og
+`buildAreaView()` akkurat som `/omrade`, og legger sitt eget innhold i `extraSections`-sømmen.
+En endring i den offentlige visningen slår derfor gjennom her av seg selv.
+
+| Lag | Delt mellom `/omrade` og `/admin/adresse` |
+|---|---|
+| `lib/area-view.ts` | Kildene og fristene (8 s / 8 s / 12 s) |
+| `components/area/AreaExplorer.tsx` | Layout, kart, valg, seksjoner, eiendomskort |
+| `components/area/AreaFacts.tsx` | Seksjoner, grupper, ordlyd |
+| `components/area/SkolekretsNotis.tsx` | Skolekretsnotisen |
+| `extraSections` | **Kun admin.** Offentlig side sender ingenting inn |
+
+Den eneste research-seksjonen som er bygget er **Datakvalitet i området**: antall per kategori
+innen radius, hvilke kategorier som er tomme, og en tillitsgrad utledet av kildenes helse — «lav»
+så snart én områdekilde er kritisk. Poenget er at en operatør ikke skal lese «ingen treff» som et
+svar når kilden er utdatert. Den er bygget på `features_count_near` og `provider_health()`, som
+begge finnes fra før, og bruker `assessAll` fra `lib/sync/health` slik at «stale» betyr det samme
+her som i `/admin` og i varslingen.
+
 **Admin kan ikke** skrive data direkte. Knappene legger en rad i `sync_requests`; sync-workeren
 utfører den. Det er derfor webappen ikke trenger en skrivenøkkel.
 
@@ -1170,6 +1190,7 @@ Ting vi vet om og bevisst ikke har løst nå.
 | | |
 |---|---|
 | **Skjenkebevillinger dekker bare Oslo** | Næringsetatens register. Lisens ikke oppgitt av kilden — bør avklares |
+| **Fem av seks research-kategorier er ikke bygget** | Datasenter/industri, omsorg/bofellesskap, forsvar/militært, større prosjekter og notater mangler både datamodell og innhold. To av dem berører data vi bevisst har valgt å ikke samle — se seksjon 23 og discovery-notatene. Sømmen `extraSections` står klar |
 | **Skolekretser dekker bare Oslo, og bare barnetrinnet** | Ingen nasjonal kilde finnes: Geonorge har to skolekrets-datasett i hele landet, begge fra Halden. Hver kommune publiserer sitt eget |
 | **Tilfluktsrom har ikke areal, type eller status** | DSBs datasett har dem ikke. Vi viser romnummer, stedsbeskrivelse, plasser og posisjon |
 | **Tilfluktsromseksjonen faller bort uten treff** | 556 rom i hele landet betyr at de fleste adresser ikke har noen i nærheten. En fast «ingen funnet»-linje ville vært støy, og lest som en påstand om områdets beredskap |
