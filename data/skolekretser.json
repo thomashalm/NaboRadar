@@ -1,0 +1,957 @@
+{
+  "kilde": "Oslo kommune, Plan- og bygningsetaten — WFS map=SKOLER, lag Skolekretser_f",
+  "kildeUrl": "https://od2.pbe.oslo.kommune.no/xkart/skoler/",
+  "verifisert": "2026-09-25",
+  "merknad": "Kobling fra SKRETSNAVN til skole. Navnene er identiske med skolenavnet uten «skole», med to unntak som er satt for hånd. orgnr er null når skolen ikke finnes i vår Udir-synk.",
+  "kretser": [
+    {
+      "krets": "Abildsø",
+      "skoler": [
+        {
+          "navn": "Abildsø skole",
+          "orgnr": "974589648"
+        }
+      ]
+    },
+    {
+      "krets": "Ammerud",
+      "skoler": [
+        {
+          "navn": "Ammerud skole",
+          "orgnr": "974589656"
+        }
+      ]
+    },
+    {
+      "krets": "Bakås",
+      "skoler": [
+        {
+          "navn": "Bakås skole",
+          "orgnr": "974590433"
+        }
+      ]
+    },
+    {
+      "krets": "Bekkelaget",
+      "skoler": [
+        {
+          "navn": "Bekkelaget skole",
+          "orgnr": "974589664"
+        }
+      ]
+    },
+    {
+      "krets": "Berg",
+      "skoler": [
+        {
+          "navn": "Berg skole",
+          "orgnr": "912697711"
+        }
+      ]
+    },
+    {
+      "krets": "Bestum",
+      "skoler": [
+        {
+          "navn": "Bestum skole",
+          "orgnr": "974589672"
+        }
+      ]
+    },
+    {
+      "krets": "Bjølsen",
+      "skoler": [
+        {
+          "navn": "Bjølsen skole",
+          "orgnr": "974589680"
+        }
+      ]
+    },
+    {
+      "krets": "Bjørndal",
+      "skoler": [
+        {
+          "navn": "Bjørndal skole",
+          "orgnr": "974590514"
+        }
+      ]
+    },
+    {
+      "krets": "Bjørnsletta",
+      "skoler": [
+        {
+          "navn": "Bjørnsletta skole",
+          "orgnr": "974590603"
+        }
+      ]
+    },
+    {
+      "krets": "Bogstad",
+      "skoler": [
+        {
+          "navn": "Bogstad skole",
+          "orgnr": "987865997"
+        }
+      ]
+    },
+    {
+      "krets": "Bolteløkka",
+      "skoler": [
+        {
+          "navn": "Bolteløkka skole",
+          "orgnr": "974589702"
+        }
+      ]
+    },
+    {
+      "krets": "Bryn",
+      "skoler": [
+        {
+          "navn": "Bryn skole",
+          "orgnr": "974589710"
+        }
+      ]
+    },
+    {
+      "krets": "Brynseng",
+      "skoler": [
+        {
+          "navn": "Brynseng skole",
+          "orgnr": "916513968"
+        }
+      ]
+    },
+    {
+      "krets": "Bygdøy",
+      "skoler": [
+        {
+          "navn": "Bygdøy skole",
+          "orgnr": "974589729"
+        }
+      ]
+    },
+    {
+      "krets": "Bøler",
+      "skoler": [
+        {
+          "navn": "Bøler skole",
+          "orgnr": "974589737"
+        }
+      ]
+    },
+    {
+      "krets": "Disen",
+      "skoler": [
+        {
+          "navn": "Disen skole",
+          "orgnr": "879128072"
+        }
+      ]
+    },
+    {
+      "krets": "Ekeberg",
+      "skoler": [
+        {
+          "navn": "Ekeberg skole",
+          "orgnr": "974589745"
+        }
+      ]
+    },
+    {
+      "krets": "Ellingsrudåsen",
+      "skoler": [
+        {
+          "navn": "Ellingsrudåsen skole",
+          "orgnr": "974589753"
+        }
+      ]
+    },
+    {
+      "krets": "Fernanda Nissen",
+      "skoler": [
+        {
+          "navn": "Fernanda Nissen skole",
+          "orgnr": "916203993"
+        }
+      ]
+    },
+    {
+      "krets": "Furuset",
+      "skoler": [
+        {
+          "navn": "Furuset skole",
+          "orgnr": "974589761"
+        }
+      ]
+    },
+    {
+      "krets": "Gamlebyen",
+      "skoler": [
+        {
+          "navn": "Gamlebyen skole",
+          "orgnr": "973626442"
+        }
+      ]
+    },
+    {
+      "krets": "Godlia",
+      "skoler": [
+        {
+          "navn": "Godlia skole",
+          "orgnr": "979927533"
+        }
+      ]
+    },
+    {
+      "krets": "Grefsen",
+      "skoler": [
+        {
+          "navn": "Grefsen skole",
+          "orgnr": "974589788"
+        }
+      ]
+    },
+    {
+      "krets": "Grindbakken",
+      "skoler": [
+        {
+          "navn": "Grindbakken skole",
+          "orgnr": "974589699"
+        }
+      ]
+    },
+    {
+      "krets": "Grorud",
+      "skoler": [
+        {
+          "navn": "Grorud skole",
+          "orgnr": "974589796"
+        }
+      ]
+    },
+    {
+      "krets": "Grünerløkka",
+      "skoler": [
+        {
+          "navn": "Grünerløkka skole",
+          "orgnr": "874589802"
+        }
+      ]
+    },
+    {
+      "krets": "Hallagerbakken",
+      "skoler": [
+        {
+          "navn": "Hallagerbakken skole",
+          "orgnr": "974590417"
+        }
+      ]
+    },
+    {
+      "krets": "Hasle",
+      "skoler": [
+        {
+          "navn": "Hasle skole",
+          "orgnr": "974589818"
+        }
+      ]
+    },
+    {
+      "krets": "Haugen",
+      "skoler": [
+        {
+          "navn": "Haugen skole",
+          "orgnr": "874590452"
+        }
+      ]
+    },
+    {
+      "krets": "Haugenstua",
+      "skoler": [
+        {
+          "navn": "Haugenstua skole",
+          "orgnr": "974590549"
+        }
+      ]
+    },
+    {
+      "krets": "Holmen",
+      "skoler": [
+        {
+          "navn": "Holmen skole",
+          "orgnr": "917526427"
+        }
+      ]
+    },
+    {
+      "krets": "Huseby",
+      "skoler": [
+        {
+          "navn": "Huseby skole",
+          "orgnr": "974589834"
+        }
+      ]
+    },
+    {
+      "krets": "Høybråten",
+      "skoler": [
+        {
+          "navn": "Høybråten skole",
+          "orgnr": "974589842"
+        }
+      ]
+    },
+    {
+      "krets": "Høyenhall",
+      "skoler": [
+        {
+          "navn": "Høyenhall skole",
+          "orgnr": "974589850"
+        }
+      ]
+    },
+    {
+      "krets": "Ila",
+      "skoler": [
+        {
+          "navn": "Ila skole",
+          "orgnr": "974589869"
+        }
+      ]
+    },
+    {
+      "krets": "Jeriko",
+      "skoler": [
+        {
+          "navn": "Jeriko skole",
+          "orgnr": "974590506"
+        }
+      ]
+    },
+    {
+      "krets": "Kampen",
+      "skoler": [
+        {
+          "navn": "Kampen skole",
+          "orgnr": "974589877"
+        }
+      ]
+    },
+    {
+      "krets": "Karlsrud",
+      "skoler": [
+        {
+          "navn": "Karlsrud skole",
+          "orgnr": "979126743"
+        }
+      ]
+    },
+    {
+      "krets": "Kastellet",
+      "skoler": [
+        {
+          "navn": "Kastellet skole",
+          "orgnr": "987131780"
+        }
+      ]
+    },
+    {
+      "krets": "Kjelsås",
+      "skoler": [
+        {
+          "navn": "Kjelsås skole",
+          "orgnr": "974589893"
+        }
+      ]
+    },
+    {
+      "krets": "Klemetsrud",
+      "skoler": [
+        {
+          "navn": "Klemetsrud skole",
+          "orgnr": "974589907"
+        }
+      ]
+    },
+    {
+      "krets": "Korsvoll",
+      "skoler": [
+        {
+          "navn": "Korsvoll skole",
+          "orgnr": "974589915"
+        }
+      ]
+    },
+    {
+      "krets": "Kringsjå",
+      "skoler": [
+        {
+          "navn": "Kringsjå skole",
+          "orgnr": "975960315"
+        }
+      ]
+    },
+    {
+      "krets": "Lakkegata",
+      "skoler": [
+        {
+          "navn": "Lakkegata skole",
+          "orgnr": "974589923"
+        }
+      ]
+    },
+    {
+      "krets": "Lambertseter",
+      "skoler": [
+        {
+          "navn": "Lambertseter skole",
+          "orgnr": "974589931"
+        }
+      ]
+    },
+    {
+      "krets": "Lilleaker",
+      "skoler": [
+        {
+          "navn": "Lilleaker skole",
+          "orgnr": "874589942"
+        }
+      ]
+    },
+    {
+      "krets": "Lilleborg",
+      "skoler": [
+        {
+          "navn": "Lilleborg skole",
+          "orgnr": "974589958"
+        }
+      ]
+    },
+    {
+      "krets": "Lindeberg",
+      "skoler": [
+        {
+          "navn": "Lindeberg skole",
+          "orgnr": "974590468"
+        }
+      ]
+    },
+    {
+      "krets": "Linderud",
+      "skoler": [
+        {
+          "navn": "Linderud skole",
+          "orgnr": "974589966"
+        }
+      ]
+    },
+    {
+      "krets": "Ljan",
+      "skoler": [
+        {
+          "navn": "Ljan skole",
+          "orgnr": "974589974"
+        }
+      ]
+    },
+    {
+      "krets": "Lusetjern",
+      "skoler": [
+        {
+          "navn": "Lusetjern skole",
+          "orgnr": "973626450"
+        }
+      ]
+    },
+    {
+      "krets": "Lutvann",
+      "skoler": [
+        {
+          "navn": "Lutvann skole",
+          "orgnr": "976811232"
+        }
+      ]
+    },
+    {
+      "krets": "Lysejordet",
+      "skoler": [
+        {
+          "navn": "Lysejordet skole",
+          "orgnr": "974590522"
+        }
+      ]
+    },
+    {
+      "krets": "Løren",
+      "skoler": [
+        {
+          "navn": "Løren skole",
+          "orgnr": "912033333"
+        }
+      ]
+    },
+    {
+      "krets": "Majorstua",
+      "skoler": [
+        {
+          "navn": "Majorstuen skole",
+          "orgnr": "974589990"
+        }
+      ]
+    },
+    {
+      "krets": "Manglerud",
+      "skoler": [
+        {
+          "navn": "Manglerud skole",
+          "orgnr": null
+        }
+      ]
+    },
+    {
+      "krets": "Maridalen",
+      "skoler": [
+        {
+          "navn": "Maridalen skole",
+          "orgnr": "974590018"
+        }
+      ]
+    },
+    {
+      "krets": "Marienlyst",
+      "skoler": [
+        {
+          "navn": "Marienlyst skole",
+          "orgnr": "974590026"
+        }
+      ]
+    },
+    {
+      "krets": "Mortensrud",
+      "skoler": [
+        {
+          "navn": "Mortensrud skole",
+          "orgnr": "974590492"
+        }
+      ]
+    },
+    {
+      "krets": "Munkerud",
+      "skoler": [
+        {
+          "navn": "Munkerud skole",
+          "orgnr": null
+        }
+      ]
+    },
+    {
+      "krets": "Nedre Bekkelaget",
+      "skoler": [
+        {
+          "navn": "Nedre Bekkelaget skole",
+          "orgnr": "974590476"
+        }
+      ]
+    },
+    {
+      "krets": "Nordpolen",
+      "skoler": [
+        {
+          "navn": "Nordpolen skole",
+          "orgnr": "997621506"
+        }
+      ]
+    },
+    {
+      "krets": "Nordseter",
+      "skoler": [
+        {
+          "navn": "Nordseter skole",
+          "orgnr": null
+        }
+      ]
+    },
+    {
+      "krets": "Nordstrand",
+      "skoler": [
+        {
+          "navn": "Nordstrand skole",
+          "orgnr": "974590069"
+        }
+      ]
+    },
+    {
+      "krets": "Nordtvet",
+      "skoler": [
+        {
+          "navn": "Nordtvet skole",
+          "orgnr": "974590077"
+        }
+      ]
+    },
+    {
+      "krets": "Nøklevann",
+      "skoler": [
+        {
+          "navn": "Nøklevann skole",
+          "orgnr": "974590085"
+        }
+      ]
+    },
+    {
+      "krets": "Oppsal",
+      "skoler": [
+        {
+          "navn": "Oppsal skole",
+          "orgnr": "974590093"
+        }
+      ]
+    },
+    {
+      "krets": "Prinsdal",
+      "skoler": [
+        {
+          "navn": "Prinsdal skole",
+          "orgnr": "974590107"
+        }
+      ]
+    },
+    {
+      "krets": "Refstad",
+      "skoler": [
+        {
+          "navn": "Refstad skole",
+          "orgnr": "974589982"
+        }
+      ]
+    },
+    {
+      "krets": "Rommen",
+      "skoler": [
+        {
+          "navn": "Rommen skole",
+          "orgnr": "974590115"
+        }
+      ]
+    },
+    {
+      "krets": "Rosenholm",
+      "skoler": [
+        {
+          "navn": "Rosenholm skole",
+          "orgnr": null
+        }
+      ]
+    },
+    {
+      "krets": "Ruseløkka",
+      "skoler": [
+        {
+          "navn": "Ruseløkka skole",
+          "orgnr": "974590131"
+        }
+      ]
+    },
+    {
+      "krets": "Rustad",
+      "skoler": [
+        {
+          "navn": "Rustad skole",
+          "orgnr": "874590142"
+        }
+      ]
+    },
+    {
+      "krets": "Rødtvet",
+      "skoler": [
+        {
+          "navn": "Rødtvet skole",
+          "orgnr": "974590158"
+        }
+      ]
+    },
+    {
+      "krets": "Sagene",
+      "skoler": [
+        {
+          "navn": "Sagene skole",
+          "orgnr": "974590166"
+        }
+      ]
+    },
+    {
+      "krets": "Seterbråten",
+      "skoler": [
+        {
+          "navn": "Seterbråten skole",
+          "orgnr": "979127502"
+        }
+      ]
+    },
+    {
+      "krets": "Sinsen",
+      "skoler": [
+        {
+          "navn": "Sinsen skole",
+          "orgnr": "974590174"
+        }
+      ]
+    },
+    {
+      "krets": "Skjønnhaug",
+      "skoler": [
+        {
+          "navn": "Skjønnhaug skole",
+          "orgnr": "874590282"
+        }
+      ]
+    },
+    {
+      "krets": "Skøyen",
+      "skoler": [
+        {
+          "navn": "Skøyen skole",
+          "orgnr": "979128134"
+        }
+      ]
+    },
+    {
+      "krets": "Slemdal",
+      "skoler": [
+        {
+          "navn": "Slemdal skole",
+          "orgnr": "974590182"
+        }
+      ]
+    },
+    {
+      "krets": "Smestad",
+      "skoler": [
+        {
+          "navn": "Smestad skole",
+          "orgnr": "974590190"
+        }
+      ]
+    },
+    {
+      "krets": "Stenbråten",
+      "skoler": [
+        {
+          "navn": "Stenbråten skole",
+          "orgnr": "975960277"
+        }
+      ]
+    },
+    {
+      "krets": "Stovner",
+      "skoler": [
+        {
+          "navn": "Stovner skole",
+          "orgnr": "974590212"
+        }
+      ]
+    },
+    {
+      "krets": "Svarttjern og Tiurleiken",
+      "skoler": [
+        {
+          "navn": "Svarttjern skole",
+          "orgnr": "974590409"
+        },
+        {
+          "navn": "Tiurleiken skole",
+          "orgnr": "974590123"
+        }
+      ]
+    },
+    {
+      "krets": "Svendstuen",
+      "skoler": [
+        {
+          "navn": "Svendstuen skole",
+          "orgnr": "979127413"
+        }
+      ]
+    },
+    {
+      "krets": "Sørkedalen",
+      "skoler": [
+        {
+          "navn": "Sørkedalen skole",
+          "orgnr": "974590220"
+        }
+      ]
+    },
+    {
+      "krets": "Teglverket",
+      "skoler": [
+        {
+          "navn": "Teglverket skole",
+          "orgnr": "913579321"
+        }
+      ]
+    },
+    {
+      "krets": "Tonsenhagen",
+      "skoler": [
+        {
+          "navn": "Tonsenhagen skole",
+          "orgnr": "974590239"
+        }
+      ]
+    },
+    {
+      "krets": "Toppåsen",
+      "skoler": [
+        {
+          "navn": "Toppåsen skole",
+          "orgnr": "974590484"
+        }
+      ]
+    },
+    {
+      "krets": "Trasop",
+      "skoler": [
+        {
+          "navn": "Trasop skole",
+          "orgnr": "974590247"
+        }
+      ]
+    },
+    {
+      "krets": "Trosterud",
+      "skoler": [
+        {
+          "navn": "Trosterud skole",
+          "orgnr": "974590255"
+        }
+      ]
+    },
+    {
+      "krets": "Tveita",
+      "skoler": [
+        {
+          "navn": "Tveita skole",
+          "orgnr": "974590263"
+        }
+      ]
+    },
+    {
+      "krets": "Tøyen",
+      "skoler": [
+        {
+          "navn": "Tøyen skole",
+          "orgnr": "974590271"
+        }
+      ]
+    },
+    {
+      "krets": "Tåsen",
+      "skoler": [
+        {
+          "navn": "Tåsen skole",
+          "orgnr": "974590298"
+        }
+      ]
+    },
+    {
+      "krets": "Ullevål",
+      "skoler": [
+        {
+          "navn": "Ullevål skole",
+          "orgnr": "974590301"
+        }
+      ]
+    },
+    {
+      "krets": "Uranienborg",
+      "skoler": [
+        {
+          "navn": "Uranienborg skole",
+          "orgnr": "974590328"
+        }
+      ]
+    },
+    {
+      "krets": "Vahl",
+      "skoler": [
+        {
+          "navn": "Vahl skole",
+          "orgnr": "879126312"
+        }
+      ]
+    },
+    {
+      "krets": "Veitvet",
+      "skoler": [
+        {
+          "navn": "Veitvet skole",
+          "orgnr": "974590336"
+        }
+      ]
+    },
+    {
+      "krets": "Vestli",
+      "skoler": [
+        {
+          "navn": "Vestli skole",
+          "orgnr": null
+        }
+      ]
+    },
+    {
+      "krets": "Vinderen",
+      "skoler": [
+        {
+          "navn": "Vinderen skole",
+          "orgnr": "974590352"
+        }
+      ]
+    },
+    {
+      "krets": "Voksen",
+      "skoler": [
+        {
+          "navn": "Voksen skole",
+          "orgnr": "974590360"
+        }
+      ]
+    },
+    {
+      "krets": "Vollebekk",
+      "skoler": [
+        {
+          "navn": "Vollebekk skole",
+          "orgnr": "918399267"
+        }
+      ]
+    },
+    {
+      "krets": "Vålerenga",
+      "skoler": [
+        {
+          "navn": "Vålerenga skole",
+          "orgnr": "974590379"
+        }
+      ]
+    },
+    {
+      "krets": "Østensjø",
+      "skoler": [
+        {
+          "navn": "Østensjø skole",
+          "orgnr": "974590387"
+        }
+      ]
+    },
+    {
+      "krets": "Årvoll",
+      "skoler": [
+        {
+          "navn": "Årvoll skole",
+          "orgnr": "974590395"
+        }
+      ]
+    }
+  ]
+}

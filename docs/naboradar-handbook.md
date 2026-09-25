@@ -211,7 +211,7 @@ hver kjøring, så en migrasjon som ikke kan spilles av på nytt, brekker testen
 | `providers` | Én rad per datakilde: status, lisens, synkeintervall, stale-grense, siste kjøring | Ja (seedes i migrasjon) |
 | `events` | Plansaker fra DiBK. Polygon/multipolygon, generert `centroid` og `computed_area_m2` | **Ja** — full sync fra DiBK |
 | `event_documents` | Tillatte plandokumenter. CHECK på type, tittel og mime-type | **Ja** |
-| `area_features` | Alle synkede områdefakta, ~37 000 rader | **Ja** |
+| `area_features` | Alle synkede områdefakta, ~37 000 rader. Inkluderer kategorien `skolekrets`, som er den eneste som besvarer «ligger punktet inne i?» og derfor står utenfor `AREA_SECTIONS` | **Ja** |
 | `sync_runs` | Én rad per kjøring: modus, tellere, advarsler, feil | Nei, men kun drifthistorikk |
 | `sync_requests` | Kø for «Kjør sync nå» fra `/admin` | Nei, men flyktig |
 | `admin_users` | E-poster som slipper inn på `/admin` | **UNIK — må sikres** |
@@ -611,6 +611,7 @@ testdetaljer og eksempelresponser.
 | Sykehus | Helsenorge ∧ Enhetsregisteret (NACE 86.101) | Sykehus | Punkt | 80 | NLOD 2.0 | **Kurert liste** i `data/sykehus.json`, ikke live-synk. Reverifiseres med `scripts/build-sykehus.ts` |
 | Omsorgstilbud | Oslo kommune + Helsenorge | Sykehjem, helsehus, behandlings- og botilbud | Punkt | 367 | NLOD 2.0 | **Kurert liste** i `data/omsorgstilbud.json`. Foreløpig i hovedsak Oslo. Kun steder ansvarlig myndighet selv publiserer med navn og adresse |
 | Skjenkebevillinger | Næringsetaten, Oslo kommune | Serverings- og skjenkesteder | Punkt | 1 406 | **Lisens ikke oppgitt av kilden** | Kun Oslo. Bør avklares med Næringsetaten |
+| Skolekretser | Plan- og bygningsetaten, Oslo kommune | Veiledende inntaksområde for barneskole | Polygon | 105 | **Lisens ikke avklart** — tjenesten oppgir «Copyright Plan- og bygningsetaten» | Kun Oslo, kun barnetrinn. Kilden har ingen datostempling, og grensene revideres hver høst |
 
 ### Direkte oppslag (per søk, ikke synket)
 
@@ -680,6 +681,21 @@ Hele poenget er at NaboRadar ikke skal si mer enn kilden gjør.
   sjekken ble ubeslektede saker slått sammen.
 - Nyeste varsel vises, med historikk under. Varsler innen 30 dager regnes som samme registrering og
   slås sammen stille.
+
+### Skolekrets
+
+- Området er **veiledende**. Utdanningsetaten reviderer grensene hver høst.
+- Kapasitet kan gi tilbud ved en annen skole. Vi skriver aldri «din skole», «du sogner til» eller
+  noe som kan leses som en garanti for skoleplass — kun **«Adressen ligger i …»**.
+- **Avstand er meningsløst her.** En krets 200 meter unna er naboens, ikke adressens. Oppslaget
+  filtrerer på at polygonet faktisk dekker punktet, og vi gjetter aldri på nærmeste skole.
+- Dekkes punktet av null kretser, sier vi ingenting. Dekkes det av flere, er kilden i uorden, og
+  vi velger ikke én av dem.
+- **Gjelder bare barnetrinnet.** På ungdomstrinnet følger tilhørigheten hvilken barneskole eleven
+  har nærskolerett ved — en oppslagstabell, ikke en egen geografi. Den er ikke bygget.
+- Kretsnavnet er ikke alltid skolenavnet: kretsen «Majorstua» hører til Majorstuen skole, og
+  «Svarttjern og Tiurleiken» deles av to skoler. Koblingen ligger kuratert i
+  `data/skolekretser.json`, aldri som navnegjetting i kjøretid.
 
 ### Skjenkesteder
 
@@ -1063,6 +1079,10 @@ Ting vi vet om og bevisst ikke har løst nå.
 | | |
 |---|---|
 | **Skjenkebevillinger dekker bare Oslo** | Næringsetatens register. Lisens ikke oppgitt av kilden — bør avklares |
+| **Skolekretser dekker bare Oslo, og bare barnetrinnet** | Ingen nasjonal kilde finnes: Geonorge har to skolekrets-datasett i hele landet, begge fra Halden. Hver kommune publiserer sitt eget |
+| **Skolekretsenes lisens er ikke avklart** | Tjenesten oppgir «Copyright Plan- og bygningsetaten i Oslo kommune». Tredje Oslo-kilde uten åpen lisens — bør avklares samlet |
+| **Skolekretsene har ingen datostempling** | Grensene revideres hver høst, og innholdshashen i sync-laget er vårt eneste signal om at det har skjedd |
+| **Fem skolekretser mangler organisasjonsnummer** | Manglerud, Munkerud, Nordseter, Rosenholm og Vestli finnes ikke i Geonorge-laget vi synker skoler fra. Da viser vi navnet uten kobling |
 | **Omsorgstilbud dekker i hovedsak Oslo** | Bygget på kommunens egen publisering |
 | **Sykehus og omsorgstilbud er kuraterte filer** | Reverifiseres med scripts, ikke live-synk |
 | **DiBK mangler formål, status og sluttdato** | Vi viser bare at oppstart er varslet |

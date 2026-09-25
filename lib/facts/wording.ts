@@ -630,6 +630,31 @@ export const OMSORG_LABEL = "Omsorgstilbud";
 export const HELSE_CAVEAT =
   "Sykehus er somatiske sykehus som både Helsenorge og Enhetsregisteret fører som sykehus. Omsorgstilbud er steder der den ansvarlige myndigheten selv publiserer navn og adresse. Data om omsorgstilbud er foreløpig tilgjengelig i utvalgte områder, så listen er ikke uttømmende.";
 
+/**
+ * Skolekrets. Ordvalget er ikke pynt — det er hele funksjonen.
+ *
+ * Et inntaksområde er veiledende. Utdanningsetaten reviderer grensene hver høst, og
+ * kapasitet kan gi plass ved en annen skole. Vi sier derfor «adressen ligger i», aldri
+ * «din skole», «du sogner til» eller noe som kan leses som en garanti for skoleplass.
+ */
+export const SKOLEKRETS_LABEL = "Skolekrets";
+export const SKOLEKRETS_UNDERTEKST = "Veiledende inntaksområde";
+
+/** «Adressen ligger i det veiledende inntaksområdet til Nordberg skole.» */
+export function describeSkolekrets(skoler: readonly string[], krets: string): string {
+  if (skoler.length === 0) return `Adressen ligger i det veiledende inntaksområdet ${krets}.`;
+  if (skoler.length === 1) return `Adressen ligger i det veiledende inntaksområdet til ${skoler[0]}.`;
+  const alle = `${skoler.slice(0, -1).join(", ")} og ${skoler.at(-1)}`;
+  return `Adressen ligger i et veiledende inntaksområde som deles av ${alle}.`;
+}
+
+export const SKOLEKRETS_FORBEHOLD =
+  "Inntaksområdene kan endres og er ikke en garanti for skoleplass. Kapasitet kan gi tilbud ved en annen skole.";
+
+/** Kun barnetrinnet. Ungdomsskole følger barneskolen, ikke en egen geografi. */
+export const SKOLEKRETS_UNGDOMSTRINN =
+  "Gjelder barnetrinnet. På ungdomstrinnet følger tilhørigheten hvilken barneskole eleven har nærskolerett ved.";
+
 export const SERVERING_CAVEAT =
   "Fra Næringsetatens bevillingsoversikt, som foreløpig bare dekker Oslo. Tiden er tillatt stengetid — ikke skjenketid, og ikke stedets faktiske åpningstid, som kan være kortere.";
 

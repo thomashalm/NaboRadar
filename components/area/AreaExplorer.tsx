@@ -43,6 +43,11 @@ interface AreaExplorerProps {
   storedFacts: Promise<AreaFactsResult>;
   lookupFacts: Promise<AreaFactsResult>;
   tiles: MapTileConfig;
+  /**
+   * Skolekretsnotisen, rendret på serveren og sendt inn som ferdig innhold. Da ligger
+   * teksten i HTML-en uten at denne klientkomponenten må kjenne til oppslaget.
+   */
+  skolekrets?: React.ReactNode;
 }
 
 type Stream<T> = { status: "loading" } | { status: "ready"; data: T } | { status: "failed" };
@@ -105,6 +110,7 @@ export function AreaExplorer({
   storedFacts: storedFactsPromise,
   lookupFacts: lookupFactsPromise,
   tiles,
+  skolekrets,
 }: AreaExplorerProps) {
   const router = useRouter();
   const eventStream = useStream(eventsPromise);
@@ -271,6 +277,7 @@ export function AreaExplorer({
           />
           <ChangeLocation radius={radius} onNavigate={navigateToLocation} />
         </div>
+        {skolekrets}
       </section>
 
       <div className="relative mx-5 h-[48vh] min-h-72 overflow-hidden rounded-2xl border border-line sm:mx-8 lg:sticky lg:top-16 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:m-0 lg:h-[calc(100dvh-4rem)] lg:rounded-none lg:border-0 lg:border-l">

@@ -5,6 +5,7 @@ import { NveKvikkleireSonerProvider } from "./nve/kvikkleire-soner";
 import { NveNettanleggProvider } from "./nve/nettanlegg";
 import { OmsorgstilbudProvider } from "./omsorg/omsorgstilbud";
 import { OsloSkjenkebevillingProvider } from "./oslo/skjenkebevilling";
+import { OsloSkolekretsProvider } from "./oslo/skolekrets";
 import { UdirBarnehagerProvider } from "./udir/barnehager";
 import { UdirSkolerProvider } from "./udir/skoler";
 import type { AreaFeatureProvider } from "./types";
@@ -23,6 +24,7 @@ export const areaFeatureProviders: readonly AreaFeatureProvider[] = [
   new SykehusProvider(),
   new OsloSkjenkebevillingProvider(),
   new OmsorgstilbudProvider(),
+  new OsloSkolekretsProvider(),
 ];
 
 export function getAreaFeatureProvider(id: string): AreaFeatureProvider | undefined {

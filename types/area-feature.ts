@@ -17,6 +17,9 @@ export const AREA_CATEGORIES = [
   "helse",
   "servering",
   "omsorg",
+  // Skolekrets er ikke et sted i nærheten, men et område søkepunktet ligger INNE i. Den hører
+  // derfor ikke til noen seksjon i AREA_SECTIONS, og vises som en egen liten notis.
+  "skolekrets",
 ] as const;
 export type AreaCategory = (typeof AREA_CATEGORIES)[number];
 

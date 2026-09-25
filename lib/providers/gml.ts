@@ -49,11 +49,11 @@ export const asNumber = (value: unknown): number | null => {
  * Flategeometri fra GML. WFS-en svarer med lat lon når vi ber om EPSG:4326, mens
  * GeoJSON krever lon lat — så koordinatparene snus her, ett sted.
  */
-export function gmlPolygon(feature: GmlFeature, path: string): GeoPolygon | null {
+export function gmlPolygon(feature: GmlFeature, path: string, les: CoordinateReader = LAT_LON): GeoPolygon | null {
   const node = feature[path];
   if (node === null || typeof node !== "object") return null;
 
-  const polygons = collectPolygons(node as Record<string, unknown>);
+  const polygons = collectPolygons(node as Record<string, unknown>, les);
   if (polygons.length === 0) return null;
   return polygons.length === 1
     ? { type: "Polygon", coordinates: polygons[0]! }
@@ -65,16 +65,16 @@ export type GeoPolygon =
   | { type: "MultiPolygon"; coordinates: number[][][][] };
 
 /** Én flate = ytre ring først, så eventuelle hull. */
-function collectPolygons(node: Record<string, unknown>): number[][][][] {
+function collectPolygons(node: Record<string, unknown>, les: CoordinateReader): number[][][][] {
   const ut: number[][][][] = [];
   const polygonNodes = asArray(node.Polygon ?? (node.MultiSurface as Record<string, unknown> | undefined)?.surfaceMember);
   for (const raw of polygonNodes) {
     const polygon = (raw as Record<string, unknown>).Polygon ?? raw;
     const rings: number[][][] = [];
-    const ytre = ringOf((polygon as Record<string, unknown>).exterior);
+    const ytre = ringOf((polygon as Record<string, unknown>).exterior, les);
     if (ytre) rings.push(ytre);
     for (const hull of asArray((polygon as Record<string, unknown>).interior)) {
-      const ring = ringOf(hull);
+      const ring = ringOf(hull, les);
       if (ring) rings.push(ring);
     }
     if (rings.length > 0) ut.push(rings);
@@ -82,12 +82,20 @@ function collectPolygons(node: Record<string, unknown>): number[][][][] {
   return ut;
 }
 
-function ringOf(node: unknown): number[][] | null {
-  const pos = (node as { LinearRing?: { posList?: string } } | undefined)?.LinearRing?.posList;
+/** Geonorge svarer lat lon når vi ber om EPSG:4326. Andre tjenester bruker andre akser. */
+export type CoordinateReader = (a: number, b: number) => [number, number];
+
+const LAT_LON: CoordinateReader = (lat, lon) => [lon, lat];
+
+function ringOf(node: unknown, les: CoordinateReader): number[][] | null {
+  const raw = (node as { LinearRing?: { posList?: unknown } } | undefined)?.LinearRing?.posList;
+  // Har elementet attributter — MapServer setter srsDimension på posList — legger parseren
+  // teksten under #text i stedet for å gi en streng. Begge formene er gyldig GML.
+  const pos = typeof raw === "string" ? raw : (raw as { "#text"?: unknown } | undefined)?.["#text"];
   if (typeof pos !== "string") return null;
   const tall = pos.trim().split(/\s+/).map(Number);
   const ring: number[][] = [];
-  for (let i = 0; i + 1 < tall.length; i += 2) ring.push([tall[i + 1]!, tall[i]!]);
+  for (let i = 0; i + 1 < tall.length; i += 2) ring.push(les(tall[i]!, tall[i + 1]!));
   return ring.length >= 4 ? ring : null;
 }
 
@@ -152,6 +160,20 @@ export async function* wfsPages(options: WfsPageOptions): AsyncGenerator<GmlFeat
   }
 }
 
+/**
+ * Samme, men for WFS 1.1-tjenester som svarer med <gml:featureMember> i stedet for <member>.
+ * MapServer (Oslo kommune) gjør det slik, og gir dessuten geometrien i sitt eget koordinat-
+ * system i stedet for det vi ba om — så kalleren må selv si hvordan aksene skal leses.
+ */
+export function gmlFeatureMembers(xml: string, typeName: string): GmlFeature[] {
+  const parsed = parser.parse(xml) as { FeatureCollection?: { featureMember?: unknown } };
+  const members = parsed.FeatureCollection?.featureMember;
+  const list = members === undefined ? [] : Array.isArray(members) ? members : [members];
+  return list
+    .map((m) => (m as Record<string, GmlFeature>)[typeName])
+    .filter((f): f is GmlFeature => f !== undefined && typeof f === "object");
+}
+
 /** Plukker ut features av én type fra en WFS FeatureCollection. */
 function featuresFrom(xml: string, typeName: string): GmlFeature[] {
   const parsed = parser.parse(xml) as { FeatureCollection?: { member?: unknown } };
@@ -168,22 +190,33 @@ async function fetchXml(url: string, options: WfsPageOptions): Promise<string> {
   return response;
 }
 
-async function fetchWithRetry(url: string, options: WfsPageOptions): Promise<string> {
-  // fetchJson håndterer timeout, backoff og «aldri retry på 4xx». Vi gjenbruker den ved å
-  // lese teksten selv når svaret ikke er JSON.
+/**
+ * Henter XML med samme timeout, backoff og 4xx-regel som resten av kodebasen.
+ *
+ * fetchJson er bygget for JSON, men er der all retry-logikken bor. Vi gjenbruker den ved å
+ * pakke teksten som JSON underveis, i stedet for å ha to sett med retry-regler.
+ */
+export async function fetchGml(
+  url: string,
+  options: { retry: HttpRetryPolicy; signal?: AbortSignal; fetchImpl?: typeof fetch },
+): Promise<string> {
+  const underliggende = options.fetchImpl ?? fetch;
   const text = await fetchJson(url, {
     timeoutMs: options.retry.timeoutMs,
     retries: options.retry.maxRetries,
     baseDelayMs: options.retry.baseDelayMs,
     signal: options.signal,
     fetchImpl: async (input, init) => {
-      const response = await fetch(input, init);
+      const response = await underliggende(input, init);
       if (!response.ok) return response;
       const body = await response.text();
-      // Pakk XML-en som JSON, slik at fetchJson kan returnere den uendret.
       return new Response(JSON.stringify(body), { status: 200, headers: { "content-type": "application/json" } });
     },
   });
   if (typeof text !== "string") throw new Error("WFS svarte ikke med XML");
   return text;
+}
+
+async function fetchWithRetry(url: string, options: WfsPageOptions): Promise<string> {
+  return fetchGml(url, { retry: options.retry, signal: options.signal });
 }
