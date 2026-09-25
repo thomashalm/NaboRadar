@@ -1,5 +1,9 @@
 # Arkitektur
 
+> Dette dokumentet beskriver datamodell, provider-arkitektur, geo-strategi og sync i detalj.
+> For helheten — drift, sikkerhet, datakilder, runbook og kjente begrensninger — se
+> **[naboradar-handbook.md](naboradar-handbook.md)**.
+
 NaboRadar henter offentlige plan- og byggedata sentralt, normaliserer dem til én intern modell i Postgres/PostGIS,
 og lar brukere spørre «hva skjer innen X meter fra dette punktet?» — uten at søket deres lagres.
 

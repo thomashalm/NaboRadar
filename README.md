@@ -2,8 +2,9 @@
 
 Hva skjer rundt deg? NaboRadar viser offentlige plan- og byggehendelser rundt en adresse, forklart på forståelig norsk.
 
-**Status:** fase 4 er ferdig. Adresse eller sted → radius → ekte planoppstarter fra DiBK → kart, feed og detaljside.
+**Status:** i produksjon på [naboradar.no](https://naboradar.no). Adresse eller sted → radius → planoppstarter, grunnforhold, støy, infrastruktur, forurenset grunn og nærområdet, med kart, liste og detaljside.
 
+- **[docs/naboradar-handbook.md](docs/naboradar-handbook.md) — hovedreferansen.** Hvordan systemet faktisk fungerer nå: arkitektur, drift, sikkerhet, datakilder, runbook og kjente begrensninger. Start her.
 - [docs/data-sources.md](docs/data-sources.md) — testede datakilder, tilgang og lisens
 - [docs/architecture.md](docs/architecture.md) — datamodell, providers, geo-strategi, sync, personvern
 - [docs/adr/](docs/adr/) — arkitekturbeslutninger
@@ -120,7 +121,7 @@ Netlify bygger fra GitHub (`main`) med `netlify.toml`: `npm run build`, Node 24,
 
 `NEXT_PUBLIC_*` bakes inn ved build. Endrer du dem, må du trigge en ny deploy.
 
-**Data i produksjon:** syncen kjører ikke på Netlify ennå. Oppdater hosted data lokalt med `npm run sync:dibk`, med Supabase-nøklene i `.env.local`. Periodisk sync (cron) kommer senere.
+**Data i produksjon:** syncen kjører i GitHub Actions, ikke på Netlify. Supabase `pg_cron` utløser workflowen hvert 15. minutt via `workflow_dispatch`, med GitHubs egen `schedule` som reserve. Se håndboken → Scheduler.
 
 **Produksjonsbundle:** PGlite og `.data/` er ekskludert fra serverfunksjonene (`outputFileTracingExcludes`), så den lokale databasen og 44 MB WASM aldri deployes.
 
@@ -481,14 +482,15 @@ Uten Supabase kan `LOCAL_DATABASE=pglite` brukes i development:
 
 ## Ikke implementert ennå
 
-AI-oppsummering, varsling og utsending, innlogging, cron-oppsett i drift. Neste datalag (etter godkjenning): flomsoner, skredaktsomhet, radon, ÅDT, skoler og barnehager. Se [docs/area-facts-discovery.md](docs/area-facts-discovery.md).
+AI-oppsummering, overvåkede adresser med utsending, rapport/PDF. Neste datalag som er vurdert, men ikke besluttet: flomsoner, skredaktsomhet, radon, ÅDT. Se [docs/area-facts-discovery.md](docs/area-facts-discovery.md) og håndboken → Roadmap.
+
+Innlogging (`/admin`), e-postvarsling og scheduler er bygget — se håndboken.
 
 ## Kjente begrensninger
 
 - **Kilden mangler felt:** DiBK har ikke formål, status eller sluttdato. Vi viser derfor bare «Planoppstart varslet …» og antyder aldri at arbeidet pågår.
 - **Kommunenavn:** DiBK leverer bare kommunenummer, så detaljsiden viser nummeret.
 - **Incremental sync:** fanger ikke planer med `oppdateringsdato = null` (~680 features), eller dokumenter som endres uten at planen gjør det. Nattlig full sync dekker dette.
-- **Områdefakta vises ikke i kartet ennå**, bare som tekst med avstand.
 - **Kvikkleiregeometri er generalisert til ~1 m** ved henting, fordi NVEs største sone har 125 000 hjørner.
 - **Lokal PGlite:** én prosess om gangen. CLI og dev-server kan ikke bruke samme lokale database samtidig.
 
