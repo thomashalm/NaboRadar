@@ -43,6 +43,26 @@ const barnehage = (title: string, distance_m: number) =>
     attributes: { lavesteAlder: 1, hoyesteAlder: 5 },
   });
 
+const sykehusrad = (title: string, distance_m: number) =>
+  row({
+    title,
+    distance_m,
+    category: "helse",
+    subtype: "sykehus",
+    provider_id: "helsenorge-sykehus",
+    attributes: { eierform: "offentlig" },
+  });
+
+const skjenkested = (title: string, distance_m: number) =>
+  row({
+    title,
+    distance_m,
+    category: "servering",
+    subtype: "skjenkested",
+    provider_id: "oslo-skjenkebevilling",
+    attributes: { stengetidInne: "03:30" },
+  });
+
 const anlegg = (title: string, distance_m: number) =>
   row({
     title,
@@ -72,12 +92,13 @@ describe("Nærområdet: skoler og barnehager som én gruppe", () => {
   it("samler skoler og barnehager i én gruppe, og holder industri utenfor", () => {
     const result = placeFacts([...seksVarianter, anlegg("Alnabru terminal", 700)], 1000);
 
-    expect(result.clusters).toHaveLength(1);
-    expect(result.clusters[0]!.id).toBe("skoler-og-barnehager");
-    expect(result.clusters[0]!.sectionId).toBe("naeromradet");
-    // Industri og anlegg beholder egne kort, og havner ikke i skole/barnehage-gruppen.
-    expect(result.facts.map((f) => f.category)).toEqual(["industri"]);
-    expect(result.clusters[0]!.lists.flatMap((l) => l.items).map((i) => i.title)).not.toContain("Alnabru terminal");
+    const skoler = result.clusters.find((c) => c.id === "skoler-og-barnehager")!;
+    expect(skoler.sectionId).toBe("naeromradet");
+    expect(skoler.lists.flatMap((l) => l.items).map((i) => i.title)).not.toContain("Alnabru terminal");
+    // Anlegget ligger i sin egen gruppe, ikke som løst kort i seksjonen.
+    expect(result.facts).toEqual([]);
+    const anleggsgruppe = result.clusters.find((c) => c.id === "virksomheter-og-anlegg")!;
+    expect(anleggsgruppe.facts.map((f) => f.headline)).toEqual(["Alnabru terminal"]);
   });
 
   it("viser begge undertypene når begge finnes", () => {
@@ -155,15 +176,48 @@ describe("Nærområdet: skoler og barnehager som én gruppe", () => {
     expect(groups[0]!.clusters.map((c) => c.label)).toEqual(["Skoler og barnehager"]);
   });
 
-  it("gir anlegg en egen oversikt når det er flere enn kortene viser", () => {
+  it("viser de tre nærmeste anleggene som kort, resten bak «Se alle anlegg»", () => {
     const mange = [1, 2, 3, 4, 5, 6].map((n) => anlegg(`Anlegg ${n}`, n * 100));
-    const result = placeFacts(mange, 1000);
+    const gruppe = placeFacts(mange, 1000).clusters.find((c) => c.id === "virksomheter-og-anlegg")!;
 
-    expect(result.facts).toHaveLength(4);
-    expect(result.overview!.toggleLabel).toBe("Se alle anlegg i området");
-    expect(result.overview!.total).toBe(6);
+    expect(gruppe.label).toBe("Virksomheter og anlegg");
+    expect(gruppe.summary).toBe("6 anlegg innen 1 km");
+    expect(gruppe.facts.map((f) => f.headline)).toEqual(["Anlegg 1", "Anlegg 2", "Anlegg 3"]);
+    expect(gruppe.overview!.toggleLabel).toBe("Se alle anlegg");
+    expect(gruppe.overview!.total).toBe(6);
     // Skole/barnehage-antall skal ikke blandes inn i anleggsoppsummeringen.
-    expect(result.overview!.headline).toBe("6 anlegg med utslippstillatelse innen 1 km");
+    expect(gruppe.overview!.headline).toBe("6 anlegg med utslippstillatelse innen 1 km");
+  });
+
+  it("beholder detaljinnholdet på anleggskortene", () => {
+    const gruppe = placeFacts([anlegg("Haraldrud", 410)], 1000).clusters.find((c) => c.id === "virksomheter-og-anlegg")!;
+    const kort = gruppe.facts[0]!;
+
+    expect(kort.headline).toBe("Haraldrud");
+    expect(kort.distanceLabel).toBe("410 m unna");
+    expect(kort.details.join(" ")).toContain("Anlegg med utslippstillatelse");
+    expect(kort.details.join(" ")).toContain("Verksted");
+    expect(kort.caveat).toContain("Tillatelse gitt av");
+    expect(kort.sourceName).toContain("Miljødirektoratet");
+    // Ingen utvider når alt får plass.
+    expect(gruppe.overview).toBeNull();
+  });
+
+  it("gir gruppene fast rekkefølge, og hopper over dem uten treff", () => {
+    const alle = placeFacts(
+      [skole("En skole", 100), sykehusrad("Et sykehus", 200), anlegg("Et anlegg", 300), skjenkested("Et utested", 400)],
+      1000,
+    );
+    expect(alle.clusters.map((c) => c.id)).toEqual([
+      "skoler-og-barnehager",
+      "helse",
+      "virksomheter-og-anlegg",
+      "servering",
+    ]);
+
+    // Uten skoler og helse rykker de to andre opp, uten tomme grupper imellom.
+    const færre = placeFacts([anlegg("Et anlegg", 300), skjenkested("Et utested", 400)], 1000);
+    expect(færre.clusters.map((c) => c.id)).toEqual(["virksomheter-og-anlegg", "servering"]);
   });
 });
 

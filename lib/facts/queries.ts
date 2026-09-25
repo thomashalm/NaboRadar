@@ -394,7 +394,6 @@ export function contaminatedFacts(rows: FactRow[], radiusM: number, truncated = 
 /** Kategoriene som vises i «Nærområdet» — som kort (industri) eller som gruppe. */
 const PLACE_CATEGORIES = new Set<AreaCategory>(["industri", "oppvekst", "helse", "omsorg", "servering"]);
 
-const PLACE_CARDS_PER_CATEGORY = 4;
 /** Hvor mange steder som vises per undertype før «Se alle …». */
 const CLUSTER_PREVIEW = 3;
 
@@ -419,6 +418,8 @@ const CLUSTER_SPECS: readonly {
   label: string;
   categories: readonly AreaCategory[];
   caveat: string;
+  /** Vis hvert sted som eget kort i stedet for en kompakt rad. */
+  cards?: boolean;
   lists: readonly ClusterListSpec[];
 }[] = [
   {
@@ -444,6 +445,23 @@ const CLUSTER_SPECS: readonly {
         subtypes: ["omsorgstilbud"],
         ental: "omsorgstilbud",
         flertall: "omsorgstilbud",
+      },
+    ],
+  },
+  {
+    id: "virksomheter-og-anlegg",
+    label: "Virksomheter og anlegg",
+    categories: ["industri"],
+    caveat: "",
+    // Anleggene er få, og hvert av dem har egne opplysninger — bransje, utslipp, myndighet.
+    cards: true,
+    lists: [
+      {
+        id: "anlegg",
+        label: "Anlegg",
+        subtypes: ["industrianlegg", "avfallsanlegg"],
+        ental: "anlegg",
+        flertall: "anlegg",
       },
     ],
   },
@@ -499,8 +517,49 @@ function buildCluster(
   const treff = rows.filter((row) => spec.categories.includes(row.category));
   if (treff.length === 0) return null;
 
+  const antall = new Map(
+    spec.lists.map((list) => [
+      list.id,
+      {
+        antall: treff.filter((row) => list.subtypes.includes(row.subtype)).length,
+        ental: list.ental,
+        flertall: list.flertall,
+      },
+    ]),
+  );
+  const summary = describeClusterSummary([...antall.values()], formatRadius(radiusM));
+
+  // Grupper med kort: de nærmeste som hele kort, resten bak «Se alle …».
+  if (spec.cards) {
+    const forside = treff.slice(0, CLUSTER_PREVIEW);
+    const tekst = describeAnleggSummary({ total: treff.length, radiusLabel: formatRadius(radiusM) });
+    return {
+      sectionId: "naeromradet",
+      id: spec.id,
+      label: spec.label,
+      summary,
+      facts: forside.flatMap((row) => factFromRow(row) ?? []),
+      lists: [],
+      overview:
+        treff.length > forside.length
+          ? {
+              sectionId: "naeromradet",
+              toggleLabel: `Se alle ${spec.lists[0]!.flertall}`,
+              total: treff.length,
+              noAttentionNote: null,
+              headline: tekst.headline,
+              details: tekst.details,
+              caveat: tekst.caveat,
+              sourceName: sourceNames(treff),
+              items: treff.map((row) => overviewItem(row, placeSubtitle(row.subtype))),
+            }
+          : null,
+      caveat: spec.caveat || null,
+      sourceName: sourceNames(treff),
+    };
+  }
+
   const lists: ClusterList[] = [];
-  const antall: { antall: number; ental: string; flertall: string }[] = [];
 
   // Radgrensen kan ha kuttet listen. Da er det databasens telling som er sann.
   const kuttet = antallIOmradet !== undefined && antallIOmradet > treff.length;
@@ -510,7 +569,6 @@ function buildCluster(
     const alle = treff.filter((row) => list.subtypes.includes(row.subtype));
     // Én liste i gruppen: da gjelder gruppens totale antall for den listen.
     const total = kuttet && spec.lists.length === 1 ? antallIOmradet : alle.length;
-    antall.push({ antall: total, ental: list.ental, flertall: list.flertall });
     if (alle.length === 0) continue;
 
     const items = alle
@@ -534,7 +592,10 @@ function buildCluster(
     sectionId: "naeromradet",
     id: spec.id,
     label: spec.label,
-    summary: describeClusterSummary(antall, formatRadius(radiusM)),
+    summary: describeClusterSummary(
+      [...antall].map(([id, del]) => ({ ...del, antall: lists.find((l) => l.id === id)?.total ?? del.antall })),
+      formatRadius(radiusM),
+    ),
     facts: [],
     lists,
     overview: null,
@@ -621,33 +682,13 @@ export function infrastrukturCluster(facts: AreaFact[], radiusM: number): FactCl
 /** Eksportert for test: grupperingen er produktlogikk og verifiseres uten database. */
 export function placeFacts(rows: FactRow[], radiusM: number, antallPerKategori: Partial<Record<AreaCategory, number>> = {}) {
   const sorted = [...rows].sort(byRelevance);
-  const gruppert = new Set(CLUSTER_SPECS.flatMap((spec) => spec.categories));
-  // Industri og anlegg er egen gruppe: de er få, og hvert anlegg har sine egne opplysninger.
-  const anlegg = sorted.filter((row) => !gruppert.has(row.category));
-
-  const facts = anlegg.slice(0, PLACE_CARDS_PER_CATEGORY).flatMap((row) => factFromRow(row) ?? []);
   const servering = sorted.filter((row) => row.category === "servering");
   const kartnote =
     servering.length > SERVERING_MARKER_CAP ? `Kartet viser de ${SERVERING_MARKER_CAP} nærmeste stedene.` : null;
-  const summary = describeAnleggSummary({ total: anlegg.length, radiusLabel: formatRadius(radiusM) });
-
-  const overview: SectionOverview | null =
-    anlegg.length > facts.length
-      ? {
-          sectionId: "naeromradet",
-          toggleLabel: "Se alle anlegg i området",
-          total: anlegg.length,
-          noAttentionNote: null,
-          headline: summary.headline,
-          details: summary.details,
-          caveat: summary.caveat,
-          sourceName: sourceNames(anlegg),
-          items: anlegg.map((row) => overviewItem(row, placeSubtitle(row.subtype))),
-        }
-      : null;
 
   return {
-    facts,
+    // Ingen løse kort i seksjonen: alt ligger i en gruppe, som resten av siden.
+    facts: [] as AreaFact[],
     clusters: CLUSTER_SPECS.flatMap(
       (spec) =>
         buildCluster(
@@ -658,7 +699,6 @@ export function placeFacts(rows: FactRow[], radiusM: number, antallPerKategori: 
           spec.categories.includes("servering") ? kartnote : null,
         ) ?? [],
     ),
-    overview,
     // Skjenkesteder er så tette i sentrum at alle markørene ville skjult resten av kartet.
     mapFeatures: [...sorted.filter((row) => row.category !== "servering"), ...servering.slice(0, SERVERING_MARKER_CAP)]
       .sort(byRelevance)
@@ -807,7 +847,6 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
     const result = placeFacts(placeRows, radius, antallPerKategori);
     facts.push(...result.facts);
     clusters.push(...result.clusters);
-    if (result.overview) overviews.push(result.overview);
     mapFeatures.push(...result.mapFeatures);
     for (const row of placeRows) usedSources.add(row.provider_id);
   }
