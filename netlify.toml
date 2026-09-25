@@ -6,3 +6,58 @@
 [build.environment]
   NODE_VERSION = "24"
   # Kartfliser/geokoding er offentlige. Supabase-variablene settes i Netlify UI (se README → Deploy).
+
+# ---------------------------------------------------------------------------
+# Rate limiting (Netlify-native, kodebaserte regler — ingen ny tjeneste).
+#
+# Hvorfor redirect og ikke funksjons-config: rate limit kan settes i config-
+# objektet til en function eller edge function, men Next.js-handleren genereres
+# av OpenNext-adapteren under Netlifys bygg. Vi skriver den ikke og kan ikke
+# legge en export i den. Redirects i netlify.toml er da eneste vei — og i
+# motsetning til en egen pass-through edge function koster den ingen ekstra
+# invokasjon per forespørsel. Regler kan ikke ligge i _redirects.
+#
+# Hvorfor ikke from = "/*", som er Netlifys egen «beskytt hele siden»-oppskrift:
+# en målt sidevisning av /omrade er 25 forespørsler mot vårt origin, og 20 av
+# dem er statiske (18 × /_next/static, 2 × /vendor). En regel på /* ville telt
+# alle, og en normal bruker ville blitt blokkert etter fem sidevisninger. Vi
+# peker derfor kun på dynamiske stier. Statiske assets treffes ikke av regelen
+# i det hele tatt, og kartflisene går direkte fra nettleseren til Kartverket —
+# panorering og zoom lager null trafikk mot oss.
+#
+# Hvorfor 120 og ikke 60: en bruker som både søker og klikker i kartet lager
+# realistisk 30–60 kall i minuttet (250 ms debounce på søk, ett kall per
+# eiendomsklikk). 60 ligger for nær ekte bruk. 120 er fortsatt langt under det
+# som koster oss noe. Vi strammer inn når vi har sett ekte trafikk — å løsne
+# etter å ha blokkert noen er verre enn å starte romslig.
+#
+# aggregate_by = ["ip", "domain"] teller per klient-IP slik Netlify selv ser den
+# på sin side av proxyen, ikke fra x-forwarded-for. Den kan altså ikke spoofes
+# av den som kaller oss. Et absolutt tak på tvers av alle klienter krever
+# aggregering per domene alene, og det er Enterprise-only.
+#
+# status = 200 gjør dette til en rewrite, ikke en 301 — uten den ville regelen
+# vært en omdirigering til seg selv. force er bevisst utelatt: da gjelder
+# regelen ikke hvis det finnes en fil på samme sti, som er en ekstra sperre mot
+# å skygge for noe statisk.
+#
+# Free-planen gir 2 kodebaserte regler per prosjekt. Dette er begge to.
+# ---------------------------------------------------------------------------
+
+[[redirects]]
+  from = "/api/*"
+  to = "/api/:splat"
+  status = 200
+  [redirects.rate_limit]
+    window_limit = 120
+    window_size = 60
+    aggregate_by = ["ip", "domain"]
+
+[[redirects]]
+  from = "/omrade"
+  to = "/omrade"
+  status = 200
+  [redirects.rate_limit]
+    window_limit = 120
+    window_size = 60
+    aggregate_by = ["ip", "domain"]
