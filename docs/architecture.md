@@ -316,11 +316,55 @@ UI-et skal formulere seg etter dette, for eksempel «Oppstart varslet for 8 mån
 |---|---|
 | **Klient** | MapLibre-kart, autocomplete-input, radiusvalg, feed-interaksjon |
 | **Server (RSC / route handlers)** | `/api/geocode` (proxy og cache mot Kartverket), resultat- og detaljsider via `events_within()` med anon-nøkkel og RLS |
-| **Kun server, hemmelig** | `SUPABASE_SERVICE_ROLE_KEY`, sync, `/api/cron/sync` (krever `CRON_SECRET`), `/admin/providers` (kun `NODE_ENV=development` eller `ADMIN_TOKEN`) |
+| **Kun server, hemmelig** | `SUPABASE_SECRET_KEY` — kun i GitHub Actions, aldri i Netlify og aldri i klienten. Webappen har ingen skrivenøkkel; `/admin` bruker brukerens egen Supabase-sesjon, og databasefunksjonene sjekker `is_admin()` selv |
 | **Database** | Geo-spørringer, dedup-constraints, dokument-allowlist, RLS |
-| **Cron** | Vercel Cron eller Supabase `pg_cron` kaller `/api/cron/sync` |
+| **Cron** | Supabase `pg_cron` kaller `trigger_sync_workflow()`, som utløser GitHub-workflowen. Ingen cron-endepunkt i webappen |
 
 Klienten kaller aldri DiBK direkte. Kartverket-tiles hentes direkte av nettleseren, siden de er offentlige og cachede.
+
+## Databasetilganger
+
+Tilgangsflaten er en **positiv liste**, ikke en opprydding i enkelttilfeller. Grunnen er en felle i Supabase: prosjektet kjører
+
+```sql
+alter default privileges in schema public grant all on functions
+  to postgres, anon, authenticated, service_role;
+```
+
+Hver nye funksjon i `public` får altså EXECUTE gitt eksplisitt til `anon` og `authenticated` — i tillegg til PostgreSQLs egen
+standard om at PUBLIC får EXECUTE. En `revoke … from public` tetter bare den ene halvdelen, og en `revoke … from anon` bare den
+andre. Begge trengs. Det tok oss én kritisk feil å lære: `trigger_sync_workflow()` lå åpen for anonyme kall fram til 2026-09-25
+og kunne utløse produksjons-syncen fra hvor som helst.
+
+| Rolle | Skal kunne kalle |
+|---|---|
+| `anon` | `features_near`, `features_count_near`, `events_within`, `get_event`, `data_status` |
+| `authenticated` | det samme, pluss `is_admin`, `provider_health`, `recent_sync_runs`, `request_sync`, `scheduler_status` |
+| `service_role` | alt — sync-worker |
+
+Alt annet er stengt. `npm run db:verify` sammenlikner den faktiske tilgangsflaten mot denne listen og feiler med exit 1 ved avvik,
+slik at neste funksjon ikke åpner seg selv i det stille.
+
+Tabellene følger samme prinsipp: appen går utelukkende gjennom RPC-er og rører ingen tabell direkte, så `anon` og `authenticated`
+har bare SELECT, og bare der en RLS-policy allerede slipper dem til. RLS er andre forsvarslinje, ikke den eneste.
+
+### Skjemaet `net` (pg_net)
+
+`anon` og `authenticated` har USAGE på `net` og EXECUTE på `net.http_post`. Det er gitt av `supabase_admin` på plattformnivå, og
+`postgres` kan ikke tilbakekalle en annen rolles grant — et forsøk er en stille no-op. Vi aksepterer det som en
+plattformstandard i stedet for å late som om vi har fjernet det.
+
+Det er ikke nåbart utenfra: PostgREST ruter bare til de eksponerte skjemaene, og `net` er ikke blant dem. Veien inn går derfor
+bare gjennom våre egne funksjoner i `public`, og der gjelder regelen:
+
+> Ingen funksjon i `public` som kan **sende** via `net.http_*` skal være kjørbar av `anon` eller `authenticated`.
+> Ingen funksjon som i det hele tatt rører `net.*` skal være kjørbar av `anon`.
+
+Skillet er bevisst. `trigger_sync_workflow()` sender, og er derfor kun åpen for `postgres` og `service_role`.
+`scheduler_status()` leser bare `status_code` fra `net._http_response` for å vise siste utløsning på `/admin` — den sender
+ingenting og har `is_admin()`-sjekk inni seg — så den er åpen for `authenticated`, men stengt for `anon`.
+
+`npm run db:verify` håndhever begge reglene ved å lete etter `net.` og `net.http_` i funksjonskroppene i `public`.
 
 ## Personvern
 

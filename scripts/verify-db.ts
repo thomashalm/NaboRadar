@@ -34,13 +34,55 @@ async function main() {
   );
   console.log(`Tabeller (RLS): ${tables.map((t) => `${t.relname}${t.rls ? "✓" : "✗"}`).join(", ")}`);
 
-  const fns = ["events_within", "get_event", "data_status", "upsert_events", "mark_removed_from_source", "sync_run_start", "sync_run_finish", "last_successful_sync_start", "provider_overview"];
-  const grants = await q<{ proname: string; anon: boolean; service: boolean }>(
-    `select p.proname, has_function_privilege('anon', p.oid, 'execute') as anon, has_function_privilege('service_role', p.oid, 'execute') as service
-     from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname = any($$${"{" + fns.join(",") + "}"}$$::text[]) order by 1`,
+  // Hvem som skal kunne kalle hva. Listen er positiv og uttømmende: alt annet i
+  // public skal være stengt for anon og authenticated. Supabase gir EXECUTE til
+  // anon, authenticated og PUBLIC som standard på hver nye funksjon i public, så
+  // uten denne sjekken åpner neste funksjon seg selv i det stille — slik
+  // trigger_sync_workflow() gjorde til 2026-09-25.
+  const ANON_OK = new Set(["data_status", "events_within", "features_near", "features_count_near", "get_event"]);
+  const AUTH_OK = new Set([...ANON_OK, "is_admin", "provider_health", "recent_sync_runs", "request_sync", "scheduler_status"]);
+
+  const grants = await q<{ proname: string; anon: boolean; auth: boolean; service: boolean }>(
+    `select p.proname,
+            has_function_privilege('anon', p.oid, 'execute') as anon,
+            has_function_privilege('authenticated', p.oid, 'execute') as auth,
+            has_function_privilege('service_role', p.oid, 'execute') as service
+     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+     where n.nspname = 'public' order by 1`,
   );
-  console.log("Funksjoner:     (anon / service_role)");
-  for (const g of grants) console.log(`  ${g.proname.padEnd(28)} ${g.anon ? "anon ✓" : "anon ✗"}  ${g.service ? "service ✓" : "service ✗"}`);
+  const avvik: string[] = [];
+  console.log("Funksjoner:     (anon / authenticated / service_role)");
+  for (const g of grants) {
+    const anonSkal = ANON_OK.has(g.proname);
+    const authSkal = AUTH_OK.has(g.proname);
+    if (g.anon !== anonSkal) avvik.push(`${g.proname}: anon ${g.anon ? "har" : "mangler"} EXECUTE, skal ${anonSkal ? "ha" : "ikke ha"}`);
+    if (g.auth !== authSkal) avvik.push(`${g.proname}: authenticated ${g.auth ? "har" : "mangler"} EXECUTE, skal ${authSkal ? "ha" : "ikke ha"}`);
+    if (!g.service) avvik.push(`${g.proname}: service_role mangler EXECUTE`);
+    const flagg = `${g.anon ? "anon " : "  .  "}${g.auth ? "auth " : "  .  "}${g.service ? "svc" : " . "}`;
+    console.log(`  ${flagg}  ${g.proname}`);
+  }
+
+  // Regelen fra migrasjon 20261003000000. Skjemaet net er en Supabase-plattform-
+  // standard vi ikke kan tilbakekalle, så veien inn dit må stenges hos oss:
+  //
+  //   net.http_*  — kan sende en forespørsel ut. Ingen utenfra skal nå den.
+  //   net.*       — kan lese pg_nets egne logger. Skal minst være stengt for anon.
+  //
+  // scheduler_status() er bevisst i den andre kategorien: den leser status_code fra
+  // net._http_response til /admin, sender ingenting, og har is_admin()-sjekk inni seg.
+  const netBrukere = await q<{ proname: string; anon: boolean; auth: boolean; sender: boolean }>(
+    `select p.proname,
+            has_function_privilege('anon', p.oid, 'execute') as anon,
+            has_function_privilege('authenticated', p.oid, 'execute') as auth,
+            p.prosrc ~ '\\mnet\\.http_' as sender
+     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+     where n.nspname = 'public' and p.prokind = 'f' and p.prosrc ~ '\\mnet\\.' order by 1`,
+  );
+  for (const f of netBrukere) {
+    if (f.sender && (f.anon || f.auth)) avvik.push(`${f.proname} kan sende via net.http_* og er kjørbar av ${f.anon ? "anon" : "authenticated"}`);
+    if (!f.sender && f.anon) avvik.push(`${f.proname} leser net.* og er kjørbar av anon`);
+  }
+  console.log(`net.*-brukere:  ${netBrukere.map((f) => `${f.proname}${f.sender ? " (sender)" : " (leser)"}`).join(", ") || "ingen"}`);
 
   const [counts] = await q<{ events: string; active: string; removed: string; documents: string; runs: string }>(
     `select (select count(*) from events) events,
@@ -55,6 +97,13 @@ async function main() {
   );
   console.log(`Berørte parter: ${bad?.n} rader (skal være 0)`);
   await client.end();
+
+  // Avvik i tilgangsflaten er ikke en advarsel. Den skal stoppe kjøringen.
+  if (avvik.length > 0) {
+    console.error(`\nTilgangsavvik (${avvik.length}):`);
+    for (const a of avvik) console.error(`  ✗ ${a}`);
+    process.exit(1);
+  }
 }
 
 main().catch((error) => {
