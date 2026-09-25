@@ -177,7 +177,9 @@ function FactSection({
       <h3 className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">{samlet.label}</h3>
       {samlet.intro && <p className="mt-1 text-[13px] text-muted">{samlet.intro}</p>}
       {samlet.clusters.map((cluster) => (
-        <ClusterDetails key={cluster.id} cluster={cluster} />
+        // Er gruppen hele seksjonen, gjentar vi ikke navnet. Undertypene i Nærområdet
+        // trenger sitt eget navn, fordi seksjonen rommer flere av dem.
+        <ClusterDetails key={cluster.id} cluster={cluster} showLabel={cluster.label !== samlet.label} />
       ))}
       {samlet.facts.length > 0 && (
         <ul className="mt-3 flex flex-col gap-3">
@@ -348,12 +350,19 @@ function PlaceRows({ items }: { items: OverviewItem[] }) {
  * bare navn og antall; listene ligger bak utvideren, og hver undertype viser de nærmeste
  * få før resten. Slik kan mange like steder finnes i området uten å fylle siden.
  */
-function ClusterDetails({ cluster }: { cluster: FactCluster }) {
+function ClusterDetails({ cluster, showLabel = true }: { cluster: FactCluster; showLabel?: boolean }) {
   return (
     <details className="mt-3 rounded-2xl border border-line bg-surface">
       <summary className="cursor-pointer px-5 py-3.5">
-        <span className="text-[15px] font-medium text-ink">{cluster.label}</span>
-        <span className="mt-0.5 block text-[13px] text-muted">{cluster.summary}</span>
+        {showLabel ? (
+          <>
+            <span className="text-[15px] font-medium text-ink">{cluster.label}</span>
+            <span className="mt-0.5 block text-[13px] text-muted">{cluster.summary}</span>
+          </>
+        ) : (
+          // Seksjonsoverskriften står rett over; da bærer oppsummeringen linjen alene.
+          <span className="text-[15px] font-medium text-ink">{cluster.summary}</span>
+        )}
       </summary>
 
       <div className="px-5 pb-4">
