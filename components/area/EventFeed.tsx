@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { RefObject } from "react";
+import { Suspense, use, type RefObject } from "react";
 import type { AreaEventsResult } from "@/lib/events/queries";
 import { formatDate, formatRadius } from "@/lib/format";
 import { DEFAULT_ANNOUNCED_WITHIN_MONTHS } from "@/lib/geo/constants";
@@ -9,7 +9,8 @@ import type { AreaEvent, AreaSort } from "@/types/event";
 import { EventCard } from "./EventCard";
 
 interface EventFeedProps {
-  result: AreaEventsResult;
+  /** Kilden kommer som et løfte, slik at overskriften kan vises før dataene er klare. */
+  events: Promise<AreaEventsResult>;
   radius: number;
   sort: AreaSort;
   pending: boolean;
@@ -39,7 +40,7 @@ function countLabel(n: number, radius: number) {
 }
 
 export function EventFeed(props: EventFeedProps) {
-  const { result, radius, sort, pending, selectedId, onSelect, hrefForEvent, hrefForSort, hrefForRadius, onNavigate, cardRefs, expanded, onExpandedChange } = props;
+  const { pending } = props;
 
   return (
     <section aria-labelledby="events-heading" aria-busy={pending} className="relative">
@@ -60,6 +61,21 @@ export function EventFeed(props: EventFeedProps) {
       )}
 
       <div className={`mt-5 transition-opacity ${pending ? "pointer-events-none opacity-40" : ""}`}>
+        {/* Samme høyde som den ferdige gruppen, så siden ikke hopper når dataene kommer. */}
+        <Suspense fallback={<SectionSkeleton label="Henter plansaker …" />}>
+          <EventFeedBody {...props} />
+        </Suspense>
+      </div>
+    </section>
+  );
+}
+
+function EventFeedBody(props: EventFeedProps) {
+  const { events, radius, sort, selectedId, onSelect, hrefForEvent, hrefForSort, hrefForRadius, onNavigate, cardRefs, expanded, onExpandedChange } = props;
+  const result = use(events);
+
+  return (
+    <>
         {result.status === "unavailable" ? (
           <Notice>
             <p className="font-medium text-ink">Vi får ikke hentet plansaker akkurat nå.</p>
@@ -143,7 +159,6 @@ export function EventFeed(props: EventFeedProps) {
             </div>
           </details>
         )}
-      </div>
 
       {result.status === "ok" && result.dataUpdatedAt && (
         <p className="mt-6 text-[13px] leading-relaxed text-muted">
@@ -151,7 +166,21 @@ export function EventFeed(props: EventFeedProps) {
           oppgir ikke om planarbeidet fortsatt pågår — datoen viser når oppstart ble varslet.
         </p>
       )}
-    </section>
+    </>
+  );
+}
+
+/** Rolig plassholder i samme form som den ferdige gruppen. */
+export function SectionSkeleton({ label }: { label: string }) {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex min-h-[4.5rem] flex-col justify-center rounded-2xl border border-line bg-surface px-5 py-3.5"
+    >
+      <span className="text-[15px] font-medium text-muted">{label}</span>
+      <span aria-hidden="true" className="mt-2 h-2 w-32 animate-pulse rounded-full bg-line" />
+    </div>
   );
 }
 

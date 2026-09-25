@@ -62,6 +62,19 @@ export const AREA_SECTIONS: readonly AreaSection[] = [
  * lokalitet som kilden mener krever tiltak eller oppfølging. Da handler det om adressen selv,
  * ikke om noe i nabolaget. En registrering 760 meter unna løfter ingenting.
  */
+/**
+ * Kategoriene som helt eller delvis fylles av direkte oppslag mot eksterne kilder
+ * (lib/facts/lookups). De er trege — strategisk støykartlegging tok 4,3 s på Alnabru — så
+ * seksjonene deres lastes for seg. Listen holdes i synk med lookup-registeret av en test.
+ */
+export const LOOKUP_CATEGORIES: readonly AreaCategory[] = ["stoy", "grunnforhold", "infrastruktur"];
+
+/** Om en seksjon må vente på et direkte oppslag før den er ferdig. */
+export function sectionWaitsForLookups(sectionId: string): boolean {
+  const section = AREA_SECTIONS.find((s) => s.id === sectionId);
+  return section?.categories.some((c) => LOOKUP_CATEGORIES.includes(c)) ?? false;
+}
+
 export function sectionOrder(input: { contaminationAtSearchPoint: boolean }): readonly AreaSection[] {
   if (!input.contaminationAtSearchPoint) return AREA_SECTIONS;
   const forurenset = AREA_SECTIONS.find((section) => section.id === "forurenset-grunn");

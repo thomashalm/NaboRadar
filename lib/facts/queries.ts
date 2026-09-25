@@ -166,6 +166,8 @@ export type AreaFactsResult =
   | {
       status: "ok";
       groups: AreaFactGroup[];
+      /** Alle seksjoner i visningsrekkefølge, også de uten treff i dette delsvaret. */
+      order: readonly string[];
       /** Alt som skal tegnes i kartet, på tvers av seksjoner. */
       mapFeatures: AreaMapFeature[];
       sources: SourceInfo[];
@@ -173,6 +175,9 @@ export type AreaFactsResult =
       unavailableSources: string[];
     }
   | { status: "unavailable"; devReason: string };
+
+/** Intern markør for «denne kilden skal ikke hentes nå», så den ikke telles som en feil. */
+class SkipSource extends Error {}
 
 /** Direkte oppslag caches kort, slik at bytte av radius ikke gir nye kall mot kildene. */
 const lookupCache = new TtlCache<LookupResult[]>(5 * 60 * 1000, 200);
@@ -759,14 +764,31 @@ export function groupFacts(
   })).filter((group) => group.facts.length > 0 || group.clusters.length > 0 || group.overview !== null);
 }
 
-export async function getAreaFacts(params: { lat: number; lng: number; radius: number }): Promise<AreaFactsResult> {
-  const { lat, lng, radius } = params;
+/**
+ * Hvilke kilder svaret skal bygges av.
+ *
+ * Målt i produksjon: databasen svarer på 100–800 ms, mens de direkte oppslagene bruker opptil
+ * fem sekunder — strategisk støykartlegging alene tok 4,3 s på Alnabru. Ved å hente dem hver
+ * for seg kan Nærområdet og Forurenset grunn vises med én gang, mens Støy fylles inn etterpå.
+ */
+export type FactSources = "all" | "db" | "lookups";
+
+export async function getAreaFacts(params: {
+  lat: number;
+  lng: number;
+  radius: number;
+  sources?: FactSources;
+}): Promise<AreaFactsResult> {
+  const { lat, lng, radius, sources: sourceSet = "all" } = params;
+  const brukDb = sourceSet !== "lookups";
+  const brukOppslag = sourceSet !== "db";
   let rows: FactRow[] = [];
   let antallPerKategori: Partial<Record<AreaCategory, number>> = {};
   let contaminatedTruncated = false;
   let dbFailed: string | null = null;
 
   try {
+    if (!brukDb) throw new SkipSource();
     const db = await getReadDb();
     if (!db) throw new Error("ingen database");
     // To spørringer: forurenset grunn er så tett i byer at den ellers fyller hele radgrensen
@@ -800,17 +822,28 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
         .map((rad) => [rad.category, rad.antall]),
     );
   } catch (error) {
-    dbFailed =
-      getDbMode() === "none"
-        ? "Ingen database konfigurert."
-        : error instanceof Error
-          ? `${error.name}: ${error.message}`.slice(0, 300)
-          : "Ukjent feil";
-    console.error("[facts] databasefeil:", dbFailed);
+    if (error instanceof SkipSource) {
+      // Kilden er bevisst utelatt fra dette svaret, ikke nede.
+    } else {
+      dbFailed =
+        getDbMode() === "none"
+          ? "Ingen database konfigurert."
+          : error instanceof Error
+            ? `${error.name}: ${error.message}`.slice(0, 300)
+            : "Ukjent feil";
+      console.error("[facts] databasefeil:", dbFailed);
+    }
   }
 
-  const { results: lookupResults, failed } = await runLookups(lat, lng, radius);
+  const { results: lookupResults, failed } = brukOppslag
+    ? await runLookups(lat, lng, radius)
+    : { results: [], failed: [] };
+
   if (dbFailed && lookupResults.length === 0) return { status: "unavailable", devReason: dbFailed };
+  // Alle de direkte oppslagene nede er en feil, ikke et tomt område.
+  if (!brukDb && lookupResults.length === 0 && failed.length > 0) {
+    return { status: "unavailable", devReason: `Alle direkte oppslag feilet: ${failed.join(", ")}` };
+  }
 
   const facts: AreaFact[] = [];
   const usedSources = new Set<string>();
@@ -898,10 +931,11 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
   );
   if (infrastruktur) clusters.push(infrastruktur);
 
+  const sections = sectionOrder({ contaminationAtSearchPoint });
   const groups = groupFacts(
     facts.filter((fact) => fact.category !== "infrastruktur"),
     overviews,
-    sectionOrder({ contaminationAtSearchPoint }),
+    sections,
     clusters,
   );
 
@@ -912,6 +946,7 @@ export async function getAreaFacts(params: { lat: number; lng: number; radius: n
   return {
     status: "ok",
     groups,
+    order: sections.map((section) => section.id),
     mapFeatures,
     sources: [...usedSources].flatMap((id) => (SOURCES[id] ? [SOURCES[id]] : [])),
     unavailableSources: unavailable,

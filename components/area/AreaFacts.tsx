@@ -1,11 +1,26 @@
 "use client";
 
-import type { AreaFactsResult, FactCluster, OverviewItem, SectionOverview } from "@/lib/facts/queries";
+import { Suspense, use } from "react";
+import { mergeFactResults } from "@/lib/facts/merge";
+import type { AreaFactGroup, AreaFactsResult, FactCluster, OverviewItem, SectionOverview } from "@/lib/facts/queries";
+import { combineStates } from "@/lib/facts/section-state";
 import { formatRadius } from "@/lib/format";
-import type { AreaFact } from "@/types/area-feature";
+import { AREA_SECTIONS, sectionWaitsForLookups, type AreaFact } from "@/types/area-feature";
+import { SectionSkeleton } from "./EventFeed";
+
+/** Overskriftene brukes også før dataene finnes, så de må stå her og ikke bare i svaret. */
+const SECTION_LABELS: Record<string, string> = Object.fromEntries(
+  AREA_SECTIONS.map((section) => [section.id, section.label]),
+);
 
 interface AreaFactsProps {
-  result: AreaFactsResult;
+  /**
+   * Kildene kommer som løfter. Databasen svarer på 0,1–1,8 s og bestemmer rekkefølgen — den
+   * vet om søkepunktet ligger i en forurenset lokalitet. De direkte oppslagene bruker opptil
+   * fem sekunder, og seksjonene deres venter for seg.
+   */
+  storedFacts: Promise<AreaFactsResult>;
+  lookupFacts: Promise<AreaFactsResult>;
   radius: number;
   pending: boolean;
 }
@@ -14,11 +29,7 @@ interface AreaFactsProps {
  * «Hva bør du vite om området?» — registrerte forhold fra offentlige kilder.
  * All tekst kommer fra lib/facts/wording.ts. Ingen score, ingen vurdering.
  */
-export function AreaFacts({ result, radius, pending }: AreaFactsProps) {
-  const groups = result.status === "ok" ? result.groups : [];
-  // En seksjon kan ha bare en utvidbar oversikt — f.eks. registreringer som ikke krever oppfølging.
-  const hasContent = groups.length > 0;
-
+export function AreaFacts({ storedFacts, lookupFacts, radius, pending }: AreaFactsProps) {
   return (
     <section aria-labelledby="facts-heading" aria-busy={pending} className="mt-12">
       <h2 id="facts-heading" className="text-xl font-semibold tracking-tight">
@@ -29,73 +40,204 @@ export function AreaFacts({ result, radius, pending }: AreaFactsProps) {
       </p>
 
       <div className={`mt-5 transition-opacity ${pending ? "pointer-events-none opacity-40" : ""}`}>
-        {result.status === "unavailable" ? (
-          <Notice>
-            <p className="font-medium text-ink">Vi får ikke hentet områdedata akkurat nå.</p>
-            {process.env.NODE_ENV === "development" && (
-              <p className="mt-3 rounded-lg bg-danger-soft px-3 py-2 font-mono text-xs text-danger">Dev: {result.devReason}</p>
-            )}
-          </Notice>
-        ) : !hasContent ? (
-          <Notice>
-            <p className="font-medium text-ink">Ingen registrerte forhold i kildene våre innen {formatRadius(radius)}.</p>
-            <p className="mt-1 text-muted">
-              Vi viser støysoner, kvikkleire, forurenset grunn, kraftanlegg og anlegg med utslippstillatelse. Flere
-              kilder kommer.
-            </p>
-          </Notice>
-        ) : (
-          <div className="flex flex-col gap-8">
-            {groups.map((group) => (
-              <div key={group.sectionId}>
-                <h3 className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">{group.label}</h3>
-                {group.intro && <p className="mt-1 text-[13px] text-muted">{group.intro}</p>}
-                {group.clusters.map((cluster) => (
-                  <ClusterDetails key={cluster.id} cluster={cluster} />
-                ))}
-                {group.facts.length > 0 && (
-                  <ul className="mt-3 flex flex-col gap-3">
-                    {group.facts.map((fact) => (
-                      <li key={fact.id}>
-                        <FactItem fact={fact} />
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {group.overview && (
-                  <>
-                    {group.overview.noAttentionNote && (
-                      <p className="mt-3 text-[15px] leading-relaxed text-muted">{group.overview.noAttentionNote}</p>
-                    )}
-                    <OverviewDetails overview={group.overview} />
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {result.status === "ok" && result.unavailableSources.length > 0 && (
-          <p className="mt-5 text-[13px] text-muted">
-            Disse kildene svarte ikke akkurat nå: {result.unavailableSources.join(", ")}. Resten av oversikten er
-            fullstendig.
-          </p>
-        )}
-
-        {result.status === "ok" && result.sources.length > 0 && (
-          <p className="mt-6 text-[13px] leading-relaxed text-muted">
-            Kilder:{" "}
-            {result.sources.map((source, index) => (
-              <span key={source.name}>
-                {index > 0 && " · "}
-                {source.name} ({source.owner}, {source.licenseName})
-              </span>
-            ))}
-            . NaboRadar vurderer ikke forholdene, og viser bare det kildene selv oppgir.
-          </p>
-        )}
+        <Suspense fallback={<AlleSkjeletter />}>
+          <FactsBody storedFacts={storedFacts} lookupFacts={lookupFacts} radius={radius} />
+        </Suspense>
       </div>
     </section>
+  );
+}
+
+/** Mens vi venter på den første kilden: én rolig linje per seksjon, i standardrekkefølge. */
+function AlleSkjeletter() {
+  return (
+    <div className="flex flex-col gap-8">
+      {AREA_SECTIONS.map((section) => (
+        <SectionShell key={section.id} label={section.label}>
+          <SectionSkeleton label="Henter data …" />
+        </SectionShell>
+      ))}
+    </div>
+  );
+}
+
+function SectionShell({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <h3 className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">{label}</h3>
+      <div className="mt-3">{children}</div>
+    </div>
+  );
+}
+
+/**
+ * Databasen bestemmer rekkefølgen, så resten av siden venter på den — men bare på den.
+ * Seksjoner som også trenger et direkte oppslag får sin egen venteboks.
+ */
+function FactsBody({
+  storedFacts,
+  lookupFacts,
+  radius,
+}: {
+  storedFacts: Promise<AreaFactsResult>;
+  lookupFacts: Promise<AreaFactsResult>;
+  radius: number;
+}) {
+  const db = use(storedFacts);
+  const order = db.status === "ok" ? db.order : AREA_SECTIONS.map((section) => section.id);
+
+  return (
+    <>
+      <div className="flex flex-col gap-8">
+        {order.map((sectionId) =>
+          sectionWaitsForLookups(sectionId) ? (
+            <Suspense
+              key={sectionId}
+              fallback={
+                <SectionShell label={SECTION_LABELS[sectionId] ?? sectionId}>
+                  <SectionSkeleton label="Henter data …" />
+                </SectionShell>
+              }
+            >
+              <FactSection sectionId={sectionId} db={db} lookupFacts={lookupFacts} />
+            </Suspense>
+          ) : (
+            <FactSection key={sectionId} sectionId={sectionId} db={db} />
+          ),
+        )}
+      </div>
+      <Suspense fallback={null}>
+        <Kildelinjer db={db} lookupFacts={lookupFacts} radius={radius} />
+      </Suspense>
+    </>
+  );
+}
+
+/** Én seksjon, satt sammen av de kildene den faktisk bruker. */
+function FactSection({
+  sectionId,
+  db,
+  lookupFacts,
+}: {
+  sectionId: string;
+  db: AreaFactsResult;
+  /** Satt bare for seksjoner som faktisk bruker et direkte oppslag. */
+  lookupFacts?: Promise<AreaFactsResult>;
+}) {
+  // use() kan stå i en betingelse; hvorvidt en seksjon har oppslag er dessuten fast.
+  const lookups = lookupFacts ? use(lookupFacts) : null;
+  const deler = [db, ...(lookups ? [lookups] : [])];
+  const state = combineStates(deler.map((del) => (del.status === "ok" ? "klar" : "feilet")));
+
+  const group = deler
+    .flatMap((del) => (del.status === "ok" ? del.groups : []))
+    .filter((g) => g.sectionId === sectionId)
+    .reduce<AreaFactGroup | null>(
+      (samlet, del) =>
+        samlet === null
+          ? del
+          : {
+              ...samlet,
+              facts: [...samlet.facts, ...del.facts].sort(
+                (a, b) => Number(b.contains) - Number(a.contains) || (a.distanceM ?? 0) - (b.distanceM ?? 0),
+              ),
+              clusters: [...samlet.clusters, ...del.clusters],
+              overview: samlet.overview ?? del.overview,
+            },
+      null,
+    );
+
+  const label = SECTION_LABELS[sectionId] ?? sectionId;
+  if (state === "feilet") {
+    return (
+      <SectionShell label={label}>
+        <p className="rounded-2xl border border-dashed border-line-strong px-5 py-4 text-[15px] text-muted">
+          Kunne ikke hente {label.toLowerCase()} akkurat nå.
+        </p>
+      </SectionShell>
+    );
+  }
+  if (!group) return null;
+
+  return (
+    <div>
+      <h3 className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">{group.label}</h3>
+      {group.intro && <p className="mt-1 text-[13px] text-muted">{group.intro}</p>}
+      {group.clusters.map((cluster) => (
+        <ClusterDetails key={cluster.id} cluster={cluster} />
+      ))}
+      {group.facts.length > 0 && (
+        <ul className="mt-3 flex flex-col gap-3">
+          {group.facts.map((fact) => (
+            <li key={fact.id}>
+              <FactItem fact={fact} />
+            </li>
+          ))}
+        </ul>
+      )}
+      {group.overview && (
+        <>
+          {group.overview.noAttentionNote && (
+            <p className="mt-3 text-[15px] leading-relaxed text-muted">{group.overview.noAttentionNote}</p>
+          )}
+          <OverviewDetails overview={group.overview} />
+        </>
+      )}
+    </div>
+  );
+}
+
+/** Kildelisten nederst kan først skrives når alle kildene har svart. */
+function Kildelinjer({
+  db,
+  lookupFacts,
+  radius,
+}: {
+  db: AreaFactsResult;
+  lookupFacts: Promise<AreaFactsResult>;
+  radius: number;
+}) {
+  const samlet = mergeFactResults(db, use(lookupFacts));
+  if (samlet.status !== "ok") {
+    return (
+      <Notice>
+        <p className="font-medium text-ink">Vi får ikke hentet områdedata akkurat nå.</p>
+      </Notice>
+    );
+  }
+  if (samlet.groups.length === 0) {
+    return (
+      <Notice>
+        <p className="font-medium text-ink">Ingen registrerte forhold i kildene våre innen {formatRadius(radius)}.</p>
+        <p className="mt-1 text-muted">
+          Vi viser støysoner, kvikkleire, forurenset grunn, kraftanlegg og anlegg med utslippstillatelse. Flere kilder
+          kommer.
+        </p>
+      </Notice>
+    );
+  }
+
+  return (
+    <>
+      {samlet.unavailableSources.length > 0 && (
+        <p className="mt-5 text-[13px] text-muted">
+          Disse kildene svarte ikke akkurat nå: {samlet.unavailableSources.join(", ")}. Resten av oversikten er
+          fullstendig.
+        </p>
+      )}
+      {samlet.sources.length > 0 && (
+        <p className="mt-6 text-[13px] leading-relaxed text-muted">
+          Kilder:{" "}
+          {samlet.sources.map((source, index) => (
+            <span key={source.name}>
+              {index > 0 && " · "}
+              {source.name} ({source.owner}, {source.licenseName})
+            </span>
+          ))}
+          . NaboRadar vurderer ikke forholdene, og viser bare det kildene selv oppgir.
+        </p>
+      )}
+    </>
   );
 }
 

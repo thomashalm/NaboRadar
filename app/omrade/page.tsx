@@ -9,10 +9,17 @@ import { DEFAULT_RADIUS_M } from "@/lib/geo/constants";
 import { getAreaEvents } from "@/lib/events/queries";
 import { getAreaFacts } from "@/lib/facts/queries";
 import { getMapTileConfig } from "@/lib/map/config";
+import { withTimeout } from "@/lib/timeout";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 const FALLBACK_LABEL = "Valgt punkt";
+
+/** Frister per kilde, satt ut fra målte svartider med god margin. */
+const EVENT_TIMEOUT_MS = 8_000;
+const DB_TIMEOUT_MS = 8_000;
+/** Oppslagene har selv et budsjett på 8 s; dette er den ytre grensen. */
+const LOOKUP_TIMEOUT_MS = 12_000;
 
 export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
   const parsed = areaParamsSchema.safeParse(await searchParams);
@@ -25,10 +32,24 @@ export default async function AreaPage({ searchParams }: { searchParams: SearchP
   if (!parsed.success) return <InvalidArea />;
 
   const { lat, lng, radius, sortering: sort } = parsed.data;
-  const [result, facts] = await Promise.all([
-    getAreaEvents({ lat, lng, radius, sort }),
-    getAreaFacts({ lat, lng, radius }),
-  ]);
+
+  /**
+   * Ingen await her. Siden sendes med adresse, radius, kart og layout med én gang, og hver
+   * kilde strømmer inn når den er ferdig. Tre strømmer, fordi de har helt ulik fart: målt på
+   * Alnabru bruker databasen 0,1–1,8 s, mens de direkte oppslagene bruker opptil 5 s.
+   */
+  const events = withTimeout(getAreaEvents({ lat, lng, radius, sort }), EVENT_TIMEOUT_MS, () => ({
+    status: "unavailable" as const,
+    devReason: `Tidsavbrudd etter ${EVENT_TIMEOUT_MS} ms`,
+  }));
+  const storedFacts = withTimeout(getAreaFacts({ lat, lng, radius, sources: "db" }), DB_TIMEOUT_MS, () => ({
+    status: "unavailable" as const,
+    devReason: `Tidsavbrudd etter ${DB_TIMEOUT_MS} ms`,
+  }));
+  const lookupFacts = withTimeout(getAreaFacts({ lat, lng, radius, sources: "lookups" }), LOOKUP_TIMEOUT_MS, () => ({
+    status: "unavailable" as const,
+    devReason: `Tidsavbrudd etter ${LOOKUP_TIMEOUT_MS} ms`,
+  }));
 
   return (
     <AreaShell>
@@ -39,8 +60,9 @@ export default async function AreaPage({ searchParams }: { searchParams: SearchP
         label={parsed.data.label ?? FALLBACK_LABEL}
         urlLabel={parsed.data.label}
         sort={sort}
-        result={result}
-        facts={facts}
+        events={events}
+        storedFacts={storedFacts}
+        lookupFacts={lookupFacts}
         tiles={getMapTileConfig()}
       />
     </AreaShell>

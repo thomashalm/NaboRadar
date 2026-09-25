@@ -8,6 +8,7 @@ import { buildAreaHref, buildEventHref } from "@/lib/area-params";
 import { EVENT_DATE_LABELS } from "@/lib/events/labels";
 import type { AreaEventsResult } from "@/lib/events/queries";
 import type { AreaFactsResult, AreaMapFeature } from "@/lib/facts/queries";
+import { mergeFactResults } from "@/lib/facts/merge";
 import { formatDate, formatDistance, formatRadius } from "@/lib/format";
 import { radiusBounds } from "@/lib/geo/radius";
 import type { MapTileConfig } from "@/lib/map/config";
@@ -33,10 +34,49 @@ interface AreaExplorerProps {
   /** Label slik den står i URL-en (kan mangle). */
   urlLabel?: string;
   sort: AreaSort;
-  result: AreaEventsResult;
-  facts: AreaFactsResult;
+  /**
+   * Kildene kommer som løfter, ikke ferdige data. Siden rendres med adresse, radius og kart
+   * med én gang, og hver seksjon fyller seg selv når kilden er ferdig — eller viser at den
+   * ikke kunne hentes, uten å ta med seg resten av siden.
+   */
+  events: Promise<AreaEventsResult>;
+  storedFacts: Promise<AreaFactsResult>;
+  lookupFacts: Promise<AreaFactsResult>;
   tiles: MapTileConfig;
 }
+
+type Stream<T> = { status: "loading" } | { status: "ready"; data: T } | { status: "failed" };
+
+/**
+ * Følger ett løfte fra serveren. Tilstanden henger på løftet, slik at et nytt søk eller ny
+ * radius viser lasting med en gang i stedet for gamle tall.
+ */
+function useStream<T>(promise: Promise<T>): Stream<T> {
+  const [entry, setEntry] = useState<{ promise: Promise<T>; state: Stream<T> }>({
+    promise,
+    state: { status: "loading" },
+  });
+
+  useEffect(() => {
+    let aktiv = true;
+    promise.then(
+      (data) => {
+        if (aktiv) setEntry({ promise, state: { status: "ready", data } });
+      },
+      (error: unknown) => {
+        console.error("[omrade] kilden feilet:", error);
+        if (aktiv) setEntry({ promise, state: { status: "failed" } });
+      },
+    );
+    return () => {
+      aktiv = false;
+    };
+  }, [promise]);
+
+  return entry.promise === promise ? entry.state : { status: "loading" };
+}
+
+
 
 const NO_EVENTS: AreaEvent[] = [];
 const NO_SITES: AreaMapFeature[] = [];
@@ -54,8 +94,35 @@ const MIN_PROPERTY_ZOOM = 14;
  * Resultatsiden: kart og feed deler valgt sak. Radius/sortering/sted endres via URL i en
  * transition — kartet beholdes, og feeden viser lastetilstand til nye data er klare.
  */
-export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, facts, tiles }: AreaExplorerProps) {
+export function AreaExplorer({
+  lat,
+  lng,
+  radius,
+  label,
+  urlLabel,
+  sort,
+  events: eventsPromise,
+  storedFacts: storedFactsPromise,
+  lookupFacts: lookupFactsPromise,
+  tiles,
+}: AreaExplorerProps) {
   const router = useRouter();
+  const eventStream = useStream(eventsPromise);
+  const storedStream = useStream(storedFactsPromise);
+  const lookupStream = useStream(lookupFactsPromise);
+
+
+  const result: AreaEventsResult | null = eventStream.status === "ready" ? eventStream.data : null;
+
+  // Delsvarene settes sammen etter hvert som de kommer. Har vi bare det ene, viser vi det.
+  const facts: AreaFactsResult | null = useMemo(() => {
+    const db = storedStream.status === "ready" ? storedStream.data : null;
+    const oppslag = lookupStream.status === "ready" ? lookupStream.data : null;
+    if (db && oppslag) return mergeFactResults(db, oppslag);
+    return db ?? oppslag ?? null;
+  }, [storedStream, lookupStream]);
+
+
   const [pending, startTransition] = useTransition();
   const [selection, setSelection] = useState<{ id: string; from: "map" | "list" } | null>(null);
   const [property, setProperty] = useState<PropertyState>({ status: "idle" });
@@ -68,8 +135,8 @@ export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, 
   const propertyRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef(new Map<string, HTMLElement>());
 
-  const events = result.status === "ok" ? result.events : NO_EVENTS;
-  const mapFeatures = facts.status === "ok" ? facts.mapFeatures : NO_SITES;
+  const events = result?.status === "ok" ? result.events : NO_EVENTS;
+  const mapFeatures = facts?.status === "ok" ? facts.mapFeatures : NO_SITES;
   // Flater tegnes som flater, punkter som markører. Kategorien avgjør hvilket lag.
   const sites = useMemo(() => mapFeatures.filter((f) => f.geometry.type !== "Point"), [mapFeatures]);
   const places = useMemo(() => mapFeatures.filter((f) => f.geometry.type === "Point"), [mapFeatures]);
@@ -87,6 +154,7 @@ export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, 
   const navigateToLocation = useCallback((href: string) => startTransition(() => router.push(href)), [router]);
 
   const propertyGeometry = property.status === "ok" ? property.property.geometry : null;
+
 
   /** Klikk i tomt kartområde: finn eiendommen under punktet. Markører har allerede forrang. */
   const lookupProperty = useCallback(async (position: { lat: number; lng: number }) => {
@@ -239,7 +307,7 @@ export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, 
           />
         </div>
         <EventFeed
-          result={result}
+          events={eventsPromise}
           radius={radius}
           sort={sort}
           pending={pending}
@@ -253,7 +321,7 @@ export function AreaExplorer({ lat, lng, radius, label, urlLabel, sort, result, 
           onNavigate={navigate}
           cardRefs={cardRefs}
         />
-        <AreaFacts result={facts} radius={radius} pending={pending} />
+        <AreaFacts storedFacts={storedFactsPromise} lookupFacts={lookupFactsPromise} radius={radius} pending={pending} />
       </div>
     </main>
   );
