@@ -967,14 +967,16 @@ Effekten er målt: første synlige innhold gikk fra **4 970 ms til 55 ms** (Oslo
 ### Hovedrekkefølge på `/omrade`
 
 1. **Nærområdet**
-2. **Planer og saker**
+2. **Støy**
 3. **Grunnforhold**
-4. **Støy**
-5. **Infrastruktur**
+4. **Infrastruktur**
+5. **Planer og saker**
 6. **Forurenset grunn**
 
-Nærområdet først fordi det er det mest umiddelbart forståelige svaret. Plansakene er viktige, men
-mer tekniske, og kommer rett etter.
+Rekkefølgen følger **hvor nær funnet er adressen selv**. Nærområdet står først fordi det er det
+mest umiddelbart forståelige svaret, og fordi det nesten alltid har innhold. Så det som beskriver
+søkepunktet — støy og grunnforhold: du står i sonen, eller du gjør det ikke. Deretter det som
+oftere handler om nabolaget: plansaker og forurenset grunn.
 
 **Unntak:** ligger søkepunktet inne i en forurensningslokalitet med påvirkningsgrad 3 eller X,
 løftes «Forurenset grunn» øverst.
@@ -994,6 +996,13 @@ Alle seksjoner følger samme form:
 - **Tomme undertyper vises ikke**
 - **Sortering på avstand**, nærmest først
 - **Kartet viser fortsatt alle relevante objekter**, også de som er kuttet fra listen
+- **Tomtilstander er én linje.** «Ingen varslede planoppstarter innen 500 m siste 24 måneder ·
+  Se 3 km» — ikke en stor stiplet boks. Forbeholdet om at kilden ikke sier om planarbeidet pågår
+  vises bare når det finnes en sak å ta forbehold om
+- **Maks to linjer før brukeren må åpne.** Støy vises som «Støy fra veitrafikk · Lden 65–69 dB» /
+  «Ved søkepunktet · modellberegnet»; metode, kartleggingsår, forbehold og kilde ligger bak
+  utvideren med uendret ordlyd. Kortformen kommer fra formuleringsregisteret, ikke fra UI-et, og
+  er samme påstand med færre ord
 
 Grenser: 3 i forhåndsvisning, maks 30 i en liste, 150 hentede skjenkesteder, maks 30 kartmarkører
 for servering. Når listen er kuttet, brukes databasens eget antall i teksten — så «566 steder» er

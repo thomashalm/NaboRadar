@@ -16,6 +16,8 @@ export interface FactText {
   headline: string;
   details: string[];
   caveat: string | null;
+  /** Kort form for kompakt visning. Samme påstand som headline, færre ord. */
+  compact?: { headline: string; context: string };
   /** Kildens egne koder og klasser. Vises bare under «Detaljer». */
   technical?: string[];
 }
@@ -481,10 +483,12 @@ export function describeFact(input: {
       const level = str(a.niva);
       const kilde = subtype === "stoy_strategisk_veg" ? "veitrafikk" : "bane (tog, T-bane eller trikk)";
       if (!level) return null;
+      const kortKilde = subtype === "stoy_strategisk_veg" ? "veitrafikk" : "bane";
       return {
         headline: `Beregnet støy fra ${kilde} ved søkepunktet: Lden ${level}`,
         details: ["Fra strategisk støykartlegging etter EU-støydirektivet, kartlagt 2022."],
         caveat: "Dette er en modellberegning for området, ikke en måling ved boligen.",
+        compact: { headline: `Støy fra ${kortKilde} · Lden ${level}`, context: "Ved søkepunktet · modellberegnet" },
       };
     }
 
@@ -497,6 +501,7 @@ export function describeFact(input: {
           [str(a.kilde), aar ? `prognoseår ${aar}` : null].filter(Boolean).join(" · ") || "Statens vegvesens støyvarselkart.",
         ],
         caveat: "Statens vegvesen oppgir at støyvarselkartet ikke skal brukes til detaljvurdering av enkeltboliger.",
+        compact: { headline: `${sone === "rød" ? "Rød" : "Gul"} støysone for veitrafikk`, context: "Ved søkepunktet · modellberegnet (T-1442)" },
       };
     }
 
@@ -507,6 +512,7 @@ export function describeFact(input: {
         headline: `Søkepunktet ligger i ${sone} flystøysone (T-1442)`,
         details: [[str(a.lufthavn), aar ? `beregnet ${aar}` : null].filter(Boolean).join(" · ")].filter(Boolean),
         caveat: "Sonene er modellberegnet for lufthavnen, ikke målt ved boligen.",
+        compact: { headline: `${sone === "rød" ? "Rød" : "Gul"} flystøysone`, context: "Ved søkepunktet · modellberegnet (T-1442)" },
       };
     }
 

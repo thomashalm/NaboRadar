@@ -230,6 +230,7 @@ function toFact(input: {
     details: text.details,
     technical: text.technical ?? [],
     caveat: text.caveat,
+    compact: text.compact ?? null,
     distanceLabel: distanceLabel(input.distanceM, input.contains),
     distanceM: input.distanceM,
     contains: input.contains,

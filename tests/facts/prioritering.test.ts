@@ -68,8 +68,8 @@ describe("rekkefølge på kategoriene", () => {
     );
     expect(groups.map((g) => g.label)).toEqual([
       "Nærområdet",
-      "Grunnforhold",
       "Støy",
+      "Grunnforhold",
       "Infrastruktur",
       "Forurenset grunn",
     ]);
@@ -94,10 +94,10 @@ describe("rekkefølge på kategoriene", () => {
     // Resten beholder sin innbyrdes rekkefølge.
     expect(rekkefølge.slice(1).map((s) => s.id)).toEqual([
       "naeromradet",
-      "saker",
-      "grunnforhold",
       "stoy",
+      "grunnforhold",
       "infrastruktur",
+      "saker",
     ]);
 
     const groups = groupFacts(
@@ -154,10 +154,10 @@ describe("rekkefølge på kategoriene", () => {
   it("har én seksjon per tema — industri og anlegg ligger under Nærområdet", () => {
     expect(AREA_SECTIONS.map((s) => s.id)).toEqual([
       "naeromradet",
-      "saker",
-      "grunnforhold",
       "stoy",
+      "grunnforhold",
       "infrastruktur",
+      "saker",
       "forurenset-grunn",
     ]);
     // Ingen kategori skal høre til to seksjoner.

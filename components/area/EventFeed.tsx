@@ -48,7 +48,6 @@ export function EventFeed(props: EventFeedProps) {
       <h3 id="events-heading" className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">
         Planer og saker
       </h3>
-      <p className="mt-1 text-[13px] text-muted">Planoppstart varslet siste {MONTHS} måneder</p>
 
       {pending && (
         <p role="status" className="mt-3 flex items-center gap-2 text-sm text-muted">
@@ -94,25 +93,28 @@ function EventFeedBody(props: EventFeedProps) {
             )}
           </Notice>
         ) : result.events.length === 0 ? (
-          <Notice>
-            <p className="font-medium text-ink">
-              Ingen planoppstarter funnet i dette området de siste {MONTHS} månedene.
-            </p>
+          // Ingenting å vise er ikke et funn, og skal ikke ta plass som ett. Én linje, med
+          // veien videre på samme linje.
+          <p className="text-[15px] leading-relaxed text-muted">
+            Ingen varslede planoppstarter innen {formatRadius(radius)} siste {MONTHS} måneder
             {radius < 3000 && (
-              <Link
-                href={hrefForRadius(3000)}
-                replace
-                scroll={false}
-                onClick={(e) => {
-                  e.preventDefault();
-                  onNavigate(hrefForRadius(3000));
-                }}
-                className="mt-3 inline-flex h-10 items-center rounded-full bg-ink px-4 text-[15px] font-medium text-white hover:bg-ink/85"
-              >
-                Prøv {formatRadius(3000)}
-              </Link>
+              <>
+                {" · "}
+                <Link
+                  href={hrefForRadius(3000)}
+                  replace
+                  scroll={false}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onNavigate(hrefForRadius(3000));
+                  }}
+                  className="font-medium text-accent hover:underline"
+                >
+                  Se {formatRadius(3000)}
+                </Link>
+              </>
             )}
-          </Notice>
+          </p>
         ) : (
           // Kompakt som gruppene i «Nærområdet»: antallet først, sakene når man åpner.
           <details
@@ -120,8 +122,9 @@ function EventFeedBody(props: EventFeedProps) {
             open={expanded ?? result.events.length <= PREVIEW}
             onToggle={(event) => onExpandedChange(event.currentTarget.open)}
           >
-            <summary className="cursor-pointer px-5 py-3.5 text-[15px] font-medium text-ink">
-              {countLabel(result.events.length, radius)}
+            <summary className="cursor-pointer px-5 py-3.5">
+              <span className="text-[15px] font-medium text-ink">{countLabel(result.events.length, radius)}</span>
+              <span className="mt-0.5 block text-[13px] text-muted">Planoppstart varslet siste {MONTHS} måneder</span>
             </summary>
 
             <div className="px-5 pb-4">
@@ -157,10 +160,16 @@ function EventFeedBody(props: EventFeedProps) {
           </details>
         )}
 
+      {/*
+        Forbeholdet om at kilden ikke sier om planarbeidet pågår, gir bare mening når det
+        finnes en sak å ta forbehold om. Uten treff er det tre linjer forklaring over
+        ingenting, og da holder det å oppgi kilden.
+      */}
       {result.status === "ok" && result.dataUpdatedAt && (
-        <p className="mt-6 text-[13px] leading-relaxed text-muted">
-          Kilde: Direktoratet for byggkvalitet (NLOD 2.0). Sist hentet {formatDate(result.dataUpdatedAt)}. Kilden
-          oppgir ikke om planarbeidet fortsatt pågår — datoen viser når oppstart ble varslet.
+        <p className="mt-3 text-[13px] leading-relaxed text-muted">
+          Kilde: Direktoratet for byggkvalitet (NLOD 2.0). Sist hentet {formatDate(result.dataUpdatedAt)}.
+          {result.events.length > 0 &&
+            " Kilden oppgir ikke om planarbeidet fortsatt pågår — datoen viser når oppstart ble varslet."}
         </p>
       )}
     </>

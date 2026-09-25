@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { grunnforholdCluster, infrastrukturCluster } from "@/lib/facts/clusters";
+import { grunnforholdCluster, infrastrukturCluster, stoyCluster } from "@/lib/facts/clusters";
 import { describeFact } from "@/lib/facts/wording";
 import type { AreaFact } from "@/types/area-feature";
 
@@ -222,5 +222,89 @@ describe("Grunnforhold som kompakt gruppe", () => {
 
   it("gir ingen gruppe uten funn", () => {
     expect(grunnforholdCluster([], 1000)).toBeNull();
+  });
+});
+
+/**
+ * «Støy» som kompakt gruppe. Forklaringen om at dette er en modellberegning er like lang som
+ * selve funnet, så den hører bak utvideren — men den må fortsatt være der, og ordrett.
+ */
+describe("støy som kompakt gruppe", () => {
+  const stoyFakta = (overrides: Partial<AreaFact> & { id: string; subtype: string }): AreaFact =>
+    ({
+      category: "stoy",
+      headline: "Beregnet støy fra veitrafikk ved søkepunktet: Lden 55–59 dB",
+      details: ["Fra strategisk støykartlegging etter EU-støydirektivet, kartlagt 2022."],
+      technical: [],
+      caveat: "Dette er en modellberegning for området, ikke en måling ved boligen.",
+      distanceLabel: "Ved søkepunktet",
+      distanceM: 0,
+      contains: true,
+      sourceName: "Strategisk støykartlegging (Miljødirektoratet)",
+      sourceDateLabel: null,
+      link: null,
+      compact: { headline: "Støy fra veitrafikk · Lden 55–59 dB", context: "Ved søkepunktet · modellberegnet" },
+      ...overrides,
+    }) as AreaFact;
+
+  it("viser funnet på én linje og konteksten på neste", () => {
+    const c = stoyCluster([stoyFakta({ id: "veg", subtype: "stoy_strategisk_veg" })], 1000)!;
+    expect(c.label).toBe("Støy fra veitrafikk · Lden 55–59 dB");
+    expect(c.summary).toBe("Ved søkepunktet · modellberegnet");
+  });
+
+  it("flytter metode, forbehold og kilde bak utvideren — uten å endre ordlyden", () => {
+    const fact = stoyFakta({ id: "veg", subtype: "stoy_strategisk_veg" });
+    const c = stoyCluster([fact], 1000)!;
+    // Faktaet ligger inne i gruppen, så FactItem viser detaljer, forbehold og kilde der.
+    expect(c.facts).toHaveLength(1);
+    expect(c.facts[0]!.caveat).toBe("Dette er en modellberegning for området, ikke en måling ved boligen.");
+    expect(c.facts[0]!.details[0]).toContain("kartlagt 2022");
+    expect(c.sourceName).toContain("Miljødirektoratet");
+  });
+
+  it("presenterer aldri modellen som en måling", () => {
+    const c = stoyCluster([stoyFakta({ id: "veg", subtype: "stoy_strategisk_veg" })], 1000)!;
+    expect(`${c.label} ${c.summary}`).toContain("modellberegnet");
+    expect(`${c.label} ${c.summary}`).not.toMatch(/\bmålt\b|\bmåling\b/);
+  });
+
+  it("teller opp når det finnes flere støykilder", () => {
+    const c = stoyCluster(
+      [
+        stoyFakta({ id: "veg", subtype: "stoy_strategisk_veg" }),
+        stoyFakta({ id: "fly", subtype: "stoysone_fly_t1442", compact: { headline: "Gul flystøysone", context: "Ved søkepunktet · modellberegnet (T-1442)" } }),
+      ],
+      1000,
+    )!;
+    expect(c.label).toBe("2 støykilder ved søkepunktet");
+    expect(c.summary).toBe("Modellberegnet, ikke målt ved boligen");
+    expect(c.facts).toHaveLength(2);
+  });
+
+  it("faller tilbake på full overskrift for en støytype uten kort form", () => {
+    const utenKort = stoyFakta({ id: "ny", subtype: "stoy_ny_type", compact: null });
+    const c = stoyCluster([utenKort], 1000)!;
+    expect(c.label).toBe("Beregnet støy fra veitrafikk ved søkepunktet: Lden 55–59 dB");
+    expect(c.summary).toBe("Ved søkepunktet");
+  });
+
+  it("gir ingen gruppe uten støyfunn", () => {
+    expect(stoyCluster([], 1000)).toBeNull();
+  });
+});
+
+describe("kompaktformen kommer fra formuleringsregisteret", () => {
+  it("kortformen sier det samme som den fulle, med færre ord", () => {
+    const full = describeFact({
+      subtype: "stoy_strategisk_veg",
+      title: "Strategisk støykartlegging",
+      attributes: { niva: "55–59 dB", enhet: "Lden", kartlagtAar: 2022 },
+      contains: true,
+    });
+    expect(full?.compact?.headline).toBe("Støy fra veitrafikk · Lden 55–59 dB");
+    expect(full?.compact?.context).toBe("Ved søkepunktet · modellberegnet");
+    // Den fulle overskriften er uendret.
+    expect(full?.headline).toBe("Beregnet støy fra veitrafikk ved søkepunktet: Lden 55–59 dB");
   });
 });

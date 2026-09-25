@@ -45,8 +45,15 @@ export interface AreaSection {
 /** Seksjonen med plansaker. Den fylles av events, ikke av områdefakta, men står i samme rekkefølge. */
 export const SAKER_SECTION_ID = "saker";
 
+/**
+ * Rekkefølgen følger hvor nær funnet er adressen selv.
+ *
+ * Støy og grunnforhold beskriver som regel søkepunktet: du står i sonen, eller du gjør det
+ * ikke. Plansaker og forurenset grunn handler oftere om noe i nabolaget. Nærområdet står
+ * først fordi det er det mest umiddelbart forståelige svaret på «hva bør du vite om dette
+ * området», og fordi det nesten alltid har innhold.
+ */
 export const AREA_SECTIONS: readonly AreaSection[] = [
-  // Først: det mest umiddelbart forståelige svaret på «hva bør du vite om området».
   {
     id: "naeromradet",
     label: "Nærområdet",
@@ -54,12 +61,12 @@ export const AREA_SECTIONS: readonly AreaSection[] = [
     intro: "Offentlig kjente virksomheter og steder i nærheten. Vi vurderer dem ikke.",
     categories: ["oppvekst", "helse", "omsorg", "servering", "industri"],
   },
+  { id: "stoy", label: "Støy", intro: null, categories: ["stoy"] },
+  { id: "grunnforhold", label: "Grunnforhold", intro: null, categories: ["grunnforhold"] },
+  { id: "infrastruktur", label: "Infrastruktur", intro: null, categories: ["infrastruktur"] },
   // Plansaker, og senere lokale saker som bydelsvedtak og støysaker knyttet til et sted.
   // De hører hjemme som undertyper her, ikke som en egen hovedseksjon.
   { id: SAKER_SECTION_ID, label: "Planer og saker", intro: null, categories: [] },
-  { id: "grunnforhold", label: "Grunnforhold", intro: null, categories: ["grunnforhold"] },
-  { id: "stoy", label: "Støy", intro: null, categories: ["stoy"] },
-  { id: "infrastruktur", label: "Infrastruktur", intro: null, categories: ["infrastruktur"] },
   // Ligger sist som standard: registreringene er tette i byer, og de fleste gjelder et sted
   // i nærheten — ikke adressen brukeren søkte på. Se sectionOrder() for unntaket.
   { id: "forurenset-grunn", label: "Forurenset grunn", intro: null, categories: ["miljo"] },
@@ -148,6 +155,12 @@ export interface AreaFact {
   technical: string[];
   /** Kildens eget forbehold. Vises alltid når det finnes. */
   caveat: string | null;
+  /**
+   * Kort form til kompakt visning: én linje med selve funnet, én med konteksten.
+   * Settes bare der en seksjon vises som kompakt gruppe. Ordlyden er den samme som i
+   * headline, bare kortere — den er ikke en ny påstand.
+   */
+  compact?: { headline: string; context: string } | null;
   /** «Ved søkepunktet» når contains er sann, ellers «420 m unna». */
   distanceLabel: string;
   distanceM: number | null;

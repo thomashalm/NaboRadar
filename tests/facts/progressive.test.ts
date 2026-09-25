@@ -104,14 +104,15 @@ describe("hvilke seksjoner som vises", () => {
   });
 
   it("følger standardrekkefølgen når søkepunktet ikke ligger i en lokalitet", () => {
-    // Nærområdet først: det er det mest umiddelbart forståelige svaret. Plansakene er
-    // viktige, men mer tekniske, og kommer rett etter.
+    // Nærområdet først: det mest umiddelbart forståelige svaret, og nesten alltid noe der.
+    // Så det som gjelder søkepunktet selv (støy, grunnforhold), før det som handler om
+    // nabolaget (plansaker, forurenset grunn).
     expect(sectionOrder({ contaminationAtSearchPoint: false }).map((s) => s.id)).toEqual([
       "naeromradet",
-      "saker",
-      "grunnforhold",
       "stoy",
+      "grunnforhold",
       "infrastruktur",
+      "saker",
       "forurenset-grunn",
     ]);
   });
@@ -145,7 +146,7 @@ describe("delsvarene settes sammen", () => {
     const grunn = slått.groups.find((g) => g.sectionId === "grunnforhold")!;
     // Nærmest først, og det som dekker søkepunktet øverst.
     expect(grunn.facts.map((f) => f.id)).toEqual(["sone", "aktsomhet"]);
-    expect(slått.groups.map((g) => g.sectionId)).toEqual(["grunnforhold", "stoy"]);
+    expect(slått.groups.map((g) => g.sectionId)).toEqual(["stoy", "grunnforhold"]);
   });
 
   it("bruker rekkefølgen fra databasen, som vet om søkepunktet er berørt", () => {

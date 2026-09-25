@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, use } from "react";
-import { grunnforholdCluster, infrastrukturCluster } from "@/lib/facts/clusters";
+import { grunnforholdCluster, infrastrukturCluster, stoyCluster } from "@/lib/facts/clusters";
 import { mergeFactResults } from "@/lib/facts/merge";
 import type {
   AreaFactGroup,
@@ -215,6 +215,7 @@ function FactSection({
 const BYGGES_AV_FAKTA: Record<string, (facts: AreaFact[], radiusM: number) => FactCluster | null> = {
   grunnforhold: grunnforholdCluster,
   infrastruktur: infrastrukturCluster,
+  stoy: stoyCluster,
 };
 
 function byggGruppe(sectionId: string, group: AreaFactGroup, radiusM: number): AreaFactGroup {

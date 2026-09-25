@@ -159,3 +159,41 @@ export function grunnforholdCluster(facts: AreaFact[], radiusM: number): FactClu
     sourceName: kilder.join(" · "),
   };
 }
+
+/**
+ * «Støy» som kompakt gruppe.
+ *
+ * Støyfunn gjelder nesten alltid søkepunktet selv — du står i sonen eller ikke — og
+ * forklaringen om at dette er en modellberegning og ikke en måling er like lang som selve
+ * funnet. Standardvisningen er derfor to linjer: hva som er beregnet, og hvor. Metode,
+ * kartleggingsår, forbehold og kilde ligger bak utvideren, med samme ordlyd som før.
+ */
+export function stoyCluster(facts: AreaFact[], radiusM: number): FactCluster | null {
+  const sortert = [...facts].sort(byRelevance);
+  if (sortert.length === 0) return null;
+
+  const kilder = [...new Set(sortert.map((fact) => fact.sourceName))];
+  const forste = sortert[0]!;
+  const flere = sortert.length > 1;
+
+  // Kompaktformen kommer fra formuleringsregisteret. Mangler den — en ny støytype som ikke
+  // har fått kort form ennå — bruker vi den fulle overskriften i stedet for å finne på noe.
+  const kort = forste.compact;
+
+  return {
+    sectionId: "stoy",
+    id: "stoy",
+    label: flere
+      ? `${sortert.length} støykilder ${forste.contains ? "ved søkepunktet" : `innen ${formatRadius(radiusM)}`}`
+      : (kort?.headline ?? forste.headline),
+    summary: flere
+      ? "Modellberegnet, ikke målt ved boligen"
+      : (kort?.context ?? forste.distanceLabel),
+    facts: sortert,
+    lists: [],
+    overview: null,
+    caveat: null,
+    sourceName: kilder.join(" · "),
+  };
+}
+
