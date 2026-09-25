@@ -5,6 +5,7 @@ import type { Map as MapLibreMap, MapLayerMouseEvent, Popup } from "maplibre-gl"
 import { useEffect, useRef, useState } from "react";
 import type { LngLatBounds } from "@/lib/geo/bounds";
 import { resolveMapClick, type MapClickHit } from "@/lib/map/click";
+import { toSafeHttpUrl } from "@/lib/url";
 import type { MapTileConfig } from "@/lib/map/config";
 import type { LayerBinding } from "@/lib/map/layers/types";
 
@@ -76,8 +77,17 @@ function popupElement(content: MapPopupContent, onNavigate?: (href: string) => v
     p.textContent = line;
     root.append(p);
   }
-  if (content.href) {
-    const href = content.href;
+  // Eneste stedet i appen der en URL fra en ekstern kilde settes rett på en DOM-node.
+  // React sitt eget vern gjelder ikke her, så skjemaet sjekkes på nytt: databasen har
+  // allerede CHECK på ^https?:// og normaliseringen kjører toSafeHttpUrl, men en lenke som
+  // slipper gjennom begge skal fortsatt ikke kunne bli javascript:.
+  const safeHref = content.href
+    ? content.href.startsWith("/")
+      ? content.href
+      : toSafeHttpUrl(content.href)
+    : null;
+  if (safeHref) {
+    const href = safeHref;
     // Interne lenker navigeres i appen; eksterne kilder åpnes i ny fane som ellers på siden.
     const internal = href.startsWith("/");
     const link = document.createElement("a");

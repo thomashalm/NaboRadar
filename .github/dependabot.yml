@@ -1,0 +1,28 @@
+# Sikkerhetsoppdateringer skal komme til oss, ikke ventes på.
+#
+# Ukentlig, og gruppert: 600 pakker i lockfilen gir ellers en strøm av PR-er ingen leser.
+# Patch og minor samles i én PR per økosystem; major kommer for seg, fordi den skal vurderes.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Oslo
+    open-pull-requests-limit: 5
+    groups:
+      smaa-oppdateringer:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: "deps"
+
+  # Actions pinnes på major-tag (actions/checkout@v5). Dependabot følger med på at
+  # taggene fortsatt finnes og at vi ikke blir hengende på en avviklet versjon.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "ci"
