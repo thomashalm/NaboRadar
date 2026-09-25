@@ -44,14 +44,11 @@ export function EventFeed(props: EventFeedProps) {
 
   return (
     <section aria-labelledby="events-heading" aria-busy={pending} className="relative">
-      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
-        <div>
-          <h2 id="events-heading" className="text-xl font-semibold tracking-tight">
-            Planer og saker
-          </h2>
-          <p className="mt-0.5 text-sm text-muted">Planoppstart varslet siste {MONTHS} måneder</p>
-        </div>
-      </div>
+      {/* Samme overskriftsnivå som de andre seksjonene: de står nå i én felles rekkefølge. */}
+      <h3 id="events-heading" className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">
+        Planer og saker
+      </h3>
+      <p className="mt-1 text-[13px] text-muted">Planoppstart varslet siste {MONTHS} måneder</p>
 
       {pending && (
         <p role="status" className="mt-3 flex items-center gap-2 text-sm text-muted">
@@ -60,7 +57,7 @@ export function EventFeed(props: EventFeedProps) {
         </p>
       )}
 
-      <div className={`mt-5 transition-opacity ${pending ? "pointer-events-none opacity-40" : ""}`}>
+      <div className={`mt-3 transition-opacity ${pending ? "pointer-events-none opacity-40" : ""}`}>
         {/* Samme høyde som den ferdige gruppen, så siden ikke hopper når dataene kommer. */}
         <Suspense fallback={<SectionSkeleton label="Henter plansaker …" />}>
           <EventFeedBody {...props} />

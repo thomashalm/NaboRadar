@@ -306,22 +306,29 @@ export function AreaExplorer({
             }}
           />
         </div>
-        <EventFeed
-          events={eventsPromise}
+        <AreaFacts
+          storedFacts={storedFactsPromise}
+          lookupFacts={lookupFactsPromise}
           radius={radius}
-          sort={sort}
           pending={pending}
-          selectedId={selectedId}
-          onSelect={(id) => setSelection({ id, from: "list" })}
-          expanded={eventsExpanded}
-          onExpandedChange={setEventsExpanded}
-          hrefForEvent={(event) => buildEventHref(event.id, context)}
-          hrefForSort={(s) => buildAreaHref({ ...context, sort: s })}
-          hrefForRadius={(r) => buildAreaHref({ ...context, radius: r })}
-          onNavigate={navigate}
-          cardRefs={cardRefs}
+          saker={
+          <EventFeed
+            events={eventsPromise}
+            radius={radius}
+            sort={sort}
+            pending={pending}
+            selectedId={selectedId}
+            onSelect={(id) => setSelection({ id, from: "list" })}
+            expanded={eventsExpanded}
+            onExpandedChange={setEventsExpanded}
+            hrefForEvent={(event) => buildEventHref(event.id, context)}
+            hrefForSort={(s) => buildAreaHref({ ...context, sort: s })}
+            hrefForRadius={(r) => buildAreaHref({ ...context, radius: r })}
+            onNavigate={navigate}
+            cardRefs={cardRefs}
+          />
+          }
         />
-        <AreaFacts storedFacts={storedFactsPromise} lookupFacts={lookupFactsPromise} radius={radius} pending={pending} />
       </div>
     </main>
   );

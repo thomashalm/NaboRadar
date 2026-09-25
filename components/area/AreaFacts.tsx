@@ -12,7 +12,7 @@ import type {
 } from "@/lib/facts/queries";
 import { combineStates } from "@/lib/facts/section-state";
 import { formatRadius } from "@/lib/format";
-import { AREA_SECTIONS, sectionWaitsForLookups, type AreaFact } from "@/types/area-feature";
+import { AREA_SECTIONS, SAKER_SECTION_ID, sectionWaitsForLookups, type AreaFact } from "@/types/area-feature";
 import { SectionSkeleton } from "./EventFeed";
 
 /** Overskriftene brukes også før dataene finnes, så de må stå her og ikke bare i svaret. */
@@ -30,13 +30,18 @@ interface AreaFactsProps {
   lookupFacts: Promise<AreaFactsResult>;
   radius: number;
   pending: boolean;
+  /**
+   * Plansaker. De kommer fra en annen kilde enn områdefakta, men står i samme rekkefølge som
+   * resten — derfor sendes de inn hit i stedet for å ligge i en egen blokk over siden.
+   */
+  saker: React.ReactNode;
 }
 
 /**
  * «Hva bør du vite om området?» — registrerte forhold fra offentlige kilder.
  * All tekst kommer fra lib/facts/wording.ts. Ingen score, ingen vurdering.
  */
-export function AreaFacts({ storedFacts, lookupFacts, radius, pending }: AreaFactsProps) {
+export function AreaFacts({ storedFacts, lookupFacts, radius, pending, saker }: AreaFactsProps) {
   return (
     <section aria-labelledby="facts-heading" aria-busy={pending} className="mt-12">
       <h2 id="facts-heading" className="text-xl font-semibold tracking-tight">
@@ -48,7 +53,7 @@ export function AreaFacts({ storedFacts, lookupFacts, radius, pending }: AreaFac
 
       <div className={`mt-5 transition-opacity ${pending ? "pointer-events-none opacity-40" : ""}`}>
         <Suspense fallback={<AlleSkjeletter />}>
-          <FactsBody storedFacts={storedFacts} lookupFacts={lookupFacts} radius={radius} />
+          <FactsBody storedFacts={storedFacts} lookupFacts={lookupFacts} radius={radius} saker={saker} />
         </Suspense>
       </div>
     </section>
@@ -85,10 +90,12 @@ function FactsBody({
   storedFacts,
   lookupFacts,
   radius,
+  saker,
 }: {
   storedFacts: Promise<AreaFactsResult>;
   lookupFacts: Promise<AreaFactsResult>;
   radius: number;
+  saker: React.ReactNode;
 }) {
   const db = use(storedFacts);
   const order = db.status === "ok" ? db.order : AREA_SECTIONS.map((section) => section.id);
@@ -97,7 +104,9 @@ function FactsBody({
     <>
       <div className="flex flex-col gap-8">
         {order.map((sectionId) =>
-          sectionWaitsForLookups(sectionId) ? (
+          sectionId === SAKER_SECTION_ID ? (
+            <div key={sectionId}>{saker}</div>
+          ) : sectionWaitsForLookups(sectionId) ? (
             <Suspense
               key={sectionId}
               fallback={

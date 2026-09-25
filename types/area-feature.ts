@@ -39,9 +39,11 @@ export interface AreaSection {
   categories: readonly AreaCategory[];
 }
 
+/** Seksjonen med plansaker. Den fylles av events, ikke av områdefakta, men står i samme rekkefølge. */
+export const SAKER_SECTION_ID = "saker";
+
 export const AREA_SECTIONS: readonly AreaSection[] = [
-  { id: "grunnforhold", label: "Grunnforhold", intro: null, categories: ["grunnforhold"] },
-  { id: "stoy", label: "Støy", intro: null, categories: ["stoy"] },
+  // Først: det mest umiddelbart forståelige svaret på «hva bør du vite om området».
   {
     id: "naeromradet",
     label: "Nærområdet",
@@ -49,6 +51,11 @@ export const AREA_SECTIONS: readonly AreaSection[] = [
     intro: "Offentlig kjente virksomheter og steder i nærheten. Vi vurderer dem ikke.",
     categories: ["oppvekst", "helse", "omsorg", "servering", "industri"],
   },
+  // Plansaker, og senere lokale saker som bydelsvedtak og støysaker knyttet til et sted.
+  // De hører hjemme som undertyper her, ikke som en egen hovedseksjon.
+  { id: SAKER_SECTION_ID, label: "Planer og saker", intro: null, categories: [] },
+  { id: "grunnforhold", label: "Grunnforhold", intro: null, categories: ["grunnforhold"] },
+  { id: "stoy", label: "Støy", intro: null, categories: ["stoy"] },
   { id: "infrastruktur", label: "Infrastruktur", intro: null, categories: ["infrastruktur"] },
   // Ligger sist som standard: registreringene er tette i byer, og de fleste gjelder et sted
   // i nærheten — ikke adressen brukeren søkte på. Se sectionOrder() for unntaket.

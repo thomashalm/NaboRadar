@@ -67,9 +67,9 @@ describe("rekkefølge på kategoriene", () => {
       [],
     );
     expect(groups.map((g) => g.label)).toEqual([
+      "Nærområdet",
       "Grunnforhold",
       "Støy",
-      "Nærområdet",
       "Infrastruktur",
       "Forurenset grunn",
     ]);
@@ -92,7 +92,13 @@ describe("rekkefølge på kategoriene", () => {
     const rekkefølge = sectionOrder({ contaminationAtSearchPoint: true });
     expect(rekkefølge[0]!.id).toBe("forurenset-grunn");
     // Resten beholder sin innbyrdes rekkefølge.
-    expect(rekkefølge.slice(1).map((s) => s.id)).toEqual(["grunnforhold", "stoy", "naeromradet", "infrastruktur"]);
+    expect(rekkefølge.slice(1).map((s) => s.id)).toEqual([
+      "naeromradet",
+      "saker",
+      "grunnforhold",
+      "stoy",
+      "infrastruktur",
+    ]);
 
     const groups = groupFacts(
       [fact("miljo", { headline: "Ved søkepunktet", distanceM: 0, contains: true }), fact("grunnforhold")],
@@ -132,7 +138,7 @@ describe("rekkefølge på kategoriene", () => {
     expect(utenGrunnforhold.map((g) => g.label)).toEqual(["Støy", "Forurenset grunn"]);
 
     const utenStoy = groupFacts([fact("grunnforhold"), fact("oppvekst"), fact("miljo")]);
-    expect(utenStoy.map((g) => g.label)).toEqual(["Grunnforhold", "Nærområdet", "Forurenset grunn"]);
+    expect(utenStoy.map((g) => g.label)).toEqual(["Nærområdet", "Grunnforhold", "Forurenset grunn"]);
 
     // Også når forurenset grunn er løftet: de som mangler, faller bort.
     const løftet = groupFacts([fact("miljo", { contains: true }), fact("oppvekst")], [], sectionOrder({ contaminationAtSearchPoint: true }));
@@ -147,9 +153,10 @@ describe("rekkefølge på kategoriene", () => {
 
   it("har én seksjon per tema — industri og anlegg ligger under Nærområdet", () => {
     expect(AREA_SECTIONS.map((s) => s.id)).toEqual([
+      "naeromradet",
+      "saker",
       "grunnforhold",
       "stoy",
-      "naeromradet",
       "infrastruktur",
       "forurenset-grunn",
     ]);

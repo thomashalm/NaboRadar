@@ -104,13 +104,30 @@ describe("hvilke seksjoner som vises", () => {
   });
 
   it("følger standardrekkefølgen når søkepunktet ikke ligger i en lokalitet", () => {
+    // Nærområdet først: det er det mest umiddelbart forståelige svaret. Plansakene er
+    // viktige, men mer tekniske, og kommer rett etter.
     expect(sectionOrder({ contaminationAtSearchPoint: false }).map((s) => s.id)).toEqual([
+      "naeromradet",
+      "saker",
       "grunnforhold",
       "stoy",
-      "naeromradet",
       "infrastruktur",
       "forurenset-grunn",
     ]);
+  });
+
+  it("har ingen egen hovedseksjon for lokale saker", () => {
+    // Støysaker og bydelsvedtak skal inn som undertyper under «Planer og saker».
+    const idn = AREA_SECTIONS.map((s) => s.id);
+    for (const forbudt of ["naboklager", "lokale-saker", "saker-i-naeromradet"]) {
+      expect(idn).not.toContain(forbudt);
+    }
+    expect(AREA_SECTIONS.find((s) => s.id === "saker")?.label).toBe("Planer og saker");
+  });
+
+  it("lar plansaksseksjonen stå i rekkefølgen uten å hente områdefakta", () => {
+    // Seksjonen fylles av events, så den har ingen kategorier — og skal aldri få en faktagruppe.
+    expect(AREA_SECTIONS.find((s) => s.id === "saker")?.categories).toEqual([]);
   });
 });
 
