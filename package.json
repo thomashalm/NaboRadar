@@ -21,7 +21,8 @@
     "sync:worker": "tsx scripts/sync-worker.ts",
     "sync:status": "tsx scripts/sync-status.ts",
     "alerts:check": "tsx scripts/alert-check.ts",
-    "research:seed": "tsx scripts/seed-research.ts"
+    "research:seed": "tsx scripts/seed-research.ts",
+    "review:backfill": "tsx scripts/research-review-backfill.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

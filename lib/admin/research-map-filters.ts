@@ -89,9 +89,31 @@ export interface Kartfilter {
   drift: OperationalStatus[];
   kommune?: string;
   kandidat?: boolean;
+  /**
+   * Freshness. Ett valg og ikke en liste med review-tilstander: på et kart er spørsmålet «hvor
+   * er researchen gammel», ikke «vis meg presis due_soon». Tilstandene bak hvert valg står i
+   * FRESHNESS_STATES.
+   */
+  freshness?: Freshness;
   kunMedPunkt: boolean;
   sortering: Sortering;
 }
+
+export const FRESHNESS_VALG = ["trenger", "forsinket", "fersk"] as const;
+export type Freshness = (typeof FRESHNESS_VALG)[number];
+
+export const FRESHNESS_LABEL: Record<Freshness, string> = {
+  trenger: "Trenger review",
+  forsinket: "Forsinket",
+  fersk: "Fersk",
+};
+
+/** Review-tilstandene hvert freshness-valg dekker. Samme navn som i basen. */
+export const FRESHNESS_STATES: Record<Freshness, string[]> = {
+  trenger: ["needs_followup", "overdue", "due"],
+  forsinket: ["overdue"],
+  fersk: ["current", "no_review_needed"],
+};
 
 export const SORTERINGER = [
   "interesse",
@@ -142,6 +164,11 @@ export function lesFilter(
     kommune: førsteVerdi(params.kommune)?.trim() || undefined,
     kandidat:
       kandidatRå === "ja" ? true : kandidatRå === "nei" ? false : undefined,
+    freshness: (FRESHNESS_VALG as readonly string[]).includes(
+      førsteVerdi(params.freshness) ?? "",
+    )
+      ? (førsteVerdi(params.freshness) as Freshness)
+      : undefined,
     // Standard på: et funn uten koordinat er ikke en markør, og kartet er hovedflaten.
     kunMedPunkt: førsteVerdi(params.punkt) !== "alle",
     sortering: (SORTERINGER as readonly string[]).includes(sortering ?? "")
@@ -170,6 +197,7 @@ export function skrivFilter(f: Kartfilter): URLSearchParams {
     p.set("drift", f.drift.join(","));
   if (f.kommune) p.set("kommune", f.kommune);
   if (f.kandidat !== undefined) p.set("kandidat", f.kandidat ? "ja" : "nei");
+  if (f.freshness) p.set("freshness", f.freshness);
   if (!f.kunMedPunkt) p.set("punkt", "alle");
   if (f.sortering !== "interesse") p.set("sortering", f.sortering);
   return p;
@@ -241,6 +269,12 @@ export function avanserteChips(f: Kartfilter): Filterchip[] {
       id: "kandidat",
       label: f.kandidat ? "Kandidat for offentlig visning" : "Ikke kandidat",
       fjern: { kandidat: undefined },
+    });
+  if (f.freshness)
+    chips.push({
+      id: "freshness",
+      label: FRESHNESS_LABEL[f.freshness],
+      fjern: { freshness: undefined },
     });
   if (!f.kunMedPunkt)
     chips.push({

@@ -4,6 +4,7 @@ import { LoginForm } from "@/components/admin/LoginForm";
 import { SignOutButton } from "@/components/admin/SignOutButton";
 import { SyncButtons } from "@/components/admin/SyncButtons";
 import { loadAdminOverview, type SchedulerStatus, type SyncRunRow } from "@/lib/admin/queries";
+import { hentReviewMetrics } from "@/lib/admin/review";
 import { getAdminSession } from "@/lib/admin/session";
 import { formatDate } from "@/lib/format";
 import type { ProviderHealth } from "@/lib/sync/health";
@@ -59,6 +60,14 @@ export default async function AdminPage() {
   }
 
   const { health, runs, scheduler, errors } = await loadAdminOverview(session.client);
+  /*
+   * Køtallet hentes i samme runde som driftsstatusen og feiler stille. Admin-navigasjonen skal
+   * ikke bli treg, og et manglende tall er bedre enn en side som ikke laster.
+   */
+  const reviewMetrics = await hentReviewMetrics(session.client).catch(() => null);
+  const trengerReview = reviewMetrics
+    ? reviewMetrics.due + reviewMetrics.overdue + reviewMetrics.needs_followup
+    : null;
   const scheduled = health.filter((h) => h.state !== "not_scheduled" && h.state !== "inactive");
   const other = health.filter((h) => h.state === "not_scheduled" || h.state === "inactive");
   const critical = scheduled.filter((h) => h.severity === "critical");
@@ -90,6 +99,9 @@ export default async function AdminPage() {
         </Link>
         <Link href="/admin/research" className="text-[15px] font-medium text-accent hover:underline">
           Research →
+        </Link>
+        <Link href="/admin/research/review" className="text-[15px] font-medium text-accent hover:underline">
+          Review-kø{trengerReview ? ` · ${trengerReview}` : ""} →
         </Link>
         <Link href="/admin/kart" className="text-[15px] font-medium text-accent hover:underline">
           Research-kart →

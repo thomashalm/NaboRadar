@@ -70,12 +70,40 @@ export interface ResearchItem {
   why_interesting: string | null;
   notes: string | null;
   first_seen_at: string;
-  last_checked_at: string | null;
+  /** Sist innholdet ble kontrollert mot kilder. Het last_checked_at før review-laget. */
+  last_verified_at: string | null;
   created_at: string;
   updated_at: string;
   created_by: string | null;
   source_count: number;
+  public_candidate: boolean;
+  public_candidate_note: string | null;
+  /**
+   * Review-signalene, beregnet i basen. De følger med listevisningen slik at /admin/research kan
+   * vise «review om 12 dager» uten et ekstra kall per rad.
+   */
+  last_reviewed_at: string | null;
+  next_review_at: string | null;
+  review_state: ReviewStateNavn;
+  review_interval_days: number | null;
+  review_mode: string;
+  days_until_review: number | null;
+  days_since_review: number | null;
+  review_count: number;
 }
+
+/**
+ * Review-tilstanden som streng. Typen bor i lib/admin/review-types.ts; her gjentas den som en
+ * strengunion for å slippe en sirkulær import mellom to typefiler.
+ */
+export type ReviewStateNavn =
+  | "needs_followup"
+  | "overdue"
+  | "due"
+  | "due_soon"
+  | "blocked"
+  | "current"
+  | "no_review_needed";
 
 export interface ResearchSource {
   id: string;

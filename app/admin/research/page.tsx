@@ -17,9 +17,13 @@ import {
   VERIFICATION_STATUSES,
   type Level,
   type ResearchItem,
+  type ReviewStateNavn,
   type VerificationStatus,
 } from "@/lib/admin/research-types";
 import { IkkeTilgang } from "@/components/admin/IkkeTilgang";
+import { ReviewMerke } from "@/components/admin/ReviewMerke";
+import { hentReviewMetrics } from "@/lib/admin/review";
+import { nårReview } from "@/lib/admin/review-types";
 import { Kildedekning } from "@/components/admin/Kildedekning";
 import { getKildedekning } from "@/lib/admin/area-research";
 
@@ -61,8 +65,12 @@ export default async function ResearchPage({ searchParams }: { searchParams: Sea
   const sort = første(params.sort) ?? "oppdatert";
   const valgt = Object.fromEntries(FILTRE.map((f) => [f.navn, første(params[f.navn])]));
 
-  // Kildestatus hentes ved siden av funnene; feiler den, vises resten.
-  const dekning = await getKildedekning(session.client).catch(() => null);
+  // Kildestatus og reviewtall hentes ved siden av funnene; feiler de, vises resten.
+  const [dekning, metrics] = await Promise.all([
+    getKildedekning(session.client).catch(() => null),
+    hentReviewMetrics(session.client).catch(() => null),
+  ]);
+  const trengerReview = metrics ? metrics.due + metrics.overdue + metrics.needs_followup : null;
 
   let alle: ResearchItem[];
   try {
@@ -149,7 +157,8 @@ export default async function ResearchPage({ searchParams }: { searchParams: Sea
             alleLabel="sist endret"
             valg={[
               { verdi: "opprettet", label: "nyest først" },
-              { verdi: "sjekket", label: "lengst siden sjekk" },
+              { verdi: "sjekket", label: "lengst siden verifisering" },
+              { verdi: "review", label: "review-behov" },
               { verdi: "interesse", label: "interesse" },
               { verdi: "kilder", label: "flest kilder" },
               { verdi: "tittel", label: "tittel" },
@@ -167,7 +176,26 @@ export default async function ResearchPage({ searchParams }: { searchParams: Sea
         </div>
       </form>
 
-      <p className="mt-6 text-[13px] text-muted">
+      <Link
+        href="/admin/research/review"
+        className="mt-6 flex items-center justify-between gap-3 rounded-2xl border border-line bg-surface px-5 py-4 hover:border-ink"
+      >
+        <span>
+          <span className="block text-[16px] font-medium text-ink">Review-kø</span>
+          <span className="block text-[14px] text-muted">
+            {trengerReview === null
+              ? "Hva som bør undersøkes på nytt"
+              : trengerReview === 0
+                ? "Ingenting trenger review nå"
+                : `${trengerReview} trenger review${metrics && metrics.overdue ? `, ${metrics.overdue} forsinket` : ""}`}
+          </span>
+        </span>
+        <span aria-hidden="true" className="text-[15px] text-accent">
+          →
+        </span>
+      </Link>
+
+      <p className="mt-5 text-[13px] text-muted">
         {funn.length} av {alle.length} funn
       </p>
 
@@ -236,9 +264,12 @@ function Rad({ item }: { item: ResearchItem }) {
         {[item.address, item.city, item.municipality].filter(Boolean).join(", ") || "Uten adresse"}
         {item.latitude === null && " · uten koordinat"}
       </p>
-      <p className="mt-2 text-[13px] text-muted">
-        {VERIFICATION_LABEL[item.verification_status]} · sist sjekket{" "}
-        {item.last_checked_at ? dato(item.last_checked_at) : "aldri"}
+      <p className="mt-2 flex flex-wrap items-center gap-2 text-[13px] text-muted">
+        <ReviewMerke state={item.review_state} liten />
+        <span>
+          {nårReview(item.days_until_review, item.review_state)} · {VERIFICATION_LABEL[item.verification_status]} ·
+          sist verifisert {item.last_verified_at ? dato(item.last_verified_at) : "aldri"}
+        </span>
       </p>
     </li>
   );
@@ -278,6 +309,15 @@ function Velg({
 }
 
 const INTERESSE_RANG: Record<Level, number> = { high: 0, medium: 1, low: 2 };
+const REVIEW_RANG: Record<ReviewStateNavn, number> = {
+  needs_followup: 0,
+  overdue: 0,
+  due: 1,
+  due_soon: 2,
+  blocked: 3,
+  current: 4,
+  no_review_needed: 5,
+};
 const STATUS_RANG: Record<VerificationStatus, number> = {
   verified_public_source: 0,
   partially_verified: 1,
@@ -294,7 +334,14 @@ function sorter(funn: ResearchItem[], sort: string): ResearchItem[] {
       return ut.sort((a, b) => b.created_at.localeCompare(a.created_at));
     case "sjekket":
       // Aldri sjekket er det som trenger en sjekk mest, så det ligger først.
-      return ut.sort((a, b) => (a.last_checked_at ?? "").localeCompare(b.last_checked_at ?? ""));
+      return ut.sort((a, b) => (a.last_verified_at ?? "").localeCompare(b.last_verified_at ?? ""));
+    case "review":
+      // Køens egen rekkefølge hører hjemme i køen; her holder det å løfte det som er forfalt.
+      return ut.sort(
+        (a, b) =>
+          REVIEW_RANG[a.review_state] - REVIEW_RANG[b.review_state] ||
+          (a.next_review_at ?? "9999").localeCompare(b.next_review_at ?? "9999"),
+      );
     case "interesse":
       // Innen samme interessenivå: det best verifiserte først — det er det som er klart å bruke.
       return ut.sort(

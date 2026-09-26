@@ -10,6 +10,8 @@ import {
   antallAvanserte,
   avanserteChips,
   erStandard,
+  FRESHNESS_LABEL,
+  FRESHNESS_VALG,
   gruppeFor,
   harUndertyper,
   kartHref,
@@ -370,6 +372,21 @@ function Filterpanel({
               valg={VERIFICATION_STATUSES.map((v) => ({ v, l: VERIFICATION_LABEL[v] }))}
               aktive={filter.verifisering}
               onChange={(v) => endre({ verifisering: v as Kartfilter["verifisering"] })}
+            />
+          </Bolk>
+          <Bolk tittel="Freshness">
+            {/*
+              Geografisk freshness er nyttig av samme grunn som kartet ellers: det viser hvor
+              researchen er gammel, ikke bare hvilke funn som er det.
+            */}
+            <Velg
+              merkelapp=""
+              verdi={filter.freshness ?? ""}
+              valg={[
+                { v: "", l: "alle" },
+                ...FRESHNESS_VALG.map((f) => ({ v: f, l: FRESHNESS_LABEL[f] })),
+              ]}
+              onChange={(v) => endre({ freshness: (v || undefined) as Kartfilter["freshness"] })}
             />
           </Bolk>
           <Bolk tittel="Annet">

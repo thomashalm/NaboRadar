@@ -77,7 +77,12 @@ export default async function FunnPage({ params }: { params: Promise<{ id: strin
         <Rad navn="Lagt inn" verdi={`${dato(item.created_at)}${item.created_by ? ` av ${item.created_by}` : ""}`} />
         <Rad navn="Sist endret" verdi={dato(item.updated_at)} />
         <Rad navn="Først sett" verdi={dato(item.first_seen_at)} />
-        <Rad navn="Sist sjekket" verdi={item.last_checked_at ? dato(item.last_checked_at) : "aldri"} />
+        <Rad navn="Sist verifisert" verdi={item.last_verified_at ? dato(item.last_verified_at) : "aldri"} />
+        <Rad navn="Sist review" verdi={item.last_reviewed_at ? dato(item.last_reviewed_at) : "aldri"} />
+        <Rad
+          navn="Neste review"
+          verdi={item.next_review_at ? dato(item.next_review_at) : "ingen planlagt"}
+        />
         <Rad
           navn="Opphav"
           verdi={item.origin_type === "manual" ? "manuelt lead" : `import · ${item.origin_provider ?? "ukjent"}`}

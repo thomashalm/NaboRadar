@@ -25,3 +25,10 @@ All intern research følger **discovery først → verifisering etterpå → akt
 leads**. Ikke start i et API og konkluder ut fra hva som mangler der — fravær i et register er
 ikke fravær i virkeligheten. Metoden står i sin helhet i håndboken under
 [Research-metoden](docs/naboradar-handbook.md#research-metoden), og gjelder alle kategorier.
+
+Når et eksisterende research-item undersøkes på nytt: **registrer resultatet som en review**, ikke
+bare overskriv funnet. Utfallet — også «ingen endring» — er det som gjør basen levende, og det er
+det review-køen sorterer etter. Gjør det gjennom `/admin/research/review`, eller for en hel runde
+med `npm run research:seed -- --review="<rundeetikett>"`. Innhold og reviewplan er to forskjellige
+ting: en innholdsoppdatering skal ikke se ut som en kontroll. Se
+[Research lifecycle](docs/naboradar-handbook.md#36-research-lifecycle-freshness-og-review-kø).

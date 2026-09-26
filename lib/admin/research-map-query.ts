@@ -1,6 +1,6 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { gruppeFor, type Kartfilter } from "./research-map-filters";
+import { FRESHNESS_STATES, gruppeFor, type Kartfilter } from "./research-map-filters";
 import type { Level, OperationalStatus, VerificationStatus } from "./research-types";
 
 /**
@@ -29,6 +29,8 @@ export interface Kartpunkt {
   public_candidate: boolean;
   source_count: number;
   updated_at: string;
+  review_state: string;
+  next_review_at: string | null;
 }
 
 export interface Kartresultat {
@@ -67,6 +69,7 @@ export async function hentKartpunkter(client: SupabaseClient, filter: Kartfilter
     p_operational: filter.drift,
     p_municipality: filter.kommune ?? null,
     p_public_candidate: filter.kandidat ?? null,
+    p_review_states: filter.freshness ? FRESHNESS_STATES[filter.freshness] : null,
     // Hentes alltid med koordinatløse med: listen skal kunne vise dem, og tellingen trenger dem.
     p_only_with_coords: false,
   });

@@ -1474,6 +1474,7 @@ npm run db:push              # kjør migrasjoner mot SUPABASE_DB_URL
 npm run db:push -- --dry-run # vis hva som ville blitt kjørt
 npm run db:verify            # PostGIS, RLS, grants og data. Exit 1 ved tilgangsavvik
 npm run research:seed        # legg inn/oppdater kuraterte research-funn. Idempotent
+npm run review:backfill # gir eksisterende research-items en reviewplan
 ```
 
 ### Sync
@@ -2042,3 +2043,155 @@ hullene fra runde 2:
   har to militære navn i Oslo og null i Bærum, selv om Kolsås base er dokumentert av Forsvaret
 
 ---
+
+## 36. Research lifecycle: freshness og review-kø
+
+Et research-item slutter ikke å endre seg fordi vi har verifisert det én gang. Et planlagt
+datasenter blir bygget, forsinket eller kansellert; en gruve skifter eier; en tillatelse blir
+avslått. Review-laget gir basen en eksplisitt idé om når hvert funn sist ble kontrollert, når det
+bør kontrolleres igjen, og hvorfor.
+
+Livsløpet er:
+
+```
+Discovery → verifisering → research-item → reviewpolicy → review-kø → review → oppdatert item → neste review
+```
+
+### De tre datoene
+
+| Felt | Betyr |
+|---|---|
+| `last_verified_at` | Sist innholdet faktisk ble kontrollert mot kilder. Het `last_checked_at` før review-laget |
+| `last_reviewed_at` | Sist en review ble gjennomført, også når ingenting endret seg |
+| `next_review_at` | Når funnet bør undersøkes igjen |
+
+`updated_at` er aldri freshness. Den sier bare at raden ble skrevet til, og en rettet skrivefeil
+ville ellers gjort et to år gammelt funn ferskt.
+
+### Tilstand beregnes, den lagres ikke
+
+`review_state` ligger i viewet `admin_research_review_status`, regnet ut fra `next_review_at`:
+
+| Tilstand | Når |
+|---|---|
+| `no_review_needed` | `review_mode = 'none'`, eller policyen gir null intervall (avvist, arkivert, stabilt historisk) |
+| `blocked` | Reviewen står på noe eksternt: kilden er nede, dokumentet kan ikke leses |
+| `needs_followup` | Forrige review endte `unresolved`, og datoen er passert |
+| `overdue` | Mer enn 14 dager over datoen |
+| `due` | Datoen er passert, innenfor slingringsmonnet på 14 dager |
+| `due_soon` | Innen 14 dager |
+| `current` | Lenger fram |
+
+Ingen nattjobb oppdaterer dette, og det er meningen: en beregnet tilstand kan ikke komme ut av
+takt med virkeligheten. Punkt 40 i spesifikasjonen ba om en scheduler hvis den var nødvendig —
+den er ikke det.
+
+### Intervallpolicyen
+
+Én immutable funksjon, `research_review_interval()`. Basisintervallet følger hvor fort tingen
+faktisk endrer seg:
+
+| Situasjon | Basis |
+|---|---|
+| `under_construction` | 30 dager |
+| `planned` | 45 dager ved høy interesse eller public candidate, ellers 60 |
+| `unknown` status | 60 dager ved høy interesse, ellers 90 |
+| `investigated_not_confirmed` | 90 / 180 / 365 etter interesse |
+| `active` | 90 / 180 / 365 etter interesse |
+| `historical`, `closed` | 365, eller ingen review når sikkerheten er høy, interessen ikke er høy og kilden holder |
+| `rejected`, `archived` | Ingen review |
+
+Deretter justeres det multiplikativt, med gulv på 14 dager og tak på 730:
+
+- lav sikkerhet ×0,5 · middels ×0,75
+- public candidate ×0,75, og aldri over 120 dager uansett
+- mangler primærkilde ×0,75
+- mangler koordinat ×0,75 (bare for `finding` og `lead` — et notat jages ikke for manglende punkt)
+- har endret seg i en tidligere review ×0,75
+- reviews på rad uten endring: opptil ×2
+
+Ingen ugjennomsiktig score. UI-et viser alltid *hvorfor* datoen er der den er:
+«45 dagers intervall · planlagt prosjekt, høy interesse».
+
+### Review reasons
+
+Beregnet, aldri lagret — et funn som får primærkilde slutter å ha `missing_primary_source` uten at
+noen må huske å fjerne det. Verdiene: `under_construction`, `planned_project`, `status_unknown`,
+`high_interest`, `low_confidence`, `medium_confidence`, `public_candidate`,
+`missing_primary_source`, `missing_coordinates`, `unresolved_lead`, `previously_changed`,
+`manual_followup`, `blocked_source`, `never_reviewed`, `source_old`.
+
+`missing_capacity` finnes ikke: kapasitet er ikke et strukturert felt, den står i beskrivelsen. Et
+felt vi ikke kan beregne blir et felt ingen vedlikeholder.
+
+**Gammel kilde er ikke samme sak som gammelt faktum.** En kulturminneregistrering fra 2018 kan
+være helt gyldig. Derfor er `source_old` en grunn og aldri en konklusjon.
+
+### Prioritet
+
+Lavere tall først: 1 under bygging, 2 planlagt, 3 høy interesse med svak sikkerhet, 4 uavklart
+lead, 5 public candidate, 6 har endret seg før, 7 forsinket, 8 aktivt med høy interesse, 9 ukjent
+status, 10 middels interesse, 11 mangler primærkilde, 12 mangler koordinat, 20 historisk, 80
+avvist, 90 ingen review. Køen sorterer på tilstand først, så prioritet, så hvem som har ventet
+lengst.
+
+### Overstyring
+
+`review_mode` sier hvordan datoen ble satt: `policy`, `manual`, `none` eller `blocked`. Alt annet
+enn `policy` krever en begrunnelse — databasen håndhever det — og vises som overstyrt i køen. En
+utsettelse er ikke en måte å skjule noe på.
+
+### Historikk
+
+`admin_research_reviews` er én rad per kontroll: utfall, om noe endret seg, status og sikkerhet
+før og etter, sammendrag, kilder kontrollert, og runden reviewen hørte til. Derfor kan vi si
+«kontrollert fire ganger, sist endret 12.08.2026».
+
+Ikke bland dette med `admin_research_runs`, som er en *researchrunde* på en kategori eller en
+metode. Én runde kan generere hundre reviews; en review peker tilbake på runden gjennom
+`research_run_id`.
+
+### Innholdsoppdatering er ikke en review
+
+Dette er det viktigste skillet i laget, og det kostet en feilrunde å få riktig.
+
+`save_research_item` og `npm run research:seed` skriver innholdsfelt og rører *ikke*
+`last_reviewed_at`, `next_review_at`, `review_mode` eller manuelle overstyringer. Triggeren
+`research_items_review_schedule` regner bare om datoen når noe som påvirker intervallet faktisk
+endrer seg — status, interesse, sikkerhet, kandidatflagg, koordinat, streak — eller når datoen
+mangler eller det lagrede intervallet ikke stemmer med policyen lenger.
+
+Første versjon regnet om ved *hver* oppdatering der kallet ikke satte datoen selv. Det så
+riktig ut, men én `research:seed`-kjøring vasket bort hele planen: en kø på tolv aktuelle saker ble
+198 «ferske». Regresjonstesten «beholder en planlagt dato gjennom en seed-oppdatering» finnes for
+at det ikke skal skje igjen.
+
+### Reviews fra en researchrunde
+
+`npm run research:seed -- --review="<rundeetikett>"` registrerer en review per funn seeden
+oppdaterte, knyttet til den navngitte runden, med utfall `updated` eller `unchanged` basert på en
+faktisk sammenligning av feltene før og etter. Da får en stor runde reviewhistorikk uten at noen
+klikker gjennom UI-et for hvert funn.
+
+Skriptet kaller `record_research_review_unchecked()`, som er revoked fra alle roller og bare kan
+kalles av eieren. Alternativet — å skrive tabellene direkte fra skriptet — ville gitt to steder som
+må holde streak, datoer og historikk i takt. Aktøren lagres som «seed», ikke som en person.
+
+### Sikkerhet
+
+Som resten av research: ingen rettigheter til `anon`, lesing bak `is_admin()` med RLS, all skriving
+gjennom security definer-funksjoner som sjekker `is_admin()` selv. Viewet har ingen rettigheter i
+det hele tatt; det leses gjennom funksjonene. Reviewdata sier hva vi *ikke* har kontrollert, og er
+minst like interne som funnene selv.
+
+### Kommandoer
+
+```bash
+npm run review:backfill        # gir eksisterende funn en reviewplan
+npm run review:backfill -- --dry
+npm run research:seed -- --review="National VA and mineral extraction discovery v1"
+```
+
+Backfillen setter `last_verified_at` fra nyeste kildedato og gir prioritetsklassene en første
+review fordelt over tre uker, de høyest prioriterte først. Den hevder ikke at noen har gjort en
+review: `last_reviewed_at` står urørt, og funnene beholder grunnen «aldri kontrollert».
