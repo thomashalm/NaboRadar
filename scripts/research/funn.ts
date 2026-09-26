@@ -564,7 +564,8 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "VEAS anlegg Bjerkås",
     description:
-      "Mindre reguleringsendring for VEAS-anlegget på Bjerkås. VEAS er renseanlegget for avløp fra Oslo, Bærum og Asker.",
+      "Mindre reguleringsendring for VEAS-anlegget på Bjerkås. VEAS er renseanlegget for avløp fra Oslo, Bærum og Asker." +
+      " Anlegget er landets største renseanlegg: rundt 110 millioner kubikkmeter avløpsvann i året, tilsvarende 867 000 personekvivalenter, i et prosessanlegg på 42 000 kvadratmeter inne i fjellet.",
     municipality: "Asker",
     address: "Bjerkåsholmen 21",
     postal_code: "3470",
@@ -579,7 +580,8 @@ export const FUNN: Funn[] = [
     why_interesting:
       "Et regionalt renseanlegg er både lukt og tungtrafikk, og endringer der treffer et stort nærområde.",
     notes:
-      "Adressen er nærmeste adresse til planområdets senterpunkt, ikke anleggets egen adresse.",
+      "Adressen er nærmeste adresse til planområdets senterpunkt, ikke anleggets egen adresse." +
+      " VEAS utreder nitrogenfjerning og utvidelse for å møte skjerpede krav og forventet vekst i tilførsel. Det betyr flere år med anleggsarbeid på Bjerkås.",
     kilder: [
       {
         source_name: "DiBK planleggingigangsatt, arealplan 1628 (2012009)",
@@ -594,6 +596,27 @@ export const FUNN: Funn[] = [
           "Kunngjøringen er offentlig og dokumenterer at planarbeidet er startet — ikke hva anlegget " +
           "til slutt blir.",
       },
+      {
+        source_name: "Norges største renseanlegg",
+        source_url:
+          "https://www.veas.nu/en-ren-og-frisk-fjord/norges-storste-renseanlegg",
+        publisher: "VEAS",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegget renser avløpsvannet til rundt 800 000 mennesker rundt Oslofjorden. Prosessanlegget er 42 000 kvadratmeter og ligger inne i fjellet ved Slemmestad i Asker. Rundt 110 millioner kubikkmeter avløpsvann i året.",
+      },
+      {
+        source_name: "Nitrogenfjerning for en region — konseptutredning",
+        source_url:
+          "https://veas.nu/uploads/2025/06/Nitrogenfjerning-for-en-region-rapport-konseptutredning-12.6.2025.pdf",
+        publisher: "VEAS",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Utredning av nitrogenfjerning og kapasitetsutvidelse. Tilførselen er estimert å øke med 37 prosent til 2030 og 58 prosent til 2050.",
+      },
     ],
   },
   {
@@ -601,7 +624,8 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Oredalen avfallsanlegg",
     description:
-      "Forenklet endring i reguleringsplan for Oredalen avfallsanlegg i sørlige Asker.",
+      "Forenklet endring i reguleringsplan for Oredalen avfallsanlegg i sørlige Asker." +
+      " Anlegget har kapasitet til å behandle mer enn 75 tonn ordinært avfall per døgn, og til mottak og lagring av mer enn 50 tonn farlig avfall.",
     municipality: "Asker",
     address: "Tofteveien 35",
     postal_code: "3483",
@@ -616,7 +640,8 @@ export const FUNN: Funn[] = [
     why_interesting:
       "Deponi og avfallsanlegg er blant de mest støy- og luktutsatte nabolagene vi kan vise.",
     notes:
-      "Adressen er nærmeste adresse til planområdets senterpunkt, ikke anleggets egen adresse.",
+      "Adressen er nærmeste adresse til planområdets senterpunkt, ikke anleggets egen adresse." +
+      " Status oppdatert: søknad om deponering av 8 000 tonn PFAS-holdige masser er avslått av Statsforvalteren, og en søknad om endret tillatelse har vært på høring. Lindum arbeider samtidig med utslippsledning og vannrensing for å øke kapasiteten. Dette er en aktiv sak, ikke et statisk anlegg.",
     kilder: [
       {
         source_name: "DiBK planleggingigangsatt, arealplan 1069 (06285078)",
@@ -630,6 +655,39 @@ export const FUNN: Funn[] = [
           "Varsel om planoppstart 2025-08-14: «Oredalen avfallsanlegg». Forslagsstillertype: Foretak. " +
           "Kunngjøringen er offentlig og dokumenterer at planarbeidet er startet — ikke hva anlegget " +
           "til slutt blir.",
+      },
+      {
+        source_name:
+          "Avslag på søknad om midlertidig tillatelse til å deponere PFAS-holdige masser",
+        source_url:
+          "https://www.statsforvalteren.no/siteassets/fm-oslo-og-viken/horinger-og-kunngjoringer/lindum-oredalen/vedtak-om-avslag-pa-soknad-om-midlertidig-tillatelse-til-a-deponere-pfas-holdige-masser-som-er-farlig-avfall---lindum-oredalen-as.pdf",
+        publisher: "Statsforvalteren i Østfold, Buskerud, Oslo og Akershus",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Søknad om midlertidig tillatelse til å deponere opptil 8 000 tonn PFAS-holdige masser klassifisert som farlig avfall ble avslått.",
+      },
+      {
+        source_name:
+          "Høring av søknad om endring av tillatelse — Lindum Oredalen AS",
+        source_url:
+          "https://www.statsforvalteren.no/nn/ostfold-buskerud-oslo-og-akershus/horinger/2024/11/horing-av-soknad-om-endring-av-tillatelse-etter-forurensningsloven--lindum-oredalen-as--oredalen-avfallsanlegg-og-deponi-asker-kommune/",
+        publisher: "Statsforvalteren i Østfold, Buskerud, Oslo og Akershus",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Søknad om endret tillatelse for Oredalen avfallsanlegg og deponi i Asker kommune, lagt ut på høring.",
+      },
+      {
+        source_name: "Lindum Oredalen i gang med prosjekt for økt kapasitet",
+        source_url:
+          "https://lindum.no/nyheter/oredalen-prosjekt-utslippsledning-vannrensing-2",
+        publisher: "Lindum",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Prosjekt for ny utslippsledning og vannrensing, med formål å øke kapasiteten på anlegget.",
       },
     ],
   },
@@ -700,6 +758,7 @@ export const FUNN: Funn[] = [
   },
   {
     category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
     item_type: "note",
     title: "Ingen datasenter-funn i plandataene for Oslo, Bærum og Asker",
     description:
@@ -1433,6 +1492,7 @@ export const FUNN: Funn[] = [
   },
   {
     category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
     item_type: "note",
     title: "Registrerte datasenteroperatører med kontoradresse i Oslo og Bærum",
     description:
@@ -1482,12 +1542,13 @@ export const FUNN: Funn[] = [
   },
   {
     category: "Datasenter / industri / tekniske anlegg",
-    subcategory: "Avfallsforbrenning",
+    subcategory: "Avfall",
     item_type: "finding",
     title: "Hafslund Celsio Klemetsrud energigjenvinningsanlegg",
     description:
       "Norges største anlegg for energigjenvinning av avfall, med utslippstillatelse fra " +
-      "Miljødirektoratet og utslipp til både luft og vann.",
+      "Miljødirektoratet og utslipp til både luft og vann." +
+      " Hafslund håndterte over 366 000 tonn avfall på sine to forbrenningsanlegg i 2023, hvorav Klemetsrud er det største. Anlegget har kapasitet til over 3 000 tonn farlig avfall i året, og produserte 1,9 TWh fjernvarme i 2021 — rundt 20 prosent av Oslos varmebehov. Karbonfangstanlegget skal fange opptil 350 000 tonn CO2 i året.",
     municipality: "Oslo",
     address: "Klemetsrudveien 1",
     postal_code: "1278",
@@ -1505,7 +1566,8 @@ export const FUNN: Funn[] = [
       "i kommunen.",
     notes:
       "Adressen er nærmeste adresse til anleggets registrerte punkt. Registeret dokumenterer " +
-      "at anlegget har tillatelse, ikke hvor mye det faktisk slipper ut i dag.",
+      "at anlegget har tillatelse, ikke hvor mye det faktisk slipper ut i dag." +
+      " Kapasitetstallet på 366 000 tonn gjelder Klemetsrud og Haraldrud til sammen, ikke Klemetsrud alene.",
     kilder: [
       {
         source_name:
@@ -1519,16 +1581,39 @@ export const FUNN: Funn[] = [
           "Anlegg med utslippstillatelse. Bransje 38.220 energigjenvinning. Forurensningsmyndighet: Miljødirektoratet. " +
           "Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
       },
+      {
+        source_name:
+          "Nøkkeltall for avfallsforbrenning og fjernvarmeproduksjon",
+        source_url:
+          "https://www.hafslund.no/no/produkter-og-tjenester/fjernvarme/nokkeltall-for-avfallsforbrenning-og-fjernvarmeproduksjon",
+        publisher: "Hafslund",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Over 366 000 tonn avfall håndtert på de to forbrenningsanleggene i 2023. Klemetsrud har kapasitet til over 3 000 tonn farlig avfall per år. 1,9 TWh fjernvarme i 2021, rundt 20 prosent av Oslos varmebehov.",
+      },
+      {
+        source_name: "Karbonfangst — det neste steget",
+        source_url:
+          "https://www.hafslund.no/no/produkter-og-tjenester/oslo-ccs/karbonfangst-det-neste-steget",
+        publisher: "Hafslund",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Karbonfangstanlegget på Klemetsrud skal kunne fange opptil 350 000 tonn CO2 per år.",
+      },
     ],
   },
   {
     category: "Datasenter / industri / tekniske anlegg",
-    subcategory: "Avfall og fjernvarme",
+    subcategory: "Avfall",
     item_type: "finding",
     title: "Haraldrud energigjenvinnings- og varmesentralanlegg",
     description:
       "Samlet anleggsområde på Haraldrud med både materialgjenvinning og varmesentral. Begge har " +
-      "egen utslippstillatelse og utslipp til luft og vann. Ett fysisk sted, to tillatelser.",
+      "egen utslippstillatelse og utslipp til luft og vann. Ett fysisk sted, to tillatelser." +
+      " Anlegget behandler rundt 120 000 tonn avfall i året på to forbrenningslinjer og produserer rundt 250 GWh energi som varmt vann til fjernvarmenettet i Groruddalen og Oslo sentrum. Sorteringsanlegget på samme område har kapasitet til 100 000 tonn husholdningsavfall i året.",
     municipality: "Oslo",
     address: "Brobekkveien 87",
     postal_code: "0582",
@@ -1558,6 +1643,27 @@ export const FUNN: Funn[] = [
         excerpt_or_summary:
           "Anlegg med utslippstillatelse. Bransje 38.210 materialgjenvinning og 35.300 fjernvarme. Forurensningsmyndighet: Miljødirektoratet. " +
           "Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Haraldrud energigjenvinningsanlegg",
+        source_url:
+          "https://www.oslo.kommune.no/avfall-og-gjenvinning/behandlingsanlegg-for-avfall/haraldrud-energigjenvinningsanlegg/",
+        publisher: "Oslo kommune",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegget har kapasitet til å gjenvinne 120 000 tonn avfall per år fordelt på to forbrenningslinjer, og produserer årlig rundt 250 GWh energi til fjernvarmenettet.",
+      },
+      {
+        source_name: "Haraldrud utsorteringsanlegg",
+        source_url:
+          "https://www.oslo.kommune.no/avfall-og-gjenvinning/behandlingsanlegg-for-avfall/haraldrud-sorteringsanlegg/",
+        publisher: "Oslo kommune",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Sorteringsanlegget har kapasitet til å håndtere 100 000 tonn husholdningsavfall per år.",
       },
     ],
   },
@@ -2656,6 +2762,7 @@ export const FUNN: Funn[] = [
   },
   {
     category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
     item_type: "note",
     title: "Plan- og byggesak er ikke en farbar vei til datasentre",
     description:
@@ -3738,6 +3845,7 @@ export const FUNN: Funn[] = [
   },
   {
     category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
     item_type: "note",
     title: "Datasentre i Oslo-regionen utenfor Oslo, Bærum og Asker",
     description:
@@ -3807,6 +3915,7 @@ export const FUNN: Funn[] = [
 
   {
     category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
     item_type: "note",
     title: "Ingen datasenteranlegg dokumentert i Bærum",
     description:
@@ -3861,6 +3970,7 @@ export const FUNN: Funn[] = [
   },
   {
     category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
     item_type: "finding",
     title: "Nordavind DC Sites: tolv anlegg i Innlandet",
     description:
@@ -3909,6 +4019,7 @@ export const FUNN: Funn[] = [
   },
   {
     category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
     item_type: "note",
     title: "Ingen kryptoutvinning blant datasenteroperatørene i Oslo-området",
     description:
@@ -4279,6 +4390,7 @@ export const FUNN: Funn[] = [
   },
   {
     category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
     item_type: "lead",
     title: "Fire kryptooperatører uten stedfestet anlegg",
     description:
@@ -4414,49 +4526,6 @@ export const FUNN: Funn[] = [
   {
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
-    item_type: "finding",
-    title: "Bulk N01 Data Center Campus, Vennesla",
-    description:
-      "Bulks nasjonale campus i Øvrebø i Vennesla, med flere registrerte driftsselskaper (N01, DCM101, DCM102).",
-    municipality: "Vennesla",
-    address: "Stølevegen 39",
-    postal_code: "4715",
-    city: "Øvrebø",
-    latitude: 58.25757,
-    longitude: 7.89205,
-    verification_status: "partially_verified",
-    operational_status: "active",
-    sensitivity: "internal_only",
-    confidence: "medium",
-    interest_level: "medium",
-    why_interesting:
-      "Bulks hovedcampus, og forklaringen på hvorfor selskapet har fire Nkom-registreringer på én kontoradresse i Oslo.",
-    notes:
-      "Kapasitetstall kommer fra operatør- og bransjekilder, ikke fra myndighet.",
-    kilder: [
-      {
-        source_name: "DataCenterMap: Bulk N01 Data Center Campus, Vennesla",
-        source_url: "https://www.datacentermap.com/norway/",
-        publisher: "DataCenterMap",
-        source_type: "web",
-        source_date: "2026-09-26",
-        excerpt_or_summary:
-          "Oppført som Bulk N01 Data Center Campus, Vennesla, operatør Bulk Infrastructure, adresse Stølevegen 39, 4715 Øvrebø. " +
-          "Bulks nasjonale campus i Øvrebø i Vennesla, med flere registrerte driftsselskaper (N01, DCM101, DCM102).",
-      },
-      {
-        source_name: "Kartverket adresse-API",
-        source_url: "https://ws.geonorge.no/adresser/v1/sok",
-        publisher: "Kartverket",
-        source_type: "register",
-        source_date: "2026-09-26",
-        excerpt_or_summary:
-          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
-      },
-    ],
-  },
-  {
-    category: "Datasenter / industri / tekniske anlegg",
     item_type: "note",
     title: "Nasjonalt bilde: 112 oppføringer i 42 markeder",
     description:
@@ -5265,6 +5334,7 @@ export const FUNN: Funn[] = [
   },
   {
     category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
     item_type: "note",
     title: "Dekningsstatus for den nasjonale datasenterkartleggingen",
     description:
@@ -5921,8 +5991,8 @@ export const FUNN: Funn[] = [
     address: "Saugbrug industriområde",
     postal_code: "1772",
     city: "Halden",
-    latitude: 59.12347,
-    longitude: 11.38597,
+    latitude: 59.12504,
+    longitude: 11.40234,
     verification_status: "partially_verified",
     operational_status: "planned",
     sensitivity: "internal_only",
@@ -5931,8 +6001,9 @@ export const FUNN: Funn[] = [
     why_interesting:
       "Enda et tilfelle av datasenter på en eksisterende industritomt med kraft og nett fra før.",
     notes:
-      "Beskrevet som «potential development» — ikke bekreftet prosjekt. Koordinaten er Violgata 8 i " +
-      "Halden, ikke industriområdets eget punkt.",
+      "Beskrevet som «potential development» — ikke bekreftet prosjekt. Koordinaten er rettet: den " +
+      "pekte tidligere på Violgata 8 (Halden DC01 sin adresse), og er nå satt til Saugbrugs eget " +
+      "registrerte anleggspunkt fra Miljødirektoratets utslippsregister.",
     kilder: [
       {
         source_name: "DataCenterMap: Green Mountain Halden, Saugbrug",
@@ -6086,6 +6157,1720 @@ export const FUNN: Funn[] = [
         source_date: "2026-09-26",
         excerpt_or_summary:
           "Elverum (to Nordavind-anlegg), Molde/Eide (Troll Housing) og Hamar (Nordavind Heggvin) er dekket gjennom PeeringDB uten katalogen. De øvrige gjenstående markedene har ingen PeeringDB-fasilitet.",
+      },
+    ],
+  },
+
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Prosessindustri",
+    item_type: "finding",
+    title: "Herøya industripark",
+    description:
+      "Norges største industripark. Minst seks anlegg med utslippstillatelse på samme område: Yara Porsgrunn (gjødsel), Eramet Norway Porsgrunn (ferrolegeringer), INOVYN PVC-fabrikk, Addcon Nordic, REEtec demonstrasjonsanlegg for sjeldne jordarter og Norsk Gjenvinning." +
+      " Yara Porsgrunn alene har en ammoniakkfabrikk på 530 000 tonn i året, tre salpetersyrefabrikker på til sammen 1,3 millioner tonn syre, to NPK-fabrikker på rundt 2 millioner tonn og en kalksalpeterfabrikk på rundt 1 million tonn.",
+    municipality: "Porsgrunn",
+    address: "Hydrovegen 45",
+    city: "Porsgrunn",
+    latitude: 59.12046,
+    longitude: 9.62139,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et sammenhengende industriområde av denne størrelsen setter rammene for hele Porsgrunn — tungtrafikk, utslipp til luft og vann, og beredskapssoner rundt kjemisk produksjon.",
+    notes:
+      "Ett funn for hele parken, ikke seks. Anleggene har egne tillatelser, men deler område, infrastruktur og lokal påvirkning." +
+      " Kapasitetstallene er Yaras egne. De øvrige anleggene i parken har ikke oppgitt kapasitet.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Herøya industripark",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Seks anlegg med utslippstillatelse registrert på samme område, alle regulert av Miljødirektoratet. Flertallet har utslipp til både luft og vann.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+      {
+        source_name: "Yara Porsgrunn",
+        source_url: "https://www.yara.no/om-yara/yara-i-norge/yara-porsgrunn/",
+        publisher: "Yara Norge",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kapasitetstall per fabrikkenhet: ammoniakk 530 000 tonn/år, tre salpetersyrefabrikker 1,3 millioner tonn/år, to NPK-fabrikker rundt 2,0 millioner tonn/år, kalksalpeter rundt 1 million tonn/år. Europas største produksjonskapasitet for NPK etter nitrofosfatmetoden.",
+      },
+      {
+        source_name:
+          "Yara fortsetter arbeidet med å kutte Norges største punktutslipp",
+        source_url:
+          "https://www.yara.com/news-and-media/news/archive/news-2022/yara-fortsetter-arbeidet-med-a-kutte-norges-storste-punktutslipp/",
+        publisher: "Yara International",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Yara omtaler selv anlegget på Herøya som Norges største punktutslipp.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Kjemisk industri",
+    item_type: "finding",
+    title: "Rafnes og Bamble industriområde",
+    description:
+      "Petrokjemisk industriområde i Bamble med INOVYN Norge avd. Rafnes, Ineos Rafnes, Ineos Bamble og Norsk Spesialolje. Produksjon av uorganiske og organiske kjemiske råvarer og basisplast.",
+    municipality: "Bamble",
+    address: "Herreveien 801",
+    city: "Stathelle",
+    latitude: 59.09613,
+    longitude: 9.59335,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Petrokjemi er blant de få virksomhetstypene som gir sikkerhetssoner og beredskapsplaner langt utenfor egen tomt.",
+    notes: "Fire tillatelser på ett industriområde, samlet i ett funn.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Rafnes og Bamble industriområde",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Fire anlegg med utslippstillatelse fra Miljødirektoratet, alle med utslipp til luft og vann.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Metallindustri",
+    item_type: "finding",
+    title: "Mo industripark",
+    description:
+      "Stort industriområde i Mo i Rana med Elkem Rana, Ferroglobe Mangan Norge, 7 Steel Nordic (tidligere Celsa Armeringsstål), SMA Mineral og Miljøteknikk Terrateam. Smelteverk, stålproduksjon, kalk og materialgjenvinning på samme sted.",
+    municipality: "Rana",
+    address: "Verkstedløypa 11",
+    city: "Mo i Rana",
+    latitude: 66.31336,
+    longitude: 14.16755,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Industriparken er byens økonomiske ryggrad og samtidig dens tyngste miljøbelastning, midt i et boligområde med 26 000 innbyggere.",
+    notes:
+      "Fem tillatelser samlet i ett funn. Alle deler industriområdet ved Ranfjorden.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Mo industripark",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Fem anlegg med utslippstillatelse fra Miljødirektoratet innenfor samme industriområde.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Prosessindustri",
+    item_type: "finding",
+    title: "Borregaard og Sarpsborg industriområde",
+    description:
+      "Borregaards bioraffineri i Sarpsborg, med spesialcellulose og eget forbrenningsanlegg, sammen med Nordic Paper, Hafsil og SAREN Energy på samme område." +
+      " Borregaard bruker rundt 1 million kubikkmeter tømmer i året og har en årlig produksjonskapasitet på 160 000 tonn lignin.",
+    municipality: "Sarpsborg",
+    address: "Borregaard",
+    city: "Sarpsborg",
+    latitude: 59.27292,
+    longitude: 11.11629,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et av Europas mest integrerte bioraffinerier, midt i Sarpsborg. Lukt fra celluloseproduksjon er en dokumentert og langvarig lokal sak.",
+    notes: "Fem tillatelser på samme industriområde ved Glomma.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Borregaard og Sarpsborg industriområde",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Fem anlegg med utslippstillatelse fra Miljødirektoratet, flertallet med utslipp til både luft og vann.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+      {
+        source_name: "Om Borregaard",
+        source_url: "https://www.borregaard.com/company",
+        publisher: "Borregaard",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bioraffineriet bruker rundt 1 million kubikkmeter tømmer i året og produserer spesialcellulose, biopolymerer, biovanillin, cellulosefibriller og bioetanol.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Prosessindustri",
+    item_type: "finding",
+    title: "Øra industriområde",
+    description:
+      "Industriområdet på Øra i Fredrikstad med Kronos Titan (titandioksid), Kemira Chemicals, Polynt Composites, Unger Fabrikker, FREVARs forbrenningsanlegg og SAREN Energy Bio-El.",
+    municipality: "Fredrikstad",
+    address: "Habornveien 61",
+    city: "Gamle Fredrikstad",
+    latitude: 59.18537,
+    longitude: 10.96719,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Seks tunge anlegg på én halvøy tett på boligområdene i Gamle Fredrikstad, med både kjemisk produksjon og avfallsforbrenning.",
+    notes: "Seks tillatelser samlet i ett funn.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Øra industriområde",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Seks anlegg med utslippstillatelse fra Miljødirektoratet på samme industriområde.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Prosessindustri",
+    item_type: "finding",
+    title: "Mongstad raffineri og industriområde",
+    description:
+      "Norges største oljeraffineri, med tilhørende kraftvarmeverk, SAR Treatment og Puma Energy på samme område." +
+      " Raffineriet har en kapasitet på 12 millioner tonn råolje i året, tilsvarende 230 000 fat per dag, og råoljeterminalen kan lagre 9,5 millioner fat.",
+    municipality: "Alver",
+    address: "Mongstad 121",
+    city: "Mongstad",
+    latitude: 60.81494,
+    longitude: 5.03326,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Raffineriet er landets største punktutslipp av CO2 og et av de største industrianleggene overhodet.",
+    notes: "Fire tillatelser på Mongstad-området.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Mongstad raffineri og industriområde",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Raffineri og kraftvarmeverk med utslippstillatelse fra Miljødirektoratet, med utslipp til luft og vann.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+      {
+        source_name: "Equinors raffineri på Mongstad",
+        source_url: "https://www.equinor.com/no/energi/mongstad",
+        publisher: "Equinor",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Raffineriet har kapasitet på 12 millioner tonn råolje i året (230 000 fat per dag). Råoljeterminalen har kapasitet på 9,5 millioner fat.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Kjemisk industri",
+    item_type: "finding",
+    title: "Dynea-området på Lillestrøm",
+    description:
+      "Kjemisk industriområde med Dynea Lillestrøm, Allnex Norway, Microbeads og Life Technologies. Produksjon av basisplast og kjemiske produkter.",
+    municipality: "Lillestrøm",
+    address: "Svelleveien 33",
+    city: "Lillestrøm",
+    latitude: 59.9467,
+    longitude: 11.06882,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Kjemisk produksjon midt i Lillestrøm, i et område som ellers bygges ut med bolig.",
+    notes: "Fire tillatelser på samme område.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Dynea-området på Lillestrøm",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Fire anlegg med utslippstillatelse fra Miljødirektoratet.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Metallindustri",
+    item_type: "finding",
+    title: "Fiskaa industriområde, Kristiansand",
+    description:
+      "Industriområdet på Fiskaa med Glencore Nikkelverk, Elkem Carbon og Elkem Testvirksomhet." +
+      " Glencore Nikkelverk har en årlig kapasitet på rundt 95 000 tonn nikkel, 30 000 tonn kobber og 5 200 tonn kobolt.",
+    municipality: "Kristiansand",
+    address: "Vesterveien 31",
+    city: "Kristiansand",
+    latitude: 58.1388,
+    longitude: 7.97123,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Nikkelverket er et av Europas største raffinerier for nikkel, og ligger tett på boligområder vest i Kristiansand.",
+    notes: "Tre tillatelser på samme område.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Fiskaa industriområde, Kristiansand",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tre anlegg med utslippstillatelse fra Miljødirektoratet, alle med utslipp til luft og vann.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+      {
+        source_name: "Nikkelverk — vår historie",
+        source_url: "https://www.nikkelverk.no/en/who-we-are/our-history",
+        publisher: "Glencore Nikkelverk",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Årlig kapasitet er bygget opp til rundt 95 000 tonn nikkel, i tillegg til kobber og kobolt. Anlegget er et av de største nikkelraffineriene i den vestlige verden.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Kjemisk industri",
+    item_type: "finding",
+    title: "Jotun og BASF i Sandefjord",
+    description:
+      "Jotun Gimle, Jotun Vindal og BASF Sandefjord — maling, lakk og kjemiske produkter.",
+    municipality: "Sandefjord",
+    address: "Hystadveien 167",
+    city: "Sandefjord",
+    latitude: 59.11094,
+    longitude: 10.22479,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Tre kjemiske produksjonsanlegg i en by på 60 000, i områder som ellers er bolig og næring.",
+    notes: "Tre tillatelser i samme by, ikke samme tomt.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Jotun og BASF i Sandefjord",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tre anlegg med utslippstillatelse fra Miljødirektoratet.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Prosessindustri",
+    item_type: "finding",
+    title: "Tjeldbergodden",
+    description:
+      "Metanolfabrikk og industrigassanlegg (AGA) på Tjeldbergodden i Aure.",
+    municipality: "Aure",
+    address: "Tjeldbergoddvegen 100",
+    city: "Kjørsvikbugen",
+    latitude: 63.41242,
+    longitude: 8.68501,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Nordens største metanolfabrikk, i en kommune med 3 500 innbyggere — anlegget definerer stedet.",
+    notes: "To tillatelser på samme anlegg.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Tjeldbergodden",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Metanolfabrikk og industrigassanlegg med utslippstillatelse fra Miljødirektoratet.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Prosessindustri",
+    item_type: "finding",
+    title: "Heidelberg Materials Brevik sementfabrikk",
+    description:
+      "Sementfabrikk i Brevik med utslippstillatelse fra Miljødirektoratet, og anlegg for forbrenning av farlig avfall på samme sted." +
+      " Karbonfangstanlegget i Brevik, åpnet i 2025 som verdens første i fullskala i sementindustrien, fanger rundt 400 000 tonn CO2 i året — omtrent halvparten av fabrikkens utslipp.",
+    municipality: "Porsgrunn",
+    address: "Setrevegen 2",
+    city: "Brevik",
+    latitude: 59.06192,
+    longitude: 9.68934,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Sementproduksjon er blant de største punktutslippene i landet, og fabrikken ligger rett ved boligbebyggelsen i Brevik.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret." +
+      " Fangstanlegget gir skipstrafikk med flytende CO2 fra Brevik til Øygarden — en transportkjede som i seg selv er stedsrelevant.",
+    kilder: [
+      {
+        source_name:
+          "Norske utslipp: Heidelberg Materials Brevik sementfabrikk",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+      {
+        source_name: "Brevik cement plant",
+        source_url:
+          "https://www.sement.heidelbergmaterials.no/en/norcembrevik_eng",
+        publisher: "Heidelberg Materials Sement Norge",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegget fanger rundt 400 000 tonn CO2 per år, om lag 50 prosent av fabrikkens utslipp. Flytende CO2 skipes til mottaksanlegg i Øygarden for lagring under havbunnen, som del av Langskip.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Metallindustri",
+    item_type: "finding",
+    title: "Alcoa Lista aluminiumsverk",
+    description:
+      "Aluminiumsverk på Lista med utslipp til luft og vann. Aludyne Norway ligger på samme område." +
+      " Nominell kapasitet er 95 000 tonn primæraluminium i året etter oppstart av elektrolysehall 3.",
+    municipality: "Farsund",
+    address: "Vollmonaveien 40",
+    city: "Farsund",
+    latitude: 58.07307,
+    longitude: 6.78323,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et aluminiumsverk definerer arbeidsmarkedet og miljøbildet i en kommune på 9 500 innbyggere.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret." +
+      " Følg opp: Alcoa har i egne pressemeldinger omtalt både kapasitetsøkning og stenging av én produksjonslinje for å kutte kraftkostnader. Faktisk driftsnivå må sjekkes på nytt før tallet brukes som dagens produksjon.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Alcoa Lista aluminiumsverk",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+      {
+        source_name: "Alcoa Norge",
+        source_url: "https://www.alcoa.com/norway/no",
+        publisher: "Alcoa",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppstart av elektrolysehall 3 ga en kapasitetsøkning på 31 000 tonn og bringer verket opp til en nominell kapasitet på 95 000 tonn i året.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Metallindustri",
+    item_type: "finding",
+    title: "Hydro Karmøy og Speira",
+    description:
+      "Aluminiumsverk og valseverk på Karmøy — Hydro Aluminium Karmøy og Speira Karmøy Rolling Mill på samme område.",
+    municipality: "Karmøy",
+    address: "Hydrovegen 160",
+    city: "Håvik",
+    latitude: 59.31491,
+    longitude: 5.31259,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et av Norges største aluminiumsanlegg, tett på boligområdene på Håvik.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Hydro Karmøy og Speira",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Metallindustri",
+    item_type: "finding",
+    title: "Hydro Aluminium Sunndal",
+    description:
+      "Europas største aluminiumsverk etter kapasitet, på Sunndalsøra." +
+      " Verket har en kapasitet på 400 000 tonn primæraluminium og 500 000 tonn støperiprodukter i året, i tillegg til 80 000 tonn anoder.",
+    municipality: "Sunndal",
+    address: "Flaggnutvegen 1",
+    city: "Sunndalsøra",
+    latitude: 62.68051,
+    longitude: 8.55392,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Anlegget er grunnen til at Sunndalsøra finnes som tettsted, og dominerer dalbunnen fysisk.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Hydro Aluminium Sunndal",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+      {
+        source_name: "Sunndal Primary Production",
+        source_url:
+          "https://www.hydro.com/en/global/about-hydro/hydro-worldwide/europe/norway/sunndal/sunndal-primary-production/",
+        publisher: "Hydro",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Europas største aluminiumsverk, med kapasitet på 400 000 tonn primæraluminium og 500 000 tonn støperiprodukter per år, samt 80 000 tonn anoder.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Metallindustri",
+    item_type: "finding",
+    title: "Hydro Aluminium Årdal",
+    description:
+      "Aluminiumsverk og karbonfabrikk i Øvre Årdal, to anlegg med hver sin utslippstillatelse.",
+    municipality: "Årdal",
+    address: "Røtisvegen 20B",
+    city: "Øvre Årdal",
+    latitude: 61.31157,
+    longitude: 7.82489,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Verket ligger midt i dalbunnen i en kommune på 5 000 innbyggere, med boligbebyggelse tett inntil.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Hydro Aluminium Årdal",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Metallindustri",
+    item_type: "finding",
+    title: "Hydro Aluminium Husnes",
+    description: "Aluminiumsverk på Husnes i Kvinnherad.",
+    municipality: "Kvinnherad",
+    address: "Onarheimsvegen 52",
+    city: "Husnes",
+    latitude: 59.86812,
+    longitude: 5.76826,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Ligger i samme kommune som to planlagte datasentre i Grøn Næringspark — samlet gir det stort kraftuttak i en liten kommune.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Hydro Aluminium Husnes",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Metallindustri",
+    item_type: "finding",
+    title: "Boliden Odda sinkverk",
+    description:
+      "Sinkverk på Eitrheim i Odda, med Fluorsid Noralf på samme område." +
+      " Verket produserer i dag rundt 200 000 tonn sink i året, og utvidelsen Green Zinc Odda skal ta kapasiteten til 350 000 tonn.",
+    municipality: "Ullensvang",
+    address: "Eitrheim",
+    city: "Odda",
+    latitude: 60.08839,
+    longitude: 6.53337,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et av Europas største sinkverk, innerst i Sørfjorden med boligbebyggelse tett på. Området har lang historie med tungmetallforurensning.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret." +
+      " Utvidelsen er en av de største industriinvesteringene på fastlandet på mange år, og gir flere år med anleggsarbeid innerst i Sørfjorden.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Boliden Odda sinkverk",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+      {
+        source_name: "Boliden øker sinkkapasiteten i Odda",
+        source_url:
+          "https://www.metalsupply.no/article/view/142372/boliden_oker_sinkkapasiteten_i_odda",
+        publisher: "Metalsupply",
+        source_type: "news",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Sinkverket har i dag en årlig kapasitet på 200 000 tonn. Utvidelsen tar kapasiteten til 350 000 tonn sink i året, en økning på 75 prosent, med ny røsteovn, nytt svovelsyreanlegg og ny elektrolysehall.",
+      },
+      {
+        source_name: "Boliden Odda",
+        source_url: "https://afry.com/no-no/prosjekt/boliden-odda",
+        publisher: "AFRY",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Prosjektet Green Zinc Odda 4.0 er en totalmodernisering av sinkverket, med en samlet investering på rundt 700 millioner euro.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Metallindustri",
+    item_type: "finding",
+    title: "Finnfjord smelteverk",
+    description: "Ferrosilisiumverk på Finnfjord i Senja kommune.",
+    municipality: "Senja",
+    address: "Ferroveien 5A",
+    city: "Finnsnes",
+    latitude: 69.22259,
+    longitude: 18.08218,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Det største industrianlegget i Midt-Troms, tett på Finnsnes.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Finnfjord smelteverk",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Metallindustri",
+    item_type: "finding",
+    title: "Elkem Salten",
+    description: "Smelteverk i Sørfold med utslipp til luft og vann.",
+    municipality: "Sørfold",
+    address: "Valljordveien 34",
+    city: "Straumen",
+    latitude: 67.36347,
+    longitude: 15.58938,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Dominerende arbeidsplass og utslippskilde i en kommune på under 2 000 innbyggere.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Elkem Salten",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Prosessindustri",
+    item_type: "finding",
+    title: "Norske Skog Skogn",
+    description: "Papirfabrikk på Skogn i Levanger.",
+    municipality: "Levanger",
+    address: "Sjøvegen 108",
+    city: "Skogn",
+    latitude: 63.71185,
+    longitude: 11.15832,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "En av landets største papirfabrikker, med egen havn og tungtransport gjennom tettstedet.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Norske Skog Skogn",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Prosessindustri",
+    item_type: "finding",
+    title: "Norske Skog Saugbrugs",
+    description:
+      "Papirfabrikk midt i Halden sentrum. Green Mountain har samtidig en mulig datasenterutvikling på samme industriområde.",
+    municipality: "Halden",
+    address: "Porsnesveien 4",
+    city: "Halden",
+    latitude: 59.12504,
+    longitude: 11.40234,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "En papirfabrikk i sentrum av en by på 32 000 er uvanlig, og industriområdet er nå aktuelt for datasenter.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Norske Skog Saugbrugs",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Avfall",
+    item_type: "finding",
+    title: "Noah Langøya",
+    description:
+      "Behandlings- og deponianlegg for farlig avfall på øya Langøya utenfor Holmestrand, i et tidligere kalkbrudd." +
+      " Tillatelsen åpner for inntil 1 060 000 tonn avfall til sluttbehandling i året. Mottakskapasiteten for uorganisk farlig avfall rekker til rundt 2030, med planlagt tilbakeføring av øya til friluftsformål i 2034.",
+    municipality: "Holmestrand",
+    address: "Langøya",
+    city: "Holmestrand",
+    latitude: 59.49039,
+    longitude: 10.38501,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Landets viktigste anlegg for uorganisk farlig avfall, på en øy med begrenset gjenværende kapasitet. Både driften og hva som skjer etterpå er en nasjonal sak.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret." +
+      " Hva som skal erstatte Langøya etter 2030 er en uavklart nasjonal sak. Raudsand i Molde har vært blant de foreslåtte alternativene.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Noah Langøya",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+      {
+        source_name: "Tillatelse for Noah Solutions",
+        source_url:
+          "https://www.miljodirektoratet.no/globalassets/dokumenter/industri/noahsolutions-tillatelse030222.pdf",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tillatelsen omfatter mottak av inntil 1 060 000 tonn avfall per år til sluttbehandling på Langøya.",
+      },
+      {
+        source_name: "Sikrer mottakskapasiteten i minst sju år",
+        source_url:
+          "https://www.noah.no/sikrer-mottakskapasiteten-i-minst-sju-ar/",
+        publisher: "NOAH",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Behandlingskapasitet for uorganisk farlig avfall frem til 2030. Tidsplanen for endelig tilbakeføring til friluftsformål i 2034 endres ikke.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Avfall",
+    item_type: "finding",
+    title: "Returkraft energigjenvinning",
+    description:
+      "Forbrenningsanlegg for avfall med energigjenvinning i Kristiansand." +
+      " Anlegget tar imot rundt 130 000 tonn restavfall i året fra hele Agder, og har vært i drift siden 2010.",
+    municipality: "Kristiansand",
+    address: "Setesdalsveien 205",
+    city: "Kristiansand",
+    latitude: 58.18072,
+    longitude: 7.93311,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Regionens avfallsforbrenning, i Setesdalsveien tett på boligområder.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret." +
+      " Returkraft har også et CCS-prosjekt under utvikling. Anlegget ligger på Langemyr.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Returkraft energigjenvinning",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+      {
+        source_name: "Om Returkraft",
+        source_url: "https://www.returkraft.no/om-returkraft",
+        publisher: "Returkraft",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegget på Langemyr i Kristiansand tar imot rundt 130 000 tonn restavfall per år fra Agder-regionen, og startet drift i 2010.",
+      },
+      {
+        source_name: "Endret tillatelse for Returkraft AS",
+        source_url:
+          "https://www.statsforvalteren.no/siteassets/fm-agder/dokument-agder/miljo-og-klima/forurensning/tillatelser/2020-returkraft/endret-tillatelse-for-returkraft-as.pdf",
+        publisher: "Statsforvalteren i Agder",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Gjeldende tillatelse etter forurensningsloven for forbrenningsanlegget.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Avfall",
+    item_type: "finding",
+    title: "BIR Ressurs energigjenvinning",
+    description:
+      "Forbrenningsanlegg for avfall i Rådal i Bergen, med utslipp til luft og vann." +
+      " Tillatelsen omfatter inntil 240 000 tonn avfall i året, med nominell timekapasitet på 28,7 tonn. I 2024 ga forbrenningen 300 GWh varme til fjernvarmenettet og 90 GWh strøm.",
+    municipality: "Bergen",
+    address: "Fanavegen 219",
+    city: "Rådal",
+    latitude: 60.2826,
+    longitude: 5.31782,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Bergens avfallsforbrenning, i et område som ellers er bolig og handel.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: BIR Ressurs energigjenvinning",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+      {
+        source_name: "Forbrenningsanlegget",
+        source_url:
+          "https://bir.no/om-bir/%C3%A5rsrapport-2024/baerekraft-og-samfunnsansvar/forbrenningsanlegget/",
+        publisher: "BIR",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegget kan brenne 28 tonn avfall per time og tar imot rundt 200 000 tonn restavfall årlig. I 2024 ga forbrenningen 300 GWh varmeenergi til fjernvarmenettet og 90 GWh elektrisitet.",
+      },
+      {
+        source_name: "Endring av tillatelse etter forurensningsloven for BIR",
+        source_url:
+          "https://www.statsforvalteren.no/siteassets/fm-vestland/miljo-og-klima/kunngjering/bir.pdf",
+        publisher: "Statsforvalteren i Vestland",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tillatelsen gjelder forbrenning av inntil 240 000 tonn avfall per år, med nominell timekapasitet 28,7 tonn og maksimal timekapasitet 31,4 tonn.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Avfall",
+    item_type: "finding",
+    title: "Forus Energigjenvinning",
+    description:
+      "Forbrenningsanlegg med to linjer på Forus, sammen med Lyse Neos fjernvarmeanlegg i samme område." +
+      " De to linjene har en samlet kapasitet på 110 000 tonn avfall i året, og gir 225 GWh til fjernvarme og 50 GWh strøm. Anlegget har vært i drift siden 2002 og går døgnkontinuerlig.",
+    municipality: "Sandnes",
+    address: "Forusbeen 202",
+    city: "Sandnes",
+    latitude: 58.88332,
+    longitude: 5.69922,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Avfallsforbrenning midt i Nord-Jærens største næringsområde, tett på bolig i både Sandnes og Stavanger.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret." +
+      " Eierne er IVAR IKS, Lyse Neo og Westco. Lyse Neos fjernvarmeanlegg ligger på samme område.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Forus Energigjenvinning",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+      {
+        source_name: "Hva gjør vi",
+        source_url: "https://www.forusenergi.no/hva-gjor-vi",
+        publisher: "Forus Energigjenvinning",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "To forbrenningslinjer med samlet kapasitet 110 000 tonn avfall per år, som gir 225 GWh tilgjengelig for fjernvarme og 50 GWh elektrisitet. I drift siden 2002, døgnkontinuerlig.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Prosessindustri",
+    item_type: "finding",
+    title: "Rockwool Moss",
+    description:
+      "Produksjon av mineralull i Moss, med utslipp til luft og vann.",
+    municipality: "Moss",
+    address: "Værlegata 56",
+    city: "Moss",
+    latitude: 59.42707,
+    longitude: 10.66059,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting: "Et tungt produksjonsanlegg nær Moss sentrum og havna.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Rockwool Moss",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Prosessindustri",
+    item_type: "finding",
+    title: "Leca Rælingen",
+    description: "Produksjon av lettklinker i Rælingen.",
+    municipality: "Rælingen",
+    address: "Årnesvegen 1",
+    city: "Nordby",
+    latitude: 59.88635,
+    longitude: 11.11214,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Det eneste tunge industrianlegget i en ellers boligpreget kommune på Nedre Romerike.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Leca Rælingen",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Gruve",
+    item_type: "finding",
+    title: "Sibelco Nordic Stjernøya",
+    description:
+      "Nefelinsyenittbrudd på Stjernøya i Alta, med egen utskipningshavn.",
+    municipality: "Alta",
+    address: "Lillebukt 2",
+    city: "Kvalfjord",
+    latitude: 70.26402,
+    longitude: 22.61788,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et av verdens få nefelinsyenittbrudd, på en øy uten veiforbindelse. Uttaket former hele øya.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Sibelco Nordic Stjernøya",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Gruve",
+    item_type: "finding",
+    title: "Quartz Corp Drag",
+    description:
+      "Kvartsforedling på Drag i Hamarøy, basert på uttak i området.",
+    municipality: "Hamarøy",
+    address: "Hellandsveien 14",
+    city: "Drag",
+    latitude: 68.04504,
+    longitude: 16.08919,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Hjørnesteinsbedriften i et tettsted på rundt 500 innbyggere.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Quartz Corp Drag",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Avfall",
+    item_type: "finding",
+    title: "Speira Recycling Raudsand",
+    description:
+      "Gjenvinningsanlegg for aluminium på Raudsand i Molde, i et tidligere gruveområde.",
+    municipality: "Molde",
+    address: "Kristenvikvegen 50",
+    city: "Raudsand",
+    latitude: 62.84727,
+    longitude: 8.11761,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Raudsand har vært foreslått som nasjonalt deponi for farlig avfall, og gruveområdet er en langvarig lokal og nasjonal strid.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Kapasitet og produksjonsvolum er ikke oppgitt i registeret.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Speira Recycling Raudsand",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse regulert av Miljødirektoratet, som håndterer de største virksomhetene. Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Kilder",
+    item_type: "note",
+    title: "Norske utslipp er den beste inngangen til tunge anlegg",
+    description:
+      "Miljødirektoratets utslippsregister dekker 866 anlegg nasjonalt, med koordinat, bransje og " +
+      "forurensningsmyndighet. Hvem som regulerer anlegget er i praksis et størrelsesfilter: " +
+      "Miljødirektoratet håndterer de største, statsforvalterne resten. Det gir en autoritativ " +
+      "kandidatliste uten å måtte gjette hva som er stort.",
+    municipality: null,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    notes:
+      "Denne runden dekket de 157 Miljødirektoratet-regulerte anleggene i prioriterte bransjer. De " +
+      "øvrige 709, i hovedsak statsforvalterregulerte og mindre, er ikke gjennomgått enkeltvis. " +
+      "Registeret oppgir ikke kapasitet — tonn per år, MW og personekvivalenter må hentes andre steder.",
+    kilder: [
+      {
+        source_name: "Norske utslipp, nasjonal gjennomgang",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "866 anlegg med utslippstillatelse i Norge. 211 er regulert av Miljødirektoratet selv — de største virksomhetene — resten av statsforvalterne. 157 av de 211 ligger i bransjer med tydelig områdebetydning: avfall, metall, kjemi, sement, papir, uttak og lagring.",
+      },
+    ],
+  },
+
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Avløp og VA",
+    item_type: "finding",
+    title: "Bekkelaget renseanlegg",
+    description:
+      "Oslos største avløpsrenseanlegg, bygget inn i fjellet ved Ormsund. Kapasiteten ble doblet " +
+      "fra 270 000 til 540 000 nitrogen-personekvivalenter ved utvidelsen som ble satt i prøvedrift i 2021. " +
+      "Anlegget kan ta imot 7 000 liter avløpsvann per sekund.",
+    municipality: "Oslo",
+    address: "Ormsundveien 5",
+    postal_code: "0198",
+    city: "Oslo",
+    latitude: 59.88263,
+    longitude: 10.77039,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et renseanlegg i denne størrelsen er en varig nabo: lukt, tungtransport av slam og " +
+      "anleggsperioder som strekker seg over år. Bekkelaget ligger tett på bolig på Ormsund og Ekeberg.",
+    notes:
+      "Fjellanlegg — det synlige fotavtrykket er mindre enn kapasiteten tilsier. Kommunale " +
+      "renseanlegg står ikke i Miljødirektoratets utslippsregister; tallene her kommer fra Oslo kommune selv.",
+    kilder: [
+      {
+        source_name: "Bekkelaget renseanlegg",
+        source_url:
+          "https://www.oslo.kommune.no/vann-og-avlop/bekkelaget-renseanlegg/",
+        publisher: "Oslo kommune",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegget er beregnet for 540 000 nitrogen-personekvivalenter etter utvidelsen, og mottok 330 000 i 2024. Maksimalt 7 000 liter per sekund kan tas imot, hvorav 3 500 liter per sekund gjennom full rensing.",
+      },
+      {
+        source_name: "I dag dobles kapasiteten ved Bekkelaget RA",
+        source_url: "https://www.vanytt.no/?p=19175",
+        publisher: "VANytt",
+        source_type: "news",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Anlegget fra 2001 var bygget for 270 000 personekvivalenter. Prøvedrift av det utvidede anlegget startet i 2021, med kapasitet beregnet for avløpet fra rundt 500 000 mennesker i 2040.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse, kommune og koordinat bekreftet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Avløp og VA",
+    item_type: "finding",
+    title: "IVAR sentralrenseanlegg Nord-Jæren, Mekjarvik",
+    description:
+      "Regionens hovedrenseanlegg i Mekjarvik i Randaberg, med avløpsvann fra over 300 000 " +
+      "innbyggere i fem kommuner. Anlegget har også biogass- og gjødselproduksjon fra slammet.",
+    municipality: "Randaberg",
+    address: "Mekjarvik 10",
+    postal_code: "4072",
+    city: "Randaberg",
+    latitude: 59.02015,
+    longitude: 5.6172,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Lukt fra biogassdelen har vært en reell nabosak med tilsyn fra Statsforvalteren — " +
+      "nettopp den typen forhold en adressesøkende bruker vil vite om.",
+    notes:
+      "Følg opp: gjeldende tillatelse og dagens kapasitet i personekvivalenter er ikke bekreftet i " +
+      "et gjeldende vedtak. 260 000 pe er en tidligere tillatelse, ikke dagens tall.",
+    kilder: [
+      {
+        source_name: "Sentralrenseanlegget Nord-Jæren",
+        source_url: "https://www.ivar.no/snj/",
+        publisher: "IVAR IKS",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegget tar imot avløpsvann fra over 300 000 innbyggere i Randaberg, Stavanger, Sola, Sandnes og Gjesdal. I drift siden 1992, med nytt renseanlegg ferdig høsten 2018.",
+      },
+      {
+        source_name: "Utslippsløyve for Sentralrenseanlegg Nord-Jæren",
+        source_url:
+          "https://www.statsforvalteren.no/siteassets/fm-rogaland/dokument-fmro/miljo/brev-og-artiklar/utsleppsloyve-snj-130813.pdf",
+        publisher: "Statsforvalteren i Rogaland",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Utslippstillatelse for anlegget. Tidligere tillatelse var gitt for 260 000 personekvivalenter.",
+      },
+      {
+        source_name:
+          "Statsforvalteren har konkludert etter for mye lukt fra IVAR sitt biogassanlegg i Mekjarvik",
+        source_url:
+          "https://www.bygdebladet.no/statsforvalteren-har-konkludert-etter-for-mye-lukt-fra-ivar-sitt-biogassanlegg-i-mekjarvik/s/5-100-625322",
+        publisher: "Bygdebladet",
+        source_type: "news",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Lukt fra biogassanlegget i Mekjarvik har vært behandlet som tilsynssak hos Statsforvalteren.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse, kommune og koordinat bekreftet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Avløp og VA",
+    item_type: "finding",
+    title: "Høvringen avløpsrenseanlegg",
+    description:
+      "Trondheims største avløpsrenseanlegg, på Høvringen vest i byen. Dimensjonert for " +
+      "170 000 personekvivalenter og avløpsvann fra to tredjedeler av kommunens befolkning.",
+    municipality: "Trondheim",
+    address: "Bynesveien 68A",
+    postal_code: "7018",
+    city: "Trondheim",
+    latitude: 63.44655,
+    longitude: 10.33656,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Anlegget ligger på en utsatt kolle mot fjorden, med boligområder på Byåsen ovenfor. " +
+      "Trondheim har også et nabolagsanlegg på Ladehammeren, som ikke er kartlagt her ennå.",
+    notes:
+      "Ladehammeren renseanlegg (LARA) er ikke lagt inn. Bør med i neste runde sammen med IVAR " +
+      "Grødaland og Bergens anlegg (Haukeland 132 000 pe, Flesland 63 000 pe, Hjellestad 56 000 pe).",
+    kilder: [
+      {
+        source_name:
+          "Høvringen avløpsrenseanlegg — Rent vann i Trondheimsfjorden",
+        source_url:
+          "https://www.trondheim.kommune.no/globalassets/10-bilder-og-filer/10-byutvikling/kommunalteknikk/vann-og-avlop/hovringen-avlopsrenseanlegg.pdf",
+        publisher: "Trondheim kommune",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegget tar imot avløpsvann fra to tredjedeler av Trondheims befolkning, et rensedistrikt på 95 km², dimensjonert for 170 000 personekvivalenter og en gjennomsnittlig tilrenning på 4 000 kubikkmeter i timen.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse, kommune og koordinat bekreftet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Kilder",
+    item_type: "note",
+    title: "Kommunale avløpsrenseanlegg mangler i Norske utslipp",
+    description:
+      "Miljødirektoratets utslippsregister, som ellers er den beste inngangen til tunge anlegg, " +
+      "inneholder praktisk talt ingen kommunale avløpsrenseanlegg. Et søk på avløpsbransjen gir tre treff " +
+      "nasjonalt, ingen av dem et hovedrenseanlegg. VEAS, Bekkelaget, Høvringen og IVAR Nord-Jæren står " +
+      "ikke der.",
+    municipality: null,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    notes:
+      "Konsekvens for metoden: renseanlegg må hentes fra kommunene og de interkommunale selskapene " +
+      "selv, og fra Statsforvalterens tillatelser — ikke fra det nasjonale utslippsregisteret. Dette er et " +
+      "konkret eksempel på at fravær i ett register ikke er bevis på at noe ikke finnes.",
+    kilder: [
+      {
+        source_name: "Norske utslipp, søk på avløpsbransjen",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Søk på bransje 37 (oppsamling og behandling av avløpsvann) og på «renseanlegg» i tittel gir tre treff i hele landet, og ingen av dem er et kommunalt hovedrenseanlegg.",
       },
     ],
   },

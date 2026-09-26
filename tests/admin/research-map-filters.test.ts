@@ -162,3 +162,39 @@ describe("undertype vises bare når den betyr noe", () => {
     expect(harUndertyper("industri")).toBe(true);
   });
 });
+
+/**
+ * Regresjon: kategorigruppene må dekke det som faktisk ligger i basen.
+ *
+ * Feilen dette fanger er stille: en research-runde innfører en ny underkategori
+ * («Metallindustri», «Gruve», «Avløp og VA»), funnene havner i databasen, og kartet viser dem
+ * aldri fordi ingen gruppe spør etter dem. Kilden er de kuraterte funnene, som er det seeden
+ * legger inn.
+ */
+describe("gruppene dekker de kuraterte funnene", () => {
+  const dekket = (kategori: string, subkategori?: string) =>
+    KATEGORIGRUPPER.some(
+      (g) =>
+        g.kategorier.includes(kategori) &&
+        (!g.subkategorier || (subkategori !== undefined && g.subkategorier.includes(subkategori))),
+    );
+
+  it("har en gruppe for hver kategori og underkategori i funnene", async () => {
+    const { FUNN } = await import("../../scripts/research/funn");
+    const udekket = [
+      ...new Set(
+        FUNN.filter((f) => !dekket(f.category, f.subcategory)).map((f) =>
+          f.subcategory ? `${f.category} / ${f.subcategory}` : f.category,
+        ),
+      ),
+    ];
+    expect(udekket).toEqual([]);
+  });
+
+  it("bruker ett navn per underkategori, ikke synonymer", async () => {
+    const { FUNN } = await import("../../scripts/research/funn");
+    const sub = new Set(FUNN.map((f) => f.subcategory).filter((s): s is string => Boolean(s)));
+    const avfall = [...sub].filter((s) => s.toLowerCase().includes("avfall"));
+    expect(avfall).toEqual(["Avfall"]);
+  });
+});

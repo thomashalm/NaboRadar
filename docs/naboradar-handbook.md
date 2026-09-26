@@ -1900,6 +1900,41 @@ Samlet fra rundene, fordi hver av dem kostet en runde å oppdage:
 | Samme koordinat = dublett | To prosjekter i samme næringspark deler punkt uten å være samme anlegg. Sjekk før sammenslåing |
 | Befolkningstetthet som relevanssignal | Den største planlagte kapasiteten ligger i Tysvær, Luster og Vaksdal, ikke i byene. Kraft og tomt styrer lokalisering, ikke folketall |
 | Geokoding uten postnummer | «Granittvegen 110» og «Nordliveien 21» traff feil kommune uten postnummerkrav. Krev alltid postnummer |
+| Utslippsregisteret dekker alt tungt | Norske utslipp har 866 anlegg, men praktisk talt ingen kommunale avløpsrenseanlegg. VEAS, Bekkelaget, Høvringen og IVAR Nord-Jæren står ikke der |
+| Én tillatelse = ett sted | Herøya har seks tillatelser og er ett industriområde. Funnet skal beskrive stedet, ikke registerraden |
+| Register med koordinat = kjent kommune | Utslippsregisteret oppgir punkt, ikke kommune. Reversgeokod mot Kartverket før kommunen skrives inn |
+| Register = kapasitet | Norske utslipp oppgir ikke tonn per år, MW eller personekvivalenter. Kapasitet må hentes fra operatør eller tillatelse, anlegg for anlegg |
+
+### Nasjonal runde: store tekniske anlegg og industri
+
+161 funn og 355 kilder totalt. Runden la til 35 funn, oppdaterte 4 og ryddet én foreldet dublett.
+Scope var hele Norge: avfall, avløp og VA, energi, prosess- og metallindustri, kjemisk industri,
+uttak og lagring.
+
+**Inngangen var Miljødirektoratets utslippsregister, som vi allerede synker inn i
+`area_features`.** 866 anlegg nasjonalt, hvorav 211 er regulert av Miljødirektoratet selv og resten
+av statsforvalterne. *Hvem som er forurensningsmyndighet er i praksis et størrelsesfilter* —
+Miljødirektoratet håndterer de største — og gir dermed en autoritativ kandidatliste uten skjønn.
+157 av de 211 lå i bransjer med tydelig områdebetydning og ble gjennomgått.
+
+Det som flyttet mest i denne runden:
+
+- **Industriområde, ikke registerrad.** Ti steder hadde flere tillatelser på samme fysiske område.
+  Herøya har seks, Øra seks, Mo i Rana fem, Borregaard fem. De er lagt inn som ett funn hver, fordi
+  brukeren spør om stedet.
+- **Kapasitet finnes ikke i registeret.** Tonn per år, MW og personekvivalenter måtte hentes per
+  anlegg fra operatør eller tillatelse. Det er tregt, men det er forskjellen på «det ligger en
+  fabrikk der» og «det ligger et anlegg på 12 millioner tonn råolje i året der».
+- **Kommunale renseanlegg mangler i utslippsregisteret.** Et søk på avløpsbransjen gir tre treff
+  nasjonalt, ingen av dem et hovedrenseanlegg. Renseanlegg må hentes fra kommunene og de
+  interkommunale selskapene selv. Nok et konkret tilfelle av at fravær i ett register ikke er bevis.
+- **Kommune må reversgeokodes.** Registeret gir koordinat, ikke kommune. 33 anleggspunkt ble slått
+  opp mot Kartverkets punktsøk før kommune og nærmeste adresse ble skrevet inn.
+- **QA på gruppenivå avdekket to feil i basen.** En gjennomgang av hver kategorigruppe på
+  `/admin/kart` fant at «Metallindustri» og «Gruve» ikke fanges av noen gruppe, at avfall hadde tre
+  ulike underkategorinavn for det samme, og at Bulk-campuset i Vennesla sto igjen som dublett etter
+  en omdøping. Alt tre er rettet. Kjør denne sjekken etter hver runde som innfører nye
+  underkategorier.
 
 ### Fjerde research-runde: discovery først
 
