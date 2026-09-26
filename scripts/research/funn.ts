@@ -1217,6 +1217,15 @@ export const FUNN: Funn[] = [
       "Bekreftet fysisk anlegg med Nkom-registrert operatør, beliggenhetsadresse i Enhetsregisteret og flere bransjekilder.",
     kilder: [
       {
+        source_name: "PeeringDB: nettverk til stede i fasiliteten",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "fac_id 345, registrert siden 2010. 52 nettverk til stede — den klart best tilknyttede fasiliteten i Norge etter OS-IX. Bekrefter at dette er et bærende knutepunkt, ikke et serverrom.",
+      },
+      {
         source_name: "Nkom, registrerte kommersielle datasenteroperatører",
         source_url: "https://nkom.no/datasenter/oversikt",
         publisher: "Nasjonal kommunikasjonsmyndighet",
@@ -1340,6 +1349,16 @@ export const FUNN: Funn[] = [
       "Bevisst uten koordinat: adressen ligger i et boligstrøk, og et anlegg på over 0,5 MW er lite " +
       "sannsynlig der. Selskapsadresse skal ikke settes som anleggslokasjon.",
     kilder: [
+      {
+        source_name: "PeeringDB og DataCenterMap, søk på Bærum",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB og DataCenterMap",
+        source_type: "register",
+        source_date: "2026-09-26",
+        supports_claim: false,
+        excerpt_or_summary:
+          "Ingen av de to katalogene fører en fasilitet i Bærum. Undersøkte kilder som ikke støtter at det finnes et anlegg på adressen.",
+      },
       {
         source_name: "Nkom, registrerte kommersielle datasenteroperatører",
         source_url: "https://nkom.no/datasenter/oversikt",
@@ -2882,6 +2901,15 @@ export const FUNN: Funn[] = [
       "Bekreftet fysisk anlegg med tre uavhengige oppføringer på samme adresse, verifisert adresse og korrekt status.",
     kilder: [
       {
+        source_name: "PeeringDB: nettverk til stede i fasiliteten",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "fac_id 5518. 43 nettverk til stede. Sammen med OSL01 utgjør de to Oslos to bærende samtrafikkpunkter.",
+      },
+      {
         source_name: "DataCenterMap: Oslo Internet Exchange - OS-IX",
         source_url: "https://www.datacentermap.com/norway/oslo/",
         publisher: "DataCenterMap",
@@ -3147,6 +3175,15 @@ export const FUNN: Funn[] = [
       "adressene sammenfaller og at Basefarm er tidligere navn — ikke på en kilde som sier det direkte.",
     kilder: [
       {
+        source_name: "PeeringDB: nettverk til stede i fasiliteten",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "fac_id 6629, oppført som «Basefarm OSL3» med stedsangivelse Grorud. 4 nettverk til stede. Styrker at Skygard OSL3 og Basefarm OSL3 er samme anlegg.",
+      },
+      {
         source_name: "DataCenterMap: Skygard OSL3",
         source_url: "https://www.datacentermap.com/norway/oslo/",
         publisher: "DataCenterMap",
@@ -3370,6 +3407,15 @@ export const FUNN: Funn[] = [
       "Aliaser: AVUR Oslo, Nordlo Forskningsparken, SSC Networks. AVUR er registrert hos Nkom.",
     kilder: [
       {
+        source_name: "PeeringDB: nettverk til stede i fasiliteten",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "fac_id 346, registrert siden 2010. 8 nettverk til stede — et reelt, men lite samtrafikkpunkt.",
+      },
+      {
         source_name:
           "DataCenterMap: Forskningsparken / AVUR OSLO / Forskningsparken Oslo",
         source_url: "https://www.datacentermap.com/norway/oslo/",
@@ -3404,7 +3450,7 @@ export const FUNN: Funn[] = [
   {
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
-    item_type: "finding",
+    item_type: "lead",
     title: "Fujitsu Oslo, Østensjøveien 32",
     description: "Datasenteranlegg oppført av Fujitsu Norway på Bryn.",
     municipality: "Oslo",
@@ -3416,12 +3462,24 @@ export const FUNN: Funn[] = [
     verification_status: "partially_verified",
     operational_status: "active",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "low",
     interest_level: "low",
     why_interesting:
       "Et datasenter i et kontorområde på Bryn som er under transformasjon til bolig.",
-    notes: "Kun én kilde.",
+    notes:
+      "Nedgradert i runde 5: det eneste nettverket i fasiliteten er Fujitsus eget, samme mønster " +
+      "som Sognsveien 75. Trolig et internt teknisk rom. Ikke avvist, men ikke dokumentert som " +
+      "kommersielt anlegg.",
     kilder: [
+      {
+        source_name: "PeeringDB: nettverk til stede i fasiliteten",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "fac_id 1962. Ett nettverk til stede, Fujitsus eget (AS60717). Trolig selskapets eget tekniske rom, ikke et kommersielt datasenter.",
+      },
       {
         source_name: "PeeringDB: Fujitsu Oslo",
         source_url: "https://www.peeringdb.com/api/fac?country=NO",
@@ -3466,6 +3524,15 @@ export const FUNN: Funn[] = [
       "datasentre.",
     notes: "Kun én kilde.",
     kilder: [
+      {
+        source_name: "PeeringDB: nettverk til stede i fasiliteten",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "fac_id 817. 2 nettverk til stede, begge Rent a Rack sine egne. Lite anlegg.",
+      },
       {
         source_name: "PeeringDB: Rent a Rack",
         source_url: "https://www.peeringdb.com/api/fac?country=NO",
@@ -3534,27 +3601,52 @@ export const FUNN: Funn[] = [
   {
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
-    item_type: "finding",
-    title: "Ullevål Stadion datasenter, Sognsveien 75",
+    item_type: "note",
+    title: "Sognsveien 75 er ikke et datasenter",
     description:
-      "Fasilitet oppført i PeeringDB på Ullevål Stadion, med DNB Næringseiendom som organisasjon.",
+      "Undersøkt og avkreftet. PeeringDB har en fasilitet på Sognsveien 75 siden 2014, men det " +
+      "eneste nettverket til stede er AS200163 «Ullevål Stadion» — byggets eget, registrert av " +
+      "eiendomsselskapet DNB Næringseiendom. Ingen samtrafikkpunkter, ingen tredjepartsnettverk, " +
+      "ingen operatør. Dette er et teknisk rom i et næringsbygg, ikke et kommersielt datasenter.",
     municipality: "Oslo",
     address: "Sognsveien 75",
     postal_code: "0855",
     city: "Oslo",
     latitude: 59.94856,
     longitude: 10.73282,
-    verification_status: "partially_verified",
+    verification_status: "rejected",
     operational_status: "active",
     sensitivity: "internal_only",
-    confidence: "low",
+    confidence: "high",
     interest_level: "low",
     why_interesting:
-      "Et samtrafikkpunkt i et idretts- og kontoranlegg midt i byen.",
+      "Ingenting — hypotesen er avkreftet. Står igjen som dokumentasjon på at spørsmålet er undersøkt.",
     notes:
-      "Kun én kilde, og organisasjonen er en eiendomsbesitter — det kan være et teknisk rom i " +
-      "bygget snarere enn et datasenter.",
+      "Avvist 2026-09-26. Hypotese: kommersielt datasenter på Sognsveien 75. Sjekket: PeeringDB " +
+      "fasilitet og nettverksliste, DataCenterMap, websøk på adressen og NIX-historikk. Det som " +
+      "støttet: en reell fasilitetsoppføring siden 2014. Det som manglet: enhver operatør eller " +
+      "tredjepart. Trenger ikke undersøkes på nytt.",
+    tidligere_titler: ["Ullevål Stadion datasenter, Sognsveien 75"],
     kilder: [
+      {
+        source_name: "NIX, Norwegian Internet Exchange",
+        source_url: "https://www.nix.no/about/",
+        publisher: "Universitetet i Oslo",
+        source_type: "web",
+        source_date: "2026-09-26",
+        supports_claim: false,
+        excerpt_or_summary:
+          "NIX oppgir sine lokasjoner, og Sognsveien 75 er ikke blant dem. Undersøkt kilde som ikke støtter hypotesen.",
+      },
+      {
+        source_name: "PeeringDB: nettverk til stede i fasiliteten",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "fac_id 1830, opprettet 2014. net_count 1, ix_count 0. Det ene nettverket er AS200163 «Ullevål Stadion», altså byggets eget.",
+      },
       {
         source_name: "PeeringDB: Ullevål Stadion",
         source_url: "https://www.peeringdb.com/api/fac?country=NO",
@@ -3709,6 +3801,176 @@ export const FUNN: Funn[] = [
           "deduplikerte fysiske anlegg i Oslo pluss ett i Asker. Feilen var å behandle fravær i " +
           "et register som fravær i virkeligheten: Nkom oppgir aldri lokasjon, og ingen " +
           "myndighetskilde gjør det.",
+      },
+    ],
+  },
+
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    item_type: "note",
+    title: "Ingen datasenteranlegg dokumentert i Bærum",
+    description:
+      "Hypotesen var at Bærum måtte ha minst ett fysisk datasenter, gitt Fornebu og Lysaker " +
+      "som næringsområder. Bredt søk mot PeeringDB, DataCenterMap, Nkom-registeret og " +
+      "websøk gir ingen fasilitet i kommunen. To Nkom-registrerte operatører har " +
+      "Bærum-adresse — GlobalConnect på Snarøyveien 36 og Akvatechnic på Haslum — men ingen av dem er dokumentert med anlegg der. GlobalConnect oppgir et driftssenter " +
+      "på Fornebu, som er noe annet enn et datasenterbygg.",
+    municipality: "Bærum",
+    verification_status: "investigated_not_confirmed",
+    operational_status: "unknown",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    notes:
+      "Undersøkt 2026-09-26. Dette er et negativt funn om katalogdekning, ikke et bevis på at " +
+      "ingen serverrom finnes i Bærum. Neste innganger er byggesak og nettselskapenes " +
+      "tilknytningssaker, som fortsatt ikke er åpnet.",
+    kilder: [
+      {
+        source_name: "PeeringDB: fasiliteter i Norge og nettverk per fasilitet",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "49 registrerte fasiliteter i Norge. Ingen i Bærum, ingen i Asker. 16 i Oslo kommune.",
+      },
+      {
+        source_name: "DataCenterMap, Oslo-oversikten",
+        source_url: "https://www.datacentermap.com/norway/oslo/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "34 oppføringer i Oslo-markedet. Ingen med adresse i Bærum.",
+      },
+      {
+        source_name: "GlobalConnect: driftssenter på Fornebu",
+        source_url:
+          "https://bedrift.globalconnect.no/tjenester/colocation-i-datasenter",
+        publisher: "GlobalConnect",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "GlobalConnect oppgir et Network Operations Center på Fornebu med døgnovervåking. " +
+          "Selskapets beliggenhetsadresse er Snarøyveien 36 i Bærum. Et driftssenter er ikke " +
+          "det samme som et datasenterbygg, og ingen katalog fører en fasilitet der.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    item_type: "note",
+    title: "Markedsbildet: hvem har flest fysiske anlegg i Norge",
+    description:
+      "Nasjonal oversikt, til å forstå aktørene. Nordavind DC Sites har ti registrerte " +
+      "fasiliteter, alle i innlandet. Green Mountain har tre (Rennesøy, Rjukan og Ytre " +
+      "Enebakk). Vaultica har OSL01 i Oslo, OSL02 i Nordre Follo og OSL03 i Lillestrøm. " +
+      "Bulk har OS-IX i Oslo og N01-campus i Øvrebø. GlobalConnect har fem (tre i Oslo, " +
+      "Stavanger og Trondheim).",
+    municipality: null,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "low",
+    notes:
+      "Ingen av disse ligger i Oslo, Bærum eller Asker utover det som allerede er registrert. " +
+      "Oversikten står her for å hindre at samme kartlegging gjøres om igjen.",
+    kilder: [
+      {
+        source_name:
+          "PeeringDB: 10 fasiliteter registrert på Nordavind DC Sites",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nordavind DC Sites har ti fasiliteter i Norge: Alvdal, Elverum (Grundsetmoen og " +
+          "Hagen), Hamar (Heggvin), Kirkenær, Lalm, Lena, Rudshøgda, Skarnes (Slomarka og " +
+          "Tronbøl), Tynset og Åkrestrømmen. Ingen i Oslo-regionen.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    item_type: "note",
+    title: "Ingen kryptoutvinning blant datasenteroperatørene i Oslo-området",
+    description:
+      "Ni av de 60 Nkom-registrerte operatørene oppgir at deler av forbruket går til " +
+      "kryptovalutautvinning, fem av dem med 95–100 %. Alle ni har adresse langt fra " +
+      "Oslo-området — typisk i kommuner med rimelig kraft. Ingen av operatørene med " +
+      "anlegg i Oslo oppgir kryptoutvinning.",
+    municipality: null,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "low",
+    notes:
+      "Kryptostatus gjelder operatøren, ikke det enkelte anlegget. En operatør med flere " +
+      "anlegg kan bruke dem ulikt, og registeret skiller ikke.",
+    kilder: [
+      {
+        source_name:
+          "Nkom, registrerte kommersielle datasenteroperatører, kryptostatus",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Ni av de 60 operatørene oppgir kryptovalutautvinning: Tydal Data Center (33 %), " +
+          "Troll Housing (97 %), Thermaltech (100 %), Nordic Blocks (1 %), Exanorth (100 %), " +
+          "Currency Edge (100 %), Bluefjords (14 %), Bluebite (55 %) og Arctic Flux (95 %).",
+      },
+      {
+        source_name: "Enhetsregisteret: oppslag på alle 60 operatørene",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Samtlige 60 organisasjonsnumre slått opp. De ni med kryptoutvinning har adresse i " +
+          "Tydal, Hustadvika, Tromsø, Søndre Land, Namsskogan, Kvænangen, Luster, Fauske og " +
+          "Horten. Ingen i Oslo, Bærum eller Asker.",
+      },
+    ],
+  },
+  {
+    category: "Kilder",
+    item_type: "data_issue",
+    title: "PeeringDB-oppføring er ikke det samme som datasenter",
+    description:
+      "Metodefunn. En fasilitet i PeeringDB kan være alt fra et bærende knutepunkt til et " +
+      "serverrom i et kontorbygg. Antall nettverk til stede skiller dem, og hvem som eier " +
+      "det ene nettverket avgjør: er det byggets eget AS, er det ikke et datasenter.",
+    municipality: null,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    notes:
+      "Regel for senere runder: sjekk net_count og hvem nettverkene tilhører før en " +
+      "katalogoppføring behandles som et anlegg. Det avslørte Ullevål Stadion som en " +
+      "byggoppføring og ikke et datasenter.",
+    kilder: [
+      {
+        source_name:
+          "Egen metodegjennomgang: PeeringDB net_count som størrelsessignal",
+        publisher: "NaboRadar",
+        source_type: "correspondence",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Antall nettverk til stede i en PeeringDB-fasilitet skiller tydelig mellom " +
+          "knutepunkt og teknisk rom: OSL01 Ulven har 52, OS-IX 43, Forskningsparken 8, " +
+          "Basefarm OSL3 4, Rent a Rack 2, og Fujitsu, UiO og Ullevål Stadion ett hver. " +
+          "Der det ene nettverket er byggets eget, er oppføringen et serverrom, ikke et " +
+          "kommersielt datasenter.",
       },
     ],
   },

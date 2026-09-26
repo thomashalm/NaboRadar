@@ -133,6 +133,8 @@ async function settInn(client: pg.Client, funn: Funn): Promise<string> {
       funn.interest_level,
       funn.why_interesting ?? null,
       funn.notes ?? null,
+      funn.public_candidate ?? false,
+      funn.public_candidate_note ?? null,
     ],
   );
   return rows[0]!.id;

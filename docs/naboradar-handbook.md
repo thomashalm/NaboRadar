@@ -1828,6 +1828,21 @@ kandidatfunn må fortsatt gjennom den vanlige veien: provider, avklart lisens, n
 visningsregel. Og vi gjengir hva anlegget er og hva kildene sier — ikke konsekvenser som støy,
 trafikk eller risiko uten egen dokumentasjon.
 
+### Systematiske feil å unngå
+
+Samlet fra rundene, fordi hver av dem kostet en runde å oppdage:
+
+| Feil | Hva som faktisk gjelder |
+|---|---|
+| Fravær i register = fravær i virkeligheten | Nkom sier *hvem* som driver datasenter, aldri *hvor* |
+| Operatør = anlegg | Ett selskap kan ha ti anlegg, eller null |
+| Kontoradresse = anleggsadresse | Bulks kontor er på Skøyen, anlegget på Økern |
+| Markedskode = kommune | «OSL» betyr Oslo-*markedet*: OSL02 ligger i Nordre Follo, OSL03 i Lillestrøm |
+| Katalogoppføring = datasenter | En PeeringDB-fasilitet kan være et serverrom. Sjekk `net_count` og hvem nettverkene tilhører |
+| Campus = ett anlegg per oppføring | STACK OSL03 har fire bygg og fem oppføringer, men er ett sted |
+| Ett bygg = én operatør | Hans Møller Gasmanns vei 9 har tre |
+| Navnebytte = nytt anlegg | DigiPlex → STACK → Vaultica er samme bygg |
+
 ### Fjerde research-runde: discovery først
 
 **Metodefeil rettet.** Runde 2 og 3 startet i autoritative registre og konkluderte med ett
