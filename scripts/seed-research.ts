@@ -107,12 +107,12 @@ async function settInn(client: pg.Client, funn: Funn): Promise<string> {
            item_type, category, subcategory, title, description,
            municipality, address, postal_code, city, latitude, longitude, geom,
            verification_status, operational_status, sensitivity, confidence, interest_level,
-           why_interesting, notes, created_by
+           why_interesting, notes, created_by, public_candidate, public_candidate_note
          ) values (
            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
            case when $10::double precision is not null
              then extensions.st_setsrid(extensions.st_makepoint($11, $10), 4326) end,
-           $12, $13, $14, $15, $16, $17, $18, 'seed'
+           $12, $13, $14, $15, $16, $17, $18, 'seed', $19, $20
          ) returning id`,
     [
       funn.item_type,
@@ -149,6 +149,7 @@ async function oppdater(
        item_type = $2, category = $3, subcategory = $4, description = $5,
        municipality = $6, postal_code = $7, city = $8, latitude = $9, longitude = $10,
        address = $18, title = $19,
+       public_candidate = $20, public_candidate_note = $21,
        geom = case when $9::double precision is not null
                 then extensions.st_setsrid(extensions.st_makepoint($10, $9), 4326) end,
        verification_status = $11, operational_status = $12, sensitivity = $13,
@@ -175,6 +176,8 @@ async function oppdater(
       funn.notes ?? null,
       funn.address ?? null,
       funn.title,
+      funn.public_candidate ?? false,
+      funn.public_candidate_note ?? null,
     ],
   );
 }

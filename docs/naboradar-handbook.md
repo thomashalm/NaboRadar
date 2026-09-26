@@ -1760,6 +1760,58 @@ som faktisk fikk konsekvenser:
 - **Ingen masseimport av omsorgsadresser.** Enhetsregisteret ble vurdert og forkastet som inngang;
   næringskode viser kontoradresser, ikke tjenester.
 
+### Research-metoden
+
+**Discovery først → verifisering etterpå → aktiv oppfølging av svake leads.** Dette er
+standardmetoden for *all* research, ikke bare datasentre. Spørsmålet er ikke «hva finnes i
+API-et?», men «hva kan vi finne ut om området, og hvor godt kan vi dokumentere det?».
+
+**1. Discovery.** Bygg en bred kandidatliste først: websøk, lokalaviser, bransjekataloger,
+operatørenes egne sider, kommunale sider, offentlige dokumenter og PDF-er, rapporter,
+kartportaler, registre, historiske kilder, gamle og alternative navn. En kandidat forkastes
+aldri fordi den ikke finnes i et strukturert datasett. Tredjepartskilder duger som discovery
+selv om de ikke alene gir høy confidence.
+
+**2. Verifisering.** Hver kandidat prøves mot, i prioritert rekkefølge: ansvarlig myndighet →
+operatør/eier selv → kommunal plan, byggesak eller eInnsyn → offentlige registre og kart →
+energi- og nettkilder → flere uavhengige sekundærkilder. Både discovery-kilden og
+verifiseringskilden lagres, og det skal gå fram hva som er bekreftet og hva som bare er
+indikasjon.
+
+**3. Søk bredt på identiteten.** Alternative og historiske navn, prosjektnavn, selskaps- og
+operatørnavn, gatenavn, områdenavn, gårdsnavn, orgnr, plan-ID, saksnummer og facility-kode.
+Samme sted finnes ofte under flere navn. Dedupliser på **sted**, ikke navn, og behold aliaser og
+operatørhistorikk på funnet.
+
+**4. Svake leads skal følges opp, ikke parkeres.** Et lead med `interest_level = high` og lav
+eller middels confidence får normalt en egen oppfølgingsrunde før man går videre til mindre
+interessante funn. Oppfølgingen skal forsøke å avklare fysisk lokasjon, primærkilde, en ekstra
+uavhengig kilde, status, om navnet gjelder selskap/prosjekt/anlegg, alternative navn,
+plan-ID eller orgnr, koordinat, størrelse og eierskifter.
+
+Et lead skal helst ende som `high`, `medium` (med det som mangler dokumentert),
+`investigated_not_confirmed` (med hypotese, sjekkede kilder, hva som støttet, hva som manglet og
+dato) eller `rejected`.
+
+**5. Confidence og interest er ulike akser.** Confidence er hvor godt dokumentert funnet er;
+interest er hvor mye det betyr. Høy interesse og lav confidence betyr *prioriter mer research* —
+ikke at funnet er svakt.
+
+Målet er ikke flest mulig leads, men å gå fra «dette kan være interessant» til «dette vet vi,
+dette er kildene, dette mangler fortsatt».
+
+### Fra research til offentlig NaboRadar
+
+Research-basen er staging. Et funn kan flagges som **kandidat for offentlig visning** med
+`public_candidate`, som krever bekreftet fysisk anlegg, bekreftet lokasjon, god kildeproveniens
+og korrekt status. Databasen håndhever de to som lar seg håndheve: koordinat må finnes, og
+`verification_status` må være `verified_public_source`.
+
+Flagget publiserer ingenting. Det finnes ingen kodevei fra research til `area_features`, og et
+kandidatfunn må fortsatt gjennom den vanlige veien: provider, avklart lisens, normalisering og
+visningsregel. Og vi gjengir hva anlegget er og hva kildene sier — ikke konsekvenser som støy,
+trafikk eller risiko uten egen dokumentasjon.
+
 ### Fjerde research-runde: discovery først
 
 **Metodefeil rettet.** Runde 2 og 3 startet i autoritative registre og konkluderte med ett

@@ -18,3 +18,10 @@ kjente begrensninger.
 
 Ikke oppdater håndboken for små copy-endringer, vanlig styling eller trivielle bugfikser uten
 systempåvirkning.
+
+## Research
+
+All intern research følger **discovery først → verifisering etterpå → aktiv oppfølging av svake
+leads**. Ikke start i et API og konkluder ut fra hva som mangler der — fravær i et register er
+ikke fravær i virkeligheten. Metoden står i sin helhet i håndboken under
+[Research-metoden](docs/naboradar-handbook.md#research-metoden), og gjelder alle kategorier.

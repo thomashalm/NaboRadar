@@ -53,6 +53,9 @@ export interface Funn {
    * datakvalitetssaker og svake leads, der spørsmålet ikke gir mening.
    */
   why_interesting?: string;
+  /** Satt når funnet er godt nok til å vurderes for den offentlige visningen. */
+  public_candidate?: boolean;
+  public_candidate_note?: string;
   notes?: string;
   kilder: Kilde[];
 }
@@ -134,14 +137,16 @@ export const FUNN: Funn[] = [
   },
 
   {
-    category: "Datasenter / industri / tekniske anlegg",
+    category: "Forsvar / militært",
     subcategory: "Eksplosivproduksjon",
     item_type: "finding",
-    title: "Planlagt produksjonsanlegg for eksplosiver",
+    title: "Nytt anlegg for militære høyeksplosiver på Tofte",
     description:
-      "Varslet planoppstart for et produksjonsanlegg for eksplosiver i skogsområdet ved Dustad, " +
-      "sør i Asker (tidligere Hurum). Planområdet ligger uten adresse innen 600 m; nærmeste " +
-      "adressenavn er Dustadveien, 1,2 km unna. Forslagsstiller er oppgitt som foretak, ikke kommunen.",
+      "Nytt produksjonsanlegg for militære høyeksplosiver på Tofte i Asker, planlagt som statlig " +
+      "reguleringsplan med Kommunal- og distriktsdepartementet som planmyndighet. Forsvarsbygg er " +
+      "forslagsstiller og Chemring Nobel er tiltakshaver. Planprogrammet lå ute på høring fra " +
+      "27. april til 15. juni 2026. To områder på Hurum ble vurdert, Tofte og Sætre sør; " +
+      "Forsvarsbygg vurderer Tofte som eneste realistiske alternativ.",
     municipality: "Asker",
     city: "Tofte",
     latitude: 59.56754,
@@ -149,18 +154,62 @@ export const FUNN: Funn[] = [
     verification_status: "verified_public_source",
     operational_status: "planned",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "high",
     interest_level: "high",
     why_interesting:
-      "Et eksplosivanlegg er blant de få virksomhetene som faktisk endrer hva det betyr å bo i " +
-      "nærheten. Planen er dokumentert; hvem som står bak og hva anlegget skal brukes til er det ikke.",
+      "En statlig regulert sprengstoffabrikk for Forsvaret er den største enkeltsaken i Asker. Den gir " +
+      "sikkerhetssoner, beredskapskrav og tungtrafikk, og er allerede omstridt lokalt og løftet til " +
+      "Stortinget.",
     notes:
-      "Runde 2: Miljødirektoratets utslippsregister plasserer Chemring Nobels anlegg på Engeneveien 7A, " +
-      "samme adresse som selskapet er registrert på, og 12 km fra dette planområdet. Det bekrefter at " +
-      "planen gjelder et annet sted enn det eksisterende anlegget. Ingen forsvarstilknytning er dokumentert. Chemring Nobel AS er den eneste eksplosivprodusenten " +
+      "Løst i oppfølgingsrunden, og konklusjonen fra runde 2 var feil: det er en forsvarstilknytning. " +
+      "Forsvarsbygg er forslagsstiller og Chemring Nobel tiltakshaver. Anlegget kommer i tillegg til " +
+      "Chemrings eksisterende fabrikk på Engene, 12 km nord. Chemring Nobel AS er den eneste eksplosivprodusenten " +
       "registrert i Asker, men den registrerte adressen ligger 12 km nord for planområdet, så " +
       "selskapet kan ikke knyttes til stedet på grunnlag av adresse alene.",
+    tidligere_titler: ["Planlagt produksjonsanlegg for eksplosiver"],
     kilder: [
+      {
+        source_name:
+          "Forsvarsbygg: planprosess for nytt anlegg for militære eksplosiver",
+        source_url:
+          "https://www.forsvarsbygg.no/fag-og-temasider/planprosess-for-nytt-anlegg-for-militaere-eksplosiver",
+        publisher: "Forsvarsbygg",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Forsvarsbygg er forslagsstiller og ansvarlig for planprosessen. Chemring Nobel er tiltakshaver. Planprogrammet ble lagt ut på høring 27. april 2026.",
+      },
+      {
+        source_name:
+          "Regjeringen: statlig planprosess for nytt produksjonsanlegg for militære høyeksplosiver",
+        source_url:
+          "https://www.regjeringen.no/no/aktuelt/statlig-planprosess-for-nytt-produksjonsanlegg-for-militare-hoyeksplosiver/id3146406/",
+        publisher: "Kommunal- og distriktsdepartementet",
+        source_type: "regulation",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Planarbeidet gjennomføres som statlig reguleringsplan med departementet som planmyndighet.",
+      },
+      {
+        source_name: "Asker kommune: arbeid med sprengstoffabrikk i Hurummarka",
+        source_url:
+          "https://www.asker.kommune.no/asker-mot-2030/arbeid-med-sprengstoffabrikk-i-hurummarka/statlig-planprosess-for-ny-sprengstoffabrikk/",
+        publisher: "Asker kommune",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommunens egen temaside. Kommunen anbefaler statlig regulering.",
+      },
+      {
+        source_name:
+          "Statsforvalteren: innspill til plan for nytt anlegg for eksplosiver i Asker",
+        source_url:
+          "https://www.statsforvalteren.no/nb/ostfold-buskerud-oslo-og-akershus/nyheter/2026/06/innspill-til-plan-for-nytt-anlegg-for-eksplosiver-i-asker",
+        publisher: "Statsforvalteren i Østfold, Buskerud, Oslo og Akershus",
+        source_type: "document",
+        source_date: "2026-09-26",
+        excerpt_or_summary: "Statsforvalterens innspill til planoppstart.",
+      },
       {
         source_name: "DiBK planleggingigangsatt, arealplan 1600 (3203_202606)",
         source_url:
@@ -201,31 +250,64 @@ export const FUNN: Funn[] = [
     category: "Støy / nabobelastning",
     subcategory: "Idrettsanlegg",
     item_type: "finding",
-    title: "Løvenskioldbanen under omregulering",
+    title: "Løvenskioldbanen skytebane",
     description:
-      "Varslet detaljregulering for Løvenskioldbanen ved Dælimosen i Bærum. Kartverket fører " +
-      "«Løvenskioldbanen» som idrettsanlegg 332 m fra planområdets senterpunkt, og «Skytterkollen» " +
-      "som idrettshall 155 m unna.",
+      "Stor sivil skytebane ved Dælimosen i Bærum, under detaljregulering. Anlegget har i dag ingen " +
+      "rettslig bindende støykrav gjennom reguleringsplan eller tillatelse — planarbeidet skal sette " +
+      "rammene for støy, skytetider og bruk for mange år framover. Statsforvalteren har stilt krav " +
+      "om opprydding av forurensning på banen.",
     municipality: "Bærum",
     address: "Dælimosen",
     postal_code: "1359",
     city: "Eiksmarka",
     latitude: 59.96122,
     longitude: 10.58635,
-    verification_status: "partially_verified",
+    verification_status: "verified_public_source",
     operational_status: "active",
     sensitivity: "internal_only",
-    confidence: "low",
+    confidence: "high",
     interest_level: "high",
     why_interesting:
       "Skytestøy er en av de få nabobelastningene folk faktisk søker etter, og den fanges ikke av " +
-      "de modellberegnede støysonene våre, som dekker veitrafikk og bane.",
+      "de modellberegnede støysonene våre, som dekker veitrafikk og bane. Banen har i dag ingen " +
+      "bindende støykrav, og reguleringen som nå pågår avgjør skytetider og bruk for mange år framover.",
     notes:
-      "Forsvarsbyggs nasjonale datasett over skyte- og øvingsfelt er gjennomgått: dette er ikke et " +
-      "militært felt. Skytefunksjon er *ikke* verifisert. Kartverket klassifiserer anlegget som «Idrettsanlegg», " +
+      "Løst i oppfølgingsrunden: skytefunksjonen er bekreftet av Statsforvalteren, Store norske " +
+      "leksikon og Norges Skytterforbunds eget støysonearbeid. Forsvarsbyggs datasett viser at det " +
+      "ikke er et militært felt — det er sivilt. Kartverket klassifiserer anlegget som «Idrettsanlegg», " +
       "ikke «Skytebane». Navnet Skytterkollen 155 m unna peker mot skyting, men et stedsnavn er " +
       "ikke en kilde på bruk. Må bekreftes mot Bærum kommune eller anleggseier før noe sies om støy.",
+    tidligere_titler: ["Løvenskioldbanen under omregulering"],
     kilder: [
+      {
+        source_name:
+          "Statsforvalteren: miljøtekniske undersøkelser, Løvenskiold skytebane 2023",
+        source_url:
+          "https://www.statsforvalteren.no/siteassets/fm-oslo-og-viken/miljo-og-klima/forurensning/lovenskiold-skytebane/miljotekniske-undersokelser---lovenskiold-skytebane-2023.pdf",
+        publisher: "Statsforvalteren i Østfold, Buskerud, Oslo og Akershus",
+        source_type: "document",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Miljøtekniske undersøkelser med krav om opprydding av forurensning. Bekrefter entydig at anlegget er en skytebane.",
+      },
+      {
+        source_name: "Store norske leksikon: Løvenskioldbanen",
+        source_url: "https://snl.no/L%C3%B8venskioldbanen",
+        publisher: "Store norske leksikon",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppslagsverksomtale av Løvenskioldbanen som skytebane.",
+      },
+      {
+        source_name: "Folkeaksjonen mot skytestøy fra Løvenskioldbanen",
+        source_url: "https://www.motskytestoy.no/",
+        publisher: "Folkeaksjonen mot skytestøy",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Naboaksjon med egen dokumentasjon av skytestøy. Partsinnlegg, men dokumenterer at støyen er en reell og omstridt nabobelastning.",
+      },
       {
         source_name: "DiBK planleggingigangsatt, arealplan 1680 (3201_2025010)",
         source_url:
@@ -1130,6 +1212,9 @@ export const FUNN: Funn[] = [
       "Nkom-registeret (02, 03.1, 03.2, 04) har adresser i Nordre Follo, Lillestrøm og Indre Østfold " +
       "og faller utenfor dette området.",
     tidligere_titler: ["STACK OSL01 datasenter, Ulven"],
+    public_candidate: true,
+    public_candidate_note:
+      "Bekreftet fysisk anlegg med Nkom-registrert operatør, beliggenhetsadresse i Enhetsregisteret og flere bransjekilder.",
     kilder: [
       {
         source_name: "Nkom, registrerte kommersielle datasenteroperatører",
@@ -1199,6 +1284,9 @@ export const FUNN: Funn[] = [
     tidligere_titler: [
       "Blix Solutions — registrert datasenteroperatør på Lindeberg",
     ],
+    public_candidate: true,
+    public_candidate_note:
+      "Bekreftet fysisk anlegg, Nkom-registrert operatør og verifisert beliggenhetsadresse.",
     kilder: [
       {
         source_name: "Nkom, registrerte kommersielle datasenteroperatører",
@@ -2789,6 +2877,9 @@ export const FUNN: Funn[] = [
     notes:
       "Aliaser: Alfabygget, OS-IX, Oslo Internet Exchange, HMG9. Bulk Infrastructure har " +
       "forretningsadresse Karenslyst allé 53 på Skøyen — det er kontoret, ikke anlegget.",
+    public_candidate: true,
+    public_candidate_note:
+      "Bekreftet fysisk anlegg med tre uavhengige oppføringer på samme adresse, verifisert adresse og korrekt status.",
     kilder: [
       {
         source_name: "DataCenterMap: Oslo Internet Exchange - OS-IX",
@@ -2903,6 +2994,9 @@ export const FUNN: Funn[] = [
     notes:
       "Aliaser: Blix NR5, Magnora Oslo. Bygget er 6 050 m² fra 1988, eid av Bruun Eiendom. " +
       "Effekttallene kommer fra bransjeomtale, ikke fra en myndighetskilde.",
+    public_candidate: true,
+    public_candidate_note:
+      "Bekreftet fysisk anlegg med to operatøroppføringer. Effekttallene er fra bransjekilde og skal ikke gjengis som fakta.",
     kilder: [
       {
         source_name: "DataCenterMap: Magnora Oslo",
@@ -2952,27 +3046,59 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Skygard OSL1, Østre Aker vei 24C",
     description:
-      "Datasenterprosjekt i Hovinbyen, beskrevet av operatøren som et anlegg som skal sette ny " +
-      "standard for bærekraft og sikkerhet. Om det er i drift, under bygging eller planlagt går " +
-      "ikke klart fram av kilden.",
+      "Datasenter i Hovinbyen på 20 MW over 25 000 m², bygget for 2,4 milliarder kroner og satt i " +
+      "drift første halvår 2025. Eid av Telenor, Hafslund og HitecVision med 31,7 % hver, og " +
+      "Analysys Mason med 5 %. Overskuddsvarmen leveres til fjernvarmenettet. Det klart største " +
+      "dokumenterte datasenteret i Oslo kommune.",
     municipality: "Oslo",
     address: "Østre Aker vei 24C",
     postal_code: "0581",
     city: "Oslo",
     latitude: 59.92941,
     longitude: 10.8181,
-    verification_status: "partially_verified",
+    verification_status: "verified_public_source",
     operational_status: "active",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "high",
     interest_level: "high",
     why_interesting:
       "Et nytt datasenter midt i Hovinbyen, Oslos største transformasjonsområde, der det ellers " +
       "planlegges tett bolig. Effektbehov og kjøling er relevant for hele nabolaget.",
     notes:
-      "Driftsstatus er ikke bekreftet. Skygard er registrert hos Nkom som kommersiell " +
-      "datasenteroperatør, med kontoradresse Karenslyst allé 10.",
+      "Løst i oppfølgingsrunden: 20 MW, i drift fra første halvår 2025. Skygard kjøpte to datasentre " +
+      "av Orange i Oslo — det forklarer «Orange OSL5» som alias på OSL3. Registrert hos Nkom, med " +
+      "kontoradresse Karenslyst allé 10.",
+    public_candidate: true,
+    public_candidate_note:
+      "Bekreftet fysisk anlegg i drift, operatørens egen kilde pluss uavhengig fagpresse, verifisert adresse og korrekt status.",
     kilder: [
+      {
+        source_name: "Skygard, egen anleggsside for OSL1",
+        source_url: "https://www.skygard.no/osl1-eng",
+        publisher: "Skygard",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary: "Operatørens egen side for anlegget.",
+      },
+      {
+        source_name:
+          "Byggeindustrien: starter byggingen av datasenter sentralt i Oslo",
+        source_url:
+          "https://www.bygg.no/oslo/starter-byggingen-av-datasenter-sentralt-i-oslo/367624",
+        publisher: "Byggeindustrien",
+        source_type: "news",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Byggestart i Hovinbyen med investeringsramme på 2,4 milliarder kroner.",
+      },
+      {
+        source_name: "Norsk Datasenterindustri: Skygard",
+        source_url: "https://www.datasenterindustrien.no/skygard",
+        publisher: "Norsk Datasenterindustri",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary: "Bransjeorganisasjonens oppføring av operatøren.",
+      },
       {
         source_name: "DataCenterMap: Skygard OSL1",
         source_url: "https://www.datacentermap.com/norway/oslo/",
@@ -3128,6 +3254,9 @@ export const FUNN: Funn[] = [
     why_interesting:
       "Et datasenter midt i Nydalen, et område som ellers er kontor, bolig og høyskole.",
     notes: "Aliaser: V-Hosting Data Center, Availo.",
+    public_candidate: true,
+    public_candidate_note:
+      "Bekreftet fysisk anlegg i drift siden 2014, verifisert adresse.",
     kilder: [
       {
         source_name: "DataCenterMap: GlobalConnect Nydalen",
@@ -3465,13 +3594,35 @@ export const FUNN: Funn[] = [
     operational_status: "active",
     sensitivity: "internal_only",
     confidence: "medium",
-    interest_level: "high",
+    interest_level: "medium",
     why_interesting:
       "Det første dokumenterte datasenteret i Asker. Ligger i et næringsområde tett på bolig og " +
       "på E18-korridoren, og er verdt å følge med på om det utvides.",
     notes:
-      "Kun én bransjekilde. Bør bekreftes mot operatøren, Nkom-registeret eller byggesak.",
+      "Oppfølgingsrunde: selskapet og adressen er bekreftet i flere kilder, men Astrofarm står ikke i " +
+      "Nkoms register — anlegget er trolig under 0,5 MW. DataCenterMap bruker dessuten samme ordlyd " +
+      "her som for Blix BDC, så beskrivelsen av anlegget er ikke uavhengig bekreftet. Interessenivå " +
+      "nedjustert til middels: et lite anlegg, ikke en stor installasjon.",
     kilder: [
+      {
+        source_name: "Bedriftsoppslag: Astrofarm AS, orgnr 979 905 173",
+        source_url:
+          "https://www.proff.no/selskap/astrofarm-as/hvalstad/it-drift-og-support/IG7ERO50ZDG",
+        publisher: "Brønnøysundregistrene via Proff",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "IT-driftsselskap etablert 1998, 11 ansatte, Nye Vakås vei 8 i Hvalstad. Bekrefter virksomhet på adressen.",
+      },
+      {
+        source_name: "Nkom, registrerte kommersielle datasenteroperatører",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Astrofarm står ikke i registeret over de 60 kommersielle operatørene. Registreringsplikten gjelder anlegg over 0,5 MW.",
+      },
       {
         source_name: "DataCenterMap: Astrofarm Oslo",
         source_url: "https://www.datacentermap.com/norway/oslo/",
