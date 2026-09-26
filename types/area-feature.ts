@@ -59,7 +59,9 @@ export const AREA_SECTIONS: readonly AreaSection[] = [
     id: "naeromradet",
     label: "Nærområdet",
     // Nøytral ramme: dette er hva som finnes, ikke hva som er bra eller dårlig.
-    intro: "Offentlig kjente virksomheter og steder i nærheten. Vi vurderer dem ikke.",
+    // Kort nok til én linje på mobil. Forbeholdet om at vi ikke vurderer stedene står samlet
+    // i «Kilder og metode» nederst, i stedet for i hver seksjonsingress.
+    intro: "Offentlig registrerte steder i nærheten.",
     categories: ["oppvekst", "helse", "omsorg", "servering", "industri"],
   },
   { id: "stoy", label: "Støy", intro: null, categories: ["stoy"] },

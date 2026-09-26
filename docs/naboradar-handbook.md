@@ -1039,6 +1039,28 @@ løftes «Forurenset grunn» øverst.
 Det finnes **ingen** hovedseksjon som heter Naboklager, Lokale saker eller lignende. Slike saker
 hører hjemme som undertyper under «Planer og saker» hvis de noen gang bygges. Dette er testet.
 
+### Seksjonsrammen
+
+Alle seksjoner rendres gjennom `components/area/SectionShell.tsx`: overskrift, eventuelt **én**
+kort sekundærlinje, og så innholdet. Avstandene bor der, ett sted, slik at rytmen er den samme
+hele veien ned. Lå den tidligere i to nesten like varianter i `AreaFacts` og `EventFeed`, og
+seksjonene drev fra hverandre etter hvert som de fikk hvert sitt innhold.
+
+### Kilder og metode hører ikke til i hovedflyten
+
+Provenance er alltid tilgjengelig, men aldri det første øyet møter:
+
+- **Samlet nederst.** «Kilder og metode (n)» lister datasettene som faktisk inngikk i *dette*
+  resultatet, med eier og lisens, og det generelle forbeholdet om at NaboRadar bare gjengir det
+  kildene oppgir. Listen sto tidligere som et avsnitt rett under siste seksjon, og var da den
+  lengste sammenhengende teksten på siden
+- **Seksjonsspesifikk kilde bak «Kilde og metode».** Plansakenes kildelinje lå rett under
+  tomtilstanden, slik at «ingenting å vise» ble fulgt av to linjer teknisk tekst
+- **Kilden på selve funnet blir stående** der den forklarer nettopp det funnet — inne i kortet
+  eller i den åpnede gruppen
+- **Ingen seksjonsingress bærer et generelt forbehold.** «Vi vurderer dem ikke» hørte til alle
+  seksjonene, ikke bare Nærområdet, og står nå ett sted: i «Kilder og metode»
+
 ### Kompakt gruppe — mønsteret
 
 Alle seksjoner følger samme form:
@@ -1051,11 +1073,14 @@ Alle seksjoner følger samme form:
 - **Tomme undertyper vises ikke**
 - **Sortering på avstand**, nærmest først
 - **Kartet viser fortsatt alle relevante objekter**, også de som er kuttet fra listen
-- **Rader kan velge objektet i kartet.** Har en rad et tilsvarende kartobjekt, blir den en knapp:
-  markøren utheves, kartet panorerer hvis objektet ligger utenfor utsnittet, og popupen åpner seg
-  — nøyaktig samme tilstand som ved klikk direkte i kartet. Mekanismen ligger i
-  `components/area/map-selection.tsx` som en liten kontekst, og er **generell**: den gjelder alle
-  grupper, ikke én type. Rader uten kartobjekt er ikke klikkbare
+- **Hele raden velger objektet i kartet.** Har en rad et tilsvarende kartobjekt, dekkes den av en
+  knapp: markøren utheves, kartet panorerer hvis objektet ligger utenfor utsnittet, og popupen
+  åpner seg — nøyaktig samme tilstand som ved klikk direkte i kartet. Knappen dekker raden i
+  stedet for å pakke innholdet, fordi raden kan ha en kildelenke, og en lenke inne i en knapp er
+  ugyldig. Affordansen er diskret: hover-flate, valgt-flate, og en blek `›` i avstandskolonnen for
+  de radene som faktisk kan velges. Mekanismen ligger i `components/area/map-selection.tsx` som en
+  liten kontekst, og er **generell**: den gjelder alle grupper, ikke én type. Rader uten
+  kartobjekt er ikke klikkbare og får ingen markør
 - **Tomtilstander er én linje.** «Ingen varslede planoppstarter innen 500 m siste 24 måneder ·
   Se 3 km» — ikke en stor stiplet boks. Forbeholdet om at kilden ikke sier om planarbeidet pågår
   vises bare når det finnes en sak å ta forbehold om

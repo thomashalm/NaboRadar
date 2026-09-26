@@ -341,7 +341,7 @@ export function AreaExplorer({
 
   return (
     <main className="lg:grid lg:grid-cols-[minmax(24rem,30rem)_1fr] lg:grid-rows-[auto_1fr]">
-      <section className="px-5 pt-7 pb-6 sm:px-8 lg:col-start-1 lg:row-start-1 lg:px-10 lg:pt-12">
+      <section className="px-5 pt-7 pb-5 sm:px-8 lg:col-start-1 lg:row-start-1 lg:px-10 lg:pt-12">
         <p className="text-[15px] font-medium text-muted">Dette skjer innen {formatRadius(radius)} fra</p>
         <h1 className="mt-1 text-[2rem] leading-tight font-semibold tracking-[-0.03em] text-balance sm:text-4xl">
           {label}
@@ -380,7 +380,7 @@ export function AreaExplorer({
         )}
       </div>
 
-      <div className="px-5 pt-8 pb-16 sm:px-8 lg:col-start-1 lg:row-start-2 lg:px-10 lg:pt-4">
+      <div className="px-5 pt-7 pb-16 sm:px-8 lg:col-start-1 lg:row-start-2 lg:px-10 lg:pt-1">
         <div ref={propertyRef} className={property.status === "idle" ? "" : "mb-8"}>
           <PropertyCard
             state={property}

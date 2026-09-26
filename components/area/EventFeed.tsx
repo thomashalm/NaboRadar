@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense, use, type RefObject } from "react";
 import type { AreaEventsResult } from "@/lib/events/queries";
 import { formatDate, formatRadius } from "@/lib/format";
+import { SectionShell } from "./SectionShell";
 import { DEFAULT_ANNOUNCED_WITHIN_MONTHS } from "@/lib/geo/constants";
 import type { AreaEvent, AreaSort } from "@/types/event";
 import { EventCard } from "./EventCard";
@@ -43,26 +44,22 @@ export function EventFeed(props: EventFeedProps) {
   const { pending } = props;
 
   return (
-    <section aria-labelledby="events-heading" aria-busy={pending} className="relative">
-      {/* Samme overskriftsnivå som de andre seksjonene: de står nå i én felles rekkefølge. */}
-      <h3 id="events-heading" className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">
-        Planer og saker
-      </h3>
-
+    // Samme ramme som de andre seksjonene: overskrift, innhold, detaljer bak utvider.
+    <SectionShell label="Planer og saker" id="events-heading">
       {pending && (
-        <p role="status" className="mt-3 flex items-center gap-2 text-sm text-muted">
+        <p role="status" className="mb-3 flex items-center gap-2 text-sm text-muted">
           <span className="block size-4 animate-spin rounded-full border-2 border-line-strong border-t-accent" aria-hidden="true" />
           Oppdaterer …
         </p>
       )}
 
-      <div className={`mt-3 transition-opacity ${pending ? "pointer-events-none opacity-40" : ""}`}>
+      <div className={`transition-opacity ${pending ? "pointer-events-none opacity-40" : ""}`} aria-busy={pending}>
         {/* Samme høyde som den ferdige gruppen, så siden ikke hopper når dataene kommer. */}
         <Suspense fallback={<SectionSkeleton label="Henter plansaker …" />}>
           <EventFeedBody {...props} />
         </Suspense>
       </div>
-    </section>
+    </SectionShell>
   );
 }
 
@@ -161,16 +158,24 @@ function EventFeedBody(props: EventFeedProps) {
         )}
 
       {/*
-        Forbeholdet om at kilden ikke sier om planarbeidet pågår, gir bare mening når det
-        finnes en sak å ta forbehold om. Uten treff er det tre linjer forklaring over
-        ingenting, og da holder det å oppgi kilden.
+        Kilde og metode ligger bak en utvider, ikke i hovedflyten.
+        
+        Kildelinjen sto tidligere rett under tomtilstanden, slik at «ingenting å vise» ble
+        fulgt av to linjer teknisk tekst — mer plass til provenance enn til svaret. Forbeholdet
+        om at kilden ikke sier om planarbeidet pågår gir dessuten bare mening når det finnes en
+        sak å ta forbehold om.
       */}
       {result.status === "ok" && result.dataUpdatedAt && (
-        <p className="mt-3 text-[13px] leading-relaxed text-muted">
-          Kilde: Direktoratet for byggkvalitet (NLOD 2.0). Sist hentet {formatDate(result.dataUpdatedAt)}.
-          {result.events.length > 0 &&
-            " Kilden oppgir ikke om planarbeidet fortsatt pågår — datoen viser når oppstart ble varslet."}
-        </p>
+        <details className="mt-3">
+          <summary className="cursor-pointer text-[13px] font-medium text-muted hover:text-ink">
+            Kilde og metode
+          </summary>
+          <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
+            Kilde: Direktoratet for byggkvalitet (NLOD 2.0). Sist hentet {formatDate(result.dataUpdatedAt)}.
+            {result.events.length > 0 &&
+              " Kilden oppgir ikke om planarbeidet fortsatt pågår — datoen viser når oppstart ble varslet."}
+          </p>
+        </details>
       )}
     </>
   );

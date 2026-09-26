@@ -59,7 +59,7 @@ describe("Forurenset grunn som kompakt gruppe", () => {
 
   it("teller grad 3 og X som oppfølging, og alt som total", () => {
     const { cluster } = contaminatedFacts(seks, 500);
-    expect(cluster.summary).toBe("1 registrering krever oppfølging · 6 registreringer totalt innen 500 m");
+    expect(cluster.summary).toBe("1 krever oppfølging · 6 registreringer totalt");
   });
 
   it("teller grad 1 og 2 med i totalen, men aldri som oppfølging", () => {
@@ -71,10 +71,10 @@ describe("Forurenset grunn som kompakt gruppe", () => {
 
   it("bøyer tallene riktig når det bare er én av hver", () => {
     expect(contaminatedFacts([grad3("A", 100)], 500).cluster.summary).toBe(
-      "1 registrering krever oppfølging · 1 registrering totalt innen 500 m",
+      "1 krever oppfølging · 1 registrering totalt",
     );
     expect(contaminatedFacts([grad3("A", 100), gradX("B", 200)], 1000).cluster.summary).toBe(
-      "2 registreringer krever oppfølging · 2 registreringer totalt innen 1 km",
+      "2 krever oppfølging · 2 registreringer totalt",
     );
   });
 

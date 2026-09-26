@@ -561,8 +561,9 @@ export function describeContaminatedGroupSummary(input: {
 }): string {
   const registreringer = `${input.total} ${input.total === 1 ? "registrering" : "registreringer"}`;
   if (input.oppfolging === 0) return `${registreringer} · ingen vurdert til å kreve tiltak eller oppfølging`;
-  const krever = `${input.oppfolging} ${input.oppfolging === 1 ? "registrering krever" : "registreringer krever"} oppfølging`;
-  return `${krever} · ${registreringer} totalt innen ${input.radiusLabel}`;
+  // Radiusen står i seksjonsingressen og i overskriften på siden. Å gjenta den her gjorde
+  // linjen lang nok til å brekke på mobil, uten å si noe nytt.
+  return `${input.oppfolging} krever oppfølging · ${registreringer} totalt`;
 }
 
 export const INGEN_FORURENSNING_TIL_OPPFOLGING =
