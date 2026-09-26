@@ -27,10 +27,25 @@ async function main() {
 
   try {
     for (const funn of FUNN) {
-      const finnes = await client.query<{ id: string }>(
+      /*
+       * Gjenkjenning: tittel + adresse først, og tittel alene som reserve.
+       *
+       * Reserven finnes fordi et funn kan få adresse etter at det ble lagt inn — da ville en
+       * ren tittel+adresse-nøkkel opprettet en dublett i stedet for å oppdatere raden. Den
+       * brukes bare når nøyaktig én rad har tittelen, så to ulike steder med samme navn ikke
+       * smelter sammen.
+       */
+      let finnes = await client.query<{ id: string }>(
         `select id from admin_research_items where title = $1 and coalesce(address, '') = coalesce($2, '')`,
         [funn.title, funn.address ?? null],
       );
+      if (finnes.rows.length === 0) {
+        const påTittel = await client.query<{ id: string }>(
+          `select id from admin_research_items where title = $1`,
+          [funn.title],
+        );
+        if (påTittel.rows.length === 1) finnes = påTittel;
+      }
 
       const id = finnes.rows[0]?.id ?? (await settInn(client, funn));
       if (finnes.rows[0]) await oppdater(client, id, funn);
@@ -126,6 +141,7 @@ async function oppdater(
     `update admin_research_items set
        item_type = $2, category = $3, subcategory = $4, description = $5,
        municipality = $6, postal_code = $7, city = $8, latitude = $9, longitude = $10,
+       address = $18,
        geom = case when $9::double precision is not null
                 then extensions.st_setsrid(extensions.st_makepoint($10, $9), 4326) end,
        verification_status = $11, operational_status = $12, sensitivity = $13,
@@ -150,6 +166,7 @@ async function oppdater(
       funn.interest_level,
       funn.why_interesting ?? null,
       funn.notes ?? null,
+      funn.address ?? null,
     ],
   );
 }

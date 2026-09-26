@@ -760,6 +760,16 @@ export const FUNN: Funn[] = [
     kilder: [
       {
         source_name:
+          "Riksantikvaren, kulturminneregisteret: Akershus festning, fire registreringer",
+        source_url: "https://kulturminnesok.no/ra/lokalitet/86131",
+        publisher: "Riksantikvaren",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Indre festning, ytre festning/forterreng, Kontraskjæret og Skansen, samt bryggeanlegget — alle fredet. Bekrefter utstrekningen anlegget har som kulturminne.",
+      },
+      {
+        source_name:
           "Kartverket sentralt stedsnavnregister: Akershus slott og festning",
         source_url:
           "https://api.kartverket.no/stedsnavn/v1/navn?sok=Akershus%20festning",
@@ -807,6 +817,15 @@ export const FUNN: Funn[] = [
       "byggevirksomhet. Det er nabolagsinformasjon som ikke finnes i noen av de offentlige " +
       "kildene NaboRadar bruker i dag.",
     kilder: [
+      {
+        source_name: "Riksantikvaren, kulturminneregisteret: Huseby gardeleir",
+        source_url: "https://kulturminnesok.no/ra/lokalitet/267058",
+        publisher: "Riksantikvaren",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Gardeleiren i sin nåværende utforming ble påbegynt i 1979. Kommunalt listeført. Koordinat 59.9452, 10.65404 — sammenfaller med punktet fra stedsnavnregisteret.",
+      },
       {
         source_name: "Kartverket sentralt stedsnavnregister: Gardeleiren",
         source_url:
@@ -920,7 +939,8 @@ export const FUNN: Funn[] = [
       "byggeperioder som naboer merker.",
     notes:
       "Koordinaten er omtrentlig — leiren har ikke eget oppslag i stedsnavnregisteret, så punktet " +
-      "er satt fra «Linderud gård» i nærheten.",
+      "er satt fra «Linderud gård» i nærheten. Runde 3: kulturminneregisteret har en «Linderud " +
+      "arbeidsleir (revet)» fra okkupasjonstiden på et annet punkt — det er ikke samme anlegg.",
     kilder: [
       {
         source_name: "Forsvarsbygg, prosjekter på Østlandet",
@@ -955,20 +975,31 @@ export const FUNN: Funn[] = [
       "Nøyaktig utstrekning og dagens bruk er ikke undersøkt.",
     municipality: "Oslo",
     city: "Oslo",
-    latitude: 59.91347,
-    longitude: 10.87779,
-    verification_status: "partially_verified",
+    address: "Lutvannsveien 60",
+    latitude: 59.92087,
+    longitude: 10.87667,
+    verification_status: "verified_public_source",
     operational_status: "active",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "high",
     interest_level: "medium",
     why_interesting:
       "En aktiv militærleir i et boligområde betyr vakthold, øvelsesaktivitet og " +
       "byggeperioder som naboer merker.",
     notes:
-      "Koordinaten er omtrentlig — leiren har ikke eget oppslag i stedsnavnregisteret, så punktet " +
-      "er satt fra «Lutvannet» i nærheten.",
+      "Runde 3: kulturminneregisteret ga eksakt adresse og koordinat, og historikken som tysk " +
+      "Luftwaffe-hovedkvarter. Den omtrentlige koordinaten fra runde 2 er erstattet.",
     kilder: [
+      {
+        source_name:
+          "Riksantikvaren, kulturminneregisteret: Lutvann leir – Lutvannsveien 60",
+        source_url: "https://kulturminnesok.no/ra/lokalitet/215106",
+        publisher: "Riksantikvaren",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Lokaliteten omfatter det militære anlegget Lutvann leir og husmannstua Bråten. Leiren ble anlagt av tyskerne under andre verdenskrig som hovedkvarter for Luftwaffe, med polske krigsfanger som arbeidskraft, og ble kalt Lager Braaten.",
+      },
       {
         source_name: "Forsvarsbygg, prosjekter på Østlandet",
         source_url:
@@ -1911,6 +1942,805 @@ export const FUNN: Funn[] = [
         excerpt_or_summary:
           "Alle tre stasjonene er registrert som Statnett-anlegg: Hamang 59.89685/10.49851, " +
           "Bærum 59.92675/10.55788, Smestad 59.93494/10.66767. Traseen går mellom disse.",
+      },
+    ],
+  },
+
+  {
+    category: "Forsvar / militært",
+    subcategory: "Kulturminne",
+    item_type: "finding",
+    title: "Asker NIKE-batteri, Rustan leir",
+    description:
+      "Fredet luftvernanlegg fra den kalde krigen i Asker, en av NIKE-rakettstillingene som " +
+      "ble bygget for å forsvare Oslo-området. Fredningen gjelder anlegget som kulturminne — " +
+      "det er ikke i militær bruk i dag.",
+    municipality: "Asker",
+    latitude: 59.87367,
+    longitude: 10.3859,
+    verification_status: "verified_public_source",
+    operational_status: "historical",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et fredet rakettanlegg fra den kalde krigen er det mest uventede forsvarsanlegget i " +
+      "Asker, og fredningen legger reelle begrensninger på hva som kan gjøres med området.",
+    kilder: [
+      {
+        source_name:
+          "Riksantikvaren, kulturminneregisteret: Asker NIKE-batteri – Rustan leir",
+        source_url: "https://kulturminnesok.no/ra/lokalitet/94417",
+        publisher: "Riksantikvaren",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Vernetype FOR (fredet). " +
+          "Luftvernanlegg fra den kalde krigen. Beskrivelsen i registeret knytter anlegget til " +
+          "utviklingen i luftvernartilleri mot raskere bombefly i stor høyde.",
+      },
+      {
+        source_name: "Riksantikvaren, OGC API Features: lokaliteter",
+        source_url:
+          "https://api.ra.no/LokaliteterEnkeltminnerOgSikringssoner/collections/lokaliteter/items",
+        publisher: "Riksantikvaren",
+        source_type: "map_service",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Alle 11 834 kulturminnelokaliteter i Oslo (9 656), Bærum (610) og Asker (1 568) ble hentet " +
+          "og gjennomgått systematisk for forsvarsrelaterte navn og beskrivelser.",
+      },
+    ],
+  },
+  {
+    category: "Forsvar / militært",
+    subcategory: "Kulturminne",
+    item_type: "finding",
+    title: "Skar leir, Maridalen",
+    description:
+      "Fredet militært etablissement innerst i Maridalen, med røtter i et kruttverk drevet av vannkraft " +
+      "fra Skarselven, senere tysk verkstedutbygging og norsk øvingsvirksomhet. Dagens bruk er ikke undersøkt.",
+    municipality: "Oslo",
+    latitude: 60.0273,
+    longitude: 10.7789,
+    verification_status: "verified_public_source",
+    operational_status: "historical",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et fredet militæranlegg i Marka, med en industrihistorie de færreste kjenner. Fredningen styrer hva " +
+      "som kan skje med bygningene.",
+    kilder: [
+      {
+        source_name:
+          "Riksantikvaren, kulturminneregisteret: Skar leir, Maridalen",
+        source_url: "https://kulturminnesok.no/ra/lokalitet/94435",
+        publisher: "Riksantikvaren",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Vernetype FOR (fredet). " +
+          "Kruttverket ble lagt til Skar på grunn av Skarselven som kraftkilde. Senere var naturomgivelsene " +
+          "og nærheten til marka avgjørende for Forsvarets øvingsvirksomhet. Tyskerne bygde ut verksteder her.",
+      },
+      {
+        source_name: "Riksantikvaren, OGC API Features: lokaliteter",
+        source_url:
+          "https://api.ra.no/LokaliteterEnkeltminnerOgSikringssoner/collections/lokaliteter/items",
+        publisher: "Riksantikvaren",
+        source_type: "map_service",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Alle 11 834 kulturminnelokaliteter i Oslo (9 656), Bærum (610) og Asker (1 568) ble hentet " +
+          "og gjennomgått systematisk for forsvarsrelaterte navn og beskrivelser.",
+      },
+    ],
+  },
+  {
+    category: "Forsvar / militært",
+    subcategory: "Kulturminne",
+    item_type: "finding",
+    title: "Løren leir",
+    description:
+      "Fredet militærleir midt i boligtransformasjonen på Løren, med opprinnelse i ammunisjonsfabrikken " +
+      "Norma fra 1912.",
+    municipality: "Oslo",
+    latitude: 59.93068,
+    longitude: 10.79261,
+    verification_status: "verified_public_source",
+    operational_status: "historical",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et fredet anlegg midt i et av Oslos største boligutbyggingsområder. Fredningen er en reell " +
+      "planbegrensning, og historikken som ammunisjonsfabrikk forklarer hvorfor området ser ut som det gjør.",
+    kilder: [
+      {
+        source_name: "Riksantikvaren, kulturminneregisteret: Løren leir",
+        source_url: "https://kulturminnesok.no/ra/lokalitet/87642",
+        publisher: "Riksantikvaren",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Vernetype FOR (fredet). " +
+          "Leiren ligger mellom Ringveien og Lørenveien i et tidligere industriområde som nå transformeres til " +
+          "bolig. Ammunisjonsfabrikken Norma ble anlagt på Løren i 1912, hadde kontrakt med Forsvaret fra 1916 " +
+          "og ble rekvirert i 1941.",
+      },
+      {
+        source_name: "Riksantikvaren, OGC API Features: lokaliteter",
+        source_url:
+          "https://api.ra.no/LokaliteterEnkeltminnerOgSikringssoner/collections/lokaliteter/items",
+        publisher: "Riksantikvaren",
+        source_type: "map_service",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Alle 11 834 kulturminnelokaliteter i Oslo (9 656), Bærum (610) og Asker (1 568) ble hentet " +
+          "og gjennomgått systematisk for forsvarsrelaterte navn og beskrivelser.",
+      },
+    ],
+  },
+  {
+    category: "Forsvar / militært",
+    subcategory: "Kulturminne",
+    item_type: "finding",
+    title: "Holmenkollen leir",
+    description:
+      "Fredet militært etablissement i Holmenkollen, tysk luftforsvarshovedkvarter under okkupasjonen og " +
+      "senere alliert kontrollsenter.",
+    municipality: "Oslo",
+    latitude: 59.96422,
+    longitude: 10.66365,
+    verification_status: "verified_public_source",
+    operational_status: "historical",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et av de viktigste militære kommandoanleggene i landet, midt i et villaområde, og fortsatt fredet.",
+    kilder: [
+      {
+        source_name: "Riksantikvaren, kulturminneregisteret: Holmenkollen leir",
+        source_url: "https://kulturminnesok.no/ra/lokalitet/112576",
+        publisher: "Riksantikvaren",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Vernetype FOR (fredet). " +
+          "Holmenkollen etablissement inngikk i kjeden av tyske kommandoanlegg under okkupasjonen og var " +
+          "hovedkvarter for det tyske luftforsvaret. Fra 1945 kontrollsenter for Luftforsvaret i Sør-Norge, " +
+          "deretter for allierte luftstridskrefter.",
+      },
+      {
+        source_name: "Riksantikvaren, OGC API Features: lokaliteter",
+        source_url:
+          "https://api.ra.no/LokaliteterEnkeltminnerOgSikringssoner/collections/lokaliteter/items",
+        publisher: "Riksantikvaren",
+        source_type: "map_service",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Alle 11 834 kulturminnelokaliteter i Oslo (9 656), Bærum (610) og Asker (1 568) ble hentet " +
+          "og gjennomgått systematisk for forsvarsrelaterte navn og beskrivelser.",
+      },
+    ],
+  },
+  {
+    category: "Forsvar / militært",
+    subcategory: "Kulturminne",
+    item_type: "finding",
+    title: "Ormsund leir",
+    description:
+      "Fredet leiranlegg fra okkupasjonstiden ved Ormsund på Bekkelaget, bygget for den tyske marinen og " +
+      "fortsatt bevart i sitt opprinnelige villamiljø.",
+    municipality: "Oslo",
+    latitude: 59.88041,
+    longitude: 10.76797,
+    verification_status: "verified_public_source",
+    operational_status: "historical",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Et intakt krigsminne midt i et boligområde, med fredning som binder både anlegget og omgivelsene.",
+    kilder: [
+      {
+        source_name: "Riksantikvaren, kulturminneregisteret: Ormsund leir",
+        source_url: "https://kulturminnesok.no/ra/lokalitet/168054",
+        publisher: "Riksantikvaren",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Vernetype VED (vedtaksfredet). " +
+          "Ormsund leir ligger på Agnesjordet ved Nedre Bekkelaget skole og ble bygget av okkupasjonsmakten " +
+          "under andre verdenskrig til bruk for den tyske marinen. Den ligger fortsatt i sitt opprinnelige " +
+          "miljø omgitt av store trevillaer og hager.",
+      },
+      {
+        source_name: "Riksantikvaren, OGC API Features: lokaliteter",
+        source_url:
+          "https://api.ra.no/LokaliteterEnkeltminnerOgSikringssoner/collections/lokaliteter/items",
+        publisher: "Riksantikvaren",
+        source_type: "map_service",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Alle 11 834 kulturminnelokaliteter i Oslo (9 656), Bærum (610) og Asker (1 568) ble hentet " +
+          "og gjennomgått systematisk for forsvarsrelaterte navn og beskrivelser.",
+      },
+    ],
+  },
+  {
+    category: "Forsvar / militært",
+    subcategory: "Kulturminne",
+    item_type: "finding",
+    title: "Bakås skanser",
+    description:
+      "Fire fredede skanser — eldre feltbefestninger — i Alna bydel, bevart som et grøntdrag mellom skole " +
+      "og blokkbebyggelse.",
+    municipality: "Oslo",
+    latitude: 59.93657,
+    longitude: 10.91862,
+    verification_status: "verified_public_source",
+    operational_status: "historical",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Fredede forsvarsverk forklarer hvorfor et grøntdrag midt i blokkbebyggelsen aldri er bygget ut.",
+    kilder: [
+      {
+        source_name: "Riksantikvaren, kulturminneregisteret: Bakås skanser",
+        source_url: "https://kulturminnesok.no/ra/lokalitet/118039",
+        publisher: "Riksantikvaren",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Vernetype VED (vedtaksfredet). " +
+          "De fire skansene på Bakås ligger i Alna bydel ved endestasjonen for T-banelinjen til Ellingsrudåsen, " +
+          "nær Bakås skole og blokkbebyggelse. Nærområdet er fortsatt i stor grad uberørt landskap.",
+      },
+      {
+        source_name: "Riksantikvaren, OGC API Features: lokaliteter",
+        source_url:
+          "https://api.ra.no/LokaliteterEnkeltminnerOgSikringssoner/collections/lokaliteter/items",
+        publisher: "Riksantikvaren",
+        source_type: "map_service",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Alle 11 834 kulturminnelokaliteter i Oslo (9 656), Bærum (610) og Asker (1 568) ble hentet " +
+          "og gjennomgått systematisk for forsvarsrelaterte navn og beskrivelser.",
+      },
+    ],
+  },
+  {
+    category: "Forsvar / militært",
+    subcategory: "Kulturminne",
+    item_type: "finding",
+    title: "Grossbatterie Stabekk «Bertha»",
+    description:
+      "Tysk storluftvernbatteri fra okkupasjonstiden ved Store Stabekk gård i Bærum. Registrert i " +
+      "kulturminneregisteret, men uten vernestatus.",
+    municipality: "Bærum",
+    latitude: 59.90695,
+    longitude: 10.58763,
+    verification_status: "verified_public_source",
+    operational_status: "historical",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Et av de største tyske luftvernanleggene i Bærum, i et område som i dag er tett boligbebyggelse og " +
+      "under planarbeid for E18-korridoren.",
+    kilder: [
+      {
+        source_name:
+          "Riksantikvaren, kulturminneregisteret: Grossbatterie Stabekk «Bertha»",
+        source_url: "https://kulturminnesok.no/ra/lokalitet/290214",
+        publisher: "Riksantikvaren",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Vernetype IKKEV (ikke vernet). " +
+          "Beliggenhet Krokvolden, nordover fra Gamle Drammensvei ved Store Stabekk gård, krysser Skogveien. " +
+          "En av flere store luftvernkanonstillinger anlagt av tyskerne.",
+      },
+      {
+        source_name: "Riksantikvaren, OGC API Features: lokaliteter",
+        source_url:
+          "https://api.ra.no/LokaliteterEnkeltminnerOgSikringssoner/collections/lokaliteter/items",
+        publisher: "Riksantikvaren",
+        source_type: "map_service",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Alle 11 834 kulturminnelokaliteter i Oslo (9 656), Bærum (610) og Asker (1 568) ble hentet " +
+          "og gjennomgått systematisk for forsvarsrelaterte navn og beskrivelser.",
+      },
+    ],
+  },
+  {
+    category: "Forsvar / militært",
+    subcategory: "Kulturminne",
+    item_type: "finding",
+    title: "Fangeleir ved Oksenøya bruk",
+    description:
+      "Revet fangeleir ved Oksenøya bruk på Fornebu, brukt for russiske krigsfanger og siste krigsår drevet " +
+      "som utekommando under Grini.",
+    municipality: "Bærum",
+    latitude: 59.89847,
+    longitude: 10.60756,
+    verification_status: "verified_public_source",
+    operational_status: "historical",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Fornebu bygges nå tett ut, og dette er en del av stedets historie som ikke er synlig i terrenget lenger.",
+    kilder: [
+      {
+        source_name:
+          "Riksantikvaren, kulturminneregisteret: Fangeleir ved Oksenøya bruk",
+        source_url: "https://kulturminnesok.no/ra/lokalitet/290258",
+        publisher: "Riksantikvaren",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Vernetype IKKEV (ikke vernet). " +
+          "Fangeleir for russiske krigsfanger. Siste krigsår utekommando under Grini fangeleir, med opptil " +
+          "400 fanger. Tilstand: revet.",
+      },
+      {
+        source_name: "Riksantikvaren, OGC API Features: lokaliteter",
+        source_url:
+          "https://api.ra.no/LokaliteterEnkeltminnerOgSikringssoner/collections/lokaliteter/items",
+        publisher: "Riksantikvaren",
+        source_type: "map_service",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Alle 11 834 kulturminnelokaliteter i Oslo (9 656), Bærum (610) og Asker (1 568) ble hentet " +
+          "og gjennomgått systematisk for forsvarsrelaterte navn og beskrivelser.",
+      },
+    ],
+  },
+  {
+    category: "Forsvar / militært",
+    subcategory: "Kulturminne",
+    item_type: "finding",
+    title: "Arkivbunker Løkkeåsen",
+    description:
+      "Bunkeranlegg på Løkkeåsen i Sandvika, registrert i kulturminneregisteret som arkivbunker.",
+    municipality: "Bærum",
+    latitude: 59.89921,
+    longitude: 10.53535,
+    verification_status: "verified_public_source",
+    operational_status: "historical",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Underjordiske anlegg midt i Sandvika sentrum er relevant å kjenne til ved utbygging og graving.",
+    kilder: [
+      {
+        source_name:
+          "Riksantikvaren, kulturminneregisteret: Arkivbunker Løkkeåsen",
+        source_url: "https://kulturminnesok.no/ra/lokalitet/290207",
+        publisher: "Riksantikvaren",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Vernetype IKKEV (ikke vernet). " +
+          "Registrert som arkivbunker på Løkkeåsen i Sandvika.",
+      },
+      {
+        source_name: "Riksantikvaren, OGC API Features: lokaliteter",
+        source_url:
+          "https://api.ra.no/LokaliteterEnkeltminnerOgSikringssoner/collections/lokaliteter/items",
+        publisher: "Riksantikvaren",
+        source_type: "map_service",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Alle 11 834 kulturminnelokaliteter i Oslo (9 656), Bærum (610) og Asker (1 568) ble hentet " +
+          "og gjennomgått systematisk for forsvarsrelaterte navn og beskrivelser.",
+      },
+    ],
+  },
+  {
+    category: "Forsvar / militært",
+    subcategory: "Kulturminne",
+    item_type: "finding",
+    title: "Tyske festningsanlegg på Snarøya, Fornebu og Høvik",
+    description:
+      "Et sammenhengende landskap av tyske anlegg fra okkupasjonstiden rundt Fornebu flyplass: " +
+      "44 registrerte bunkere, fjellhuler, skytterstillinger, ringvern og løpegraver fra " +
+      "Snarøya i sør til Høvik og Stabekk i nord. Samlet i ett funn framfor 44 enkeltrader.",
+    municipality: "Bærum",
+    city: "Snarøya",
+    latitude: 59.89767,
+    longitude: 10.6058,
+    verification_status: "verified_public_source",
+    operational_status: "historical",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Fornebu og Snarøya bygges tett ut, og under bakken ligger det et betydelig antall " +
+      "bunkere og fjellanlegg som ingen av dem har vernestatus. Det er relevant både for " +
+      "graving og for å forstå terrenget.",
+    notes:
+      "Koordinaten er tyngdepunktet for de 44 registreringene, ikke ett bestemt anlegg. Enkeltanlegg " +
+      "kan slås opp i kulturminneregisteret.",
+    kilder: [
+      {
+        source_name:
+          "Riksantikvaren, kulturminneregisteret: 44 registreringer av bunkere og skytterstillinger i Bærum",
+        source_url: "https://kulturminnesok.no/ra/lokalitet/290239",
+        publisher: "Riksantikvaren",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "44 enkeltregistreringer med bunker, skytterstilling, skyttergrav, kanonstilling, " +
+          "ringvern eller løpegrav i navn eller beskrivelse. Tyngdepunkt 59.898, 10.606, " +
+          "utstrekning fra Snarøya i sør til Grini i nord. Blant dem fjellbunkere på Snarøya, " +
+          "«Hovedbunker Birkeli», «Bunker Lys blå», tysk radiostasjon ved Snarøya og Den tyske " +
+          "jagerflyger-kommandoens bunker ved Fornebu. Ingen av dem har vernestatus.",
+      },
+      {
+        source_name: "Riksantikvaren, OGC API Features: lokaliteter",
+        source_url:
+          "https://api.ra.no/LokaliteterEnkeltminnerOgSikringssoner/collections/lokaliteter/items",
+        publisher: "Riksantikvaren",
+        source_type: "map_service",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Alle 11 834 kulturminnelokaliteter i Oslo (9 656), Bærum (610) og Asker (1 568) ble hentet " +
+          "og gjennomgått systematisk for forsvarsrelaterte navn og beskrivelser.",
+      },
+    ],
+  },
+  {
+    category: "Forsvar / militært",
+    subcategory: "Kulturminne",
+    item_type: "finding",
+    title: "Luftvernbatterier rundt Oslo",
+    description:
+      "Fire registrerte luftvernbatterier fra okkupasjonstiden rundt Oslo. To av dem, Bjerke " +
+      "og Ekeberg, er oppgitt som revet. Gressholmen og Holmen står uten slik merknad.",
+    municipality: "Oslo",
+    latitude: 59.88421,
+    longitude: 10.71894,
+    verification_status: "verified_public_source",
+    operational_status: "historical",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Luftvernstillinger ligger på høydedrag som ofte er grøntområder i dag, og forklarer " +
+      "hvorfor enkelte kolletopper aldri er bebygget.",
+    notes:
+      "Koordinaten er Gressholmen-batteriet. De fire ligger spredt; dette er en samleoppføring.",
+    kilder: [
+      {
+        source_name:
+          "Riksantikvaren, kulturminneregisteret: luftvernbatterier i Oslo",
+        source_url: "https://kulturminnesok.no/ra/lokalitet/215083",
+        publisher: "Riksantikvaren",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Fire registrerte luftvernbatterier: Bjerke (59.94336, 10.8049, revet), Ekeberg " +
+          "(59.8959, 10.77899, revet), Gressholmen (59.88421, 10.71894) og Holmen " +
+          "(59.94849, 10.6845). Ingen har vernestatus.",
+      },
+      {
+        source_name: "Riksantikvaren, OGC API Features: lokaliteter",
+        source_url:
+          "https://api.ra.no/LokaliteterEnkeltminnerOgSikringssoner/collections/lokaliteter/items",
+        publisher: "Riksantikvaren",
+        source_type: "map_service",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Alle 11 834 kulturminnelokaliteter i Oslo (9 656), Bærum (610) og Asker (1 568) ble hentet " +
+          "og gjennomgått systematisk for forsvarsrelaterte navn og beskrivelser.",
+      },
+    ],
+  },
+  {
+    category: "Forsvar / militært",
+    subcategory: "Kulturminne",
+    item_type: "note",
+    title: "Tyske leirer i Oslo under okkupasjonen",
+    description:
+      "19 registrerte leir- og lageranlegg fra okkupasjonstiden, spredt over hele byen og " +
+      "nesten alle revet. Samlet i ett funn fordi enkeltanleggene sjelden er synlige i dag, " +
+      "men samlet sier de noe om hvor tett okkupasjonen lå over byen.",
+    municipality: "Oslo",
+    verification_status: "verified_public_source",
+    operational_status: "historical",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "low",
+    notes:
+      "Uten koordinat: anleggene ligger spredt og de fleste er revet. «Linderud arbeidsleir» i denne " +
+      "listen er et annet anlegg enn dagens Linderud leir.",
+    kilder: [
+      {
+        source_name:
+          "Riksantikvaren, kulturminneregisteret: tyske leirer i Oslo",
+        source_url: "https://kulturminnesok.no/ra/lokalitet/215106",
+        publisher: "Riksantikvaren",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "19 registrerte leir- og lageranlegg fra okkupasjonstiden i Oslo, de fleste merket " +
+          "«revet»: blant andre Etterstadleiren, Frognerleiren, Furuset leir, Gulleråsen leir, " +
+          "Hasleveien leir, Kampen leir, Klosterenga leir, Kongsvingergata leir, Sannergata leir, " +
+          "Sjursøya leir, Skøyen leir, Stavangergata leir, Ljanskollen fangeleir og Linderud " +
+          "arbeidsleir.",
+      },
+      {
+        source_name: "Riksantikvaren, OGC API Features: lokaliteter",
+        source_url:
+          "https://api.ra.no/LokaliteterEnkeltminnerOgSikringssoner/collections/lokaliteter/items",
+        publisher: "Riksantikvaren",
+        source_type: "map_service",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Alle 11 834 kulturminnelokaliteter i Oslo (9 656), Bærum (610) og Asker (1 568) ble hentet " +
+          "og gjennomgått systematisk for forsvarsrelaterte navn og beskrivelser.",
+      },
+    ],
+  },
+  {
+    category: "Forsvar / militært",
+    subcategory: "Kulturminne",
+    item_type: "note",
+    title: "«Festningen» i Hurum er en antatt bygdeborg, ikke et militæranlegg",
+    description:
+      "To kulturminneregistreringer i søndre Asker heter «Festningen». Navnet peker mot et " +
+      "forsvarsanlegg, men registeret beskriver en bratt bergknatt som antatt bygdeborg fra " +
+      "forhistorisk tid. Lagret for å unngå at navnet feiltolkes i en senere runde.",
+    municipality: "Asker",
+    latitude: 59.67832,
+    longitude: 10.44802,
+    verification_status: "investigated_not_confirmed",
+    operational_status: "historical",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "low",
+    kilder: [
+      {
+        source_name: "Riksantikvaren, kulturminneregisteret: Festningen, Hurum",
+        source_url: "https://kulturminnesok.no/ra/lokalitet/10008",
+        publisher: "Riksantikvaren",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Vernetype IKKEV (ikke vernet). " +
+          "Åsen faller bratt av mot alle kanter. Registrert som antatt bygdeborg, ikke som militæranlegg " +
+          "fra nyere tid. Ingen spor av mur er funnet.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    item_type: "note",
+    title: "Ingen planlagte datasentre dokumentert i Oslo, Bærum eller Asker",
+    description:
+      "Etter tre runder — plandata (runde 1), Nkoms register og Enhetsregisteret (runde 2), og " +
+      "kommunale planressurser (runde 3) — er STACK OSL01 på Ulven fortsatt det eneste " +
+      "bekreftede fysiske datasenteret i de tre kommunene. Ingen planlagte anlegg er funnet.",
+    municipality: null,
+    verification_status: "investigated_not_confirmed",
+    operational_status: "unknown",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    notes:
+      "Veien videre er det nye arealformålet: planer varslet etter juli 2025 kan angi datasenter " +
+      "eksplisitt, og da blir de søkbare i plandata. Nettselskapenes tilknytningssaker er den andre " +
+      "inngangen — de er ikke undersøkt ennå.",
+    kilder: [
+      {
+        source_name:
+          "Kart- og planforskriften, nytt arealformål for datasenter fra juli 2025",
+        source_url: "https://www.regjeringen.no/",
+        publisher: "Kommunal- og distriktsdepartementet",
+        source_type: "regulation",
+        source_date: "2025-07-01",
+        primary_source: true,
+        excerpt_or_summary:
+          "Datasenter er fra juli 2025 et eget arealformål som kan angis i kommuneplan, på linje " +
+          "med næringsbebyggelse og industri. Kommunene skal vurdere kapasitet i kraftnettet, " +
+          "arealkonflikter og klimavirkning.",
+      },
+      {
+        source_name: "Søk i kommunale planressurser for Oslo, Bærum og Asker",
+        source_url: "https://od2.pbe.oslo.kommune.no/kart/",
+        publisher: "Oslo, Bærum og Asker kommune",
+        source_type: "web",
+        source_date: "2026-09-26",
+        supports_claim: false,
+        excerpt_or_summary:
+          "Ingen dokumentert plan- eller byggesak for datasenter funnet i de tre kommunene. " +
+          "Kommunenes planinnsyn er kartklienter uten søkbart tekstgrensesnitt utenfra.",
+      },
+    ],
+  },
+  {
+    category: "Infrastruktur / større prosjekter",
+    subcategory: "Områdeutvikling",
+    item_type: "finding",
+    title: "Røyken næringspark",
+    description:
+      "Næringsområde under utbygging i Røyken, med to varslede planer for ulike felt: felt C i 2025 og " +
+      "felt E samme år. Ett område, to plansaker.",
+    municipality: "Asker",
+    address: "Vekstveien 31",
+    postal_code: "3474",
+    city: "Åros",
+    latitude: 59.69138,
+    longitude: 10.47644,
+    verification_status: "verified_public_source",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Et av de største sammenhengende næringsområdene i nye Asker, i et område som ellers er bolig og " +
+      "landbruk. Hva slags virksomhet som kommer inn avgjør belastningen for nabolaget.",
+    notes:
+      "Adressen er nærmeste adresse til planområdets senterpunkt, ikke prosjektets egen adresse.",
+    kilder: [
+      {
+        source_name: "DiBK planleggingigangsatt, arealplan 865",
+        source_url:
+          "https://plandata.ft.dibk.no/services/rest/planleggingigangsatt/collections/arealplan/items/865?f=html",
+        publisher: "Direktoratet for byggkvalitet",
+        source_type: "map_service",
+        source_date: "2025-04-03",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel om planoppstart 2025-04-03: «Røyken næringspark, felt E». Kunngjøringen dokumenterer at planarbeidet " +
+          "er startet, ikke hva området til slutt blir.",
+      },
+      {
+        source_name: "DiBK planleggingigangsatt, arealplan 595",
+        source_url:
+          "https://plandata.ft.dibk.no/services/rest/planleggingigangsatt/collections/arealplan/items/595?f=html",
+        publisher: "Direktoratet for byggkvalitet",
+        source_type: "map_service",
+        source_date: "2025-06-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel om planoppstart 2025-06-30: «Bestemmelser til detaljregulering for Røyken næringsområde, Felt C». Kunngjøringen dokumenterer at planarbeidet " +
+          "er startet, ikke hva området til slutt blir.",
+      },
+    ],
+  },
+  {
+    category: "Infrastruktur / større prosjekter",
+    subcategory: "Områdeutvikling",
+    item_type: "finding",
+    title: "Yggeset avfallsområde",
+    description:
+      "Områderegulering for Yggeset i Heggedal, Askers avfallsanlegg med gjenvinningsstasjon.",
+    municipality: "Asker",
+    address: "Yggesetveien 14",
+    postal_code: "1389",
+    city: "Heggedal",
+    latitude: 59.79161,
+    longitude: 10.46458,
+    verification_status: "verified_public_source",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Avfallsanlegg gir lukt og tungtrafikk, og en områderegulering kan endre både omfang og drift. " +
+      "Ligger tett på boligområdet i Heggedal.",
+    notes:
+      "Adressen er nærmeste adresse til planområdets senterpunkt, ikke prosjektets egen adresse.",
+    kilder: [
+      {
+        source_name: "DiBK planleggingigangsatt, arealplan 774",
+        source_url:
+          "https://plandata.ft.dibk.no/services/rest/planleggingigangsatt/collections/arealplan/items/774?f=html",
+        publisher: "Direktoratet for byggkvalitet",
+        source_type: "map_service",
+        source_date: "2024-06-03",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel om planoppstart 2024-06-03: «Områderegulering for Yggeset». Kunngjøringen dokumenterer at planarbeidet " +
+          "er startet, ikke hva området til slutt blir.",
+      },
+    ],
+  },
+  {
+    category: "Infrastruktur / større prosjekter",
+    subcategory: "Områdeutvikling",
+    item_type: "finding",
+    title: "Rortunet og Slemmestadveien",
+    description:
+      "Detaljregulering for senterområdet Rortunet i Slemmestad, varslet september 2026.",
+    municipality: "Asker",
+    address: "Rortunet 4",
+    postal_code: "3470",
+    city: "Slemmestad",
+    latitude: 59.77792,
+    longitude: 10.48624,
+    verification_status: "verified_public_source",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Slemmestad er i full transformasjon fra sementindustristed til boligsted, og senterområdet er " +
+      "kjernen i den omleggingen.",
+    notes:
+      "Adressen er nærmeste adresse til planområdets senterpunkt, ikke prosjektets egen adresse.",
+    kilder: [
+      {
+        source_name: "DiBK planleggingigangsatt, arealplan 2076",
+        source_url:
+          "https://plandata.ft.dibk.no/services/rest/planleggingigangsatt/collections/arealplan/items/2076?f=html",
+        publisher: "Direktoratet for byggkvalitet",
+        source_type: "map_service",
+        source_date: "2026-09-10",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel om planoppstart 2026-09-10: «Detaljregulering for Rortunet/Slemmestadveien». Kunngjøringen dokumenterer at planarbeidet " +
+          "er startet, ikke hva området til slutt blir.",
+      },
+    ],
+  },
+  {
+    category: "Infrastruktur / større prosjekter",
+    subcategory: "Områdeutvikling",
+    item_type: "finding",
+    title: "Storsand bolig- og golfområde",
+    description:
+      "Stort bolig- og golfområde ved Storsand i søndre Asker, varslet november 2025.",
+    municipality: "Asker",
+    address: "Storsandveien 9",
+    postal_code: "3475",
+    city: "Sætre",
+    latitude: 59.65603,
+    longitude: 10.5883,
+    verification_status: "verified_public_source",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "En stor utbygging i et område som i dag er lite bebygd, og som vil endre karakteren på hele " +
+      "strekningen langs Oslofjorden sør for Sætre.",
+    notes:
+      "Adressen er nærmeste adresse til planområdets senterpunkt, ikke prosjektets egen adresse.",
+    kilder: [
+      {
+        source_name: "DiBK planleggingigangsatt, arealplan 1094",
+        source_url:
+          "https://plandata.ft.dibk.no/services/rest/planleggingigangsatt/collections/arealplan/items/1094?f=html",
+        publisher: "Direktoratet for byggkvalitet",
+        source_type: "map_service",
+        source_date: "2025-11-23",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel om planoppstart 2025-11-23: «Storsand bolig- og golfområde Grønsand og Havnemyra OG Slottet - Storsand». Kunngjøringen dokumenterer at planarbeidet " +
+          "er startet, ikke hva området til slutt blir.",
       },
     ],
   },

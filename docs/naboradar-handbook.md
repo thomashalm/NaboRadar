@@ -1760,6 +1760,22 @@ som faktisk fikk konsekvenser:
 - **Ingen masseimport av omsorgsadresser.** Enhetsregisteret ble vurdert og forkastet som inngang;
   næringskode viser kontoradresser, ikke tjenester.
 
+### Tredje research-runde
+
+61 funn og 100 kilder totalt. Runden la til 18 funn og oppdaterte 4, og gikk målrettet etter
+hullene fra runde 2:
+
+- **Kulturminneregisteret har både WFS og OGC API Features.** Runde 2 konkluderte med at det bare
+  fantes nedlasting — feil, fordi søket i Geonorge bare traff én av distribusjonene. Alle 11 834
+  lokaliteter i de tre kommunene ble hentet og gjennomgått, og ga 19 forsvarsfunn: fredede
+  anlegg som Skar leir, Løren leir og Holmenkollen leir, Asker NIKE-batteri fra den kalde krigen,
+  og et helt tysk festningslandskap på Snarøya og Fornebu
+- **Klynger framfor enkeltrader.** 44 bunkere og skytterstillinger i Bærum, 19 tyske leirer i Oslo
+  og fire luftvernbatterier er samlet i tre funn. Enkeltanleggene kan slås opp i registeret
+- **Datasentre står fortsatt på ett bekreftet anlegg.** Etter plandata, Nkom og kommunale
+  planressurser er STACK OSL01 det eneste. Fra juli 2025 er datasenter et eget arealformål i
+  kart- og planforskriften — det er veien inn neste gang
+
 ### Andre research-runde
 
 43 funn og 65 kilder totalt. Runden la til 26 funn og reviderte 8. Det som flyttet mest:
