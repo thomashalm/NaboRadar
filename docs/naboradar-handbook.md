@@ -1842,6 +1842,8 @@ Samlet fra rundene, fordi hver av dem kostet en runde å oppdage:
 | Campus = ett anlegg per oppføring | STACK OSL03 har fire bygg og fem oppføringer, men er ett sted |
 | Ett bygg = én operatør | Hans Møller Gasmanns vei 9 har tre |
 | Navnebytte = nytt anlegg | DigiPlex → STACK → Vaultica er samme bygg |
+| Katalogens marked = kommune | DataCenterMap fører Tydal under markedet «Ås». NTC Billingstad i Asker lå under et eget marked og manglet i Oslo-oversikten |
+| Geokoding uten postnummer | «Granittvegen 110» og «Nordliveien 21» traff feil kommune uten postnummerkrav. Krev alltid postnummer |
 
 ### Fjerde research-runde: discovery først
 

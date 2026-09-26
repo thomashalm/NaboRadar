@@ -3974,4 +3974,547 @@ export const FUNN: Funn[] = [
       },
     ],
   },
+
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "NTC Billingstad datasenter",
+    description:
+      "Colocation-anlegg på Billingstadsletta i Asker, drevet av NTC Services. Anlegget har " +
+      "redundant fiber, 2N UPS og aggregat — teknisk utrustning som skiller et datasenter " +
+      "fra et serverrom. Operatøren står i Nkoms register, så anlegget er over 0,5 MW.",
+    municipality: "Asker",
+    address: "Billingstadsletta 17",
+    postal_code: "1396",
+    city: "Billingstad",
+    latitude: 59.87584,
+    longitude: 10.49587,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Det best dokumenterte datasenteret i Asker, i et næringsområde tett på bolig og " +
+      "E18. Aggregat og 2N-strøm betyr reservekraft på stedet.",
+    notes:
+      "Funnet fordi Billingstad er et eget marked i DataCenterMap og derfor ikke kom med i " +
+      "Oslo-sveipet. Et eksempel på at markedsinndelingen i katalogene skjuler anlegg.",
+    public_candidate: true,
+    public_candidate_note:
+      "Bekreftet fysisk anlegg, verifisert adresse, Nkom-registrert operatør og korrekt status.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: NTC Billingstad",
+        source_url: "https://www.datacentermap.com/norway/billingstad/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppført som NTC Billingstad, operatør NTC Services AS, adresse Billingstadsletta 17, 1396 Billingstad. " +
+          "Colocation-rackplass med smarthands, redundant fiberforbindelse og 2N UPS med aggregatstøtte.",
+      },
+      {
+        source_name: "Nkom: NTC Services AS er registrert datasenteroperatør",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Organisasjonsnummer 988534005. Kryptovalutautvinning oppgitt som «Nei». " +
+          "Registreringsplikten gjelder anlegg over 0,5 MW.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Tydal Data Center, Kirkvollen",
+    description:
+      "Norges største datasenterutbygging: 180 MW under bygging i Kirkvollen industriområde " +
+      "i Tydal, eid av Bitdeer Technologies Group. Etablert 2021 for bitcoinutvinning, nå " +
+      "under konvertering til AI-kolokasjon. Nkom oppgir 33 % kryptoutvinning.",
+    municipality: "Tydal",
+    city: "Tydal",
+    latitude: 63.03392,
+    longitude: 11.67715,
+    verification_status: "verified_public_source",
+    operational_status: "under_construction",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "180 MW er i en annen størrelsesorden enn alt annet i dette datasettet — mer enn " +
+      "det samlede dokumenterte forbruket i Oslo. Det endrer kraftbalansen i en liten " +
+      "kommune, og viser hva et datasenter kan bli.",
+    notes:
+      "Koordinaten er Kartverkets punkt for Kirkvollen i Tydal, ikke anleggets egen adresse. " +
+      "Effekttallet kommer fra operatøren og entreprenøren, ikke fra en myndighetskilde.",
+    kilder: [
+      {
+        source_name: "Bitdeer og Data Center Installations: utbygging i Tydal",
+        source_url: "https://tydaldatacenter.no/",
+        publisher: "Tydal Data Center / Bitdeer",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegget ligger i Kirkvollen industriområde i Tydal, etablert 2021. Bitdeer " +
+          "Technologies Group kjøpte 100 % av aksjene i 2024, og har kontrahert Data Center " +
+          "Installations AS for å bygge ut anlegget til 180 MW — en konvertering fra " +
+          "bitcoinutvinning til AI-kolokasjon.",
+      },
+      {
+        source_name:
+          "Nkom: Tydal Data Center AS er registrert datasenteroperatør",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Organisasjonsnummer 927050188. Kryptovalutautvinning oppgitt som «Ja, 33 % av forbruk». " +
+          "Registreringsplikten gjelder anlegg over 0,5 MW.",
+      },
+      {
+        source_name:
+          "E24: kinesisk milliardær utvinner krypto på norske datasentre",
+        source_url:
+          "https://e24.no/energi-og-klima/i/4BMPKq/kinesisk-milliardaer-utvinner-krypto-paa-norske-datasentre",
+        publisher: "E24",
+        source_type: "news",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Tydal og Troll Housing er kjøpt av kryptomilliardæren Jihan Wu, og har til sammen " +
+          "tilgang på rundt 247 MW.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Exanorth / Bitzero, Tunnsjødalen i Namsskogan",
+    description:
+      "Kraftkrevende containeranlegg i Tunnsjødalen med 8 500 maskiner og 300 servere, som " +
+      "utvinner kryptovaluta for søsterselskapet Bitzero Inc. Nkom oppgir 100 % " +
+      "kryptoutvinning. Driften har vært omtalt som truet etter et underskudd på 55 " +
+      "millioner kroner.",
+    municipality: "Namsskogan",
+    address: "Tunnsjødalsveien 178",
+    postal_code: "7892",
+    latitude: 64.71377,
+    longitude: 12.83181,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et anlegg som bærer en kommunes økonomi og samtidig er økonomisk utsatt. Det " +
+      "viser hvor sårbart et lokalsamfunn blir når ett kraftkrevende anlegg står for en " +
+      "stor del av inntektene.",
+    notes:
+      "Aliaser: Bitzero Namsskogan, Exanorth Tunnsjødalen. Selskapet oppga først at bruken var " +
+      "hemmelig og beskrev den som skylagring.",
+    kilder: [
+      {
+        source_name: "Namdalsavisa og Trønder-Avisa om Exanorth i Namsskogan",
+        source_url:
+          "https://www.nt24.no/tapte-55-millioner-pa-bitcoin-eventyr-na-er-drifta-i-namsskogan-truet/s/5-120-118957",
+        publisher: "Namdalsavisa / Trønder-Avisa",
+        source_type: "news",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Anlegget i Tunnsjødalen driver 8 500 maskiner og 300 servere i containere, noen " +
+          "kilometer fra E6 ved Kjelmoen. Virksomheten ble først presentert som «lagring i " +
+          "skya», men regnskapet viser utvinning av digital valuta for søsterselskapet Bitzero " +
+          "Inc på Barbados. Kommunen tjener rundt 12 millioner i året på kraftsalg til anlegget.",
+      },
+      {
+        source_name: "Nkom: Exanorth AS er registrert datasenteroperatør",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Organisasjonsnummer 921677421. Kryptovalutautvinning oppgitt som «Ja, 100 % av forbruk». " +
+          "Registreringsplikten gjelder anlegg over 0,5 MW.",
+      },
+      {
+        source_name: "DataCenterMap: Bitzero Namsskogan Data Center",
+        source_url: "https://www.datacentermap.com/norway/namsskogan/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppført som Bitzero Namsskogan Data Center, operatør Bitzero, adresse Tunnsjødalsveien 178. " +
+          "Oppført i katalogen under Namsskogan.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Troll Housing, Hustadvika",
+    description:
+      "Datasenter i Hustadvika utenfor Molde med 97 % av forbruket til kryptoutvinning — den " +
+      "høyeste andelen blant de norske anleggene av denne størrelsen. Samme eierskap som " +
+      "Tydal Data Center.",
+    municipality: "Hustadvika",
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Et av landets største kryptoanlegg, og halvparten av et eierskap som samlet " +
+      "disponerer rundt 247 MW norsk kraft.",
+    notes:
+      "Uten koordinat: ingen kilde oppgir anleggets adresse, bare kommunen. Må stedfestes før " +
+      "det kan brukes til noe.",
+    kilder: [
+      {
+        source_name: "Nkom: Troll Housing AS er registrert datasenteroperatør",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Organisasjonsnummer 911678608. Kryptovalutautvinning oppgitt som «Ja, 97 % av forbruk». " +
+          "Registreringsplikten gjelder anlegg over 0,5 MW.",
+      },
+      {
+        source_name: "E24 og Møre Trafo om Troll Housing",
+        source_url:
+          "https://moretrafo.no/en/reference/troll-housing-data-center-expansion-in-tydal",
+        publisher: "E24 / Møre Trafo",
+        source_type: "news",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Datasenterselskap i Hustadvika kommune utenfor Molde, kjøpt av samme eier som " +
+          "Tydal. De to anleggene har til sammen tilgang på rundt 247 MW.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "lead",
+    title: "Thermaltech, Tromsdalen",
+    description:
+      "Datasenteroperatør i Tromsdalen i Tromsø med 100 % av forbruket til kryptoutvinning. " +
+      "Anleggets nøyaktige adresse og størrelse er ikke dokumentert.",
+    municipality: "Tromsø",
+    city: "Tromsdalen",
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "medium",
+    notes:
+      "Uten koordinat: bare bydelen er kjent, ikke adressen. Å sette et punkt på Tromsdalen som " +
+      "helhet ville vært å late som vi vet hvor anlegget står.",
+    kilder: [
+      {
+        source_name: "Nkom: Thermaltech AS er registrert datasenteroperatør",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Organisasjonsnummer 933436012. Kryptovalutautvinning oppgitt som «Ja, 100 % av forbruk». " +
+          "Registreringsplikten gjelder anlegg over 0,5 MW.",
+      },
+      {
+        source_name:
+          "Digi.no om norske datasenteroperatører med kryptoutvinning",
+        source_url:
+          "https://www.digi.no/nyhetsstudio/lagring-i-skya-viste-seg-aa-vaere-bitcoin-mining/42594",
+        publisher: "Digi.no",
+        source_type: "news",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Thermaltech i Tromsdalen i Troms er blant operatørene som oppgir kryptoutvinning.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    item_type: "lead",
+    title: "Fem kryptooperatører uten stedfestet anlegg",
+    description:
+      "Fem av de ni Nkom-operatørene med kryptoutvinning er ikke stedfestet: Bluefjords " +
+      "(Luster), Bluebite (Fauske), Currency Edge (Kvænangen), Arctic Flux (Horten) og " +
+      "Nordic Blocks (Søndre Land). Kommunene er kjent fra kontoradressen, anleggene ikke.",
+    municipality: null,
+    verification_status: "investigated_not_confirmed",
+    operational_status: "unknown",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    notes:
+      "Websøk ga ingen treff på anleggene. Neste innganger er lokalpresse i de fem kommunene og " +
+      "nettselskapenes tilknytningssaker. Undersøkt 2026-09-26.",
+    kilder: [
+      {
+        source_name:
+          "Nkom: fem operatører med kryptoutvinning er registrert datasenteroperatør",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Organisasjonsnummer flere. Kryptovalutautvinning oppgitt som «Ja, 1–100 % av forbruk». " +
+          "Registreringsplikten gjelder anlegg over 0,5 MW.",
+      },
+      {
+        source_name: "Enhetsregisteret: kontoradresser for de fem",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-26",
+        supports_claim: false,
+        excerpt_or_summary:
+          "Bluefjords (14 %) i Luster, Bluebite GmbH (55 %) i Fauske, Currency Edge (100 %) i " +
+          "Kvænangen, Arctic Flux (95 %) i Horten og Nordic Blocks (1 %) i Søndre Land. Dette " +
+          "er kontoradresser, ikke anleggsadresser — ingen av anleggene er stedfestet.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Green Mountain OSL1-Enebakk",
+    description:
+      "Datasenterområde i Ytre Enebakk. Green Mountain oppgir 75 000 m² tomt med tilgang på inntil 93 MW.",
+    municipality: "Enebakk",
+    address: "Granittveien 100",
+    postal_code: "1914",
+    city: "Ytre Enebakk",
+    latitude: 59.75914,
+    longitude: 10.99308,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Det største datasenterområdet i Oslos umiddelbare nærhet, på et areal som gjør det til et campus, ikke et bygg.",
+    notes:
+      "Kapasitetstall kommer fra operatør- og bransjekilder, ikke fra myndighet.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Green Mountain OSL1-Enebakk",
+        source_url: "https://www.datacentermap.com/norway/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppført som Green Mountain OSL1-Enebakk, operatør Green Mountain, adresse Granittveien 100, 1914 Ytre Enebakk. " +
+          "Datasenterområde i Ytre Enebakk. Green Mountain oppgir 75 000 m² tomt med tilgang på inntil 93 MW.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "AQ Compute / hscale OSL1, Hønefoss",
+    description:
+      "Kolokasjonsanlegg på Follum i Hønefoss, oppgitt som AQ Computes første colocation-datasenter.",
+    municipality: "Ringerike",
+    address: "Follummoveien 94",
+    postal_code: "3516",
+    city: "Hønefoss",
+    latitude: 60.20508,
+    longitude: 10.23546,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Et av de større anleggene i Oslos randsone, på et tidligere industriområde.",
+    notes:
+      "Kapasitetstall kommer fra operatør- og bransjekilder, ikke fra myndighet.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: AQ Compute / hscale OSL1, Hønefoss",
+        source_url: "https://www.datacentermap.com/norway/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppført som AQ Compute / hscale OSL1, Hønefoss, operatør AQ Compute, adresse Follummoveien 94, 3516 Hønefoss. " +
+          "Kolokasjonsanlegg på Follum i Hønefoss, oppgitt som AQ Computes første colocation-datasenter.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Bulk N01 Data Center Campus, Vennesla",
+    description:
+      "Bulks nasjonale campus i Øvrebø i Vennesla, med flere registrerte driftsselskaper (N01, DCM101, DCM102).",
+    municipality: "Vennesla",
+    address: "Stølevegen 39",
+    postal_code: "4715",
+    city: "Øvrebø",
+    latitude: 58.25757,
+    longitude: 7.89205,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Bulks hovedcampus, og forklaringen på hvorfor selskapet har fire Nkom-registreringer på én kontoradresse i Oslo.",
+    notes:
+      "Kapasitetstall kommer fra operatør- og bransjekilder, ikke fra myndighet.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Bulk N01 Data Center Campus, Vennesla",
+        source_url: "https://www.datacentermap.com/norway/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppført som Bulk N01 Data Center Campus, Vennesla, operatør Bulk Infrastructure, adresse Stølevegen 39, 4715 Øvrebø. " +
+          "Bulks nasjonale campus i Øvrebø i Vennesla, med flere registrerte driftsselskaper (N01, DCM101, DCM102).",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    item_type: "note",
+    title: "Nasjonalt bilde: 112 oppføringer i 42 markeder",
+    description:
+      "Rammen for videre arbeid. Katalogene fører 112 og 49 oppføringer nasjonalt, med " +
+      "delvis overlapp. Oslo er klart størst med 34, deretter Stavanger, Bergen og et " +
+      "belte av små markeder med ett eller to anlegg hver — typisk kraftkrevende anlegg i " +
+      "kommuner med rimelig kraft.",
+    municipality: null,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "low",
+    notes:
+      "Denne runden gjennomgikk Oslo-markedet i sin helhet og Billingstad, pluss de ni " +
+      "kryptooperatørene og de største nasjonale aktørene. Markedene Stavanger, Bergen, Bryne, " +
+      "Aksdal, Kristiansand, Skien, Trondheim og Sandefjord er identifisert, men ikke gjennomgått " +
+      "anlegg for anlegg.",
+    kilder: [
+      {
+        source_name: "DataCenterMap, nasjonal oversikt",
+        source_url: "https://www.datacentermap.com/norway/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "112 oppføringer fordelt på 42 markeder. Størst: Oslo 34, Stavanger 9, Bergen 8, " +
+          "Bryne 5, Aksdal 5, Kristiansand 4, Skien 4, Trondheim 4, Sandefjord 3. Resten har " +
+          "ett eller to hver.",
+      },
+      {
+        source_name: "PeeringDB, nasjonal oversikt",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "49 fasiliteter i Norge. Overlappet med DataCenterMap er delvis: PeeringDB fører " +
+          "samtrafikkpunkter, DataCenterMap fører colocation-tilbud.",
+      },
+    ],
+  },
+  {
+    category: "Kilder",
+    item_type: "data_issue",
+    title: "Katalogenes markedsinndeling plasserer anlegg i feil kommune",
+    description:
+      "DataCenterMap fører Tydal Data Center under markedet «Ås», som er en helt annen " +
+      "kommune i en annen landsdel. Samtidig lå NTC Billingstad i Asker under et eget " +
+      "marked «Billingstad» og kom ikke med i Oslo-oversikten.",
+    municipality: null,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    notes:
+      "Regel: markedsnavn i en katalog er ikke kommune, og et marked kan både skjule anlegg og " +
+      "plassere dem feil. Kommunen må alltid settes fra adressen, geokodet mot Kartverket.",
+    kilder: [
+      {
+        source_name:
+          "DataCenterMap: Tydal Data Center ført under markedet «Ås»",
+        source_url: "https://www.datacentermap.com/norway/as/bitdeer-tydal/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegget i Kirkvollen i Tydal kommune i Trøndelag er plassert under markedet «Ås». " +
+          "Ås er en kommune i Akershus, 60 mil unna.",
+      },
+    ],
+  },
 ];
