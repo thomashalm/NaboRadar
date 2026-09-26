@@ -22,6 +22,22 @@ import type { NormalizedAreaFeature } from "@/types/area-feature";
  *
  * `adresse` er ikke en ren adresse, men kildens egen stedsbeskrivelse — «Vestre Braarudgt. 6b -
  * Åsheim». Den vises derfor som «Sted», ikke som «Adresse».
+ *
+ * IDENTITET: `romnr`, ikke `lokalId`.
+ *
+ * `lokalId` ser ut som en varig UUID, men DSB genererer den på nytt for hvert uttrekk. To uttrekk
+ * et døgn fra hverandre hadde 0 av 556 ID-er felles, mens `romnr` hadde 556 av 556 — og
+ * koordinatene var identiske til sju desimaler. Med `lokalId` som nøkkel ble derfor alle 556 rom
+ * opprettet på nytt, og de 556 gamle markert som fjernet, ved hver full sync.
+ *
+ * `romnr` er Sivilforsvarets eget romnummer, unikt på alle 556 i uttrekket. Adresse og koordinat
+ * ble vurdert og forkastet: tre stedsbeskrivelser brukes av flere rom, fire koordinater deles av
+ * to rom hver, og to par — romnr 2127/2128 på «TANGVALL» og 9983/17676 på «Tjørnahaugane 60» —
+ * deler *både* adresse og koordinat. En nøkkel av de feltene ville slått sammen reelle rom.
+ *
+ * `datauttaksdato` brukes ikke som `sourceUpdatedAt`. Den er tidspunktet uttrekket ble kjørt, med
+ * millisekunder, og sier ingenting om når rommet ble endret. Feltet inngår i innholdshashen, så å
+ * ta det med ville gjort hver sync til 556 «updated» uten at noe var endret.
  */
 const WFS = "https://wfs.geonorge.no/skwms1/wfs.tilfluktsrom_offentlige";
 const TYPENAME = "Tilfluktsrom";
@@ -47,6 +63,7 @@ export class DsbTilfluktsromProvider implements AreaFeatureProvider {
       typeName: TYPENAME,
       signal: options.signal,
       retry: this.retry,
+      fetchImpl: this.fetchImpl,
     })) {
       yield { features, documents: [] };
     }
@@ -62,8 +79,18 @@ export class DsbTilfluktsromProvider implements AreaFeatureProvider {
       const romnr = asNumber(feature.romnr);
       const sted = nested(feature, "adresse");
 
-      if (!lokalId || !punkt) {
-        rejected.push({ kind: "feature", externalId: lokalId, reason: "mangler lokalId eller posisjon" });
+      /*
+       * Uten romnummer har rommet ingen stabil identitet, og vi avviser det framfor å finne på
+       * en. Å falle tilbake på lokalId ville gjenskapt ID-churnen, og en nøkkel av adresse og
+       * koordinat ville slått sammen rom som faktisk er forskjellige. Et avvist rom blir synlig
+       * i kjøringens `rejected`, som er der et datakvalitetsproblem hører.
+       */
+      if (romnr === null || !punkt) {
+        rejected.push({
+          kind: "feature",
+          externalId: lokalId,
+          reason: romnr === null ? "mangler romnr (stabil identitet)" : "mangler posisjon",
+        });
         continue;
       }
 
@@ -73,11 +100,11 @@ export class DsbTilfluktsromProvider implements AreaFeatureProvider {
 
       records.push({
         providerId: this.id,
-        externalId: lokalId,
+        externalId: String(romnr),
         category: "tilfluktsrom",
         subtype: "offentlig_tilfluktsrom",
         // Stedsbeskrivelsen er det eneste navnet kilden har. Uten den bruker vi romnummeret.
-        title: sted ?? (romnr !== null ? `Tilfluktsrom ${romnr}` : "Offentlig tilfluktsrom"),
+        title: sted ?? `Tilfluktsrom ${romnr}`,
         geometry: { type: "Point", coordinates: punkt },
         attributes: {
           sted,
@@ -86,7 +113,8 @@ export class DsbTilfluktsromProvider implements AreaFeatureProvider {
         },
         sourceUrl: DATASETT,
         sourceUrlType: "provider_page",
-        sourceUpdatedAt: uttaksdato(nested(feature, "datauttaksdato")),
+        // Se kommentaren øverst: kilden har ingen endringsdato, bare uttrekkstidspunkt.
+        sourceUpdatedAt: null,
       });
     }
 
@@ -97,7 +125,14 @@ export class DsbTilfluktsromProvider implements AreaFeatureProvider {
     const started = performance.now();
     try {
       let antall = 0;
-      for await (const side of wfsPages({ baseUrl: WFS, typeName: TYPENAME, retry: this.retry })) antall += side.length;
+      for await (const side of wfsPages({
+        baseUrl: WFS,
+        typeName: TYPENAME,
+        retry: this.retry,
+        fetchImpl: this.fetchImpl,
+      })) {
+        antall += side.length;
+      }
       return {
         ok: antall > 0,
         checkedAt: new Date().toISOString(),
@@ -113,11 +148,4 @@ export class DsbTilfluktsromProvider implements AreaFeatureProvider {
       };
     }
   }
-}
-
-/** Kilden oppgir når uttrekket ble tatt, ikke når rommet ble endret. */
-function uttaksdato(value: string | null): string | null {
-  if (!value) return null;
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
 }

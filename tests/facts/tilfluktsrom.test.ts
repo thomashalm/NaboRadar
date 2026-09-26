@@ -148,11 +148,35 @@ describe("normalisering fra DSB", () => {
     ...over,
   });
 
-  it("bruker DSBs lokalId som stabil ekstern id", () => {
+  /**
+   * Denne testen sa tidligere at `lokalId` var «stabil ekstern id». Det var den ikke: DSB
+   * genererer den på nytt for hvert uttrekk, og to uttrekk et døgn fra hverandre hadde 0 av 556
+   * ID-er felles. Identiteten er romnummeret. Se tests/sync/dsb-identitet.test.ts for
+   * reconciliation-beviset.
+   */
+  it("bruker romnummeret som ekstern id, ikke den flyktige lokalId", () => {
     const { records } = provider.normalize({ features: [feature()], documents: [] });
-    expect(records[0]!.externalId).toBe("3acdde2d-1124-42a1-9961-4be701f81c1b");
+    expect(records[0]!.externalId).toBe("776");
     expect(records[0]!.category).toBe("tilfluktsrom");
     expect(records[0]!.subtype).toBe("offentlig_tilfluktsrom");
+    // Romnummeret ligger også i attributtene, som før.
+    expect(records[0]!.attributes.romnummer).toBe(776);
+  });
+
+  it("holder uttrekkstidspunktet utenfor innholdet", () => {
+    // datauttaksdato er når uttrekket ble kjørt, ikke når rommet ble endret. Tas den med i
+    // innholdshashen, blir hver sync 556 «updated» uten at noe er endret.
+    const { records } = provider.normalize({ features: [feature()], documents: [] });
+    expect(records[0]!.sourceUpdatedAt).toBeNull();
+  });
+
+  it("gir samme eksterne id når kilden bytter lokalId", () => {
+    const a = provider.normalize({ features: [feature()], documents: [] });
+    const b = provider.normalize({
+      features: [feature({ lokalId: "ny-uuid-hver-gang", datauttaksdato: "2026-09-25T23:40:59.001" })],
+      documents: [],
+    });
+    expect(b.records[0]!.externalId).toBe(a.records[0]!.externalId);
   });
 
   it("legger rommet på riktig sted", () => {
@@ -169,12 +193,19 @@ describe("normalisering fra DSB", () => {
     ).toBeNull();
   });
 
-  it("avviser rader uten id eller posisjon i stedet for å gjette", () => {
+  it("avviser rader uten romnummer eller posisjon i stedet for å gjette", () => {
     const { records, rejected } = provider.normalize({
-      features: [feature({ lokalId: null }), feature({ posisjon: null })],
+      features: [feature({ romnr: null }), feature({ posisjon: null })],
       documents: [],
     });
     expect(records).toEqual([]);
     expect(rejected).toHaveLength(2);
+    expect(rejected[0]!.reason).toContain("romnr");
+  });
+
+  it("godtar en rad som mangler lokalId, siden den ikke er identiteten", () => {
+    const { records, rejected } = provider.normalize({ features: [feature({ lokalId: null })], documents: [] });
+    expect(rejected).toEqual([]);
+    expect(records[0]!.externalId).toBe("776");
   });
 });

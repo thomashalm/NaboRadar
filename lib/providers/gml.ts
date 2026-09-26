@@ -135,6 +135,14 @@ export interface WfsPageOptions {
   pageSize?: number;
   signal?: AbortSignal;
   retry: HttpRetryPolicy;
+  /**
+   * Erstatning for fetch, til tester.
+   *
+   * Uten denne gikk providernes injiserte fetch i gulvet: konstruktøren tok imot en, men
+   * wfsPages brukte alltid global fetch — så en test mot en falsk WFS traff i stedet den
+   * ekte tjenesten uten å si fra.
+   */
+  fetchImpl?: typeof fetch;
 }
 
 /** Henter alle features for én typeName, side for side. */
@@ -218,5 +226,5 @@ export async function fetchGml(
 }
 
 async function fetchWithRetry(url: string, options: WfsPageOptions): Promise<string> {
-  return fetchGml(url, { retry: options.retry, signal: options.signal });
+  return fetchGml(url, { retry: options.retry, signal: options.signal, fetchImpl: options.fetchImpl });
 }

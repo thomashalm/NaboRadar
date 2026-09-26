@@ -663,6 +663,7 @@ data**. Terskler i `lib/sync/guards.ts`:
 | Avviste features | over **5 %** | Advarsel |
 | Avviste features | over **25 %** | `suspicious` |
 | Uvanlig vekst | over **3×** | Advarsel, blokkerer ingenting |
+| ID-churn | full sync der under **20 %** av postene gjenkjennes på ekstern ID | `suspicious` — men reconciliation kjøres |
 
 **Skriving stoppes aldri** — nye data er som regel riktige. Det som stoppes er full reconciliation,
 altså det som markerer alt vi ikke så som «fjernet fra kilden». Objekter slettes aldri; de får
@@ -672,6 +673,14 @@ altså det som markerer alt vi ikke så som «fjernet fra kilden». Objekter sle
 > kjøring når kjøringen er et **komplett snapshot**, altså full sync. En inkrementell sync henter
 > kun det som er endret, og «3 poster» er da et helt normalt svar — ikke et datafall. Vakter som
 > gjelder uansett modus (andel avviste) er fortsatt aktive.
+
+> **ID-churn er den ene vakten som *ikke* stopper reconciliation.** De andre handler om at kilden
+> kan ha levert for lite; da er det riktig å la alt stå. ID-churn er motsatt: dataene er der, men
+> under nye ID-er. Lot vi reconciliation stå av, ville forrige generasjon blitt liggende aktiv ved
+> siden av den nye, og brukerne fått hvert objekt to ganger. Derfor rydder vi, og roper høyt.
+> Vakten ble laget etter DSB tilfluktsrom, der `lokalId` var ny for hvert uttrekk og hver full sync
+> opprettet 556 rader og fjernet 556 — med uendret antall aktive, så ingen annen vakt så det. Se
+> [Tilfluktsrom](#tilfluktsrom).
 
 ### Stale-deteksjon
 
@@ -802,6 +811,18 @@ Hele poenget er at NaboRadar ikke skal si mer enn kilden gjør.
   ikke et varsel.
 - **Areal, type og status finnes ikke i kilden**, og vi finner dem ikke på. Feltene vi har er
   `lokalId`, `romnr`, `plasser`, `adresse` (en stedsbeskrivelse, ikke en ren adresse) og punkt.
+- **`romnr` er identiteten, ikke `lokalId`.** `lokalId` ser ut som en varig UUID, men DSB genererer
+  den på nytt for hvert uttrekk: to uttrekk et døgn fra hverandre hadde **0 av 556** ID-er felles,
+  mens `romnr` hadde **556 av 556** og koordinatene var identiske til sju desimaler. Med `lokalId`
+  som nøkkel opprettet hver full sync 556 nye rader og markerte 556 gamle som fjernet, uten at
+  antallet aktive endret seg — så datafallvakten så ingenting.
+  Adresse og koordinat ble vurdert og forkastet som nøkkel: tre stedsbeskrivelser brukes av flere
+  rom, fire koordinater deles av to rom hver, og to par — romnr 2127/2128 på «TANGVALL» og
+  9983/17676 på «Tjørnahaugane 60» — deler *både* adresse og koordinat. En nøkkel av de feltene
+  ville slått sammen reelle rom. Mangler `romnr`, avvises rommet framfor at vi finner opp en ID.
+- **`datauttaksdato` brukes ikke som `sourceUpdatedAt`.** Den er tidspunktet uttrekket ble kjørt, med
+  millisekunder, og sier ingenting om rommet. Feltet inngår i innholdshashen, så å ta det med ville
+  gjort hver sync til 556 «updated» uten at noe var endret.
 - Seksjonen ligger **sist**, og faller bort når det ikke er treff — som alle andre seksjoner.
   Vi skriver ikke «ingen tilfluktsrom her», som ville lest som en påstand om områdets beredskap.
 

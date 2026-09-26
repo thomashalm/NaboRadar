@@ -167,6 +167,9 @@ export async function runSync<TRecord>(
       baseline: baseline ?? null,
       mode: options.mode,
       force: options.force,
+      // Skrivetellerne avslører om kilden har byttet ID på alt: alt nytt, ingenting gjenkjent.
+      inserted: result.inserted,
+      matched: result.updated + result.unchanged,
     });
     result.suspicious = verdict.suspicious;
     result.warnings = verdict.warnings;

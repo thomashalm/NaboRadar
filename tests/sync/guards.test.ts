@@ -94,6 +94,58 @@ describe("vakter mot silent failures", () => {
     });
   });
 
+  /**
+   * ID-churn: feilklassen de andre vaktene er blinde for, fordi antallet er uendret.
+   *
+   * Dette skjedde for DSB tilfluktsrom: `lokalId` var ny for hvert uttrekk, så hver full sync
+   * opprettet 556 rader og markerte 556 gamle som fjernet — med 556 aktive både før og etter.
+   */
+  describe("kilden bytter sine egne ID-er", () => {
+    it("flagger en full sync der ingenting gjenkjennes", () => {
+      const verdict = run({ baseline: 556, fetched: 556, records: 556, inserted: 556, matched: 0 });
+      expect(verdict.suspicious).toBe(true);
+      expect(verdict.warnings.join(" ")).toContain("gjenbruker ikke sine egne ID-er");
+    });
+
+    it("rydder likevel, slik at forrige generasjon ikke blir liggende aktiv ved siden av den nye", () => {
+      // Motsatt av datafall: dataene er der, bare under nye ID-er. Da er duplikater verre enn å rydde.
+      const verdict = run({ baseline: 556, fetched: 556, records: 556, inserted: 556, matched: 0 });
+      expect(verdict.allowReconcile).toBe(true);
+    });
+
+    it("godtar en normal kjøring der alt gjenkjennes", () => {
+      const verdict = run({ baseline: 556, fetched: 556, records: 556, inserted: 0, matched: 556 });
+      expect(verdict.suspicious).toBe(false);
+      expect(verdict.warnings).toEqual([]);
+    });
+
+    it("godtar reell vekst der de gamle fortsatt kjennes igjen", () => {
+      const verdict = run({ baseline: 500, fetched: 560, records: 560, inserted: 60, matched: 500 });
+      expect(verdict.suspicious).toBe(false);
+    });
+
+    it("flagger ikke den første kjøringen, der ingenting kan gjenkjennes", () => {
+      const verdict = run({ baseline: null, fetched: 556, records: 556, inserted: 556, matched: 0 });
+      expect(verdict.suspicious).toBe(false);
+    });
+
+    it("bruker ikke regelen på små datasett", () => {
+      const verdict = run({ baseline: 10, fetched: 10, records: 10, inserted: 10, matched: 0 });
+      expect(verdict.suspicious).toBe(false);
+    });
+
+    it("gjelder ikke incremental, som aldri er et komplett snapshot", () => {
+      const verdict = run({ mode: "incremental", baseline: 556, fetched: 30, records: 30, inserted: 30, matched: 0 });
+      expect(verdict.suspicious).toBe(false);
+    });
+
+    it("er av uten skrivetellere, slik at eldre kallere ikke endrer oppførsel", () => {
+      const verdict = run({ baseline: 556, fetched: 556, records: 556 });
+      expect(verdict.suspicious).toBe(false);
+      expect(verdict.warnings).toEqual([]);
+    });
+  });
+
   it("bruker ikke prosentregning på små referansetall", () => {
     expect(run({ baseline: 5, records: 2, fetched: 2 }).suspicious).toBe(false);
   });

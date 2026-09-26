@@ -22,7 +22,8 @@
     "sync:status": "tsx scripts/sync-status.ts",
     "alerts:check": "tsx scripts/alert-check.ts",
     "research:seed": "tsx scripts/seed-research.ts",
-    "review:backfill": "tsx scripts/research-review-backfill.ts"
+    "review:backfill": "tsx scripts/research-review-backfill.ts",
+    "fix:dsb-identitet": "tsx scripts/fix-dsb-identity.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
