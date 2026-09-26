@@ -9,9 +9,9 @@ import { SearchBox } from "@/components/search/SearchBox";
 import { areaParamsSchema } from "@/lib/area-params";
 import { buildAreaView } from "@/lib/area-view";
 import { getAdminSession } from "@/lib/admin/session";
-import { getAreaResearch } from "@/lib/admin/area-research";
 import { researchNear } from "@/lib/admin/research";
 import { internalFeatures } from "@/lib/admin/research-map";
+import { erStedsfunn } from "@/lib/admin/research-sort";
 import { DEFAULT_RADIUS_M } from "@/lib/geo/constants";
 import { getMapTileConfig } from "@/lib/map/config";
 
@@ -46,14 +46,17 @@ export default async function AdminAddressPage({ searchParams }: { searchParams:
 
   const { lat, lng, radius, sortering: sort } = parsed.data;
   const { events, storedFacts, lookupFacts } = buildAreaView({ lat, lng, radius, sort });
-  // Research og datakvalitet hentes samtidig, og hver for seg: feiler én, vises den andre.
-  const [research, funn] = await Promise.all([
-    getAreaResearch(session.client, { lat, lng, radiusM: radius }),
-    researchNear(session.client, { lat, lng, radiusM: radius }).catch((error: unknown) => {
+  /*
+   * Bare faktiske steder og prosjekter her. Datakvalitets- og kildesaker er research de også,
+   * men de hører hjemme i /admin/research — i en adressevisning ville de fortrengt funnene
+   * operatøren faktisk leter etter.
+   */
+  const funn = await researchNear(session.client, { lat, lng, radiusM: radius })
+    .then((alle) => alle.filter(erStedsfunn))
+    .catch((error: unknown) => {
       console.error("[admin/adresse] research_near feilet:", error);
       return null;
-    }),
-  ]);
+    });
 
   return (
     <AreaShell>
@@ -71,7 +74,7 @@ export default async function AdminAddressPage({ searchParams }: { searchParams:
         basePath="/admin/adresse"
         skolekrets={<SkolekretsNotis lat={lat} lng={lng} />}
         internalFeatures={funn ? internalFeatures(funn) : []}
-        extraSections={<InternSeksjon research={research} funn={funn} radiusM={radius} />}
+        leadSections={<InternSeksjon funn={funn} radiusM={radius} />}
       />
     </AreaShell>
   );

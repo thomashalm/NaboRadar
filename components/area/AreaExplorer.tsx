@@ -51,6 +51,15 @@ interface AreaExplorerProps {
    */
   skolekrets?: React.ReactNode;
   /**
+   * Innhold som legges **over** resultatet, før de offentlige seksjonene.
+   *
+   * Brukes av admin til intern research. Den ligger først fordi den er grunnen til at en
+   * operatør åpner admin-visningen i stedet for den offentlige — ikke fordi den er viktigere
+   * enn resultatet, men fordi den er det som ikke finnes andre steder. Den offentlige siden
+   * sender ingenting inn her.
+   */
+  leadSections?: React.ReactNode;
+  /**
    * Innhold som legges under resultatet, etter de offentlige seksjonene.
    *
    * Sømmen som lar admin vise «samme resultat + noe mer» uten en egen implementasjon av
@@ -145,6 +154,7 @@ export function AreaExplorer({
   lookupFacts: lookupFactsPromise,
   tiles,
   skolekrets,
+  leadSections,
   extraSections,
   internalFeatures = NO_INTERNAL,
   basePath,
@@ -396,6 +406,7 @@ export function AreaExplorer({
           onSelect={velgFraListe}
           ids={mapFeatureIds}
         >
+        {leadSections}
         <AreaFacts
           storedFacts={storedFactsPromise}
           lookupFacts={lookupFactsPromise}

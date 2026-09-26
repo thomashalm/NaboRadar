@@ -20,6 +20,8 @@ import {
   type VerificationStatus,
 } from "@/lib/admin/research-types";
 import { IkkeTilgang } from "@/components/admin/IkkeTilgang";
+import { Kildedekning } from "@/components/admin/Kildedekning";
+import { getKildedekning } from "@/lib/admin/area-research";
 
 export const metadata: Metadata = { title: "Research", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -58,6 +60,9 @@ export default async function ResearchPage({ searchParams }: { searchParams: Sea
   const q = første(params.q);
   const sort = første(params.sort) ?? "oppdatert";
   const valgt = Object.fromEntries(FILTRE.map((f) => [f.navn, første(params[f.navn])]));
+
+  // Kildestatus hentes ved siden av funnene; feiler den, vises resten.
+  const dekning = await getKildedekning(session.client).catch(() => null);
 
   let alle: ResearchItem[];
   try {
@@ -177,6 +182,8 @@ export default async function ResearchPage({ searchParams }: { searchParams: Sea
           ))}
         </ul>
       )}
+
+      <Kildedekning dekning={dekning} />
     </Ramme>
   );
 }

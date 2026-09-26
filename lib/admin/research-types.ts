@@ -95,6 +95,7 @@ export interface ResearchSource {
 /** Et funn nær et punkt, til admin-adressesøket. */
 export interface NearbyResearch {
   id: string;
+  item_type: ItemType;
   category: string;
   subcategory: string | null;
   title: string;
@@ -109,7 +110,11 @@ export interface NearbyResearch {
   sensitivity: Sensitivity;
   confidence: Level;
   interest_level: Level;
+  why_interesting: string | null;
+  notes: string | null;
   source_count: number;
+  /** Merket som god nok til å vurderes for den offentlige visningen. */
+  public_candidate: boolean;
 }
 
 /**

@@ -379,17 +379,19 @@ slik at «tilbake» går dit brukeren var. `fra` valideres mot en allowlist (`AR
 en sti fra URL-en skal ikke kunne bli en lenke vi ikke kontrollerer. Offentlige URL-er er uendret:
 `fra` settes bare når konteksten ikke er den offentlige siden.
 
-Den interne seksjonen har to deler, og de blandes bevisst ikke:
+**Intern research ligger øverst**, før det offentlige resultatet, gjennom `leadSections`-sømmen.
+Det er den som er grunnen til at en operatør åpner denne siden i stedet for `/omrade` — ikke fordi
+den er viktigere enn resultatet, men fordi den er det som ikke finnes andre steder.
 
-**Research i området** — kuraterte funn fra det private research-laget, innen valgt radius. Kun
-kategorier som faktisk har funn vises. Se [35. Privat research](#35-privat-research).
+Bare **faktiske steder og prosjekter** vises her. Funn om datakvalitet, lisenser og
+kildeproblemer er research de også, men de hører hjemme i `/admin/research`; i en adressevisning
+ville de fortrengt det operatøren leter etter. Filteret er `erStedsfunn` i
+`lib/admin/research-sort.ts`.
 
-**Datakvalitet i området** — antall per kategori innen radius, hvilke kategorier som er tomme, og
-en tillitsgrad utledet av kildenes helse — «lav» så snart én områdekilde er kritisk. Poenget er at
-en operatør ikke skal lese «ingen treff» som et svar når kilden er utdatert. Den er bygget på
-`features_count_near` og `provider_health()`, som begge finnes fra før, og bruker `assessAll` fra
-`lib/sync/health` slik at «stale» betyr det samme her som i `/admin` og i varslingen. Den handler
-om *kildene våre*, ikke om funn, og er derfor ikke en del av research.
+**Kildestatus og datadekning** lå tidligere her som «Datakvalitet i området». Den er flyttet til
+`/admin/research`: den sier noe om kildene våre, ikke om et bestemt sted, og i en adressevisning
+konkurrerte den med research. Logikken er beholdt — `tillitFor` og `assessAll` fra
+`lib/sync/health`, slik at «stale» betyr det samme som i `/admin` og i varslingen.
 
 **Admin kan ikke** skrive data direkte. Knappene legger en rad i `sync_requests`; sync-workeren
 utfører den. Det er derfor webappen ikke trenger en skrivenøkkel.
@@ -1704,9 +1706,23 @@ Planlagt produksjonsanlegg for eksplosiver
 PLANLAGT · MEDIUM SIKKERHET · INTERESSE HØY · 3 KILDER · INTERN
 ```
 
-Hele kortet er trykkflaten. Knappen dekker kortet i stedet for å pakke innholdet, fordi kortet
-inneholder en lenke — en lenke inne i en knapp er ugyldig. Det gir to tydelige tabstopp: velg
-punktet, og åpne funnet. Adressen ligger over trykkflaten, så den kan markeres og kopieres.
+**Rekkefølgen** er interesse → sikkerhet → avstand. Et høyinteressant funn to kilometer unna skal
+komme før et middels interessant i nabogården: i admin leter man etter hva som er verdt å vite,
+ikke etter hva som tilfeldigvis er nærmest. Kategorigruppene sorteres etter sitt beste funn, og
+tomme grupper finnes ikke.
+
+**Kortene er kompakte.** Kollapset viser de fem tingene som avgjør om man vil åpne dem: avstand
+(eller «Omfatter valgt sted»), tittel, adresse, interesse og sikkerhet, antall kilder og INTERN.
+Kategorien står i gruppeoverskriften og gjentas ikke på kortet. Alt annet — beskrivelse,
+`why_interesting`, verifisering, driftsstatus, notater og lenken til funnet — ligger bak
+«Detaljer».
+
+Tekniske databaseverdier vises ikke. «Ukjent status» er ikke informasjon, og utelates når
+`operational_status` er `unknown`; opphav og følsomhet hører hjemme i research-oversikten.
+
+**Kartvalg og «Detaljer» er to ulike handlinger med hver sin kontroll.** Å slå dem sammen ville
+betydd at et klikk i kartet åpnet alle kortene, eller at man ikke kunne lese detaljene uten å
+flytte kartet. Et valgt kort utheves, men åpner seg ikke.
 
 Funn med koordinat tegnes på **samme** kart som de offentlige objektene, gjennom
 `internalFeatures` og `lib/map/layers/internal-findings.ts`. Markøren er en annen *form*, ikke

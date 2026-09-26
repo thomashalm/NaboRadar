@@ -35,6 +35,24 @@ describe("research holdes utenfor det offentlige", () => {
     expect(disallow).toContain("/admin");
   });
 
+  it("setter intern research før det offentlige resultatet i admin", () => {
+    // Rekkefølgen er hele poenget med `leadSections`: research er grunnen til at en operatør
+    // åpner admin-visningen, og skal ikke ligge under alt det offentlige.
+    const explorer = les("components/area/AreaExplorer.tsx");
+    expect(explorer.indexOf("{leadSections}")).toBeGreaterThan(-1);
+    // lastIndexOf, ikke indexOf: den første forekomsten av «AreaFacts» er importlinjen.
+    expect(explorer.indexOf("{leadSections}")).toBeLessThan(explorer.lastIndexOf("<AreaFacts"));
+    const side = les("app/admin/adresse/page.tsx");
+    expect(side).toMatch(/leadSections=\{<InternSeksjon/);
+  });
+
+  it("holder datakvalitetsblokken utenfor adressevisningen", () => {
+    // Kildestatus er drift- og dekningsinformasjon, ikke et funn. Den hører hjemme i
+    // research-oversikten, der den ikke konkurrerer med faktiske steder.
+    expect(les("app/admin/adresse/page.tsx")).not.toMatch(/Kildedekning|getKildedekning/);
+    expect(les("app/admin/research/page.tsx")).toMatch(/Kildedekning/);
+  });
+
   it("gir den offentlige resultatsiden ingen vei til research", () => {
     const side = les("app/omrade/page.tsx");
     expect(side).not.toMatch(/research/i);

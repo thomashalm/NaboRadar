@@ -12,6 +12,10 @@ import type { NearbyResearch } from "@/lib/admin/research-types";
  */
 const EGNE_HJEMS: NearbyResearch = {
   id: "a607dcb4-9c27-4dd8-b77b-63a31ea038fd",
+  item_type: "finding",
+  why_interesting: null,
+  notes: null,
+  public_candidate: false,
   category: "Omsorg / bofellesskap",
   subcategory: null,
   title: "Mulig omsorgsrelatert virksomhet",
