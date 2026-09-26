@@ -55,6 +55,21 @@ describe("research holdes utenfor det offentlige", () => {
     expect(les("app/admin/kart/page.tsx")).toMatch(/robots: \{ index: false, follow: false \}/);
   });
 
+  it("holder de avanserte filtrene bak «Filtre» i førstebildet", () => {
+    // Kartet er hovedflaten: interesse, sikkerhet, status og verifisering skal ikke stå som
+    // pillerader i førstebildet, men inne i panelet som åpnes.
+    const kart = les("components/admin/ResearchKart.tsx");
+    const panel = kart.slice(kart.indexOf("function Filterpanel"));
+    const førstebilde = kart.slice(0, kart.indexOf("function Filterpanel"));
+    for (const felt of ["VERIFICATION_STATUSES", "OPERATIONAL_STATUSES", "SORTERINGER"]) {
+      expect(panel).toContain(felt);
+      expect(førstebilde).not.toContain(`valg={${felt}`);
+    }
+    // Søk, kategori og kommune står derimot synlig.
+    expect(førstebilde).toContain("Alle kategorier");
+    expect(førstebilde).toContain("Alle kommuner");
+  });
+
   it("henter kartdata bare med admins egen sesjon", () => {
     const lag = les("lib/admin/research-map-query.ts");
     expect(lag).toMatch(/^import "server-only";/m);

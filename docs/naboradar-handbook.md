@@ -390,6 +390,19 @@ Avstandssortering gir ikke mening uten et søkepunkt. En ødelagt URL-verdi gir 
 **URL-en er tilstanden.** Bare det som avviker fra standard havner i query-strengen, så
 `/admin/kart?kategori=datasenter&drift=planned` er et delbart utsnitt og fram/tilbake virker.
 
+**Førstebildet er kart-først.** Bare det man navigerer med står synlig — søk, kategori og
+kommune. Interesse, sikkerhet, status, verifisering, kandidat, undertype og sortering ligger bak
+«Filtre (n)». Et kartverktøy som åpner med tolv valgknapper tvinger deg til å bla forbi et skjema
+for å komme til kartet; målt på 375 px starter kartet nå 332 px nede.
+
+Det man *har* valgt vises alltid, som chips man kan fjerne enkeltvis — skjulte filtre man ikke
+ser er verre enn synlige man ikke trenger. Søk, kategori og kommune er ikke med som chips, siden
+de allerede står i hvert sitt felt. Undertype vises bare når den valgte kategorien faktisk deler
+seg i undertyper, og det finnes flere enn én i resultatsettet.
+
+På mobil er kart og liste to visninger av samme datasett, med en veksler — ikke begge samtidig.
+På desktop står de side om side, med sidebaren på 336 px og kartet på resten (77 % ved 1440 px).
+
 **Klynging** er nødvendig på nasjonalt nivå: anleggene ligger tett i Oslo og Rogaland. Klikk på
 en klynge zoomer inn til den sprer seg — den åpner aldri et vilkårlig funn. Enkeltpunktene bruker
 samme rolige uttrykk som de interne markørene i adressevisningen, og interessenivået styrer

@@ -1,5 +1,8 @@
 import {
   LEVELS,
+  LEVEL_LABEL,
+  OPERATIONAL_LABEL,
+  VERIFICATION_LABEL,
   OPERATIONAL_STATUSES,
   VERIFICATION_STATUSES,
   type Level,
@@ -157,4 +160,62 @@ export function kartHref(f: Kartfilter): string {
 /** Om filteret er urørt. Brukes til å avgjøre om «Nullstill» skal vises. */
 export function erStandard(f: Kartfilter): boolean {
   return skrivFilter(f).toString() === "";
+}
+
+/**
+ * De avanserte filtrene, som chips man kan fjerne enkeltvis.
+ *
+ * Søk, kategori og kommune er ikke med: de står synlig i sine egne felt, og ville blitt vist to
+ * ganger. Poenget med chipsene er å gjøre synlig det som ellers ligger skjult bak «Filtre» —
+ * man skal alltid kunne se hvorfor man får akkurat disse treffene.
+ */
+export interface Filterchip {
+  id: string;
+  label: string;
+  /** Endringen som fjerner nettopp dette filteret. */
+  fjern: Partial<Kartfilter>;
+}
+
+export function avanserteChips(f: Kartfilter): Filterchip[] {
+  const chips: Filterchip[] = [];
+  const nivå = (v: Level) => LEVEL_LABEL[v];
+
+  if (f.subkategori) chips.push({ id: "subkategori", label: f.subkategori, fjern: { subkategori: undefined } });
+  if (f.interesse.length !== LEVELS.length)
+    chips.push({ id: "interesse", label: `${f.interesse.map(nivå).join(", ")} interesse`, fjern: { interesse: [...LEVELS] } });
+  if (f.confidence.length !== LEVELS.length)
+    chips.push({ id: "confidence", label: `${f.confidence.map(nivå).join(", ")} sikkerhet`, fjern: { confidence: [...LEVELS] } });
+  if (f.drift.length !== OPERATIONAL_STATUSES.length)
+    chips.push({ id: "drift", label: f.drift.map((d) => OPERATIONAL_LABEL[d]).join(", "), fjern: { drift: [...OPERATIONAL_STATUSES] } });
+  if (f.verifisering.length !== VERIFISERING_STANDARD.length ||
+      !VERIFISERING_STANDARD.every((v) => f.verifisering.includes(v)))
+    chips.push({
+      id: "verifisering",
+      label: f.verifisering.map((v) => VERIFICATION_LABEL[v]).join(", "),
+      fjern: { verifisering: [...VERIFISERING_STANDARD] },
+    });
+  if (f.kandidat !== undefined)
+    chips.push({
+      id: "kandidat",
+      label: f.kandidat ? "Kandidat for offentlig visning" : "Ikke kandidat",
+      fjern: { kandidat: undefined },
+    });
+  if (!f.kunMedPunkt) chips.push({ id: "punkt", label: "Også uten kartpunkt", fjern: { kunMedPunkt: true } });
+  if (f.sortering !== "interesse")
+    chips.push({ id: "sortering", label: `Sortert på ${f.sortering}`, fjern: { sortering: "interesse" } });
+  return chips;
+}
+
+/** Antallet som vises i «Filtre (n)». */
+export function antallAvanserte(f: Kartfilter): number {
+  return avanserteChips(f).length;
+}
+
+/**
+ * Om undertype-feltet er relevant. Det vises bare når den valgte kategorien faktisk deler seg i
+ * undertyper — ellers står det som et tomt felt og tar plass uten å gjøre noe.
+ */
+export function harUndertyper(slug: string | undefined): boolean {
+  const g = gruppeFor(slug);
+  return g !== null && (g.subkategorier?.length ?? 0) > 0;
 }

@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   KATEGORIGRUPPER,
+  antallAvanserte,
+  avanserteChips,
+  harUndertyper,
   VERIFISERING_STANDARD,
   erStandard,
   gruppeFor,
@@ -98,5 +101,64 @@ describe("kategorimapping", () => {
       expect(g.kategorier.length).toBeGreaterThan(0);
       expect(g.label.length).toBeGreaterThan(0);
     }
+  });
+});
+
+/**
+ * Chipsene som viser hva som er valgt.
+ *
+ * De avanserte filtrene ligger bak «Filtre», og det man ikke ser må man kunne se at man har
+ * satt — ellers blir treffene uforklarlige. Søk, kategori og kommune er ikke med, fordi de
+ * står synlig i hvert sitt felt.
+ */
+describe("aktive filterchips", () => {
+  it("er tomme når ingenting avansert er valgt", () => {
+    expect(avanserteChips(lesFilter({}))).toEqual([]);
+    expect(antallAvanserte(lesFilter({}))).toBe(0);
+    // Kategori og kommune står i egne felt og skal ikke dupliseres som chips.
+    expect(avanserteChips(lesFilter({ kategori: "datasenter", kommune: "Oslo", sok: "Tofte" }))).toEqual([]);
+  });
+
+  it("viser status, sikkerhet og interesse", () => {
+    const chips = avanserteChips(lesFilter({ drift: "planned", confidence: "high" }));
+    expect(chips.map((c) => c.id).sort()).toEqual(["confidence", "drift"]);
+    expect(chips.find((c) => c.id === "drift")!.label).toBe("Planlagt");
+    expect(antallAvanserte(lesFilter({ drift: "planned", confidence: "high" }))).toBe(2);
+  });
+
+  it("gir hver chip endringen som fjerner nettopp den", () => {
+    const filter = lesFilter({ drift: "planned", confidence: "high" });
+    const chip = avanserteChips(filter).find((c) => c.id === "drift")!;
+    const etter = { ...filter, ...chip.fjern };
+    expect(avanserteChips(etter).map((c) => c.id)).toEqual(["confidence"]);
+  });
+
+  it("viser at avviste funn er slått på", () => {
+    const chips = avanserteChips(lesFilter({ verifisering: "rejected" }));
+    expect(chips.map((c) => c.id)).toContain("verifisering");
+    // Og ikke når standardvalget er uendret.
+    expect(avanserteChips(lesFilter({})).map((c) => c.id)).not.toContain("verifisering");
+  });
+
+  it("teller sortering og kartpunkt som avanserte valg", () => {
+    expect(antallAvanserte(lesFilter({ sortering: "kommune" }))).toBe(1);
+    expect(antallAvanserte(lesFilter({ punkt: "alle" }))).toBe(1);
+  });
+});
+
+describe("undertype vises bare når den betyr noe", () => {
+  it("er skjult uten kategori", () => {
+    expect(harUndertyper(undefined)).toBe(false);
+  });
+
+  it("er skjult for kategorier uten undertyper", () => {
+    // Forsvar har ingen undertype-avgrensning i mappingen.
+    expect(harUndertyper("forsvar")).toBe(false);
+    expect(harUndertyper("va")).toBe(false);
+  });
+
+  it("er synlig for kategorier som deler seg i undertyper", () => {
+    expect(harUndertyper("datasenter")).toBe(true);
+    expect(harUndertyper("industri")).toBe(true);
   });
 });
