@@ -5309,4 +5309,727 @@ export const FUNN: Funn[] = [
       },
     ],
   },
+
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Stargate Norway / Nscale Narvik, Kvanndal",
+    description:
+      "AI-infrastrukturprosjekt fra OpenAI, Nscale og Aker ASA i Kvanndal ved Narvik. Oppgitt til " +
+      "100 000 NVIDIA-GPU-er innen utgangen av 2026, med 230 MW i første fase og mulig utvidelse til " +
+      "520 MW, utelukkende på fornybar kraft.",
+    municipality: "Narvik",
+    address: "Kvanndal",
+    postal_code: "8530",
+    city: "Bjerkvik",
+    latitude: 68.53,
+    longitude: 17.6,
+    verification_status: "partially_verified",
+    operational_status: "under_construction",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Det desidert største digitale infrastrukturprosjektet i Norge. 520 MW i full utbygging er mer " +
+      "enn alle andre anlegg i dette datasettet til sammen, i en kommune med 22 000 innbyggere.",
+    notes:
+      "Koordinaten er grov og satt fra stedsangivelsen Kvanndal ved Bjerkvik, ikke fra en verifisert " +
+      "adresse. Effekttallene er prosjekttall fra aktørene, ikke konsesjonsgitt kapasitet. Skill " +
+      "mellom første fase (230 MW) og oppgitt sluttkapasitet (520 MW).",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Stargate Norway / Nscale Narvik, Kvanndal",
+        source_url: "https://www.datacentermap.com/norway/narvik/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Nscale, OpenAI og Aker, adresse Kvanndal, 8530 Bjerkvik.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Google Skien",
+    description:
+      "Google bygger datasenter i Skien med en oppgitt investering på 600 millioner euro, ventet i " +
+      "drift i 2026.",
+    municipality: "Skien",
+    address: "Skådalsvegen",
+    postal_code: "3721",
+    city: "Skien",
+    latitude: 59.2723,
+    longitude: 9.48707,
+    verification_status: "partially_verified",
+    operational_status: "under_construction",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "En hyperskala-aktør som bygger fysisk i Norge. Investeringsbeløpet gjør det til et av de " +
+      "største industriprosjektene i Telemark.",
+    notes:
+      "Effekt er ikke oppgitt, bare investeringsbeløp. Koordinaten er Skådalsvegen 361, nærmeste " +
+      "husnummer — tomtens eget punkt er ikke stedfestet.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Google Skien",
+        source_url: "https://www.datacentermap.com/norway/skien/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Google, adresse Skådalsvegen, 3721 Skien.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "BW Frier Vest, Bamble",
+    description:
+      "Planlagt datasenter på 250 MW i Frier Vest industripark i Grenland, med fornybar kraft og " +
+      "dypvannskai.",
+    municipality: "Bamble",
+    address: "Frier Vest næringspark",
+    postal_code: "3960",
+    city: "Stathelle",
+    latitude: 59.04511,
+    longitude: 9.69821,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "250 MW i Grenland, i et industriområde som allerede har tung prosessindustri og kaianlegg.",
+    notes:
+      "Koordinaten er tettstedet Stathelle, ikke næringsparkens egen adresse.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: BW Frier Vest, Bamble",
+        source_url: "https://www.datacentermap.com/norway/skien/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør BW Velora, adresse Frier Vest næringspark, 3960 Stathelle.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Nscale Skien",
+    description:
+      "Planlagt datasenter på 96 MW i Skien, utviklet av Aker Nscale for AI-arbeidslast.",
+    municipality: "Skien",
+    address: "Skien",
+    postal_code: "3721",
+    city: "Skien",
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "high",
+    why_interesting:
+      "Sammen med Google og BW Frier Vest gjør dette Grenland til et av de tyngste " +
+      "datasenterområdene i landet.",
+    notes:
+      "Uten koordinat: kilden oppgir bare «within Skien». Ingen adresse, ingen tomt.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Nscale Skien",
+        source_url: "https://www.datacentermap.com/norway/skien/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Nscale / Aker, adresse Skien, 3721 Skien.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Tonstad DataPark, Sirdal",
+    description:
+      "Datasentercampus i Sirdal, overtatt av GreenScale. Oppgitt til 420 000 m² tomt og 300 MW " +
+      "nettkapasitet.",
+    municipality: "Sirdal",
+    address: "Tonstad",
+    postal_code: "4440",
+    city: "Tonstad",
+    latitude: 58.66421,
+    longitude: 6.7165,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "300 MW nettkapasitet i en kraftkommune med 1 800 innbyggere. Tomtestørrelsen alene gjør det " +
+      "til en av de største næringsetableringene i Agder.",
+    notes:
+      "Merk skillet: 300 MW er oppgitt *nettkapasitet*, ikke installert effekt eller IT-last. " +
+      "Koordinaten er tettstedet Tonstad.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Tonstad DataPark, Sirdal",
+        source_url: "https://www.datacentermap.com/norway/tonstad/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør GreenScale, adresse Tonstad, 4440 Tonstad.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "T1 Energy Mo i Rana",
+    description:
+      "Datasentertomt på rundt 86 000 m² i Mo i Rana, med 50 MW sikret nettkraft for AI-infrastruktur.",
+    municipality: "Rana",
+    address: "Terminalveien 22",
+    postal_code: "8624",
+    city: "Mo i Rana",
+    latitude: 66.30513,
+    longitude: 14.11593,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Mo i Rana har kraftoverskudd og industrihistorie, og 50 MW sikret nett er et konkret fortrinn " +
+      "som allerede er på plass.",
+    notes:
+      "50 MW er oppgitt som sikret nettkraft, ikke som installert kapasitet.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: T1 Energy Mo i Rana",
+        source_url: "https://www.datacentermap.com/norway/mo-i-rana/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør T1 Energy, adresse Terminalveien 22, 8624 Mo i Rana.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Terakraft Sauda I, Hellandsbygd",
+    description:
+      "Datasenter på 10 MW i et ombygd vannkraftverk fra 1919, nedlagt i 2008. Terakrafts " +
+      "flaggskipanlegg.",
+    municipality: "Sauda",
+    address: "Handelandsvegen 140",
+    postal_code: "4200",
+    city: "Hellandsbygd",
+    latitude: 59.68485,
+    longitude: 6.51957,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Et 100 år gammelt kraftverk gjort om til datasenter — det tydeligste eksempelet på at " +
+      "bransjen følger gammel kraftinfrastruktur.",
+    notes: "10 MW er oppgitt som dagens kapasitet.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Terakraft Sauda I, Hellandsbygd",
+        source_url: "https://www.datacentermap.com/norway/sauda/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Terakraft, adresse Handelandsvegen 140, 4200 Hellandsbygd.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Green Mountain RJU1-Rjukan",
+    description: "Green Mountains anlegg på Rjukan, wholesale colocation.",
+    municipality: "Tinn",
+    address: "Svaddevegen 161",
+    postal_code: "3660",
+    city: "Rjukan",
+    latitude: 59.88108,
+    longitude: 8.66942,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Rjukan er selve symbolet på norsk vannkraftindustri, og anlegget viderefører den bruken.",
+    notes: "Effekt og areal er ikke oppgitt i kilden.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Green Mountain RJU1-Rjukan",
+        source_url: "https://www.datacentermap.com/norway/rjukan/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Green Mountain, adresse Svaddevegen 161, 3660 Rjukan.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Lefdal Mine Datacenter, Kjølsdalen",
+    description:
+      "Datasenter i en nedlagt olivingruve i Nordfjord, med fri kjøling fra fjorden og 100 % " +
+      "fornybar kraft. Lefdal Mine Datacenter AS er Nkom-registrert.",
+    municipality: "Stad",
+    address: "Nordfjordvegen 7300",
+    postal_code: "6776",
+    city: "Kjølsdalen",
+    latitude: 61.93203,
+    longitude: 5.50621,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Et datasenter inne i en gruve er den mest særegne anleggstypen i Norge, og et av de få norske " +
+      "anleggene med internasjonal kjennskap.",
+    notes: "Effekt og areal er ikke oppgitt i den gjennomgåtte kilden.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Lefdal Mine Datacenter, Kjølsdalen",
+        source_url: "https://www.datacentermap.com/norway/maloy/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Lefdal Mine Datacenter, adresse Nordfjordvegen 7300, 6776 Kjølsdalen.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Bulk N01 Campus, Øvrebø",
+    description:
+      "Bulks nasjonale campus i Øvrebø, med flere bygg: DCM100 med 1 500 m² og inntil 4 MW, DCM101 " +
+      "med 1 500 m² white space over fire haller og inntil 640 rack, og DCM102 med 42 MW IT-kapasitet " +
+      "bygget for GPU- og CPU-infrastruktur med høy tetthet. Fire katalogoppføringer, ett campus.",
+    municipality: "Vennesla",
+    address: "Stølevegen 39",
+    postal_code: "4715",
+    city: "Øvrebø",
+    latitude: 58.25757,
+    longitude: 7.89205,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Det største colocation-campuset i Sør-Norge, og et av de få norske anleggene som eksplisitt " +
+      "er bygget for GPU-tetthet.",
+    notes:
+      "Skill mellom tallene: 42 MW gjelder IT-kapasitet i DCM102 alene, ikke hele campuset. " +
+      "1 500 m² gjelder per bygg. Erstatter det tidligere, tynnere funnet for samme sted.",
+    tidligere_titler: ["Bulk N01 Data Center Campus, Vennesla"],
+    kilder: [
+      {
+        source_name: "DataCenterMap: Bulk N01 Campus, Øvrebø",
+        source_url: "https://www.datacentermap.com/norway/kristiansand/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Bulk Infrastructure, adresse Stølevegen 39, 4715 Øvrebø.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Gigahost, Søndre Kullerød i Sandefjord",
+    description:
+      "Tre datasenteroppføringer — DC1, DC2 og DC3 — på samme adresse i Sandefjord. Gigahost AS er " +
+      "Nkom-registrert.",
+    municipality: "Sandefjord",
+    address: "Søndre Kullerød 2",
+    postal_code: "3241",
+    city: "Sandefjord",
+    latitude: 59.17565,
+    longitude: 10.21416,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting: "Den største colocation-aktøren i Vestfold.",
+    notes:
+      "Tre katalogoppføringer, én adresse. Om det er tre separate haller i samme bygg eller tre " +
+      "oppføringer av samme anlegg, går ikke fram av kilden.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Gigahost, Søndre Kullerød i Sandefjord",
+        source_url: "https://www.datacentermap.com/norway/sandefjord/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Gigahost AS, adresse Søndre Kullerød 2, 3241 Sandefjord.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Arcem Husnes, Grøn Næringspark",
+    description:
+      "Planlagt datasenter på 90 MW i Grøn Næringspark, med 40 MW i første fase ventet i 2031, på " +
+      "60 000 m² tomt.",
+    municipality: "Kvinnherad",
+    address: "Grøn Næringspark",
+    postal_code: "5460",
+    city: "Husnes",
+    latitude: 59.86377,
+    longitude: 5.74533,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "90 MW i Kvinnherad, i samme næringspark som et annet planlagt anlegg. To store prosjekter i " +
+      "én park i en kommune med 13 000 innbyggere.",
+    notes:
+      "Skill mellom første fase (40 MW, 2031) og oppgitt sluttkapasitet (90 MW). Koordinaten er " +
+      "tettstedet Husnes, ikke parkens egen adresse.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Arcem Husnes, Grøn Næringspark",
+        source_url: "https://www.datacentermap.com/norway/husnes/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Arcem, Inc., adresse Grøn Næringspark, 5460 Husnes.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "NDC Husnes, Grøn Næringspark",
+    description:
+      "Planlagt datasenter i Grøn Næringspark med 50 MW i første fase og mulighet for å skalere til " +
+      "150 MW, på fornybar kraft.",
+    municipality: "Kvinnherad",
+    address: "Grøn Næringspark",
+    postal_code: "5460",
+    city: "Husnes",
+    latitude: 59.86377,
+    longitude: 5.74533,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Sammen med Arcem gir dette inntil 240 MW planlagt i én næringspark på Husnes.",
+    notes:
+      "Skill mellom første fase (50 MW) og oppgitt potensial (150 MW). Eget prosjekt, ikke samme " +
+      "anlegg som Arcem, men samme park.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: NDC Husnes, Grøn Næringspark",
+        source_url: "https://www.datacentermap.com/norway/husnes/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Reikna AS, adresse Grøn Næringspark, 5460 Husnes.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Green Mountain Halden, Saugbrug",
+    description:
+      "Mulig datasenterutvikling på Norske Skog Saugbrugs industriområde, som et samarbeid mellom " +
+      "Green Mountain og Norske Skog.",
+    municipality: "Halden",
+    address: "Saugbrug industriområde",
+    postal_code: "1772",
+    city: "Halden",
+    latitude: 59.12347,
+    longitude: 11.38597,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "medium",
+    why_interesting:
+      "Enda et tilfelle av datasenter på en eksisterende industritomt med kraft og nett fra før.",
+    notes:
+      "Beskrevet som «potential development» — ikke bekreftet prosjekt. Koordinaten er Violgata 8 i " +
+      "Halden, ikke industriområdets eget punkt.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Green Mountain Halden, Saugbrug",
+        source_url: "https://www.datacentermap.com/norway/halden/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Green Mountain, adresse Saugbrug industriområde, 1772 Halden.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Halden DC01",
+    description:
+      "Colocation-anlegg i Halden med 250 kW tilgjengelig kapasitet, ISO 27001-sertifisert, eid av " +
+      "Storespeed AS med Magnora ASA i ryggen.",
+    municipality: "Halden",
+    address: "Violgata 8",
+    postal_code: "1776",
+    city: "Halden",
+    latitude: 59.12347,
+    longitude: 11.38597,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "low",
+    why_interesting:
+      "Et lite, men reelt anlegg. 250 kW gjør det til det minste dokumenterte i datasettet.",
+    notes:
+      "Merk størrelsen: 250 kW, ikke MW. Storespeed er Nkom-registrert, og Magnora står også bak " +
+      "AI-datasenteret på Nedre Rommen i Oslo.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Halden DC01",
+        source_url: "https://www.datacentermap.com/norway/halden/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Storespeed AS, adresse Violgata 8, 1776 Halden.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "PolarDC HER01, Herøya",
+    description: "Datasenter i Herøya industripark i Porsgrunn.",
+    municipality: "Porsgrunn",
+    address: "Fjordgata 48",
+    postal_code: "3936",
+    city: "Porsgrunn",
+    latitude: 59.11356,
+    longitude: 9.63635,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Herøya er Norges største industripark, med kraft og infrastruktur fra før.",
+    notes:
+      "Effekt og areal er ikke oppgitt. DataCenterMap fører anlegget under markedet «Skien», men det " +
+      "ligger i Porsgrunn kommune.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: PolarDC HER01, Herøya",
+        source_url: "https://www.datacentermap.com/norway/skien/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Polar Data Centers, adresse Fjordgata 48, 3936 Porsgrunn.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
 ];
