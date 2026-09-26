@@ -3861,24 +3861,37 @@ export const FUNN: Funn[] = [
   },
   {
     category: "Datasenter / industri / tekniske anlegg",
-    item_type: "note",
-    title: "Markedsbildet: hvem har flest fysiske anlegg i Norge",
+    item_type: "finding",
+    title: "Nordavind DC Sites: tolv anlegg i Innlandet",
     description:
-      "Nasjonal oversikt, til å forstå aktørene. Nordavind DC Sites har ti registrerte " +
-      "fasiliteter, alle i innlandet. Green Mountain har tre (Rennesøy, Rjukan og Ytre " +
-      "Enebakk). Vaultica har OSL01 i Oslo, OSL02 i Nordre Follo og OSL03 i Lillestrøm. " +
-      "Bulk har OS-IX i Oslo og N01-campus i Øvrebø. GlobalConnect har fem (tre i Oslo, " +
-      "Stavanger og Trondheim).",
+      "Den operatøren i Norge med flest registrerte fasiliteter: tolv anlegg, alle i Innlandet og " +
+      "Trøndelag-randen. Kommunene er løst fra postnummer: Alvdal, Elverum (to anlegg), Hamar " +
+      "(Heggvin), Grue (Kirkenær), Vågå (Lalm), Østre Toten (Krabyskogen), Ringsaker (Rudshøgda), " +
+      "Sør-Odal (Slomarka og Tronbøl), Tynset (Tylldalen) og Rendalen (Åkrestrømmen). " +
+      "Til sammenligning har Green Mountain fem, GlobalConnect fem, Vaultica fire og Bulk to.",
     municipality: null,
     verification_status: "verified_public_source",
     operational_status: "active",
     sensitivity: "internal_only",
     confidence: "medium",
-    interest_level: "low",
+    interest_level: "medium",
     notes:
-      "Ingen av disse ligger i Oslo, Bærum eller Asker utover det som allerede er registrert. " +
-      "Oversikten står her for å hindre at samme kartlegging gjøres om igjen.",
+      "Ett funn for hele nettverket, ikke tolv: adressene i PeeringDB er stedsnavn uten husnummer, " +
+      "så ingen av dem lar seg geokode presist. Kommunene er sikre (fra postnummer), koordinatene " +
+      "er det ikke. Effekt og areal er ikke oppgitt for noen av anleggene. Dekker samtidig " +
+      "DataCenterMap-markedene Elverum, Harpefoss og Bismo, som ikke lot seg åpne.",
+    tidligere_titler: ["Markedsbildet: hvem har flest fysiske anlegg i Norge"],
     kilder: [
+      {
+        source_name:
+          "Kartverket adresse-API: postnummer til kommune for de tolv anleggene",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Hvert postnummer fra PeeringDB slått opp mot Kartverket for å fastslå kommune. Adressene er stedsnavn uten husnummer og gir ikke presis koordinat.",
+      },
       {
         source_name:
           "PeeringDB: 10 fasiliteter registrert på Nordavind DC Sites",
@@ -5255,9 +5268,9 @@ export const FUNN: Funn[] = [
     item_type: "note",
     title: "Dekningsstatus for den nasjonale datasenterkartleggingen",
     description:
-      "Av 112 katalogoppføringer nasjonalt er omtrent 74 åpnet og vurdert enkeltvis i de " +
-      "gjennomgåtte markedene. Rundt 38 gjenstår, fordelt på Kristiansand, Skien, " +
-      "Sandefjord, Halden, Husnes og en rekke markeder med ett anlegg hver.",
+      "Om lag 100 av 112 katalogoppføringer er åpnet og vurdert enkeltvis. De resterende tolv " +
+      "ligger i små enkeltmarkeder og lot seg ikke åpne: DataCenterMap nådde grensen for gratis " +
+      "sidevisninger.",
     municipality: null,
     verification_status: "verified_public_source",
     operational_status: "active",
@@ -5265,8 +5278,8 @@ export const FUNN: Funn[] = [
     confidence: "high",
     interest_level: "low",
     notes:
-      "Neste steg er å åpne de gjenstående markedene. De er identifisert med navn og antall, " +
-      "så arbeidet er avgrenset og kan tas opp igjen uten ny discovery.",
+      "De gjenstående markedene er navngitt i det egne funnet om gratisgrensen. Elverum og Hamar " +
+      "er dekket gjennom PeeringDB i stedet.",
     kilder: [
       {
         source_name: "DataCenterMap: markeder gjennomgått i denne runden",
@@ -6029,6 +6042,50 @@ export const FUNN: Funn[] = [
         source_date: "2026-09-26",
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+
+  {
+    category: "Kilder",
+    item_type: "data_issue",
+    title: "DataCenterMap-dekningen stopper på gratisgrensen",
+    description:
+      "Rundt 12 av 112 katalogoppføringer er ikke åpnet enkeltvis, fordi DataCenterMap nådde " +
+      "grensen for gratis sidevisninger. Grensen er katalogens egen og respekteres; den " +
+      "omgås ikke. De gjenstående markedene er navngitt: Ørnes, Masfjordnes, Sarpsborg, " +
+      "Korgen, Kristiansund, Molde, Moss, Sand, Fyresdal, Røyrvik, Kirkebygden, Mandal, " +
+      "Forus, Gjøvik og Hermansverk.",
+    municipality: null,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    notes:
+      "Neste spor, i prioritert rekkefølge: PeeringDB dekker allerede Elverum og Hamar; " +
+      "operatørsøk per kommune i lokalpresse; og en betalt dataeksport fra DataCenterMap hvis " +
+      "kartleggingen skal bli helt komplett. Markedene har ett anlegg hver, så omfanget er lite " +
+      "— men det er reelt uåpnet, ikke antatt tomt.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: grense for gratis sidevisninger nådd",
+        source_url: "https://www.datacentermap.com/research/limited/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "«You have reached the limit of free page views.» Katalogen tilbyr et gratisnivå for bla og henviser profesjonell bruk til betalte dataeksporter. Grensen ble nådd etter at rundt 100 av 112 oppføringer var åpnet.",
+      },
+      {
+        source_name: "PeeringDB: dekning av de gjenstående kommunene",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Elverum (to Nordavind-anlegg), Molde/Eide (Troll Housing) og Hamar (Nordavind Heggvin) er dekket gjennom PeeringDB uten katalogen. De øvrige gjenstående markedene har ingen PeeringDB-fasilitet.",
       },
     ],
   },
