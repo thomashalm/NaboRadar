@@ -16,6 +16,26 @@ export function isWithinNorway(lat: number, lng: number): boolean {
 
 const firstValue = (value: unknown) => (Array.isArray(value) ? value[0] : value);
 
+/**
+ * Sidene som kan vise en søkekontekst. Resultatvisningen finnes på to steder — den offentlige
+ * `/omrade` og driftens `/admin/adresse` — og all navigasjon inne i den (radius, sortering, endre
+ * sted, tilbake fra en sak) må bli liggende der brukeren er. Uten dette blir en admin sendt ut på
+ * den offentlige siden ved første klikk, og mister den interne delen av resultatet.
+ *
+ * Listen er en allowlist, ikke en gjetning: basestien kommer fra en URL-parameter, og en åpen
+ * sti derfra ville vært en lenke vi ikke kontrollerer.
+ */
+export const AREA_BASE_PATHS = ["/omrade", "/admin/adresse"] as const;
+export type AreaBasePath = (typeof AREA_BASE_PATHS)[number];
+export const DEFAULT_BASE_PATH: AreaBasePath = "/omrade";
+
+export function resolveBasePath(value: unknown): AreaBasePath {
+  const first = firstValue(value);
+  return (AREA_BASE_PATHS as readonly string[]).includes(String(first))
+    ? (first as AreaBasePath)
+    : DEFAULT_BASE_PATH;
+}
+
 const coordinate = (min: number, max: number) =>
   z.preprocess(
     firstValue,
@@ -62,16 +82,23 @@ export const areaParamsSchema = z.object({
     .preprocess(firstValue, z.string().optional())
     .transform((v): AreaSort => (v === "nyeste" ? "newest" : "distance"))
     .catch("distance" as const),
+  /** URL: fra=/admin/adresse. Hvilken resultatvisning konteksten hører til. */
+  fra: z.preprocess(firstValue, z.unknown()).transform(resolveBasePath).catch(DEFAULT_BASE_PATH),
 });
 
 export type AreaParams = z.infer<typeof areaParamsSchema>;
 
-interface AreaContext {
+export interface AreaContext {
   lat: number;
   lng: number;
   radius: number;
   label?: string | null;
   sort?: AreaSort;
+  /**
+   * Hvilken resultatvisning konteksten hører til. Standard er den offentlige siden, så
+   * offentlige URL-er ser uendret ut — parameteren dukker bare opp der den faktisk trengs.
+   */
+  basePath?: AreaBasePath;
 }
 
 function contextSearch(params: AreaContext): URLSearchParams {
@@ -85,11 +112,19 @@ function contextSearch(params: AreaContext): URLSearchParams {
   return search;
 }
 
-export function buildAreaHref(params: AreaContext, basePath = "/omrade"): string {
-  return `${basePath}?${contextSearch(params).toString()}`;
+export function buildAreaHref(params: AreaContext): string {
+  return `${params.basePath ?? DEFAULT_BASE_PATH}?${contextSearch(params).toString()}`;
 }
 
-/** Detaljside med søkekonteksten, slik at avstand og «tilbake» kan vises. */
+/**
+ * Detaljside med søkekonteksten, slik at avstand og «tilbake» kan vises.
+ *
+ * `fra` følger med når konteksten ikke kommer fra den offentlige siden, slik at «tilbake» går
+ * dit brukeren faktisk var. Den utelates for /omrade, så offentlige lenker er uendret.
+ */
 export function buildEventHref(id: string, context?: AreaContext): string {
-  return context ? `/sak/${id}?${contextSearch(context).toString()}` : `/sak/${id}`;
+  if (!context) return `/sak/${id}`;
+  const search = contextSearch(context);
+  if (context.basePath && context.basePath !== DEFAULT_BASE_PATH) search.set("fra", context.basePath);
+  return `/sak/${id}?${search.toString()}`;
 }

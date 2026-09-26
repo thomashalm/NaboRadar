@@ -95,15 +95,13 @@ export default async function FunnPage({ params }: { params: Promise<{ id: strin
       {item.latitude !== null && item.longitude !== null && (
         <p className="mt-4">
           <Link
-            href={buildAreaHref(
-              {
-                lat: item.latitude,
-                lng: item.longitude,
-                radius: DEFAULT_RADIUS_M,
-                label: item.address ?? item.title,
-              },
-              "/admin/adresse",
-            )}
+            href={buildAreaHref({
+              lat: item.latitude,
+              lng: item.longitude,
+              radius: DEFAULT_RADIUS_M,
+              label: item.address ?? item.title,
+              basePath: "/admin/adresse",
+            })}
             className="text-[15px] font-medium text-accent hover:underline"
           >
             Se området rundt funnet →

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import type { PropertyLookupResult } from "@/lib/property/types";
 import { AreaMap, type MapPopupContent } from "@/components/map/AreaMap";
-import { buildAreaHref, buildEventHref } from "@/lib/area-params";
+import { buildAreaHref, buildEventHref, type AreaBasePath } from "@/lib/area-params";
 import { EVENT_DATE_LABELS } from "@/lib/events/labels";
 import type { AreaEventsResult } from "@/lib/events/queries";
 import type { AreaFactsResult, AreaMapFeature } from "@/lib/facts/queries";
@@ -65,6 +65,13 @@ interface AreaExplorerProps {
    * oppfører seg som et trykk i en offentlig. Den offentlige siden sender ingenting hit.
    */
   internalFeatures?: readonly InternalMapFeature[];
+  /**
+   * Hvilken side denne visningen står på. Radius, sortering, «endre sted» og «tilbake» bygger
+   * lenkene sine av den, slik at navigasjonen blir liggende der brukeren er. Uten den ville et
+   * radiusklikk i /admin/adresse sendt operatøren ut på den offentlige siden — og dermed bort fra
+   * den interne delen av resultatet.
+   */
+  basePath?: AreaBasePath;
 }
 
 type Stream<T> = { status: "loading" } | { status: "ready"; data: T } | { status: "failed" };
@@ -131,6 +138,7 @@ export function AreaExplorer({
   skolekrets,
   extraSections,
   internalFeatures = NO_INTERNAL,
+  basePath,
 }: AreaExplorerProps) {
   const router = useRouter();
   const eventStream = useStream(eventsPromise);
@@ -175,7 +183,10 @@ export function AreaExplorer({
       ? selection.id
       : null;
 
-  const context = useMemo(() => ({ lat, lng, radius, label: urlLabel, sort }), [lat, lng, radius, urlLabel, sort]);
+  const context = useMemo(
+    () => ({ lat, lng, radius, label: urlLabel, sort, basePath }),
+    [lat, lng, radius, urlLabel, sort, basePath],
+  );
   const navigate = useCallback(
     (href: string) => startTransition(() => router.replace(href, { scroll: false })),
     [router],
@@ -312,7 +323,7 @@ export function AreaExplorer({
             onNavigate={navigate}
             pending={pending}
           />
-          <ChangeLocation radius={radius} onNavigate={navigateToLocation} />
+          <ChangeLocation radius={radius} onNavigate={navigateToLocation} basePath={basePath} />
         </div>
         {skolekrets}
       </section>

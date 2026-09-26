@@ -160,6 +160,77 @@ describe("privat research", { timeout: 30_000 }, () => {
     expect(rad!.confidence).toBe("low");
   });
 
+  /**
+   * Regresjonstest for det geografiske oppslaget.
+   *
+   * Egne Hjems vei 5 ligger 33 m fra Ringstabekkveien 89 — to naboadresser på Bekkestua.
+   * Koordinatene er Kartverkets representasjonspunkter, hentet gjennom samme adresse-API som
+   * resten av NaboRadar bruker. Et funn med presis adresse skal dukke opp i adressesøket på
+   * enhver radius vi tilbyr, og her på den minste.
+   */
+  it("finner et nabofunn fra et søkepunkt 33 m unna", async () => {
+    const EGNE_HJEMS = { lat: 59.919488, lng: 10.597865 };
+    const RINGSTABEKKVEIEN_89 = { lat: 59.919287, lng: 10.59829 };
+
+    const [nytt] = await db.rpc<string>("save_research_item", {
+      p_id: null,
+      p_fields: {
+        category: "Omsorg / bofellesskap",
+        title: "Nabofunn",
+        address: "Egne Hjems vei 5",
+        municipality: "Bærum",
+        latitude: EGNE_HJEMS.lat,
+        longitude: EGNE_HJEMS.lng,
+        verification_status: "investigated_not_confirmed",
+        sensitivity: "internal_only",
+      },
+    });
+    expect(nytt).toBeTruthy();
+
+    for (const radius of [500, 1000, 3000]) {
+      const nær = await db.rpc<{ title: string; distance_m: number }>("research_near", {
+        lat: RINGSTABEKKVEIEN_89.lat,
+        lng: RINGSTABEKKVEIEN_89.lng,
+        radius_m: radius,
+      });
+      const treff = nær.find((r) => r.title === "Nabofunn");
+      expect(treff, `skal finnes innen ${radius} m`).toBeDefined();
+      expect(treff!.distance_m).toBeGreaterThan(25);
+      expect(treff!.distance_m).toBeLessThan(45);
+    }
+
+    // internal_only og investigated_not_confirmed skal ikke filtrere noe bort — det er
+    // standardtilstanden for et manuelt lead, og ville tømt adressesøket for alt nytt.
+    const alle = await db.rpc<{ title: string; sensitivity: string }>("research_near", {
+      lat: RINGSTABEKKVEIEN_89.lat,
+      lng: RINGSTABEKKVEIEN_89.lng,
+      radius_m: 500,
+    });
+    expect(alle.every((r) => r.sensitivity === "internal_only")).toBe(true);
+  });
+
+  it("sorterer nærmeste funn først", async () => {
+    // Samme punkt som over, men med et funn lenger unna lagt til etterpå, så rekkefølgen
+    // ikke kan komme av innsettingsrekkefølgen.
+    await db.rpc("save_research_item", {
+      p_id: null,
+      p_fields: {
+        category: "Infrastruktur / større prosjekter",
+        title: "Lenger unna",
+        latitude: 59.9295,
+        longitude: 10.6109,
+      },
+    });
+    const nær = await db.rpc<{ title: string; distance_m: number }>("research_near", {
+      lat: 59.919287,
+      lng: 10.59829,
+      radius_m: 3000,
+    });
+    const avstander = nær.map((r) => Number(r.distance_m));
+    expect(avstander).toEqual([...avstander].sort((a, b) => a - b));
+    expect(nær[0]!.title).toBe("Nabofunn");
+  });
+
   it("krever provider for importerte funn", async () => {
     await expect(
       db.rpc("save_research_item", {

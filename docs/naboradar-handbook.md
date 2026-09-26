@@ -368,6 +368,16 @@ En endring i den offentlige visningen slår derfor gjennom her av seg selv.
 | `components/area/AreaFacts.tsx` | Seksjoner, grupper, ordlyd |
 | `components/area/SkolekretsNotis.tsx` | Skolekretsnotisen |
 | `extraSections` | **Kun admin.** Offentlig side sender ingenting inn |
+| `basePath` | **Kun admin.** Hvilken side visningen står på |
+
+`basePath` er nødvendig fordi resultatvisningen finnes på to steder. Radiusvelgeren, sorteringen,
+«endre sted» og søkefeltet bygger lenkene sine av søkekonteksten, og uten en basesti pekte de alle
+på `/omrade` — en operatør ble sendt ut på den offentlige siden ved første klikk, og dermed bort
+fra den interne delen av resultatet. Basestien ligger nå i `AreaContext`, så alle fire
+lenkebyggerne plukker den opp av seg selv. `buildEventHref` tar den med som `fra` til `/sak/[id]`,
+slik at «tilbake» går dit brukeren var. `fra` valideres mot en allowlist (`AREA_BASE_PATHS`) —
+en sti fra URL-en skal ikke kunne bli en lenke vi ikke kontrollerer. Offentlige URL-er er uendret:
+`fra` settes bare når konteksten ikke er den offentlige siden.
 
 Den interne seksjonen har to deler, og de blandes bevisst ikke:
 

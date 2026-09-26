@@ -16,6 +16,8 @@ describe("/omrade query-parametre", () => {
       radius: 3000,
       label: "Sognsvann",
       sortering: "distance",
+      // Uten fra i URL-en hører konteksten til den offentlige siden.
+      fra: "/omrade",
     });
   });
 
@@ -56,7 +58,13 @@ describe("/omrade query-parametre", () => {
     const href = buildAreaHref({ ...SOGNSVANN, radius: 3000, label: "Sognsvann & co" });
     expect(href.startsWith("/omrade?")).toBe(true);
     const params = Object.fromEntries(new URL(href, "http://x").searchParams);
-    expect(areaParamsSchema.parse(params)).toEqual({ ...SOGNSVANN, radius: 3000, label: "Sognsvann & co", sortering: "distance" });
+    expect(areaParamsSchema.parse(params)).toEqual({
+      ...SOGNSVANN,
+      radius: 3000,
+      label: "Sognsvann & co",
+      sortering: "distance",
+      fra: "/omrade",
+    });
   });
 
   it("sortering=nyeste gir newest, alt annet nærmest først", () => {

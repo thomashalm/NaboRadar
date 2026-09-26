@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import type { GeocodeResponse } from "@/app/api/geocode/route";
-import { buildAreaHref } from "@/lib/area-params";
+import { buildAreaHref, type AreaBasePath } from "@/lib/area-params";
 import type { SearchLocation } from "@/lib/geocoding/types";
 
 /** Må samsvare med MIN_QUERY_LENGTH på serveren. */
@@ -22,9 +22,11 @@ interface SearchBoxProps {
   onSelected?: () => void;
   /** Overstyr navigasjon (f.eks. i en transition for å vise lastetilstand). Standard: router.push. */
   onNavigate?: (href: string) => void;
+  /** Hvilken resultatvisning søket skal lande på. Standard er den offentlige. */
+  basePath?: AreaBasePath;
 }
 
-export function SearchBox({ radius, size = "compact", autoFocus, onSelected, onNavigate }: SearchBoxProps) {
+export function SearchBox({ radius, size = "compact", autoFocus, onSelected, onNavigate, basePath }: SearchBoxProps) {
   const router = useRouter();
   const id = useId();
   const inputId = `${id}-input`;
@@ -84,7 +86,7 @@ export function SearchBox({ radius, size = "compact", autoFocus, onSelected, onN
   function select(location: SearchLocation) {
     setOpen(false);
     setQuery(location.label);
-    const href = buildAreaHref({ lat: location.latitude, lng: location.longitude, radius, label: location.label });
+    const href = buildAreaHref({ lat: location.latitude, lng: location.longitude, radius, label: location.label, basePath });
     if (onNavigate) onNavigate(href);
     else {
       setNavigating(true);

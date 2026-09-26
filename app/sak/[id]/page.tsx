@@ -56,7 +56,15 @@ export default async function EventPage({ params, searchParams }: Props) {
   if (result.status === "not_found") notFound();
 
   const backHref = context
-    ? buildAreaHref({ lat: context.lat, lng: context.lng, radius: context.radius, label: context.label, sort: context.sortering })
+    ? buildAreaHref({
+        lat: context.lat,
+        lng: context.lng,
+        radius: context.radius,
+        label: context.label,
+        sort: context.sortering,
+        // `fra` er allowlistet i areaParamsSchema, så tilbake-lenken kan ikke peke ut av appen.
+        basePath: context.fra,
+      })
     : null;
   const backLabel = context?.label ?? "området";
 

@@ -69,6 +69,7 @@ export default async function AdminAddressPage({ searchParams }: { searchParams:
         storedFacts={storedFacts}
         lookupFacts={lookupFacts}
         tiles={getMapTileConfig()}
+        basePath="/admin/adresse"
         skolekrets={<SkolekretsNotis lat={lat} lng={lng} />}
         internalFeatures={funn ? funn.map(kartobjekt) : []}
         extraSections={<InternSeksjon research={research} funn={funn} radiusM={radius} />}
@@ -103,7 +104,7 @@ function Søk() {
           Samme resultat som brukeren ser, med intern research under.
         </p>
         <div className="mt-8">
-          <SearchBox radius={DEFAULT_RADIUS_M} autoFocus />
+          <SearchBox radius={DEFAULT_RADIUS_M} autoFocus basePath="/admin/adresse" />
         </div>
         <Link href="/admin" className="mt-6 inline-block text-[15px] font-medium text-accent hover:underline">
           Til driftssiden
