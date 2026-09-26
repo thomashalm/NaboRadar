@@ -1904,6 +1904,60 @@ Samlet fra rundene, fordi hver av dem kostet en runde å oppdage:
 | Én tillatelse = ett sted | Herøya har seks tillatelser og er ett industriområde. Funnet skal beskrive stedet, ikke registerraden |
 | Register med koordinat = kjent kommune | Utslippsregisteret oppgir punkt, ikke kommune. Reversgeokod mot Kartverket før kommunen skrives inn |
 | Register = kapasitet | Norske utslipp oppgir ikke tonn per år, MW eller personekvivalenter. Kapasitet må hentes fra operatør eller tillatelse, anlegg for anlegg |
+| Vår egen kopi = kilden | Vi konkluderte at renseanlegg manglet hos Miljødirektoratet. De manglet i *vårt* uttrekk av industridelen. Etaten har et eget avløpsdatasett med 2 961 anlegg |
+| Registrert punkt = anlegget | Rana Grubers registrerte punkt er verket i Mo i Rana, gruvene ligger 35 km unna på Ørtfjell. Skaland Graphites punkt er anlegget på Skaland, gruven er ved Trælen |
+| Kapasitet = belastning | Avløpsregisterets kapasitetsfelt er dimensjonert kapasitet: VEAS står med 1 100 000 pe mot rundt 867 000 i faktisk belastning |
+| Uttaksvolum finnes i utslippsregisteret | Volum og driftshorisont for pukkverk står i driftskonsesjonen hos DMF og i reguleringsplanen, ikke i utslippstillatelsen |
+
+### Nasjonal runde: VA og mineraluttak
+
+216 funn og 521 kilder totalt. Runden la til 55 funn, rettet ett feilaktig fra forrige runde, løste tre svake
+leads og standardiserte underkategoriene. To spor: VA og renseanlegg, og gruver, steinbrudd, pukkverk og
+masseuttak. Scope var hele Norge.
+
+**To nasjonale registre bar runden.**
+
+- **Avløp:** Miljødirektoratets avløpsdatasett, som ligger åpent på
+  `kart3.miljodirektoratet.no/arcgis/rest/services/avloep/MapServer/1` og bygger på kommunenes KOSTRA-
+  rapportering. 2 961 anlegg, hvorav 139 over 10 000 pe og 30 over 50 000 pe, med navn, kommune,
+  driftsstatus, renseprinsipp, renseprosess, dimensjonert kapasitet i personekvivalenter, koordinat og
+  faktaark per anlegg. Dette er VA-sporets motsvarighet til Norske utslipp for industri.
+- **Mineraluttak:** Miljødirektoratets utslippsregister, der 100 anlegg ligger i bransjene 05, 07, 08 og
+  23.6–23.9. Utslippstillatelse følger størrelse, så uttrekket gir de største uttakene.
+
+Det som flyttet mest i denne runden:
+
+- **Vi rettet en egen feilkonklusjon.** Forrige runde skrev at kommunale renseanlegg «praktisk talt ikke
+  finnes» hos Miljødirektoratet. Søket var gjort i vår egen synkede kopi av industridelen. Feilen er nå et
+  eget funn, fordi den er verdt å huske: et fravær i et uttrekk sier noe om uttrekket, ikke om registeret.
+- **Volumtallene for pukkverk ligger hos DMF, ikke i utslippsregisteret.** Direktoratets høringssaker oppgir
+  årlig uttak, samlet volum, konsesjonsareal og etapper. Det løste tre leads: Lierskogen (3,7 millioner m³
+  samlet, 175 000 m³ i året, 219 dekar), Bjønndalen (15,5 millioner fm³ samlet, 200 000 fm³ i året) og
+  Rekefjord (2–2,5 millioner tonn i året, 600 skipsanløp).
+- **DMFs egne karttjenester svarte 503.** `kart.dirmin.no` og `minit.dirmin.no` var utilgjengelige gjennom
+  hele runden, så driftskonsesjonene kunne ikke hentes maskinelt. Bergrettigheter finnes som WFS via
+  Geonorge, men en bergrettighet er en leterett — ikke drift.
+- **PDF-er kan ikke leses i dette miljøet.** Verken SSBs avløpsrapport eller DMFs konsesjonsvedtak kunne
+  tekstuttrekkes, fordi `pdftotext` og `pdftoppm` ikke er installert. Der det var avgjørende, er kilden
+  lagret med en tydelig merknad om at innholdet ikke er lest.
+- **Svalbard kan ikke stedfestes.** Research-basen tillater bare breddegrad mellom 57 og 72. Gruve 7 i
+  Adventdalen står derfor uten koordinat, med begrunnelsen i notatet.
+- **Kapasitetsbegrepene må holdes fra hverandre.** Dimensjonert kapasitet, faktisk belastning, hydraulisk
+  kapasitet og planlagt sluttilstand er fire forskjellige tall, og for flere anlegg fant vi tre av dem med
+  ulike verdier. Hvert funn sier hvilket tall som er hvilket.
+
+#### Faste underkategorier
+
+Underkategoriene er et vokabular, ikke fritekst — ellers blir kartet fragmentert. For disse to sporene:
+
+| Spor | Underkategorier |
+|---|---|
+| VA | `Renseanlegg`, `Vannbehandlingsanlegg`, `Pumpestasjon`, `VA-tunnel/fjellanlegg` |
+| Mineral | `Gruve`, `Pukkverk`, `Steinbrudd`, `Masseuttak` |
+
+`Gruve` brukes om malmuttak, `Steinbrudd` om uttak av stein, kalk og industrimineraler, `Pukkverk` om
+knust fjell til bygg og anlegg. Nye underkategorier må legges inn i `KATEGORIGRUPPER` i samme commit, og
+testen `gruppene dekker de kuraterte funnene` feiler hvis det glemmes.
 
 ### Nasjonal runde: store tekniske anlegg og industri
 

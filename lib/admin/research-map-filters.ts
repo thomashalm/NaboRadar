@@ -54,7 +54,7 @@ export const KATEGORIGRUPPER: Kategorigruppe[] = [
     ],
   },
   { slug: "avfall", label: "Avfall og kommunalteknikk", kategorier: [INDUSTRI], subkategorier: ["Avfall", "Kommunalteknisk anlegg"] },
-  { slug: "pukk", label: "Gruve, pukk og steinbrudd", kategorier: [INDUSTRI], subkategorier: ["Pukkverk", "Gruve"] },
+  { slug: "pukk", label: "Gruve, pukk og steinbrudd", kategorier: [INDUSTRI], subkategorier: ["Pukkverk", "Gruve", "Steinbrudd", "Masseuttak"] },
   { slug: "energi", label: "Energi", kategorier: ["Infrastruktur / større prosjekter"], subkategorier: ["Kraftnett"] },
   { slug: "va", label: "VA og renseanlegg", kategorier: ["Miljø / grunn / forurensning"] },
   { slug: "forsvar", label: "Forsvar og militært", kategorier: ["Forsvar / militært"] },

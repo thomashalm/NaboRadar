@@ -197,4 +197,28 @@ describe("gruppene dekker de kuraterte funnene", () => {
     const avfall = [...sub].filter((s) => s.toLowerCase().includes("avfall"));
     expect(avfall).toEqual(["Avfall"]);
   });
+
+  /**
+   * Vokabularet for VA og mineraluttak, slik håndboken fastsetter det. Uten dette sniker synonymer
+   * seg inn — «Avløp og VA» ved siden av «Renseanlegg», «Knuseverk» ved siden av «Pukkverk» — og
+   * kartet blir fragmentert uten at noen ser det.
+   */
+  it("holder seg til det faste vokabularet for VA og mineraluttak", async () => {
+    const { FUNN } = await import("../../scripts/research/funn");
+    const sub = new Set(FUNN.map((f) => f.subcategory).filter((s): s is string => Boolean(s)));
+    const tillatt = {
+      va: ["Renseanlegg", "Vannbehandlingsanlegg", "Pumpestasjon", "VA-tunnel/fjellanlegg"],
+      mineral: ["Gruve", "Pukkverk", "Steinbrudd", "Masseuttak"],
+    };
+    const treffer = (s: string, ord: string[]) =>
+      ord.some((o) => s.toLowerCase().includes(o.toLowerCase()));
+    const vaLignende = [...sub].filter((s) =>
+      treffer(s, ["avløp", "renseanlegg", "vannbehandling", "pumpestasjon", "VA-"]),
+    );
+    const mineralLignende = [...sub].filter((s) =>
+      treffer(s, ["gruve", "pukk", "steinbrudd", "masseuttak", "knuseverk", "grustak"]),
+    );
+    expect(vaLignende.filter((s) => !tillatt.va.includes(s))).toEqual([]);
+    expect(mineralLignende.filter((s) => !tillatt.mineral.includes(s))).toEqual([]);
+  });
 });

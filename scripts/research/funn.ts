@@ -7668,7 +7668,7 @@ export const FUNN: Funn[] = [
 
   {
     category: "Miljø / grunn / forurensning",
-    subcategory: "Avløp og VA",
+    subcategory: "Renseanlegg",
     item_type: "finding",
     title: "Bekkelaget renseanlegg",
     description:
@@ -7726,7 +7726,7 @@ export const FUNN: Funn[] = [
   },
   {
     category: "Miljø / grunn / forurensning",
-    subcategory: "Avløp og VA",
+    subcategory: "Renseanlegg",
     item_type: "finding",
     title: "IVAR sentralrenseanlegg Nord-Jæren, Mekjarvik",
     description:
@@ -7795,7 +7795,7 @@ export const FUNN: Funn[] = [
   },
   {
     category: "Miljø / grunn / forurensning",
-    subcategory: "Avløp og VA",
+    subcategory: "Renseanlegg",
     item_type: "finding",
     title: "Høvringen avløpsrenseanlegg",
     description:
@@ -7845,12 +7845,3203 @@ export const FUNN: Funn[] = [
   {
     category: "Kilder",
     item_type: "note",
-    title: "Kommunale avløpsrenseanlegg mangler i Norske utslipp",
+    tidligere_titler: ["Kommunale avløpsrenseanlegg mangler i Norske utslipp"],
+    title:
+      "Rettelse: avløpsanlegg ligger i et eget datasett hos Miljødirektoratet",
     description:
-      "Miljødirektoratets utslippsregister, som ellers er den beste inngangen til tunge anlegg, " +
-      "inneholder praktisk talt ingen kommunale avløpsrenseanlegg. Et søk på avløpsbransjen gir tre treff " +
-      "nasjonalt, ingen av dem et hovedrenseanlegg. VEAS, Bekkelaget, Høvringen og IVAR Nord-Jæren står " +
-      "ikke der.",
+      "Forrige runde konkluderte med at kommunale avløpsrenseanlegg «praktisk talt ikke finnes» hos " +
+      "Miljødirektoratet. Det var feil. Søket ble gjort i vår egen synkede kopi av industridelen av " +
+      "Norske utslipp, som bare inneholder virksomheter med industribransjekode. Miljødirektoratet har " +
+      "et eget, komplett datasett for avløpsanlegg — 2 961 anlegg med kapasitet, renseprosess, " +
+      "driftsstatus, koordinat og faktaark — og faktaarkene ligger på norskeutslipp.no. VEAS, " +
+      "Bekkelaget, Høvringen og IVAR Nord-Jæren står alle der.",
+    municipality: null,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    notes:
+      "Metodefeilen var å lete i vår egen delmengde og konkludere om kilden. Et fravær i et uttrekk sier " +
+      "noe om uttrekket, ikke om registeret — og et fravær i et register sier ikke noe om virkeligheten. " +
+      "Sjekk alltid hvilket datasett kilden faktisk tilbyr før fraværet skrives ned som et funn.",
+    kilder: [
+      {
+        source_name: "Miljødirektoratet, avløpsanlegg (kart-API)",
+        source_url:
+          "https://kart3.miljodirektoratet.no/arcgis/rest/services/avloep/MapServer/1",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Eget datasett for avløpsanlegg med navn, kommune, driftsstatus, renseprinsipp, renseprosess, dimensjonert kapasitet i personekvivalenter, utslippsmengder, koordinat og lenke til faktaark. Dataene kommer fra kommunenes årlige KOSTRA-rapportering.",
+      },
+      {
+        source_name: "Avløpsanlegg (datasett i Geonorge)",
+        source_url:
+          "https://kartkatalog.geonorge.no/metadata/uuid/276db913-395d-4867-9717-eb86636806d9",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Datasettet er publisert i Geonorge med WMS og nedlasting, uten tilgangsbegrensninger.",
+      },
+    ],
+  },
+
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "NRA renseanlegg, Strømmen",
+    description:
+      "Nedre Romerike avløpsanlegg, bygget i fjellhaller på Strømmen. Dimensjonert kapasitet 228 170 " +
+      "personekvivalenter, og det største renseanlegget i landet etter VEAS, Bekkelaget og IVAR Nord-Jæren. " +
+      "180 000 mennesker er tilknyttet nettet. Rensekapasiteten er i dag inntil 1 400 liter per sekund, og " +
+      "utvidelsen av sentralrenseanlegget RA-2 skal doble den til 2 800 liter per sekund.",
+    municipality: "Lillestrøm",
+    address: "Stalsbergenga 42",
+    postal_code: "1466",
+    city: "Strømmen",
+    latitude: 59.954,
+    longitude: 11.0225,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et fjellanlegg midt i Strømmen, i full utvidelse fram mot de skjerpede rensekravene som gjelder fra " +
+      "2030. Anleggsperioden er lang, og adkomsten går gjennom et tett bebygd område.",
+    notes:
+      "Skill tallene: 228 170 pe er dimensjonert kapasitet fra registeret, 180 000 er antall tilknyttede " +
+      "personer, og 1 400 til 2 800 liter per sekund er hydraulisk kapasitet før og etter utvidelsen.",
+    kilder: [
+      {
+        source_name: "Miljødirektoratet, avløpsanlegg: NRA renseanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=17694",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 228 170 personekvivalenter og renseprosess «Sekundær-, fosfor- og nitrogenrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Derfor er RA2 så viktig",
+        source_url:
+          "https://www.nrva.no/prosjekter/sentralrenseanlegget-pa-strommen/derfor-er-ra2-sa-viktig",
+        publisher: "Nedre Romerike vann- og avløpsselskap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegget ligger i tunnelhaller på Strømmen og renser mekanisk, kjemisk og biologisk for organisk stoff, nitrogen og fosfor. Kapasiteten på inntil 1 400 liter per sekund dobles til 2 800 liter per sekund når det nye anlegget står ferdig. 180 000 mennesker er tilknyttet nettet.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Odderøya renseanlegg",
+    description:
+      "Kristiansands hovedrenseanlegg, med størstedelen av anlegget sprengt inn i fjellet på Odderøya. " +
+      "Dimensjonert kapasitet 200 000 personekvivalenter. Utvidelsen startet i 2014 og de siste prosesstrinnene, " +
+      "inkludert biogassanlegget, ble satt i drift i 2021. Utvidelsen krevde uttak av rundt 93 000 kubikkmeter " +
+      "fast fjell.",
+    municipality: "Kristiansand",
+    address: "Sjølystveien 33",
+    postal_code: "4610",
+    city: "Kristiansand",
+    latitude: 58.1335,
+    longitude: 7.9993,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Anlegget ligger på en øy som ellers er friområde og kulturarena midt i Kristiansand, med " +
+      "ventilasjonstårn og gasstank som synlige installasjoner over bakken.",
+    notes:
+      "Bare 50 til 60 prosent av kapasiteten er i bruk. I 2024 lekket plastkuler fra anlegget ut i sjøen — en " +
+      "dokumentert hendelse, ikke en antatt påvirkning.",
+    kilder: [
+      {
+        source_name: "Miljødirektoratet, avløpsanlegg: Odderøya renseanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=17756",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 200 000 personekvivalenter og renseprosess «Sekundær- og fosforrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Plastkuler fra Odderøya renseanlegg er lekket ut i sjøen",
+        source_url:
+          "https://www.kristiansand.kommune.no/aktuelt/2024/plastkuler-fra-odderoya-renseanlegg-er-lekket-ut-i-sjoen/",
+        publisher: "Kristiansand kommune",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kommunen melder at plastkuler fra renseanlegget er lekket ut i sjøen.",
+      },
+      {
+        source_name:
+          "Ny pumpestasjon på Bredalsholmen og sjøledning til Odderøya renseanlegg",
+        source_url:
+          "https://www.kristiansand.kommune.no/navigasjon/bolig-kart-og-eiendom/vi-bygger-kristiansand/nyheter/ny-pumpestasjon-pa-bredalsholmen-og-sjoledning-til-odderoya-renseanlegg/",
+        publisher: "Kristiansand kommune",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Ny pumpestasjon på Bredalsholmen med sjøledning fram til Odderøya renseanlegg.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Fuglevik avløpsanlegg",
+    description:
+      "MOVARs hovedrenseanlegg for Mosseregionen, med dimensjonert kapasitet 192 000 personekvivalenter. " +
+      "Anlegget har vært forsøksarena for HIAS-prosessen for biologisk fosforfjerning.",
+    municipality: "Moss",
+    address: "Båthavnveien 50",
+    postal_code: "1570",
+    city: "Dilling",
+    latitude: 59.3841,
+    longitude: 10.6618,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Regionens største VA-anlegg, ved kysten sør for Moss, i et område med både bolig og båthavn.",
+    notes:
+      "MOVAR IKS er ansvarlig enhet. Kambo avløpsanlegg i samme kommune (26 000 pe) er ikke lagt inn.",
+    kilder: [
+      {
+        source_name: "Miljødirektoratet, avløpsanlegg: Fuglevik avløpsanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=17511",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 192 000 personekvivalenter og renseprosess «Sekundær- og fosforrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "HIAS renseanlegg, Ottestad",
+    description:
+      "Hamarregionens hovedrenseanlegg, drevet av HIAS IKS. Dimensjonert kapasitet 165 000 personekvivalenter. " +
+      "Anlegget ble i 2021 fullt omlagt til HIAS-prosessen, der fosfor fjernes biologisk i stedet for kjemisk, " +
+      "med en maksimal biologisk kapasitet oppgitt til 192 000 personekvivalenter. Anlegget mottar avløp fra " +
+      "rundt 65 000 mennesker i tillegg til industri.",
+    municipality: "Stange",
+    address: "Sandvikavegen 136",
+    postal_code: "2312",
+    city: "Ottestad",
+    latitude: 60.7666,
+    longitude: 11.0783,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et av landets største renseanlegg, og opphavet til en renseprosess som nå prøves ut andre steder i " +
+      "landet. Utslippet går til Mjøsa, som er drikkevannskilde.",
+    notes:
+      "Tre ulike tall: 165 000 pe dimensjonert kapasitet i registeret, 192 000 pe maksimal biologisk kapasitet " +
+      "etter omleggingen, og rundt 65 000 faktisk tilknyttede personer.",
+    kilder: [
+      {
+        source_name: "Miljødirektoratet, avløpsanlegg: HIAS renseanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=9706",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 165 000 personekvivalenter og renseprosess «Sekundær- og fosforrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Renseanlegg",
+        source_url: "https://www.hias.no/avlop/renseanlegg/",
+        publisher: "HIAS IKS",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegget i Ottestad mottar avløpsvann fra rundt 65 000 mennesker i tillegg til avløp fra industri og næring. I 2021 var anlegget fullt omlagt til HIAS-prosessen med maksimal biologisk kapasitet 192 000 pe.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Tønsberg renseanlegg",
+    description:
+      "Interkommunalt renseanlegg med dimensjonert kapasitet 160 000 personekvivalenter. Fem kommuner i " +
+      "Vestfold — Holmestrand, Horten, Tønsberg, Færder og Sandefjord — har utredet felles nitrogenrensing, og " +
+      "et nytt nitrogenrenseanlegg er under planlegging.",
+    municipality: "Tønsberg",
+    address: "Carl 15 gate 8A",
+    postal_code: "3150",
+    city: "Tolvsrød",
+    latitude: 59.262,
+    longitude: 10.4983,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et av de største anleggene i landet, og midt i den utbyggingen skjerpede nitrogenkrav for Oslofjorden " +
+      "utløser. Anleggene dimensjoneres for belastningen i 2060.",
+    notes:
+      "Planarbeidet omfatter plassering ved Åsgårdstrand, Slagentangen og et eget nitrogenrenseanlegg ved Enga " +
+      "i Sandefjord. Hvilke anlegg som blir bygget hvor er ikke avklart.",
+    kilder: [
+      {
+        source_name: "Miljødirektoratet, avløpsanlegg: Tønsberg renseanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=9520",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 160 000 personekvivalenter og renseprosess «Sekundær- og fosforrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Nytt nitrogenrenseanlegg",
+        source_url:
+          "https://www.tonsberg.kommune.no/tjenester/vann-avlop-og-renovasjon/ren-oslofjord-nitrogenrensing/nytt-nitrogenrenseanlegg/",
+        publisher: "Tønsberg kommune",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kommunen planlegger nytt nitrogenrenseanlegg som del av arbeidet for ren Oslofjord.",
+      },
+      {
+        source_name:
+          "KVU felles renseanlegg for fem kommuner — dimensjoneringsgrunnlag",
+        source_url:
+          "https://www.rense.no/getfile.php/132199-1756373647/Dokumenter/Prosjekter/PN-2%20Dimensjoneringsgrunnlag.pdf",
+        publisher: "Tønsberg renseanlegg IKS",
+        source_type: "document",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Konseptvalgutredning for felles nitrogenrensing for Holmestrand, Horten, Tønsberg, Færder og Sandefjord. Anleggene dimensjoneres for belastningen i 2060, med SSBs høye befolkningsframskriving.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Flesland renseanlegg",
+    description:
+      "Bergens største avløpsrenseanlegg, med dimensjonert kapasitet 152 000 personekvivalenter. Anlegget ble " +
+      "bygget om til sekundærrensing i perioden fram til 2016, med rister, sand- og fettfjerning, biologisk " +
+      "rensing, sedimentering og mekanisk slamfortykking.",
+    municipality: "Bergen",
+    address: "Slettenvegen 93",
+    postal_code: "5258",
+    city: "Blomsterdalen",
+    latitude: 60.2834,
+    longitude: 5.2083,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Ligger tett på Bergen lufthavn og boligområdene i Blomsterdalen. Bergens fem renseanlegg håndterer til " +
+      "sammen avløpet fra rundt 300 000 innbyggere.",
+    notes:
+      "Bergen har fem anlegg; Holen (134 000 pe), Knappen (63 000 pe), Kvernevik (56 000 pe) og Ytre Sandviken " +
+      "(44 000 pe) er de øvrige. Holen er lagt inn som eget funn; de tre minste er ikke.",
+    kilder: [
+      {
+        source_name: "Miljødirektoratet, avløpsanlegg: Flesland renseanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=9759",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 152 000 personekvivalenter og renseprosess «Sekundærrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Flesland renseanlegg",
+        source_url: "https://www.ncc.no/vare-prosjekter/flesland-renseanlegg/",
+        publisher: "NCC",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Det nye anlegget omfatter rister, sand- og fettfjerning, biologisk rensing, sedimentering og mekanisk slamfortykking.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Grødaland renseanlegg og biogassanlegg",
+    description:
+      "IVARs anlegg på Grødaland i Hå, med dimensjonert kapasitet 150 000 personekvivalenter. Et av landets " +
+      "største kombinerte rense- og biogassanlegg, med kapasitet til å ta imot avløp fra 150 000 mennesker.",
+    municipality: "Hå",
+    address: "Nordsjøvegen 2385",
+    postal_code: "4365",
+    city: "Nærbø",
+    latitude: 58.6311,
+    longitude: 5.5976,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Anlegget kombinerer avløpsrensing, slambehandling og biogassproduksjon på ett sted i et jordbruksområde " +
+      "på Jæren, og tar også imot avfall fra næringsmiddelindustrien.",
+    notes:
+      "IVAR IKS er ansvarlig enhet. Vik renseanlegg i Klepp (80 000 pe) er IVARs tredje store anlegg og er " +
+      "lagt inn separat.",
+    kilder: [
+      {
+        source_name:
+          "Miljødirektoratet, avløpsanlegg: Grødaland renseanlegg og biogassanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=18492",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 150 000 personekvivalenter og renseprosess «Sekundær- og fosforrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Renseanlegg Grødaland",
+        source_url: "https://www.ivar.no/grodaland/",
+        publisher: "IVAR IKS",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Grødaland er et av Norges største rense- og biogassanlegg, med kapasitet til å motta avløpsvann fra 150 000 mennesker.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Lillehammer renseanlegg",
+    description:
+      "Lillehammers renseanlegg, med dimensjonert kapasitet 144 000 personekvivalenter og full rensing for " +
+      "både fosfor og nitrogen.",
+    municipality: "Lillehammer",
+    address: "Dampsagvegen 120",
+    postal_code: "2609",
+    city: "Lillehammer",
+    latitude: 61.095,
+    longitude: 10.4641,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Kapasiteten er langt høyere enn folketallet i kommunen, og anlegget har nitrogenrensing som mange " +
+      "større anlegg ennå ikke har. Utslippet går til Mjøsa.",
+    notes:
+      "Den høye dimensjonerte kapasiteten skyldes blant annet industripåslipp og sesongvariasjon, ikke bare " +
+      "innbyggertall. Faktisk belastning er ikke hentet inn.",
+    kilder: [
+      {
+        source_name: "Miljødirektoratet, avløpsanlegg: Lillehammer renseanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=9487",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 144 000 personekvivalenter og renseprosess «Sekundær-, fosfor- og nitrogenrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Holen renseanlegg",
+    description:
+      "Bergens nest største avløpsrenseanlegg, på Laksevåg, med dimensjonert kapasitet 134 000 " +
+      "personekvivalenter. Bygget om til sekundærrensing i 2016.",
+    municipality: "Bergen",
+    address: "Lyrenesveien 13",
+    postal_code: "5165",
+    city: "Laksevåg",
+    latitude: 60.394,
+    longitude: 5.2736,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Ligger inne i et tett boligområde på Laksevåg, i motsetning til Flesland som ligger i utkanten.",
+    notes: "Anlegget er i fjell. Bergen kommune er ansvarlig enhet.",
+    kilder: [
+      {
+        source_name: "Miljødirektoratet, avløpsanlegg: Holen renseanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=9764",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 134 000 personekvivalenter og renseprosess «Sekundær- og fosforrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Solumstrand avløpsanlegg",
+    description:
+      "Drammens hovedrenseanlegg, med dimensjonert kapasitet 130 000 personekvivalenter — oppgitt av " +
+      "Norconsult som 104 000 pe med forberedelse for 120 000. Anlegget har ledig kapasitet og oppfyller dagens " +
+      "rensekrav, men skal legges ned når det nye regionale renseanlegget på Nordbykollen står ferdig.",
+    municipality: "Drammen",
+    address: "Svelvikveien 166",
+    postal_code: "3037",
+    city: "Drammen",
+    latitude: 59.712,
+    longitude: 10.2673,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et stort anlegg med kort gjenværende levetid: skjerpede nitrogenkrav gjør at seks anlegg i regionen " +
+      "skal erstattes av ett nytt. Det betyr både avvikling her og en stor anleggsperiode i nærheten.",
+    notes:
+      "Ulike tall fra ulike kilder: 130 000 pe i Miljødirektoratets register, 104 000 pe med forberedelse for " +
+      "120 000 hos rådgiveren. Registerets tall er lagt til grunn, avviket er notert.",
+    kilder: [
+      {
+        source_name:
+          "Miljødirektoratet, avløpsanlegg: Solumstrand avløpsanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=9381",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 130 000 personekvivalenter og renseprosess «Sekundær- og fosforrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Solumstrand avløpsrenseanlegg",
+        source_url:
+          "https://norconsult.no/prosjekter/solumstrand-avloepsrenseanlegg/",
+        publisher: "Norconsult",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Anlegget har kapasitet 104 000 personekvivalenter, med forberedelse for 120 000. Rehabilitering og utvidelse med biologisk trinn innenfor eksisterende bygningsvolum.",
+      },
+      {
+        source_name: "Nytt regionalt renseanlegg",
+        source_url:
+          "https://www.drammen.kommune.no/om-kommunen/organisasjon-administrasjon/prosjekter/nytt-regionalt-renseanlegg/",
+        publisher: "Drammen kommune",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nytt regionalt renseanlegg skal erstatte Mjøndalen, Muusøya, Bokerøya og Solumstrand i Drammen, Linnes i Lier og Lahell i Asker.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Ladehammeren renseanlegg",
+    description:
+      "Trondheims nest største renseanlegg, med dimensjonert kapasitet 122 000 personekvivalenter. Anlegget " +
+      "har bare primærrensing, som Høvringen.",
+    municipality: "Trondheim",
+    address: "Ormen Langes vei 29",
+    postal_code: "7040",
+    city: "Trondheim",
+    latitude: 63.448,
+    longitude: 10.4257,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Begge Trondheims store anlegg ligger på primærrensing. Skjerpede krav i avløpsdirektivet gjør at dette " +
+      "må endres, og det betyr store ombygginger på to anlegg tett på byen.",
+    notes:
+      "Renseprinsippet i registeret er «Kjemisk», renseprosessen «Primærrensing». Høvringen står som «Annet» " +
+      "og «Primærrensing». Se eget funn for Høvringen.",
+    kilder: [
+      {
+        source_name:
+          "Miljødirektoratet, avløpsanlegg: Ladehammeren renseanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=9175",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 122 000 personekvivalenter og renseprosess «Primærrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Øra avløpsanlegg (FREVAR)",
+    description:
+      "FREVARs avløpsrenseanlegg på Øra i Fredrikstad, med dimensjonert kapasitet 120 000 personekvivalenter.",
+    municipality: "Fredrikstad",
+    address: "Habornveien 63",
+    postal_code: "1630",
+    city: "Gamle Fredrikstad",
+    latitude: 59.1831,
+    longitude: 10.9678,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Ligger på samme industriområde som forbrenningsanlegget og den kjemiske industrien på Øra — samlet gir " +
+      "det en tett konsentrasjon av tunge anlegg på én halvøy.",
+    notes:
+      "Overlapper geografisk med funnet «Øra industriområde», som dekker forbrenning og kjemisk industri på " +
+      "samme sted. Dette funnet gjelder avløpsanlegget spesifikt.",
+    kilder: [
+      {
+        source_name:
+          "Miljødirektoratet, avløpsanlegg: Øra avløpsanlegg (FREVAR)",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=8943",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 120 000 personekvivalenter og renseprosess «Sekundær- og fosforrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Gardermoen sentralrenseanlegg",
+    description:
+      "Renseanlegget for Ullensaker og Nannestad, med dimensjonert kapasitet 120 000 personekvivalenter og " +
+      "full rensing for fosfor og nitrogen. Nytt anlegg er nylig åpnet.",
+    municipality: "Ullensaker",
+    address: "Rensevegen 84",
+    postal_code: "2060",
+    city: "Gardermoen",
+    latitude: 60.1698,
+    longitude: 11.1123,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et av få store anlegg med nitrogenrensing på plass. Ligger i et område under kraftig utbygging rundt " +
+      "hovedflyplassen.",
+    notes:
+      "Ullensaker kommune er ansvarlig enhet. Bårlidalen i Eidsvoll (35 000 pe) og Fjellfoten i Nes (30 000 pe) " +
+      "er nabolagets øvrige store anlegg og er ikke lagt inn.",
+    kilder: [
+      {
+        source_name:
+          "Miljødirektoratet, avløpsanlegg: Gardermoen sentralrenseanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=17703",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 120 000 personekvivalenter og renseprosess «Sekundær-, fosfor- og nitrogenrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Gardermoen renseanlegg åpnet",
+        source_url:
+          "https://www.ullensaker.kommune.no/aktuelt/gardermoen-renseanlegg-apnet--nytt-teknologiloft-for-rent-vann-i-ullensaker-og-nannestad/",
+        publisher: "Ullensaker kommune",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nytt renseanlegg åpnet, omtalt som et teknologiløft for rent vann i Ullensaker og Nannestad.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Sandefjord renseanlegg, Enga",
+    description:
+      "Sandefjords renseanlegg på Enga, med dimensjonert kapasitet 103 500 personekvivalenter. Et eget " +
+      "nitrogenrenseanlegg på Enga er del av det regionale planarbeidet i Vestfold.",
+    municipality: "Sandefjord",
+    address: "Enga 7",
+    postal_code: "3231",
+    city: "Sandefjord",
+    latitude: 59.0861,
+    longitude: 10.2146,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Anlegget ligger i byen, og skjerpede nitrogenkrav peker mot utbygging på samme sted.",
+    notes:
+      "Se funnet for Tønsberg renseanlegg for det regionale nitrogenarbeidet de fem Vestfold-kommunene står i.",
+    kilder: [
+      {
+        source_name: "Miljødirektoratet, avløpsanlegg: Sandefjord renseanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=8944",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 103 500 personekvivalenter og renseprosess «Sekundær- og fosforrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Saulekilen renseanlegg",
+    description:
+      "Arendals hovedrenseanlegg, med dimensjonert kapasitet 85 000 personekvivalenter.",
+    municipality: "Arendal",
+    address: "Utnesveien 55",
+    postal_code: "4817",
+    city: "His",
+    latitude: 58.4243,
+    longitude: 8.7429,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Regionens største VA-anlegg, i et område med boligbebyggelse på His.",
+    notes:
+      "Anlegget er i fjell. Faktisk belastning og eventuelle utvidelsesplaner er ikke hentet inn — bør følges " +
+      "opp mot skjerpede rensekrav.",
+    kilder: [
+      {
+        source_name: "Miljødirektoratet, avløpsanlegg: Saulekilen renseanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=9752",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 85 000 personekvivalenter og renseprosess «Sekundær- og fosforrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Knarrdalstrand renseanlegg",
+    description:
+      "Felles renseanlegg for Porsgrunn og Skien, satt i drift i 1990 og oppgradert i 2013 med kjemisk " +
+      "sedimentering dimensjonert for 82 500 personekvivalenter. Anlegget skal gjøres om til pumpestasjon når " +
+      "det nye Grenland renseanlegg står ferdig.",
+    municipality: "Porsgrunn",
+    address: "Drangedalsvegen 79",
+    postal_code: "3920",
+    city: "Porsgrunn",
+    latitude: 59.137,
+    longitude: 9.6265,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Anlegget går fra å være regionens hovedrenseanlegg til å bli en pumpestasjon. Overføringsledninger fra " +
+      "dette punktet til det nye anlegget i ytre Frierfjorden er en betydelig anleggsjobb.",
+    notes:
+      "Statusen er fortsatt aktiv. Omleggingen til pumpestasjon skjer først når Grenland renseanlegg er bygget " +
+      "— se eget funn for det.",
+    kilder: [
+      {
+        source_name:
+          "Miljødirektoratet, avløpsanlegg: Knarrdalstrand renseanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=8936",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 82 500 personekvivalenter og renseprosess «Sekundær- og fosforrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Planprogram for Grenland renseanlegg med transportsystem",
+        source_url:
+          "https://www.bamble.kommune.no/_f/p1/i95b61c77-8cf9-4dac-aa82-e210218f9110/planprogram-for-grenland-renseanlegg.pdf",
+        publisher: "Bamble kommune",
+        source_type: "document",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Fra Knarrdalstrand, som blir omgjort til pumpestasjon, føres overføringsledninger videre til det nye renseanlegget i ytre del av Frierfjorden. Det nye anlegget skal erstatte Elstrøm, Knarrdalstrand, Heistad og Salen.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Vik renseanlegg",
+    description:
+      "IVARs renseanlegg på Vik i Klepp, med dimensjonert kapasitet 80 000 personekvivalenter.",
+    municipality: "Klepp",
+    address: "Nordsjøvegen 1248",
+    postal_code: "4343",
+    city: "Orre",
+    latitude: 58.7125,
+    longitude: 5.5414,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "IVARs tredje store renseanlegg på Jæren, ved kysten i et jordbruks- og friluftsområde.",
+    notes:
+      "Bore renseanlegg i samme kommune (30 000 pe, mekanisk) er ikke lagt inn.",
+    kilder: [
+      {
+        source_name: "Miljødirektoratet, avløpsanlegg: Vik renseanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=10904",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 80 000 personekvivalenter og renseprosess «Sekundærrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Årabrot avløpsanlegg",
+    description:
+      "Haugesunds hovedrenseanlegg, med dimensjonert kapasitet 62 350 personekvivalenter og bare primærrensing.",
+    municipality: "Haugesund",
+    address: "Jovegen 60",
+    postal_code: "5514",
+    city: "Haugesund",
+    latitude: 59.4439,
+    longitude: 5.2482,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Byens største VA-anlegg, og et av de store norske anleggene som fortsatt bare har primærrensing. " +
+      "Skjerpede krav vil kreve ombygging.",
+    notes:
+      "Renseprinsippet står som «Annet» i registeret, renseprosessen som «Primærrensing». Planer for " +
+      "oppgradering er ikke undersøkt — åpent punkt.",
+    kilder: [
+      {
+        source_name: "Miljødirektoratet, avløpsanlegg: Årabrot avløpsanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=10446",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 62 350 personekvivalenter og renseprosess «Primærrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Alvim renseanlegg",
+    description:
+      "Sarpsborgs hovedrenseanlegg, med dimensjonert kapasitet 60 000 personekvivalenter.",
+    municipality: "Sarpsborg",
+    address: "Fredrikstadveien 71",
+    postal_code: "1722",
+    city: "Sarpsborg",
+    latitude: 59.2718,
+    longitude: 11.0761,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Ligger i Sarpsborg by, i samme område som industrien langs Glomma.",
+    notes:
+      "Utslippet går til Glomma. Nitrogenkrav for Oslofjorden vil treffe også dette anlegget; planer er ikke " +
+      "undersøkt.",
+    kilder: [
+      {
+        source_name: "Miljødirektoratet, avløpsanlegg: Alvim renseanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=8935",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 60 000 personekvivalenter og renseprosess «Sekundær- og fosforrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Nordre Follo renseanlegg",
+    description:
+      "Interkommunalt renseanlegg ved Vinterbro, med dimensjonert kapasitet 56 500 personekvivalenter og full " +
+      "rensing for fosfor og nitrogen.",
+    municipality: "Ås",
+    address: "Høyungsletta 19",
+    postal_code: "1407",
+    city: "Vinterbro",
+    latitude: 59.7534,
+    longitude: 10.7833,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Anlegget ligger i fjell ved Vinterbro, tett på både E6 og boligområder, og har nitrogenrensing på plass.",
+    notes: "Søndre Follo renseanlegg i Vestby (35 000 pe) er ikke lagt inn.",
+    kilder: [
+      {
+        source_name:
+          "Miljødirektoratet, avløpsanlegg: Nordre Follo renseanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=17705",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 56 500 personekvivalenter og renseprosess «Sekundær-, fosfor- og nitrogenrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "MIRA renseanlegg, Sørumsand",
+    description:
+      "Midtre Romerike avløpsselskaps renseanlegg ved Sørumsand, med dimensjonert kapasitet 63 000 " +
+      "personekvivalenter.",
+    municipality: "Lillestrøm",
+    address: "Lystadveien 140",
+    postal_code: "1920",
+    city: "Sørumsand",
+    latitude: 59.9794,
+    longitude: 11.2203,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Det andre store renseanlegget i Lillestrøm kommune, ved siden av NRA på Strømmen.",
+    notes: "Utslippet går til Glomma.",
+    kilder: [
+      {
+        source_name: "Miljødirektoratet, avløpsanlegg: MIRA renseanlegg",
+        source_url:
+          "https://www.norskeutslipp.no/Templates/NorskeUtslipp/Pages/company.aspx?CompanyID=28258",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 63 000 personekvivalenter og renseprosess «Sekundær- og fosforrensing». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Tomasjord renseanlegg",
+    description:
+      "Tromsøs største avløpsrenseanlegg, med dimensjonert kapasitet 38 400 personekvivalenter og kun " +
+      "mekanisk rensing. Strandvegen renseanlegg i samme kommune (20 500 pe) er også mekanisk.",
+    municipality: "Tromsø",
+    address: "Tromsøysundvegen 216",
+    postal_code: "9024",
+    city: "Tomasjord",
+    latitude: 69.6618,
+    longitude: 19.0146,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Tromsø er den største norske byen uten biologisk eller kjemisk avløpsrensing. Skjerpede krav i " +
+      "avløpsdirektivet innebærer at byen må bygge ut betydelig rensekapasitet.",
+    notes:
+      "Kun mekanisk rensing er dokumentert i Miljødirektoratets register for begge anleggene. Hva Tromsø " +
+      "planlegger er ikke funnet — et åpent punkt som bør følges opp mot kommunens hovedplan for avløp.",
+    kilder: [
+      {
+        source_name: "Miljødirektoratet, avløpsanlegg: Tomasjord renseanlegg",
+        source_url:
+          "https://kart3.miljodirektoratet.no/arcgis/rest/services/avloep/MapServer/1",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med dimensjonert kapasitet 38 400 personekvivalenter og renseprosess «Primærrensing (mekanisk)». Data fra kommunenes årlige KOSTRA-rapportering. Siste rapportering 2025.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Kilder",
+    item_type: "note",
+    title:
+      "Miljødirektoratets avløpsregister er den nasjonale inngangen til renseanlegg",
+    description:
+      "Miljødirektoratet har et eget, komplett datasett over avløpsanlegg, basert på kommunenes " +
+      "årlige KOSTRA-rapportering. Det er tilgjengelig som åpent kart-API, med dimensjonert kapasitet i " +
+      "personekvivalenter, renseprosess, driftsstatus, koordinat og faktaark per anlegg. 2 961 anlegg " +
+      "nasjonalt, hvorav 139 over 10 000 pe og 30 over 50 000 pe.",
+    municipality: null,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    notes:
+      "Kapasitetsfeltet er dimensjonert kapasitet, ikke faktisk belastning: VEAS står med 1 100 000 pe " +
+      "mens faktisk belastning er rundt 867 000, og Bekkelaget med 570 000 mot 330 000 rapportert i 2024. " +
+      "Bruk aldri feltet som et mål på hvor mye som faktisk renses.",
+    kilder: [
+      {
+        source_name: "Miljødirektoratet, avløpsanlegg — nasjonalt uttrekk",
+        source_url:
+          "https://kart3.miljodirektoratet.no/arcgis/rest/services/avloep/MapServer/1",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "2 961 registrerte avløpsanlegg nasjonalt. 413 har kapasitet over 2 000 pe, 139 over 10 000 pe, 30 over 50 000 pe og 18 over 100 000 pe. Hver rad har navn, kommune, driftsstatus, renseprinsipp, renseprosess, dimensjonert kapasitet i personekvivalenter, koordinat og lenke til faktaark.",
+      },
+    ],
+  },
+
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Vannbehandlingsanlegg",
+    item_type: "finding",
+    title: "Oset vannbehandlingsanlegg",
+    description:
+      "Oslos hovedvannbehandlingsanlegg, i fjell ved nordenden av Maridalsvannet. Behandler normalt " +
+      "85 prosent av byens drikkevann — rundt 95 millioner kubikkmeter i året, eller 3 000 liter per sekund — i " +
+      "to av landets største fjellhaller. Fire nye haller for vannlagring, hver på 25 millioner liter, er " +
+      "sprengt ut.",
+    municipality: "Oslo",
+    city: "Oslo",
+    latitude: 59.972,
+    longitude: 10.78916,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Drikkevannet til de fleste i Oslo behandles her. Anlegget ligger i Maridalen, et område " +
+      "med strenge restriksjoner nettopp fordi det er drikkevannskilde — noe som får konsekvenser for all " +
+      "arealbruk i nedbørfeltet.",
+    notes:
+      "Koordinaten er stedsnavnet «Oset» (fabrikk) i Kartverkets register, ikke en adresse. Anlegget er " +
+      "et fjellanlegg; det synlige fotavtrykket er lite. Skullerud vannbehandlingsanlegg, som dekker resten av " +
+      "byen, er ikke lagt inn.",
+    kilder: [
+      {
+        source_name: "Oset vannbehandlingsanlegg",
+        source_url: "https://no.wikipedia.org/wiki/Oset_vannbehandlingsanlegg",
+        publisher: "Wikipedia",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Anlegget renser drikkevann fra Maridalsvannet og dekker normalt 85 prosent av Oslos behov, tilsvarende 95 millioner kubikkmeter i året eller 3 000 liter per sekund. Anlegget er Nord-Europas største i fjell, med to haller på 150 meters lengde, 27 meters bredde og 16 meters høyde.",
+      },
+      {
+        source_name: "Bli med inn i de skjulte fjellhallene",
+        source_url:
+          "https://www.nab.no/bli-med-inn-i-de-skjulte-fjellhallene-som-snart-skal-fylles-med-100-millioner-liter-vann/s/5-143-235790",
+        publisher: "Nordre Aker Budstikke",
+        source_type: "news",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Fire nye fjellhaller, hver med lagringskapasitet på 25 millioner liter vann, er sprengt ut ved anlegget.",
+      },
+      {
+        source_name: "Kartverket stedsnavn-API",
+        source_url: "https://api.kartverket.no/stedsnavn/v1/navn",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Stedsnavn, kommune og koordinat bekreftet i Kartverkets stedsnavnregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "VA-tunnel/fjellanlegg",
+    item_type: "finding",
+    title:
+      "Ny vannforsyning Oslo: Huseby vannbehandlingsanlegg og Holsfjordtunnelen",
+    description:
+      "Oslos reservevannforsyning: en 19 kilometer lang tunnel fra Holsfjorden i Lier til Huseby, " +
+      "og et nytt vannbehandlingsanlegg i fjell under Husebyskogen. Vannbehandlingsanlegget får en " +
+      "produksjonskapasitet på 367 000 kubikkmeter per døgn, inntaks- og overføringsanlegget for råvann " +
+      "638 000 kubikkmeter per døgn, og overføringsanlegget for rentvann 23 000 kubikkmeter per time. " +
+      "Tunnelen er ferdig drevet og går under Røa og videre under Bærum. Anlegget skal være i drift i 2028, " +
+      "med istandsetting fra våren 2027.",
+    municipality: "Oslo",
+    city: "Oslo",
+    latitude: 59.9397,
+    longitude: 10.66269,
+    verification_status: "verified_public_source",
+    operational_status: "under_construction",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Landets største VA-prosjekt, og det berører adresser langt utenfor selve anlegget: " +
+      "tunnelen går under boligområder i Oslo, Bærum og Lier, og riggområdene har gitt flere år med " +
+      "anleggstrafikk og sprengning.",
+    notes:
+      "Koordinaten er stedsnavnet Husebyskogen i Oslo. Anlegget ligger i fjell; punktet er en " +
+      "representasjon av overflaten over anlegget, ikke en adresse. Tunnelen er en linje gjennom tre " +
+      "kommuner og er ikke representert geografisk — dette funnet bør få geometri når modellen støtter det.",
+    kilder: [
+      {
+        source_name: "Berørte områder av ny vannforsyning i Oslo",
+        source_url:
+          "https://www.oslo.kommune.no/vann-og-avlop/ny-vannforsyning-oslo/berorte-omrader/",
+        publisher: "Oslo kommune",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Prosjektet omfatter en 19 km lang tunnel fra Holsfjorden til Huseby, nytt vannbehandlingsanlegg under Husebyskogen og overføringsanlegg. Tunnelen går blant annet under Røa og videre under Bærum.",
+      },
+      {
+        source_name: "Slik bygger vi ny vannforsyning",
+        source_url:
+          "https://www.oslo.kommune.no/vann-og-avlop/ny-vannforsyning-oslo/slik-bygger-vi-ny-vannforsyning/",
+        publisher: "Oslo kommune",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Inntaks- og overføringsanlegget for råvann får maksimal kapasitet 638 000 kubikkmeter per døgn. Vannbehandlingsanlegget får produksjonskapasitet 367 000 kubikkmeter per døgn, og overføringsanlegget for rentvann 23 000 kubikkmeter per time.",
+      },
+      {
+        source_name: "Nytt vannanlegg på Huseby blir ferdig i 2027",
+        source_url:
+          "https://www.aftenposten.no/oslo/i/ExpLka/nytt-vannanlegg-paa-huseby-blir-ferdig-i-2027",
+        publisher: "Aftenposten",
+        source_type: "news",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Milepæl i prosjektet omtalt, med 7 millioner arbeidstimer. Reservevannløsningen skal være i drift i 2028, og istandsetting starter våren 2027.",
+      },
+      {
+        source_name: "Kartverket stedsnavn-API",
+        source_url: "https://api.kartverket.no/stedsnavn/v1/navn",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Stedsnavn, kommune og koordinat bekreftet i Kartverkets stedsnavnregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Vannbehandlingsanlegg",
+    item_type: "finding",
+    title: "Langevatn vannbehandlingsanlegg",
+    description:
+      "IVARs hovedvannverk i Gjesdal, som forsyner rundt 330 000 innbyggere i ni kommuner på " +
+      "Nord-Jæren med drikkevann. Kapasitet 3 300 liter per sekund, tilsvarende rundt 285 000 kubikkmeter per " +
+      "døgn. Nytt anlegg med ny behandlingsprosess ferdigstilt i 2021 etter over seks års byggetid.",
+    municipality: "Gjesdal",
+    address: "Gjesdal 49",
+    postal_code: "4334",
+    city: "Ålgård",
+    latitude: 58.7594,
+    longitude: 5.9536,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Drikkevannet til hele Nord-Jæren behandles på ett sted. Nedbørfeltet rundt Langevatn " +
+      "har restriksjoner som følger av dette.",
+    notes:
+      "Koordinaten er hentet fra kart over anlegget og bekreftet mot nærmeste adresse i Gjesdal, men " +
+      "anlegget har ikke egen registrert adresse — derfor medium confidence på stedfestingen. " +
+      "3 300 l/s er kapasitet, ikke faktisk uttak.",
+    kilder: [
+      {
+        source_name: "Langevatn vannbehandlingsanlegg",
+        source_url: "https://www.ivar.no/langevatn/",
+        publisher: "IVAR IKS",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegget i Gjesdal er et av landets største og forsyner drikkevann til ni IVAR-kommuner. Kapasitet 3 300 liter per sekund. Etablert 1959, oppgradert i 1999 og 2021.",
+      },
+      {
+        source_name: "Langevatn — nytt anlegg, ny vannbehandlingsprosess",
+        source_url: "https://arsrapport.ivar.no/utgivelser/ar2021/hendelse/",
+        publisher: "IVAR IKS",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Det nye anlegget ble ferdigstilt etter mer enn seks års byggetid og markert i oktober 2021. Anlegget forsyner 330 000 innbyggere.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Vannbehandlingsanlegg",
+    item_type: "finding",
+    title: "Vikelvdalen vannbehandlingsanlegg",
+    description:
+      "Trondheims vannbehandlingsanlegg, i fjell mellom Solbakken og Vikåsen. Behandler drikkevann " +
+      "fra Jonsvatnet for Trondheim og Malvik, med maksimal kapasitet 1 400 liter per sekund og to " +
+      "desinfeksjonstrinn.",
+    municipality: "Trondheim",
+    address: "Yrkesskolevegen 14",
+    postal_code: "7058",
+    city: "Charlottenlund",
+    latitude: 63.4211,
+    longitude: 10.4855,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Jonsvatnet er drikkevannskilde for hele Trondheim, og restriksjonene rundt vannet " +
+      "styrer arealbruken i et stort område øst i byen.",
+    notes:
+      "Stedfestingen er omtrentlig: anlegget ligger i fjell mellom Solbakken og Vikåsen, og punktet er " +
+      "satt ut fra denne beskrivelsen og nærmeste adresse. Derfor medium confidence.",
+    kilder: [
+      {
+        source_name:
+          "Kommunedelplan Vann i Trondheim — vannkilder og vannbehandling",
+        source_url:
+          "https://sites.google.com/trondheim.kommune.no/kdp-vann-i-trondheim/vedleggsrapport/8-vannkilder-og-vannbehandling",
+        publisher: "Trondheim kommune",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Jonsvatnet er hovedvannkilde for Trondheim og Malvik. Drikkevannet behandles ved Vikelvdalen vannbehandlingsanlegg, som ligger i fjellet mellom Solbakken og Vikåsen og har maksimal kapasitet 1 400 liter per sekund. Behandlingen består av råvannssil, karbonatisering for pH-justering og to desinfeksjonstrinn med UV og klorering.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Nordbykollen regionale renseanlegg",
+    description:
+      "Planlagt regionalt renseanlegg på Nordbykollen ved Solumstrand i Drammen, som skal erstatte " +
+      "seks eksisterende anlegg: Mjøndalen, Muusøya, Bokerøya og Solumstrand i Drammen, Linnes i Lier og " +
+      "Lahell i Asker. Detaljregulering med konsekvensutredning har vært på offentlig ettersyn. Drivkraften er " +
+      "skjerpede krav til nitrogenrensing.",
+    municipality: "Drammen",
+    city: "Drammen",
+    latitude: 59.71899,
+    longitude: 10.2459,
+    verification_status: "verified_public_source",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Seks anlegg blir ett. For naboer på Nordbykollen betyr det et helt nytt stort anlegg " +
+      "og flere år med bygging; for naboene til de seks som legges ned, betyr det avvikling. Både plan og " +
+      "konsekvensutredning er offentlige.",
+    notes:
+      "Koordinaten er stedsnavnet Nordbykollen (ås) i Drammen. Det finnes to steder med samme navn i " +
+      "kommunen; dette er det som ligger nær Solumstrand. Kapasitet er ikke oppgitt i kildene vi har lest " +
+      "ennå — åpent punkt. Endelig plassering og utforming avgjøres i reguleringsplanen.",
+    kilder: [
+      {
+        source_name: "Nytt regionalt renseanlegg",
+        source_url:
+          "https://www.drammen.kommune.no/om-kommunen/organisasjon-administrasjon/prosjekter/nytt-regionalt-renseanlegg/",
+        publisher: "Drammen kommune",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nytt regionalt renseanlegg på Nordbykollen skal erstatte Mjøndalen, Muusøya, Bokerøya og Solumstrand i Drammen, Linnes i Lier og Lahell i Asker.",
+      },
+      {
+        source_name:
+          "Detaljregulering for regionalt renseanlegg Nordbykollen–Solumstrand, offentlig ettersyn",
+        source_url:
+          "https://www.drammen.kommune.no/politikk-samfunn/kunngjoringer/renseanlegg-nordbykollen-solumstrand-offentlig-ettersyn/",
+        publisher: "Drammen kommune",
+        source_type: "regulation",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Forslag til detaljregulering med konsekvensutredning for regionalt renseanlegg Nordbykollen–Solumstrand lagt ut til offentlig ettersyn.",
+      },
+      {
+        source_name:
+          "Rapport: Utslipp fra nytt renseanlegg vil gi bedre leveforhold i Drammensfjorden",
+        source_url:
+          "https://www.asker.kommune.no/vann-og-avlop/aktuelt-for-vann-og-avlop/nytt-renseanlegg-reduserer-utslipp/",
+        publisher: "Asker kommune",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Asker deltar i samarbeidet. Rapporten konkluderer med at utslipp fra det nye anlegget vil gi bedre leveforhold i Drammensfjorden.",
+      },
+      {
+        source_name: "Kartverket stedsnavn-API",
+        source_url: "https://api.kartverket.no/stedsnavn/v1/navn",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Stedsnavn, kommune og koordinat bekreftet i Kartverkets stedsnavnregister.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Grenland renseanlegg",
+    description:
+      "Planlagt felles renseanlegg for Grenland, i ytre del av Frierfjorden i Porsgrunn, " +
+      "dimensjonert for rundt 105 000 personekvivalenter og et areal på rundt 13 000 kvadratmeter. Skal " +
+      "erstatte Elstrøm i Skien og Knarrdalstrand, Heistad og Salen i Porsgrunn, med nye overføringsledninger " +
+      "og pumpestasjoner. Detaljregulering er varslet igangsatt (planID 2025008).",
+    municipality: "Porsgrunn",
+    city: "Porsgrunn",
+    verification_status: "verified_public_source",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Fire anlegg erstattes av ett, og transportsystemet mellom dem berører et langt " +
+      "strekk gjennom to kommuner. Planarbeidet er i gang, så dette er noe naboer kan uttale seg om nå.",
+    notes:
+      "Uten koordinat med vilje: plasseringen er beskrevet som «ytre del av Frierfjorden» i " +
+      "planprogrammet, men eksakt tomt er ikke fastsatt i kildene vi har lest. Å sette et punkt nå ville gitt " +
+      "falsk presisjon. Hentes fra reguleringsplanens geometri når den er vedtatt.",
+    kilder: [
+      {
+        source_name:
+          "Varsel om oppstart av detaljregulering for Grenland renseanlegg med transportsystem",
+        source_url:
+          "https://www.porsgrunn.kommune.no/lokalpolitikk/hoeringer/varsel-om-oppstart-av-detaljregulering-for-grenland-renseanlegg-med-transportsystem-i-porsgrunn-planid-2025008",
+        publisher: "Porsgrunn kommune",
+        source_type: "regulation",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel om oppstart av detaljregulering for Grenland renseanlegg med transportsystem i Porsgrunn, planID 2025008.",
+      },
+      {
+        source_name: "Planprogram for Grenland renseanlegg med transportsystem",
+        source_url:
+          "https://www.bamble.kommune.no/_f/p1/i95b61c77-8cf9-4dac-aa82-e210218f9110/planprogram-for-grenland-renseanlegg.pdf",
+        publisher: "Bamble kommune",
+        source_type: "document",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nytt felles renseanlegg planlegges med kapasitet for avløp fra rundt 105 000 personekvivalenter, med nye overføringsledninger og pumpestasjoner. Anlegget legges i ytre del av Frierfjorden og omfatter rundt 13 000 kvadratmeter. Det skal erstatte Elstrøm, Knarrdalstrand, Heistad og Salen.",
+      },
+      {
+        source_name: "Felles renseanlegg til milliarder på gang",
+        source_url:
+          "https://www.ta.no/felles-renseanlegg-til-milliarder-pa-gang/s/5-50-1344089",
+        publisher: "Telemarksavisa",
+        source_type: "news",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Skien og Porsgrunn planlegger felles renseanlegg med milliardkostnad.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    subcategory: "Renseanlegg",
+    item_type: "finding",
+    title: "Kvasneset reinseanlegg for Ålesund og Sula",
+    description:
+      "Planlagt felles renseanlegg for Ålesund og Sula, i fjellhaller på Kvasneset i Sula. " +
+      "Dimensjonert for 69 000 personekvivalenter og for forholdene i 2050, med anslått 48 300 tilknyttede " +
+      "innbyggere. Hydraulisk dimensjonering: 222 liter per sekund normalt, 700 liter per sekund maksimalt. " +
+      "Del av prosjektet «BLÅ — fjordar for framtida», som også omfatter ny pumpestasjon på Breivika og " +
+      "overføringsledning fra Larsgården.",
+    municipality: "Sula",
+    city: "Langevåg",
+    latitude: 62.42101,
+    longitude: 6.36303,
+    verification_status: "verified_public_source",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Ålesund har i dag bare mekaniske anlegg. Dette flytter regionens avløpsrensing til ett " +
+      "fjellanlegg i en nabokommune, med tunneldriving og en 5,5 kilometer lang overføringsledning.",
+    notes:
+      "Koordinaten er stedsnavnet Kvasneset i Sula. Anlegget er i fjell; punktet viser stedet, ikke " +
+      "anleggets utstrekning. Skill tallene: 69 000 pe er dimensjonert kapasitet, 48 300 er anslått antall " +
+      "tilknyttede innbyggere i 2050. Ålesunds eksisterende anlegg RA2 Aspøy og RA4 Åse (25 000 pe hver) er " +
+      "ikke lagt inn.",
+    kilder: [
+      {
+        source_name: "BLÅ fjordar med Kongshaugen reinseanlegg",
+        source_url:
+          "https://alesund.kommune.no/samfunnsutvikling/slik-bygger-vi-alesund/prosjekt-vatn-og-avlop/felles-renseanlegg-med-sula-kommune.18021.aspx",
+        publisher: "Ålesund kommune",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Felles renseanlegg for Ålesund og Sula, i prosjektet BLÅ — fjordar for framtida.",
+      },
+      {
+        source_name: "Nytt renseanlegg for Ålesund og Sula kommuner",
+        source_url:
+          "https://www.asplanviak.no/prosjekter/nytt-renseanlegg-for-alesund-og-sula-kommuner/",
+        publisher: "Asplan Viak",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegget er dimensjonert for kommunalt avløpsvann fra opptil 69 000 personekvivalenter, med Qdim 222 l/s, Qmaksdim 600 l/s og Qmaks 700 l/s. Dimensjonert for forholdene i 2050, med anslått 48 300 tilknyttede innbyggere. Renseanlegget plasseres i fjellhaller på Kvasneset i Sula kommune.",
+      },
+      {
+        source_name: "Kartverket stedsnavn-API",
+        source_url: "https://api.kartverket.no/stedsnavn/v1/navn",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Stedsnavn, kommune og koordinat bekreftet i Kartverkets stedsnavnregister.",
+      },
+    ],
+  },
+
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Gruve",
+    item_type: "finding",
+    title: "Rana Gruber",
+    description:
+      "Jernmalmgruve i Dunderlandsdalen, med uttak ved Ørtfjell og Storforshei og oppredningsverk i Mo i Rana. " +
+      "Rundt 5 millioner tonn råmalm tas ut årlig og foredles til omtrent 1,85 millioner tonn " +
+      "jernoksidkonsentrat. Drift både som dagbrudd og, siden 1999, under jord. Hovedgruven flyttes fra Ørtfjell " +
+      "til Stensundtjern, med malmuttak der fra slutten av 2025.",
+    municipality: "Rana",
+    address: "Mjølanveien 29",
+    postal_code: "8622",
+    city: "Mo i Rana",
+    latitude: 66.32656,
+    longitude: 14.15158,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Norges største jernmalmprodusent. Uttaket er i fjellet, men malmtransport og oppredning skjer i og ved " +
+      "Mo i Rana, med jernbane gjennom dalen.",
+    notes:
+      "Koordinaten er det registrerte punktet i utslippsregisteret, som ligger ved anlegget i Mo i Rana — ikke " +
+      "ved gruvene på Ørtfjell rundt 35 kilometer nordøst. Funnet dekker begge, og bør deles i to eller få " +
+      "geometri senere." +
+      " Skill tallene: 5 millioner tonn er råmalm, 1,85 millioner tonn er ferdig konsentrat.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Rana Gruber",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «07.100 - Bryting av jernmalm». Registeret dokumenterer at anlegget finnes og er regulert, med koordinat for det registrerte punktet.",
+      },
+      {
+        source_name: "Rana Gruber",
+        source_url: "https://snl.no/Rana_Gruber",
+        publisher: "Store norske leksikon",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Gruvene ligger i Dunderlandsdalen ved Ørtfjell og Storforshei, og er drevet både som dagbrudd og siden 1999 også under jord. Produksjonen er rundt 1,8 millioner tonn konsentrat i året.",
+      },
+      {
+        source_name: "Rana Gruber ASA — bedriftsfakta",
+        source_url:
+          "http://mineralproduksjon.no/wp-content/uploads/2026/02/MP12-BED-Rana-Gruber-ASA.pdf",
+        publisher: "Mineralproduksjon",
+        source_type: "document",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Årlig produseres omtrent fem millioner tonn råmalm, som foredles til rundt 1,85 millioner tonn jernoksidkonsentrat. Overgangen fra Ørtfjell til Stensundtjern som hovedgruve går som planlagt, med malmuttak fra slutten av 2025.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Gruve",
+    item_type: "finding",
+    title: "Titania, Tellnes",
+    description:
+      "Ilmenittgruve i dagbrudd på Tellnes i Sokndal, i drift siden 1960. Rundt 7 millioner tonn masse tas ut " +
+      "årlig, hvorav omtrent 2 millioner tonn malm og 1,6 millioner tonn gråberg fra selve dagbruddet. " +
+      "Forekomsten er verdens største kjente ilmenittforekomst med reserver på rundt 400 millioner tonn, og " +
+      "anlegget står for rundt 10 prosent av verdens ilmenittproduksjon.",
+    municipality: "Sokndal",
+    address: "Tellenesveien 484",
+    postal_code: "4380",
+    city: "Hauge i Dalane",
+    latitude: 58.33214,
+    longitude: 6.41281,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Europas største dagbrudd for titanmineraler, i en kommune med rundt 3 300 innbyggere. Uttaket, " +
+      "gråbergdeponiene og transporten preger et stort område.",
+    notes:
+      "Tallene gjelder ulike ting: 7 millioner tonn er samlet masseuttak, 2 millioner tonn er malm, 400 " +
+      "millioner tonn er reserver i forekomsten, ikke årlig produksjon. Konsentratproduksjonen på rundt 580 000 " +
+      "tonn stammer fra 1999-tall og er ikke bekreftet for i dag — åpent punkt." +
+      " Dagbruddet er en stor flate. Bør få geometri senere.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Titania AS",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «07.290 - Bryting av ikke-jernholdig malm». Registeret dokumenterer at anlegget finnes og er regulert, med koordinat for det registrerte punktet.",
+      },
+      {
+        source_name: "Titania",
+        source_url: "https://snl.no/Titania",
+        publisher: "Store norske leksikon",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Titania A/S driver dagbrudd på Tellnes i Sokndal. Dette er verdens største kjente ilmenittforekomst, og selskapet står for rundt 10 prosent av verdens ilmenittproduksjon.",
+      },
+      {
+        source_name: "Tellnes gruver",
+        source_url: "https://magmageopark.no/en/location-object/tellnes/",
+        publisher: "Magma Geopark",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Rundt 2 millioner tonn malm og 1,6 millioner tonn gråberg fjernes fra dagbruddet hvert år.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Gruve",
+    item_type: "finding",
+    title: "Sydvaranger gruve, Bjørnevatn",
+    description:
+      "Jernmalmgruve i Bjørnevatn med separasjonsverk og utskipningshavn i Kirkenes. Nedlagt siden 2015, og nå " +
+      "under forberedelse til gjenoppstart av Grangex. Den endelige investeringsbeslutningen er utsatt til " +
+      "tredje kvartal 2026, og prosjektet trenger rundt 300 millioner dollar i egenkapital og lån. Selskapet " +
+      "har uttalt mål om kommersielle leveranser av direktreduksjonskonsentrat i fjerde kvartal 2026.",
+    municipality: "Sør-Varanger",
+    address: "25/210",
+    postal_code: "9900",
+    city: "Kirkenes",
+    latitude: 69.72476,
+    longitude: 30.0341,
+    verification_status: "verified_public_source",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "En gjenåpning ville endre Sør-Varanger vesentlig: gruvedrift i Bjørnevatn, malmtog til Kirkenes og " +
+      "utskipning fra byen. Prosjektet har vært utsatt flere ganger, så statusen er fortsatt usikker.",
+    notes:
+      "Status satt til planlagt, ikke aktiv: investeringsbeslutningen er ikke tatt. Ikke fremstill dette som " +
+      "en gruve i drift. Følg opp beslutningen i tredje kvartal 2026.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Sydvaranger",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «07.100 - Bryting av jernmalm». Anlegget står registrert med utslippstillatelse. Registrering er ikke det samme som drift.",
+      },
+      {
+        source_name: "Grangex utsetter finansieringsmål for Sydvaranger",
+        source_url:
+          "https://www.nrk.no/tromsogfinnmark/grangex-utsetter-finansieringsmal-for-sydvaranger-1.17902262",
+        publisher: "NRK",
+        source_type: "news",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Grangex utsetter den endelige investeringsbeslutningen for gjenåpning til tredje kvartal 2026. Prosjektet trenger rundt 300 millioner dollar.",
+      },
+      {
+        source_name:
+          "Grangex completes DFS for Sydvaranger Mine, eyes 2026 restart",
+        source_url:
+          "https://www.mining-technology.com/news/grangex-completes-dfs-sydvaranger-mine-2026-restart/",
+        publisher: "Mining Technology",
+        source_type: "news",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Ferdigstilt mulighetsstudie, med mål om gjenoppstart og første kommersielle eksport sent i 2026.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Gruve",
+    item_type: "finding",
+    title: "Nussir kobbergruve, Repparfjord",
+    description:
+      "Planlagt kobbergruve i Nussir og Ulveryggen ved Repparfjorden. Nussir ASA har driftskonsesjon og " +
+      "tillatelse til sjødeponi for avgangsmasser i Repparfjorden. Arbeidet ble en periode stanset fordi en " +
+      "tunnel manglet kommunal tillatelse; Hammerfest kommune besluttet i juli 2025 at driften kunne fortsette. " +
+      "I juli 2026 ble prosjektet omtalt som fullfinansiert, og EPC-kontrakten for prosessanlegget er tildelt.",
+    municipality: "Hammerfest",
+    latitude: 70.46591,
+    longitude: 24.0992,
+    verification_status: "verified_public_source",
+    operational_status: "under_construction",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "En av de mest omstridte industrisakene i landet: sjødeponi i en nasjonal laksefjord, reindriftsinteresser " +
+      "og en protestleir som sto i over 200 dager. Alt dette er dokumentert og pågående.",
+    notes:
+      "Status satt til under bygging, ikke aktiv drift: konsesjon og finansiering er på plass og tunnelarbeid " +
+      "er i gang, men produksjon er ikke bekreftet startet. Confidence er medium fordi statusbildet endrer seg " +
+      "raskt og kildene er av ulik karakter." +
+      " Koordinaten er fjellet Nussir i Hammerfest fra Kartverkets stedsnavnregister — selve forekomsten, ikke " +
+      "et anleggspunkt.",
+    kilder: [
+      {
+        source_name:
+          "Nussir ASA — driftskonsesjon for Repparfjord kobberforekomst",
+        source_url:
+          "https://www.regjeringen.no/globalassets/departementene/nfd/dokumenter/nussir-asa---driftskonsesjon-for-repparfjord-kobberforekomst.pdf",
+        publisher: "Nærings- og fiskeridepartementet",
+        source_type: "document",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary: "Driftskonsesjon for Repparfjord kobberforekomst.",
+      },
+      {
+        source_name: "Nussir får fortsette gruvearbeidet i Repparfjorden",
+        source_url:
+          "https://www.nrk.no/tromsogfinnmark/nussir-far-fortsette-gruvearbeidet-i-repparfjorden-1.17487287",
+        publisher: "NRK",
+        source_type: "news",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Arbeidet var stanset fordi en tunnel manglet kommunens tillatelse. I juli 2025 besluttet Hammerfest kommune at driften kunne fortsette.",
+      },
+      {
+        source_name: "Gruvekonflikten i Repparfjorden",
+        source_url: "https://snl.no/gruvekonflikten_i_Repparfjorden",
+        publisher: "Store norske leksikon",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oversikt over konflikten om sjødeponi, reindrift og protestaksjoner.",
+      },
+      {
+        source_name: "Kartverket stedsnavn-API",
+        source_url: "https://api.kartverket.no/stedsnavn/v1/navn",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Stedsnavn, kommune og koordinat bekreftet i Kartverkets stedsnavnregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Gruve",
+    item_type: "finding",
+    title: "Engebøfjellet, rutil- og granatgruve",
+    description:
+      "Nordic Minings gruve i Engebøfjellet ved Vevring i Sunnfjord, med uttak av rutil og granat og sjødeponi " +
+      "i Førdefjorden. Anlegget er i oppstartsfase: granatleveranser er i gang, mens første rutilfrakt er " +
+      "utsatt til første kvartal 2026. Selskapets mål er å nå designkapasitet innen slutten av andre kvartal " +
+      "2026. Tørranlegget har hatt lavere oppetid og kapasitet enn planlagt.",
+    municipality: "Sunnfjord",
+    latitude: 61.49147,
+    longitude: 5.4278,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Sjødeponiet i Førdefjorden er en av de største miljøstridene i landet. Anlegget er dessuten det første " +
+      "nye store gruveprosjektet i drift i Norge på lang tid.",
+    notes:
+      "Status satt til aktiv, men i innkjøring — ikke full produksjon. Confidence medium fordi produksjons- og " +
+      "kapasitetsbildet har blitt nedjustert flere ganger." +
+      " Koordinaten er stedsnavnet Engjabøfjellet i Sunnfjord. Anlegget dekker et større område inne i fjellet " +
+      "og ved fjorden.",
+    kilder: [
+      {
+        source_name: "Engebøfjellet",
+        source_url: "https://snl.no/Engeb%C3%B8fjellet",
+        publisher: "Store norske leksikon",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Forekomst av rutil og granat i Engebøfjellet ved Vevring, med planer om sjødeponi i Førdefjorden.",
+      },
+      {
+        source_name: "Nordic Mining er forseinka med produksjon av rutil",
+        source_url:
+          "https://www.nrk.no/vestland/nordic-mining-er-forseinka-med-produksjon-av-rutil-1.17586798",
+        publisher: "NRK",
+        source_type: "news",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Produksjonen av rutil er forsinket. Første rutilfrakt er utsatt til første kvartal 2026, og målet er designkapasitet innen slutten av andre kvartal 2026.",
+      },
+      {
+        source_name: "Gruvekonflikten i Førdefjorden",
+        source_url: "https://snl.no/Gruvekonflikten_i_F%C3%B8rdefjorden",
+        publisher: "Store norske leksikon",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oversikt over konflikten om sjødeponi i Førdefjorden.",
+      },
+      {
+        source_name: "Kartverket stedsnavn-API",
+        source_url: "https://api.kartverket.no/stedsnavn/v1/navn",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Stedsnavn, kommune og koordinat bekreftet i Kartverkets stedsnavnregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Gruve",
+    item_type: "finding",
+    title: "Fensfeltet, sjeldne jordarter",
+    description:
+      "Europas største dokumenterte forekomst av sjeldne jordarter, på Fen ved Ulefoss i Nome. Rare Earths " +
+      "Norway anslår minst 15 millioner tonn sjeldne jordarter i forekomsten. Staten overtok i april 2026 " +
+      "planarbeidet fra Nome kommune, og en statlig plan for gruvedrift skal foreligge senest i 2028, med " +
+      "ambisjon om slutten av 2027. Selskapets mål er oppstart rundt 2030.",
+    municipality: "Nome",
+    latitude: 59.26865,
+    longitude: 9.30121,
+    verification_status: "verified_public_source",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Dette kan bli Europas første produksjon av sjeldne jordarter, i et tettbygd jordbruks- og " +
+      "industriområde. At staten har overtatt planarbeidet betyr at prosessen går raskere enn en vanlig " +
+      "kommunal plansak.",
+    notes:
+      "Status planlagt: ingen gruve i drift. 15 millioner tonn er anslått forekomst, ikke årlig produksjon. " +
+      "Koordinaten er tettbebyggelsen Fen i Nome, ikke et anleggspunkt — forekomsten dekker et større område.",
+    kilder: [
+      {
+        source_name:
+          "Plan for gruvedrift på Fensfeltet skal være klar senest i 2028",
+        source_url:
+          "https://anlegg.bygg.no/gruvedrift-lns-telemark/plan-for-gruvedrift-pa-fensfeltet-skal-vaere-klar-senest-i-2028/2957253",
+        publisher: "Byggeindustrien",
+        source_type: "news",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Staten tar over planarbeidet fra Nome kommune. Planen skal være klar senest i 2028, med ambisjon om slutten av 2027.",
+      },
+      {
+        source_name:
+          "Europas største forekomst av sjeldne jordarter finnes på Fen",
+        source_url:
+          "https://rareearthsnorway.com/europas-st%C3%B8rste-forekomst-av-sjeldne-jordarter-finnes-p%C3%A5-fen",
+        publisher: "Rare Earths Norway",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Selskapet har dokumentert Europas største forekomst av sjeldne jordarter, anslått til minst 15 millioner tonn.",
+      },
+      {
+        source_name: "Kartverket stedsnavn-API",
+        source_url: "https://api.kartverket.no/stedsnavn/v1/navn",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Stedsnavn, kommune og koordinat bekreftet i Kartverkets stedsnavnregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Gruve",
+    item_type: "finding",
+    title: "Skaland Graphite, Trælen",
+    description:
+      "Grafittgruve på Senja, med uttak ved Trælen og foredling på Skaland. Rundt 10 500 tonn grafittkonsentrat " +
+      "i året, tilsvarende omtrent 2 prosent av verdensproduksjonen. Malmgehalten er 28 prosent grafitt, som " +
+      "gjør forekomsten til den rikeste i produksjon i verden. Reserven ved Trælen er anslått til 1,8 millioner " +
+      "tonn. Sammenhengende drift siden 1917.",
+    municipality: "Senja",
+    address: "Bergsfjordveien 1655",
+    postal_code: "9385",
+    city: "Skaland",
+    latitude: 69.44157,
+    longitude: 17.32902,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Den eneste grafittgruven i drift i Skandinavia og Europas største produsent av naturlig grafitt — i en " +
+      "liten bygd på Senja, der virksomheten er hjørnesteinsbedrift.",
+    notes:
+      "Koordinaten er det registrerte punktet, som ligger ved anlegget på Skaland. Selve gruven ligger ved " +
+      "Trælen rundt 7 kilometer unna (69,49644 nord, 17,21812 øst i Kartverkets stedsnavnregister). Funnet " +
+      "dekker begge." +
+      " Eierskapet er i endring: Mineral Commodities har eid selskapet siden 2019, og Norge Mineraler er omtalt " +
+      "som kjøper. Bør bekreftes.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Skaland Graphite AS",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «08.990 - Annen bryting og utvinning ikke nevnt annet sted». Registeret dokumenterer at anlegget finnes og er regulert, med koordinat for det registrerte punktet.",
+      },
+      {
+        source_name: "Skaland Graphite",
+        source_url: "https://snl.no/Skaland_Graphite",
+        publisher: "Store norske leksikon",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Skaland er den eneste grafittgruven i drift i Skandinavia og Europas største produsent av naturlig grafitt, i sammenhengende drift siden 1917. Produksjonen er rundt 10 500 tonn grafittkonsentrat årlig, om lag 2 prosent av verdensproduksjonen. Malmgehalten er 28 prosent.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Gruve",
+    item_type: "finding",
+    title: "Store Norske Gruve 7, Adventdalen",
+    description:
+      "Norges siste kullgruve, i Adventdalen sørøst for Longyearbyen. Stengt 30. juni 2025 etter over 50 års " +
+      "drift, og slutten på over 100 år med norsk kulldrift på Svalbard. Bakgrunnen var at Longyearbyen " +
+      "lokalstyre sa opp avtalen om kullkjøp til kraftproduksjon. Store Norske avviklet driften i juli 2025 og " +
+      "gjennomfører et oppryddingsprosjekt som skal være ferdig i 2026.",
+    municipality: "Svalbard",
+    address: "Vei 400 1401",
+    postal_code: "9170",
+    city: "Longyearbyen",
+    verification_status: "verified_public_source",
+    operational_status: "closed",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Historisk nedleggelse, og et oppryddingsprosjekt som fortsatt pågår fysisk på stedet.",
+    notes:
+      "Status satt til stengt, men med pågående opprydding — anlegget er ikke borte fra stedet. Kommunefeltet " +
+      "står som «Svalbard», som ikke er en kommune; Kartverkets adresseregister fører Longyearbyen med " +
+      "postnummer 9170. Funnet står uten koordinat med vilje: research-basen tillater bare breddegrad " +
+      "mellom 57 og 72, altså fastlandet, så Svalbard på 78,16 nord kan ikke stedfestes i dagens modell.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Store Norske (SNSG) Gruve 7 Adventdalen",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «05.100 - Bryting av steinkull». Registeret dokumenterer at anlegget finnes og er regulert, med koordinat for det registrerte punktet.",
+      },
+      {
+        source_name: "Slutt på norsk gruvedrift: Gruve 7 på Svalbard stenges",
+        source_url:
+          "https://www.nrk.no/tromsogfinnmark/slutt-pa-norsk-gruvedrift_-gruve-7-pa-svalbard-stenges-1.17870128",
+        publisher: "NRK",
+        source_type: "news",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Gruve 7 ble stengt 30. juni 2025. Det satte punktum for over 100 år med norsk gruvedrift på Svalbard.",
+      },
+      {
+        source_name: "Gruve 7",
+        source_url: "https://www.snsk.no/bergverk/gruve-7",
+        publisher: "Store Norske",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Store Norske avviklet driften i Gruve 7 i juli 2025 og gjennomfører nå et oppryddingsprosjekt som skal være ferdig i 2026.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Steinbrudd",
+    item_type: "finding",
+    title: "Brønnøy Kalk, Akselberg",
+    description:
+      "Kalksteinbrudd på Akselberg i Brønnøy, med rundt 2 millioner tonn kalkstein i året. Anlegget er " +
+      "hovedleverandør av råstoff til Omya Hustadmarmor, som maler marmoren til kalsiumkarbonat.",
+    municipality: "Brønnøy",
+    address: "Akselbergveien 11",
+    postal_code: "8960",
+    city: "Velfjord",
+    latitude: 65.39364,
+    longitude: 12.48837,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et av landets største uttak målt i tonn, og grunnlaget for en foredlingskjede videre til Hustadvika. " +
+      "Uttaket og utskipningen preger et stort område i en kommune med rundt 7 800 innbyggere.",
+    notes:
+      "2 millioner tonn er årlig uttak. Bruddet er en stor flate og bør få geometri senere.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Brønnøy Kalk A.S",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «08.110 - Bryting av dekorstein, kalkstein, gips, kritt og skifer». Registeret dokumenterer at anlegget finnes og er regulert, med koordinat for det registrerte punktet.",
+      },
+      {
+        source_name: "Brønnøy Kalk",
+        source_url: "https://www.nomin.no/bronnoy-kalk/category875.html",
+        publisher: "Norsk Mineral",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Brønnøy Kalk produserer rundt 2 millioner tonn kalkstein årlig og er hovedleverandør av råstoff til Omya Hustadmarmor.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Steinbrudd",
+    item_type: "finding",
+    title: "Verdalskalk Tromsdalen",
+    description:
+      "Kalksteinbrudd i Tromsdalen i Verdal, med uttak av rundt 1,5 millioner tonn kalkstein i året. Mye av " +
+      "råstoffet går til Hylla for brenning til kalk.",
+    municipality: "Verdal",
+    address: "Tromsdalsvegen 442",
+    postal_code: "7657",
+    city: "Verdal",
+    latitude: 63.72419,
+    longitude: 11.65273,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et av landets største kalkuttak, i en dal med landbruk og bebyggelse, og med tungtransport ut til Hylla " +
+      "og videre.",
+    notes:
+      "1,5 millioner tonn er årlig uttak. Uttaksområdet er stort og bør få geometri senere. Eventuelle " +
+      "utvidelsesplaner er ikke undersøkt.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Verdalskalk Tromsdalen kalksteinsbrudd",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «08.110 - Bryting av dekorstein, kalkstein, gips, kritt og skifer». Registeret dokumenterer at anlegget finnes og er regulert, med koordinat for det registrerte punktet.",
+      },
+      {
+        source_name: "Tromsdalen er et produksjonsanlegg for Verdalskalk",
+        source_url:
+          "https://kalk.no/en/selskap-og-anlegg/verdalskalk/tromsdalen/",
+        publisher: "Franzefoss Minerals",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Verdalskalk tar ut rundt 1,5 millioner tonn kalkstein i året i Tromsdalen. Mye går til Hylla for brenning til kalk.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Steinbrudd",
+    item_type: "finding",
+    title: "Sibelco Åheim, olivin",
+    description:
+      "Olivinuttak i Almklovdalen ved Åheim, verdens største kommersielle olivinforekomst og olivinanlegg. " +
+      "Kapasiteten er 2,5 millioner tonn i året, med dagens produksjon rundt 1,5 millioner tonn. Reservene er " +
+      "anslått å holde i opptil 150 år. Anlegget ble åpnet i 1948.",
+    municipality: "Vanylven",
+    address: "45/4",
+    postal_code: "6146",
+    city: "Åheim",
+    latitude: 62.04107,
+    longitude: 5.51886,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Verdens største i sitt slag, i en kommune med rundt 3 000 innbyggere. Uttaket dominerer dalen og gir " +
+      "utskipning fra egen havn.",
+    notes:
+      "Skill tallene: 2,5 millioner tonn er kapasitet, rundt 1,5 millioner tonn er faktisk produksjon.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Sibelco Nordic AS, avd Åheim",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «08.910 - Bryting og utvinning av kjemiske mineraler og gjødselsmineraler». Registeret dokumenterer at anlegget finnes og er regulert, med koordinat for det registrerte punktet.",
+      },
+      {
+        source_name: "Åheim",
+        source_url: "https://www.sibelco.com/en/sites/aheim",
+        publisher: "Sibelco",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Åheim er verdens største kommersielle olivinvirksomhet, med kapasitet 2,5 millioner tonn per år og reserver for opptil 150 år. Anlegget ble åpnet i 1948.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Steinbrudd",
+    item_type: "finding",
+    title: "Franzefoss Minerals Miljøkalk, Ballangen",
+    description:
+      "Kalkuttak og produksjon under Franzefoss Minerals i Ballangen-området i Narvik kommune.",
+    municipality: "Narvik",
+    address: "Hekkelstrand-FV819 20",
+    postal_code: "8540",
+    city: "Ballangen",
+    latitude: 68.39729,
+    longitude: 16.82869,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Et av få store mineraluttak i Nordland sør for Narvik, med utskipning over egen kai.",
+    notes:
+      "Kapasitet og årlig uttak er ikke dokumentert i kildene vi har lest — åpent punkt. Confidence er medium " +
+      "på beskrivelsen, høy på at anlegget finnes og er regulert.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Franzefoss Minerals AS - Miljøkalk",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «08.110 - Bryting av dekorstein, kalkstein, gips, kritt og skifer». Registeret dokumenterer at anlegget finnes og er regulert, med koordinat for det registrerte punktet.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Steinbrudd",
+    item_type: "finding",
+    title: "Hammerfall Dolomitt",
+    description: "Dolomittuttak ved Hammerfall i Sørfold.",
+    municipality: "Sørfold",
+    address: "Røsvikveien 456",
+    postal_code: "8220",
+    city: "Røsvik",
+    latitude: 67.39173,
+    longitude: 15.53847,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Sammen med Elkem Salten er dette et av de tyngste industrianleggene i en kommune med under 2 000 " +
+      "innbyggere.",
+    notes:
+      "Årlig uttak og driftshorisont er ikke dokumentert i kildene vi har lest — åpent punkt.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Hammerfall Dolomitt",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «08.110 - Bryting av dekorstein, kalkstein, gips, kritt og skifer». Registeret dokumenterer at anlegget finnes og er regulert, med koordinat for det registrerte punktet.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Steinbrudd",
+    item_type: "finding",
+    title: "Mårnes kvartsittbrudd",
+    description: "Kvartsittbrudd på Mårnes i Gildeskål, på Sandhornøya.",
+    municipality: "Gildeskål",
+    address: "Sandhornøyveien 271",
+    postal_code: "8130",
+    city: "Sandhornøy",
+    latitude: 67.13868,
+    longitude: 14.13327,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Et stort uttak på en øy med få innbyggere, med utskipning direkte fra bruddet.",
+    notes:
+      "Årlig uttak er ikke dokumentert i kildene vi har lest — åpent punkt.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Mårnes kvartsittbrudd",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «08.990 - Annen bryting og utvinning ikke nevnt annet sted». Registeret dokumenterer at anlegget finnes og er regulert, med koordinat for det registrerte punktet.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Steinbrudd",
+    item_type: "finding",
+    title: "Egersund Granite",
+    description:
+      "Uttak av anortositt og granitt i Eigersund, med produksjon av natursteinsblokk.",
+    municipality: "Eigersund",
+    address: "Jærveien 1295",
+    postal_code: "4375",
+    city: "Helleland",
+    latitude: 58.49356,
+    longitude: 5.85807,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Dalane-området har flere store uttak; dette er ett av dem, og i samme kommune som Titania og " +
+      "Rekefjord-bruddet i nabokommunen.",
+    notes:
+      "Årlig uttak er ikke dokumentert i kildene vi har lest — åpent punkt.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Egersund Granite",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «08.110 - Bryting av dekorstein, kalkstein, gips, kritt og skifer». Registeret dokumenterer at anlegget finnes og er regulert, med koordinat for det registrerte punktet.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Steinbrudd",
+    item_type: "finding",
+    title: "Larvikitt-området i Tvedalen og Klåstad",
+    description:
+      "Norges største bergverksområde målt i antall brudd: rundt 20 larvikittbrudd i Larvik-distriktet, med " +
+      "Tvedalen og Klåstad som de viktigste. Steinindustrien i Tvedalen dekker rundt 7 000 dekar og har " +
+      "omkring 400 arbeidsplasser. Nær 300 000 tonn blokkstein eksporteres årlig, og 90 til 95 prosent av det " +
+      "som tas ut er skrotstein — rundt 400 000 tonn i året — som skipes ut lokalt fra Svartebukt havn ved " +
+      "Mørjefjorden. Larvikitt står for litt over 50 prosent av salgsverdien og 85 prosent av eksportverdien av " +
+      "norsk naturstein, og ble utpekt til Norges nasjonalbergart i 2008.",
+    municipality: "Larvik",
+    address: "Tvedalsveien 530",
+    postal_code: "3295",
+    city: "Tvedalen",
+    latitude: 59.03917,
+    longitude: 9.85632,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Ett sammenhengende industrilandskap av steinbrudd i et område som ellers er skog og hytter, med " +
+      "sprengning, tungtransport og utskipning. Ingen enkeltbrudd er svært stort, men summen er landets største " +
+      "bergverk.",
+    notes:
+      "Ett funn for hele området, ikke ett per brudd. Miljødirektoratets register fører minst elleve enkeltbrudd " +
+      "her: Aak, Bassebo, Brattås skrotsteindeponi, Håkestad, Klåstad, Krukåsen, Malerød, Saga Pearl, Skallist, " +
+      "Stålaker, Tvedalen Vest og Vevjeåsen Nord." +
+      " Koordinaten er Tvedalen Vest steinindustriområde. Området er stort og bør få geometri senere. " +
+      "Klåstad-delen ligger rundt 20 kilometer øst, ved Tjøllingveien.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Tvedalen Vest steinindustriområde",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «08.110 - Bryting av dekorstein, kalkstein, gips, kritt og skifer». Minst elleve enkeltbrudd i Larvik står registrert med utslippstillatelse i samme område.",
+      },
+      {
+        source_name: "Larvikitt",
+        source_url: "https://snl.no/larvikitt",
+        publisher: "Store norske leksikon",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "De viktigste bruddområdene er Tvedalen og Klåstad. I Larvik-distriktet drives steinbruddsvirksomhet i rundt 20 brudd. Larvikitt ble utpekt til Norges nasjonalbergart i 2008.",
+      },
+      {
+        source_name:
+          "Larvikitt — landets økonomisk viktigste natursteinressurs",
+        source_url:
+          "https://parkoganlegg.no/nyheter/moblering-belegninger/larvikitt-landets-okonomisk-viktigste-natursteinressurs/",
+        publisher: "Park & Anlegg",
+        source_type: "news",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Steinindustrien i Tvedalen er Norges største bergverk, med et titalls bedrifter på 7 000 dekar og rundt 400 arbeidsplasser. Nær 300 000 tonn eksporteres årlig, og 90-95 prosent av produksjonen er skrotstein som skipes ut fra Svartebukt havn, rundt 400 000 tonn årlig. Larvikitt står for over 50 prosent av salgsverdien og 85 prosent av eksportverdien av norsk naturstein.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Pukkverk",
+    item_type: "finding",
+    title: "Mibau Stema Jelsa",
+    description:
+      "Pukkverk på Jelsa i Suldal, omtalt som Europas største pukkprodusent, med egen skipsflåte for eksport. " +
+      "Produksjonstallene varierer mellom kildene: NGU oppgir at Suldal er landets største pukkommune med over " +
+      "3 millioner tonn i året, mens bransjekilder omtaler rundt 12 millioner tonn for Jelsa.",
+    municipality: "Suldal",
+    address: "Jelsavegen 523",
+    postal_code: "4234",
+    city: "Jelsa",
+    latitude: 59.37536,
+    longitude: 6.05599,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Landets største eksportuttak av pukk, med utskipning direkte fra bruddet. Rogaland alene står for rundt " +
+      "en tredel av det nasjonale uttaket.",
+    notes:
+      "Confidence medium fordi produksjonstallet spriker: NGUs tall for kommunen og bransjekildens tall for " +
+      "anlegget er ikke forenlige, og vi har ikke funnet en autoritativ kilde på dagens årsproduksjon. Ikke bruk " +
+      "12 millioner tonn som fastslått tall." +
+      " Selskapet het tidligere Norsk Stein.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Mibau Stema avd Jelsa",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «08.120 - Utvinning fra grus- og sandtak, og utvinning av leire og kaolin». Registeret dokumenterer at anlegget finnes og er regulert, med koordinat for det registrerte punktet.",
+      },
+      {
+        source_name:
+          "Europas største pukkprodusent — sjanseløs uten egen skipsflåte",
+        source_url:
+          "https://www.mtlogistikk.no/betong-godstransport-havn/europas-storste-pukkprodusent-sjanselos-uten-egen-skipsflate/741846",
+        publisher: "MT Logistikk",
+        source_type: "news",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Anlegget omtales som Europas største pukkprodusent, med syv lasteskip til disposisjon.",
+      },
+      {
+        source_name: "Rogaland størst på knust fjell",
+        source_url: "https://www.ngu.no/en/node/3396",
+        publisher: "Norges geologiske undersøkelse",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Av Norges samlede uttak på rundt 50 millioner tonn i året kommer omtrent en tredel, 12 millioner tonn, fra Rogaland. Suldal er landets største pukkprodusent med over tre millioner tonn per år.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Pukkverk",
+    item_type: "finding",
+    title: "Mibau Stema Tau",
+    description:
+      "Pukkverk på Tau i Strand, omtalt som Norges tredje største, med en årsproduksjon på 3,5 millioner tonn. " +
+      "Et utvidelsesprosjekt startet i 2023 og ferdigstilles i første kvartal 2026, og øker produksjonen til " +
+      "over 5 millioner tonn i året.",
+    municipality: "Strand",
+    address: "Breivikvegen 6",
+    postal_code: "4120",
+    city: "Tau",
+    latitude: 59.08863,
+    longitude: 5.90817,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "En kapasitetsøkning på nesten 50 prosent i et uttak som ligger nær tettbebyggelsen på Tau, med " +
+      "utskipning fra egen kai.",
+    notes:
+      "Skill tallene: 3,5 millioner tonn er dagens produksjon, over 5 millioner tonn er planlagt etter " +
+      "utvidelsen i 2026. Selskapet het tidligere Norsk Stein / NorStone.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Mibau Stema avd Tau",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «08.120 - Utvinning fra grus- og sandtak, og utvinning av leire og kaolin». Registeret dokumenterer at anlegget finnes og er regulert, med koordinat for det registrerte punktet.",
+      },
+      {
+        source_name: "Tau",
+        source_url: "https://www.mibau-stema.no/vaare-steinbrudd/tau",
+        publisher: "Mibau Stema",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tau er Norges tredje største pukkverk med en årsproduksjon på 3,5 millioner tonn. Utvidelsesprosjektet startet i 2023 og ferdigstilles i første kvartal 2026, og produksjonen øker deretter til over 5 millioner tonn årlig.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Pukkverk",
+    item_type: "finding",
+    title: "Rekefjord Stone",
+    description:
+      "Pukkverk i Rekefjord i Sokndal, et av landets store eksportuttak med utskipning fra egen havn. " +
+      "NGU regner NCC i Rekefjord blant de største produsentene og eksportørene i landet." +
+      " Virksomheten selger 2 til 2,5 millioner tonn stein i året til europeiske markeder, med rundt 600 skipsanløp årlig. Driften består av to brudd, ett på hver side av fjorden. Selskapet har søkt driftskonsesjon for de neste 25 årene; dagens konsesjoner gir en horisont på minst 15 år. NOAH, kontrollert av Gjelsten, er ny eier.",
+    municipality: "Sokndal",
+    address: "82/3-1",
+    postal_code: "4380",
+    city: "Hauge i Dalane",
+    latitude: 58.32798,
+    longitude: 6.2535,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Sammen med Titania i samme kommune gir dette Sokndal to av landets største mineraluttak, i en kommune " +
+      "med rundt 3 300 innbyggere.",
+    notes:
+      "Årlig produksjon er ikke dokumentert i kildene vi har lest — åpent punkt. Eierskapet er omtalt både som " +
+      "NCC og Rekefjord Stone; forholdet mellom dem bør avklares." +
+      " Oppfølging gjennomført: produksjon, skipsanløp, eierskap og konsesjonshorisont er dokumentert. Eierforholdet til NCC er avklart: NCC hadde asfaltverk i Rekefjord, og dagens eiere kjøpte anleggene fra NCC i 2007 og 2008. Det er søkt om uttak av opptil 30 millioner tonn med horisont mot 2045 — søknad, ikke vedtak.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Rekefjord Stone - Pukkverk",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «08.120 - Utvinning fra grus- og sandtak, og utvinning av leire og kaolin». Registeret dokumenterer at anlegget finnes og er regulert, med koordinat for det registrerte punktet.",
+      },
+      {
+        source_name: "Rogaland størst på knust fjell",
+        source_url: "https://www.ngu.no/en/node/3396",
+        publisher: "Norges geologiske undersøkelse",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Blant de største produsentene og eksportørene er Norsk Stein i Suldal, NorStone med brudd i Tau, Årdal og Dirdal, og NCC i Rekefjord i Sokndal kommune.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+      {
+        source_name: "Om Rekefjord Stone",
+        source_url: "https://rekefjord-stone.no/om-rekefjord-stone/",
+        publisher: "Rekefjord Stone",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Selskapet selger årlig 2 til 2,5 millioner tonn kvalitetsstein til en rekke europeiske land, med rundt 600 skipsanløp per år. Driften består av to brudd, ett på hver side av fjorden.",
+      },
+      {
+        source_name: "NOAH ny eier av Rekefjord Stone",
+        source_url: "https://www.noah.no/noah-ny-eier-av-rekefjord-stone/",
+        publisher: "NOAH",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary: "NOAH er ny eier av Rekefjord Stone.",
+      },
+      {
+        source_name:
+          "Ønsker å ta ut 30 mill. tonn stein: Slik kan det bli i 2045",
+        source_url:
+          "https://www.avisenagder.no/onsker-a-ta-ut-30-mill-tonn-stein-slik-kan-det-bli-i-2045/s/5-99-889006",
+        publisher: "Avisen Agder",
+        source_type: "news",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Selskapet ønsker å ta ut 30 millioner tonn stein, med en tidshorisont mot 2045.",
+      },
+      {
+        source_name: "Historien",
+        source_url: "https://rekefjord-stone.no/historien/",
+        publisher: "Rekefjord Stone",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "NCC hadde asfaltverk i Rekefjord til dagens eiere kjøpte Ansit-verket fra NCC i 2007 og Norit-verket i 2008.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Pukkverk",
+    item_type: "finding",
+    title: "Franzefoss Pukk Hanekleiva",
+    description:
+      "Pukkverk i Hanekleiva i Holmestrand, ved E18." +
+      " Bergartene som tas ut er sandstein og basalt. Direktoratet for mineralforvaltning har behandlet en sak om tildeling av utvidet driftskonsesjon for anlegget (saksnummer 21/05181).",
+    municipality: "Holmestrand",
+    address: "Hanekleiva 88",
+    postal_code: "3070",
+    city: "Sande i Vestfold",
+    latitude: 59.57357,
+    longitude: 10.17261,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Et stort uttak rett ved hovedveien mellom Oslo og Vestfold, med tungtransport ut på E18 og " +
+      "boligbebyggelse i nærheten.",
+    notes:
+      "Årlig produksjon, regulert volum og driftshorisont er ikke dokumentert i kildene vi har lest — åpent " +
+      "punkt som bør følges opp mot driftskonsesjon og reguleringsplan." +
+      " Oppfølging forsøkt: tildelingsvedtaket for utvidet driftskonsesjon er publisert som PDF hos Direktoratet for mineralforvaltning, men kunne ikke leses — dette miljøet mangler verktøy for tekstuttrekk fra PDF. Uttaksvolum og konsesjonsareal står fortsatt åpne, og skal hentes fra dette vedtaket.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: FRANZEFOSS PUKK AS, avd. Hanekleiva",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «08.120 - Utvinning fra grus- og sandtak, og utvinning av leire og kaolin». Registeret dokumenterer at anlegget finnes og er regulert, med koordinat for det registrerte punktet.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+      {
+        source_name: "Hanekleiva",
+        source_url: "https://www.franzefoss.no/vare-anlegg/hanekleiva",
+        publisher: "Franzefoss",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Anlegget tar ut bergartene sandstein og basalt i Sande i Vestfold, og har utsalg for privatkunder.",
+      },
+      {
+        source_name:
+          "Tildeling av driftskonsesjon (utvidelse) etter mineralloven for Hanekleiva pukkverk",
+        source_url:
+          "https://www.dirmin.no/sites/default/files/_21_05181-25_tildeling_av_driftskonsesjon_utvidelse_etter_mineralloven_for_hanekleiva_pukkver_839977_12_1.pdf",
+        publisher: "Direktoratet for mineralforvaltning",
+        source_type: "document",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Vedtak om tildeling av utvidet driftskonsesjon, saksnummer 21/05181-25. Dokumentets innhold er ikke lest: PDF-en kunne ikke tekstuttrekkes i dette miljøet. Kilden dokumenterer at vedtaket finnes, ikke hva det inneholder.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Pukkverk",
+    item_type: "finding",
+    title: "Franzefoss Pukk Lierskogen",
+    description:
+      "Pukkverk på Lierskogen i Lier, med asfaltfabrikk på samme område." +
+      " Driftskonsesjonen omfatter et område på 219 dekar, et samlet uttaksvolum på 3,7 millioner kubikkmeter og et forventet årlig uttak på 175 000 kubikkmeter, fordelt på fire etapper. Bergarten er hornfels, og anlegget tar også imot overskuddsstein fra byggeprosjekter i nærheten.",
+    municipality: "Lier",
+    address: "Gamle Drammensvei 1",
+    postal_code: "3420",
+    city: "Lierskogen",
+    latitude: 59.81496,
+    longitude: 10.29461,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Ligger tett på boligområdet på Lierskogen og på E18, og kombinerer uttak med asfaltproduksjon på samme " +
+      "sted.",
+    notes:
+      "Årlig produksjon og driftshorisont er ikke dokumentert i kildene vi har lest — åpent punkt." +
+      " Oppfølging gjennomført: uttaksvolum og konsesjonsareal er hentet fra Direktoratet for mineralforvaltnings høringssak. Det årlige uttaket varierer med etterspørselen. Naboer har kjørt opprop for avvikling av uttaket i perioden 2028–2032, som er den driftsperioden gjeldende bestemmelser åpner for.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Franzefoss Pukk avd. Lierskogen",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «08.120 - Utvinning fra grus- og sandtak, og utvinning av leire og kaolin». Lierskogen Asfaltfabrikk står registrert på samme sted.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+      {
+        source_name: "Lierskogen pukkverk i Lier kommune — driftskonsesjon",
+        source_url:
+          "https://dirmin.no/arkiv/hoering/lierskogen-pukkverk-i-lier-kommune-driftskonsesjon",
+        publisher: "Direktoratet for mineralforvaltning",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Samlet volum anslått til 3,7 millioner kubikkmeter, forventet årlig uttak 175 000 kubikkmeter, konsesjonsområde 219 dekar, drift planlagt i fire etapper. Bergarten er hornfels.",
+      },
+      {
+        source_name: "Lierskogen",
+        source_url: "https://www.franzefoss.no/vare-anlegg/lierskogen",
+        publisher: "Franzefoss",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Anlegget tar ut hornfels og mottar overskuddsstein fra byggeprosjekter i nærområdet.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Pukkverk",
+    item_type: "finding",
+    title: "Feiring Bruk Bjønndalen",
+    description:
+      "Pukkverk i Bjønndalen i Nittedal, ett av Feiring Bruks anlegg på Romerike." +
+      " Driftskonsesjonen oppgir et forventet årlig uttak på rundt 200 000 faste kubikkmeter og et samlet uttak på 15,5 millioner faste kubikkmeter. Bjønndalen er konsernets nest største anlegg og har vært del av Feiring siden 1977, med hovedvekt på steinprodukter til asfalt og betongtilslag. Det er investert 110 millioner kroner i nytt knuse- og vaskeanlegg.",
+    municipality: "Nittedal",
+    address: "Nittedalsveien 206",
+    postal_code: "1480",
+    city: "Slattum",
+    latitude: 60.00451,
+    longitude: 10.91181,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et stort uttak i en kommune som ellers er bolig og marka, med tungtransport gjennom dalen mot Oslo.",
+    notes:
+      "Årlig produksjon og driftshorisont er ikke dokumentert — åpent punkt. Feiring Bruk har flere anlegg i " +
+      "området som ikke er lagt inn: Dal pukkverk i Ullensaker, Fet pukkverk i Lillestrøm og Armoen i Blaker. " +
+      "De er egne fysiske uttak og hører hjemme som egne funn senere." +
+      " Oppfølging gjennomført: årlig og samlet uttaksvolum er hentet fra Direktoratet for mineralforvaltnings høringssak. 15,5 millioner faste kubikkmeter samlet mot 200 000 i året innebærer en driftshorisont på flere tiår.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Feiring Bruk avd. Bjønndalen Bruk",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «08.120 - Utvinning fra grus- og sandtak, og utvinning av leire og kaolin». Registeret dokumenterer at anlegget finnes og er regulert, med koordinat for det registrerte punktet.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+      {
+        source_name: "Bjønndalen Bruk i Nittedal kommune — driftskonsesjon",
+        source_url: "https://dirmin.no/arkiv/en/node/706",
+        publisher: "Direktoratet for mineralforvaltning",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Forventet årlig uttak rundt 200 000 faste kubikkmeter, samlet uttak 15 500 000 faste kubikkmeter.",
+      },
+      {
+        source_name: "Bjønndalen Bruk — Nittedal",
+        source_url: "https://feiring.no/avdeling/nittedal/",
+        publisher: "Feiring",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Bjønndalen er konsernets nest største anlegg, med i gruppen siden 1977, og produserer steinprodukter til asfalt og betongtilslag.",
+      },
+      {
+        source_name:
+          "Investerer 110 millioner i nytt knuse- og vaskeanlegg på Bjønndalen",
+        source_url:
+          "https://feiring.no/aktuelt/investerer-110-millioner-i-nytt-knuse-og-vaskeanlegg-pa-bjonndalen/",
+        publisher: "Feiring",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Investering på 110 millioner kroner i nytt knuse- og vaskeanlegg ved Bjønndalen.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Pukkverk",
+    item_type: "finding",
+    title: "NCC Hedrum pukkverk",
+    description:
+      "Pukkverk i Hedrum i Larvik, med asfaltproduksjon i samme område.",
+    municipality: "Larvik",
+    address: "Lågendalsveien 129",
+    postal_code: "3270",
+    city: "Larvik",
+    latitude: 59.10015,
+    longitude: 10.05783,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Larvik har både landets største natursteinsindustri og flere store pukkuttak; dette er ett av dem.",
+    notes:
+      "Årlig produksjon er ikke dokumentert — åpent punkt. Grinda asfaltverk står registrert i samme område.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: NCC Industry AS Hedrum pukkverk",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «08.120 - Utvinning fra grus- og sandtak, og utvinning av leire og kaolin». Registeret dokumenterer at anlegget finnes og er regulert, med koordinat for det registrerte punktet.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Pukkverk",
+    item_type: "finding",
+    title: "Svene Pukkverk",
+    description: "Pukkverk i Svene i Flesberg.",
+    municipality: "Flesberg",
+    address: "Østsida 234",
+    postal_code: "3622",
+    city: "Svene",
+    latitude: 59.77438,
+    longitude: 9.58084,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Det største industrianlegget i en kommune med rundt 2 700 innbyggere.",
+    notes: "Årlig produksjon er ikke dokumentert — åpent punkt.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Svene Pukkverk",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Registrert med utslippstillatelse, bransje «08.110 - Bryting av dekorstein, kalkstein, gips, kritt og skifer». Registeret dokumenterer at anlegget finnes og er regulert, med koordinat for det registrerte punktet.",
+      },
+      {
+        source_name: "Kartverket adresse-API, punktsøk",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Kommune og nærmeste adresse bekreftet ved punktsøk mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Kilder",
+    item_type: "note",
+    title:
+      "Slik finner vi mineraluttak: utslippsregisteret virker, DMF-kartet svarte ikke",
+    description:
+      "Inngangen til gruver, steinbrudd og pukkverk gikk via Miljødirektoratets utslippsregister, " +
+      "som fører 100 anlegg i uttaks- og mineralbransjene med koordinat. Det gir de største uttakene, fordi " +
+      "utslippstillatelse følger størrelse. Direktoratet for mineralforvaltnings egne karttjenester, som har " +
+      "driftskonsesjonene, svarte med 503 ved alle forsøk. Bergrettigheter finnes som WFS via Geonorge, men " +
+      "en bergrettighet er en leterett eller utvinningsrett — ikke et bevis på at det drives noe.",
     municipality: null,
     verification_status: "verified_public_source",
     operational_status: "active",
@@ -7858,19 +11049,40 @@ export const FUNN: Funn[] = [
     confidence: "high",
     interest_level: "medium",
     notes:
-      "Konsekvens for metoden: renseanlegg må hentes fra kommunene og de interkommunale selskapene " +
-      "selv, og fra Statsforvalterens tillatelser — ikke fra det nasjonale utslippsregisteret. Dette er et " +
-      "konkret eksempel på at fravær i ett register ikke er bevis på at noe ikke finnes.",
+      "Konsekvens: årlig uttaksvolum og driftshorisont mangler for flertallet av pukkverkene, fordi de " +
+      "tallene står i driftskonsesjonen og i reguleringsplanen, ikke i utslippsregisteret. Neste runde bør gå " +
+      "på DMFs driftskonsesjoner når tjenesten svarer, og på NGUs Grus- og Pukkdatabase, som har volum og " +
+      "arealbruk per forekomst men bare er publisert som WMS.",
     kilder: [
       {
-        source_name: "Norske utslipp, søk på avløpsbransjen",
+        source_name:
+          "Miljødirektoratet, Norske utslipp — uttrekk på uttaksbransjer",
         source_url: "https://www.norskeutslipp.no/",
         publisher: "Miljødirektoratet",
         source_type: "register",
         source_date: "2026-09-26",
         primary_source: true,
         excerpt_or_summary:
-          "Søk på bransje 37 (oppsamling og behandling av avløpsvann) og på «renseanlegg» i tittel gir tre treff i hele landet, og ingen av dem er et kommunalt hovedrenseanlegg.",
+          "100 anlegg i bransjene 05 (steinkull), 07 (malm), 08 (uttak av stein, kalk, grus og industrimineraler) og 23.6-23.9 (bearbeiding av mineraler) er registrert med utslippstillatelse i vår egen kopi av registeret, med koordinat og bransjekode per anlegg.",
+      },
+      {
+        source_name: "Bergrettigheter WFS",
+        source_url:
+          "https://wfs.geonorge.no/skwms1/wfs.bergrettigheter?request=GetCapabilities&service=WFS",
+        publisher: "Direktoratet for mineralforvaltning",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Bergrettigheter er tilgjengelig som WFS via Geonorge, med objekttypene Bergrettighet og BergrettighetGrense. Datasettet viser undersøkelses- og utvinningsretter for statens mineraler.",
+      },
+      {
+        source_name: "Direktoratet for mineralforvaltnings kartløsning",
+        source_url: "https://minit.dirmin.no/kart/",
+        publisher: "Direktoratet for mineralforvaltning",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "DMFs egne ArcGIS-tjenester på kart.dirmin.no og minit.dirmin.no svarte med HTTP 503 ved forsøk 26. september 2026. Driftskonsesjoner kunne derfor ikke hentes maskinelt.",
       },
     ],
   },
