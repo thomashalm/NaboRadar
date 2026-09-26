@@ -38,12 +38,7 @@ export interface Kategorigruppe {
 const INDUSTRI = "Datasenter / industri / tekniske anlegg";
 
 export const KATEGORIGRUPPER: Kategorigruppe[] = [
-  {
-    slug: "datasenter",
-    label: "Datasenter",
-    kategorier: [INDUSTRI],
-    subkategorier: ["Datasenter"],
-  },
+  { slug: "datasenter", label: "Datasenter", kategorier: [INDUSTRI], subkategorier: ["Datasenter"] },
   {
     slug: "industri",
     label: "Industri",
@@ -52,67 +47,23 @@ export const KATEGORIGRUPPER: Kategorigruppe[] = [
       "Kjemisk industri",
       "Eksplosivproduksjon",
       "Farmasøytisk industri",
+      "Metallindustri",
       "Næringsmiddelindustri",
       "Prosessindustri",
-      "Metallindustri",
       "Drivstofflager",
     ],
   },
-  {
-    slug: "avfall",
-    label: "Avfall og kommunalteknikk",
-    kategorier: [INDUSTRI],
-    subkategorier: ["Avfall", "Kommunalteknisk anlegg"],
-  },
-  {
-    slug: "pukk",
-    label: "Gruve, pukk og steinbrudd",
-    kategorier: [INDUSTRI],
-    subkategorier: ["Pukkverk", "Gruve"],
-  },
-  {
-    slug: "energi",
-    label: "Energi",
-    kategorier: ["Infrastruktur / større prosjekter"],
-    subkategorier: ["Kraftnett"],
-  },
-  {
-    slug: "va",
-    label: "VA og renseanlegg",
-    kategorier: ["Miljø / grunn / forurensning"],
-  },
-  {
-    slug: "forsvar",
-    label: "Forsvar og militært",
-    kategorier: ["Forsvar / militært"],
-  },
-  {
-    slug: "kulturminner",
-    label: "Kulturminner",
-    kategorier: ["Forsvar / militært"],
-    subkategorier: ["Kulturminne"],
-  },
-  {
-    slug: "omsorg",
-    label: "Institusjoner og omsorg",
-    kategorier: ["Omsorg / bofellesskap"],
-  },
-  {
-    slug: "stoy",
-    label: "Støyrelaterte anlegg",
-    kategorier: ["Støy / nabobelastning"],
-  },
-  {
-    slug: "prosjekter",
-    label: "Store prosjekter",
-    kategorier: ["Infrastruktur / større prosjekter"],
-  },
+  { slug: "avfall", label: "Avfall og kommunalteknikk", kategorier: [INDUSTRI], subkategorier: ["Avfall", "Kommunalteknisk anlegg"] },
+  { slug: "pukk", label: "Gruve, pukk og steinbrudd", kategorier: [INDUSTRI], subkategorier: ["Pukkverk", "Gruve"] },
+  { slug: "energi", label: "Energi", kategorier: ["Infrastruktur / større prosjekter"], subkategorier: ["Kraftnett"] },
+  { slug: "va", label: "VA og renseanlegg", kategorier: ["Miljø / grunn / forurensning"] },
+  { slug: "forsvar", label: "Forsvar og militært", kategorier: ["Forsvar / militært"] },
+  { slug: "kulturminner", label: "Kulturminner", kategorier: ["Forsvar / militært"], subkategorier: ["Kulturminne"] },
+  { slug: "omsorg", label: "Institusjoner og omsorg", kategorier: ["Omsorg / bofellesskap"] },
+  { slug: "stoy", label: "Støyrelaterte anlegg", kategorier: ["Støy / nabobelastning"] },
+  { slug: "prosjekter", label: "Store prosjekter", kategorier: ["Infrastruktur / større prosjekter"] },
   { slug: "telekom", label: "Telekom", kategorier: ["Telekom / master"] },
-  {
-    slug: "kilder",
-    label: "Kilder og datakvalitet",
-    kategorier: ["Datakvalitetsavvik", "Kilder"],
-  },
+  { slug: "kilder", label: "Kilder og datakvalitet", kategorier: ["Datakvalitetsavvik", "Kilder"] },
 ];
 
 export function gruppeFor(slug: string | undefined): Kategorigruppe | null {
