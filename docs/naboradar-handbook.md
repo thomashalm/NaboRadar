@@ -1843,6 +1843,7 @@ Samlet fra rundene, fordi hver av dem kostet en runde å oppdage:
 | Ett bygg = én operatør | Hans Møller Gasmanns vei 9 har tre |
 | Navnebytte = nytt anlegg | DigiPlex → STACK → Vaultica er samme bygg |
 | Katalogens marked = kommune | DataCenterMap fører Tydal under markedet «Ås». NTC Billingstad i Asker lå under et eget marked og manglet i Oslo-oversikten |
+| Befolkningstetthet som relevanssignal | Den største planlagte kapasiteten ligger i Tysvær, Luster og Vaksdal, ikke i byene. Kraft og tomt styrer lokalisering, ikke folketall |
 | Geokoding uten postnummer | «Granittvegen 110» og «Nordliveien 21» traff feil kommune uten postnummerkrav. Krev alltid postnummer |
 
 ### Fjerde research-runde: discovery først

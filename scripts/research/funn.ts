@@ -4267,11 +4267,11 @@ export const FUNN: Funn[] = [
   {
     category: "Datasenter / industri / tekniske anlegg",
     item_type: "lead",
-    title: "Fem kryptooperatører uten stedfestet anlegg",
+    title: "Fire kryptooperatører uten stedfestet anlegg",
     description:
-      "Fem av de ni Nkom-operatørene med kryptoutvinning er ikke stedfestet: Bluefjords " +
-      "(Luster), Bluebite (Fauske), Currency Edge (Kvænangen), Arctic Flux (Horten) og " +
-      "Nordic Blocks (Søndre Land). Kommunene er kjent fra kontoradressen, anleggene ikke.",
+      "Fire av de ni Nkom-operatørene med kryptoutvinning er fortsatt ikke stedfestet: Bluebite " +
+      "(Fauske), Currency Edge (Kvænangen), Arctic Flux (Horten) og Nordic Blocks (Søndre Land). " +
+      "Bluefjords er løst — anlegget ligger i Jostedalsvegen 530 i Gaupne.",
     municipality: null,
     verification_status: "investigated_not_confirmed",
     operational_status: "unknown",
@@ -4279,8 +4279,10 @@ export const FUNN: Funn[] = [
     confidence: "medium",
     interest_level: "medium",
     notes:
-      "Websøk ga ingen treff på anleggene. Neste innganger er lokalpresse i de fem kommunene og " +
-      "nettselskapenes tilknytningssaker. Undersøkt 2026-09-26.",
+      "Websøk og katalogsøk ga ingen treff. Merk at Nscale bygger et AI-datasenter i Fauske, men " +
+      "det er et annet selskap enn Bluebite — de skal ikke blandes. Neste innganger er lokalpresse " +
+      "i de fire kommunene og nettselskapenes tilknytningssaker. Undersøkt 2026-09-26.",
+    tidligere_titler: ["Fem kryptooperatører uten stedfestet anlegg"],
     kilder: [
       {
         source_name:
@@ -4514,6 +4516,796 @@ export const FUNN: Funn[] = [
         excerpt_or_summary:
           "Anlegget i Kirkvollen i Tydal kommune i Trøndelag er plassert under markedet «Ås». " +
           "Ås er en kommune i Akershus, 60 mil unna.",
+      },
+    ],
+  },
+
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "atNorth NOR01, Haugaland Business Park",
+    description:
+      "Planlagt datasentercampus på 350 MW med fire bygg i Haugaland Business Park, rettet mot " +
+      "AI-arbeidslast med fornybar kraft og avansert kjøling. Fem katalogoppføringer — campus pluss " +
+      "fire bygg — er ett fysisk anlegg.",
+    municipality: "Tysvær",
+    address: "Havnavegen 73",
+    postal_code: "5570",
+    city: "Aksdal",
+    latitude: 59.3154,
+    longitude: 5.42391,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Det største planlagte datasenteret i Norge etter oppgitt effekt. 350 MW i én næringspark er " +
+      "en kraftbruk i samme størrelsesorden som en mellomstor by.",
+    notes:
+      "Effekttallet kommer fra operatøren via bransjekatalog, ikke fra konsesjon eller myndighet. " +
+      "Bygg 1–4 er lagret som struktur på dette funnet, ikke som egne anlegg.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: atNorth NOR01, Haugaland Business Park",
+        source_url: "https://www.datacentermap.com/norway/aksdal/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør atNorth, adresse Havnavegen 73, 5570 Aksdal.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Green Mountain Gismarvik",
+    description:
+      "Planlagt anlegg på 300 MW med 100 000 m² campus i Haugaland Business Park, på fornybar " +
+      "vannkraft. Ligger i samme næringspark som atNorths NOR01.",
+    municipality: "Tysvær",
+    address: "Havnavegen 73",
+    postal_code: "5570",
+    city: "Aksdal",
+    latitude: 59.3154,
+    longitude: 5.42391,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Sammen med atNorth gir dette 650 MW planlagt effekt i én næringspark i Tysvær — det tyngste " +
+      "kraftuttaket som planlegges noe sted i dette datasettet.",
+    notes:
+      "Eget anlegg, ikke samme campus som atNorth, men samme næringspark. Koordinaten er parkens " +
+      "adresse; anleggenes egne tomter er ikke stedfestet hver for seg.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Green Mountain Gismarvik",
+        source_url: "https://www.datacentermap.com/norway/aksdal/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Green Mountain, adresse Havnavegen 73, 5570 Aksdal.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Green Horizon Norway 3 «Heimdal», Kvernaland",
+    description:
+      "Planlagt campus på 48 MW med fire bygg på Orstadvegen 140/162. Fire katalogoppføringer — " +
+      "campus, DC1, DC2 og DC4 — er ett fysisk anlegg.",
+    municipality: "Klepp",
+    address: "Orstadvegen 140",
+    postal_code: "4353",
+    city: "Kvernaland",
+    latitude: 58.79302,
+    longitude: 5.71154,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "En 48 MW-campus i et jordbruks- og industriområde på Jæren, i en kommune uten annen tung " +
+      "digital infrastruktur.",
+    notes:
+      "DataCenterMap fører anlegget under markedet «Bryne», men Kvernaland ligger i Klepp kommune. " +
+      "Kommunen er satt fra geokodet adresse.",
+    kilder: [
+      {
+        source_name:
+          "DataCenterMap: Green Horizon Norway 3 «Heimdal», Kvernaland",
+        source_url: "https://www.datacentermap.com/norway/bryne/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Green Horizon, adresse Orstadvegen 140, 4353 Kvernaland.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Green Horizon «Vidar», Kvernaland",
+    description: "Anlegg på 8 MW, klassifisert som Tier 3.",
+    municipality: "Klepp",
+    address: "Plogfabrikkvegen 8",
+    postal_code: "4353",
+    city: "Kvernaland",
+    latitude: 58.78333,
+    longitude: 5.70576,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Et mellomstort anlegg på Jæren, i samme område som Green Horizons større campus.",
+    notes:
+      "Adressen er geokodet til Klepp, ikke Time, som markedsnavnet «Bryne» ville antydet.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Green Horizon «Vidar», Kvernaland",
+        source_url: "https://www.datacentermap.com/norway/bryne/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Green Horizon, adresse Plogfabrikkvegen 8, 4353 Kvernaland.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Green Horizon Norway 1, Dysjaland",
+    description:
+      "Campus på 36 MW med to bygg. Tre katalogoppføringer — campus, DC1 og DC2 — er ett anlegg.",
+    municipality: "Sola",
+    address: "Næringsvegen 20",
+    postal_code: "4365",
+    city: "Dysjaland",
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Et av de større anleggene i Rogaland, i næringsområdet ved Sola.",
+    notes:
+      "Uten koordinat: Næringsvegen 20 med postnummer 4365 lot seg ikke geokode sikkert mot " +
+      "Kartverket. Ingen omtrentlig koordinat er satt.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Green Horizon Norway 1, Dysjaland",
+        source_url: "https://www.datacentermap.com/norway/stavanger/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Green Horizon, adresse Næringsvegen 20, 4365 Dysjaland.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Green Mountain SVG1-Rennesøy",
+    description:
+      "Fjellanlegg ved fjorden på Rennesøy, Green Mountains eldste anlegg, markedsført som et av " +
+      "verdens grønneste datasentre.",
+    municipality: "Stavanger",
+    address: "Hodneveien 260",
+    postal_code: "4150",
+    city: "Rennesøy",
+    latitude: 59.06854,
+    longitude: 5.75803,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Et datasenter inne i fjell, med fjordkjøling — den norske anleggstypen som skiller seg mest " +
+      "fra alt annet.",
+    notes:
+      "PeeringDB oppgir Hodneveien 240, DataCenterMap 260. Koordinaten er nr. 260, som lot seg " +
+      "geokode. Avviket er ikke oppklart.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Green Mountain SVG1-Rennesøy",
+        source_url: "https://www.datacentermap.com/norway/stavanger/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Green Mountain, adresse Hodneveien 260, 4150 Rennesøy.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Green Mountain Jørpeland",
+    description:
+      "Planlagt anlegg på det tidligere stålverksområdet i Jørpeland, på fornybar kraft.",
+    municipality: "Strand",
+    address: "Stålverksvegen 51",
+    postal_code: "4100",
+    city: "Jørpeland",
+    latitude: 59.01823,
+    longitude: 6.03708,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Gjenbruk av et nedlagt industriområde til datasenter — en tydelig indikator på hvor bransjen " +
+      "leter etter tomter med kraft og nett fra før.",
+    notes:
+      "Adressen «Stålverksvegen» bekrefter industrihistorikken. Kommunen er Strand, ikke Stavanger, " +
+      "som markedsnavnet antyder.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Green Mountain Jørpeland",
+        source_url: "https://www.datacentermap.com/norway/stavanger/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Green Mountain, adresse Stålverksvegen 51, 4100 Jørpeland.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Microsoft Sandnes",
+    description:
+      "Datasenter på 25 MW under utvikling, oppgitt som utvidelse av Microsofts europeiske " +
+      "infrastruktur.",
+    municipality: "Sandnes",
+    address: "Kvålkroken",
+    postal_code: "4323",
+    city: "Sandnes",
+    latitude: 58.81713,
+    longitude: 5.72007,
+    verification_status: "partially_verified",
+    operational_status: "under_construction",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "En hyperskala-aktør som bygger fysisk i Norge. Microsofts norske kontoradresse i Oslo er ikke " +
+      "et anlegg — dette er det.",
+    notes:
+      "Effekttallet kommer fra bransjekatalog. Ikke bekreftet mot Microsoft selv eller mot byggesak.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Microsoft Sandnes",
+        source_url: "https://www.datacentermap.com/norway/stavanger/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Microsoft, adresse Kvålkroken, 4323 Sandnes.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Kitebrook Leirdøla, Gaupne",
+    description:
+      "Planlagt campus på 100 MW for AI og HPC i Gaupne, på vannkraft og oppgitt som " +
+      "aggregatfri — driftssikkerheten skal komme fra kraftnettet, ikke fra dieselaggregater.",
+    municipality: "Luster",
+    address: "Jostedalsvegen",
+    postal_code: "6868",
+    city: "Gaupne",
+    latitude: 61.44092,
+    longitude: 7.25008,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "high",
+    why_interesting:
+      "100 MW AI-kapasitet i en kommune med 5 000 innbyggere. Aggregatfri drift er uvanlig og " +
+      "forutsetter svært god nettkapasitet.",
+    notes:
+      "Koordinaten er Jostedalsvegen 530, altså Bluefjords' adresse i samme veg — Kitebrooks egen " +
+      "tomt ved Leirdøla er ikke stedfestet. Kun én kilde.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Kitebrook Leirdøla, Gaupne",
+        source_url: "https://www.datacentermap.com/norway/gaupne/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Kitebrook, adresse Jostedalsvegen, 6868 Gaupne.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Bluefjords og Compute Nordic, Gaupne",
+    description:
+      "Datasenter i Gaupne med to operatøroppføringer på samme adresse: Bluefjords AS, som tilbyr " +
+      "rack, colocation og whitespace «powered by glacier», og Compute Nordic DC1. Bluefjords er " +
+      "Nkom-registrert med 14 % kryptoutvinning.",
+    municipality: "Luster",
+    address: "Jostedalsvegen 530",
+    postal_code: "6868",
+    city: "Gaupne",
+    latitude: 61.44092,
+    longitude: 7.25008,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Løser et av de ustedfestede kryptoanleggene, og viser samtidig mønsteret: anleggene ligger i " +
+      "kraftkommuner med breekjøling, ikke i byene.",
+    notes:
+      "Aliaser: BlueFjords AS, Compute Nordic DC1. Kryptoandelen på 14 % gjelder operatøren " +
+      "Bluefjords, ikke nødvendigvis hele anlegget.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Bluefjords og Compute Nordic, Gaupne",
+        source_url: "https://www.datacentermap.com/norway/gaupne/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Bluefjords / Compute Nordic, adresse Jostedalsvegen 530, 6868 Gaupne.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Nscale Fauske",
+    description:
+      "AI-datasenter på 13 MW under utvikling i Fauske, med planlagt åpning i 2027. Oppgitt til rundt " +
+      "1 000 arbeidsplasser i byggefasen og 100–150 varige. Nscale Drift AS er Nkom-registrert.",
+    municipality: "Fauske",
+    address: "Follaveien",
+    postal_code: "8200",
+    city: "Fauske",
+    latitude: 67.25948,
+    longitude: 15.39275,
+    verification_status: "partially_verified",
+    operational_status: "under_construction",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Et AI-anlegg i Nordland med et sysselsettingsomfang som betyr noe for en kommune på 10 000 " +
+      "innbyggere. Byggefasen alene er en stor lokal sak.",
+    notes:
+      "Bluebite GmbH har også Fauske-adresse i Nkom-registeret, men er et annet selskap og er ikke " +
+      "stedfestet. Ikke bland dem.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Nscale Fauske",
+        source_url: "https://www.datacentermap.com/norway/fauske/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Nscale, adresse Follaveien, 8200 Fauske.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Kitebrook Børdalen",
+    description:
+      "Planlagt campus på 100 MW for AI og HPC på vannkraft, med avansert kjøling.",
+    municipality: "Kvam",
+    address: "Fv133",
+    postal_code: "5650",
+    city: "Børdalen",
+    latitude: 60.38,
+    longitude: 5.9,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "medium",
+    why_interesting:
+      "Enda en 100 MW AI-campus fra samme aktør, i et lite tettsted på Vestlandet.",
+    notes:
+      "Koordinaten er grov og satt fra stedsnavnet Børdalen, ikke fra en verifisert adresse — «Fv133» " +
+      "er en fylkesveg uten husnummer. DataCenterMap fører anlegget under markedet «Bergen», men " +
+      "Børdalen ligger ikke i Bergen kommune. Begge deler gjør funnet svakt stedfestet.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Kitebrook Børdalen",
+        source_url: "https://www.datacentermap.com/norway/bergen/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Kitebrook, adresse Fv133, 5650 Børdalen.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "ASP Dalekvam",
+    description:
+      "ASP Data Center har kjøpt en tidligere tekstilfabrikk i Dalekvam og planlegger å gjøre den om " +
+      "til et AI-rettet datasenter på 20 MW.",
+    municipality: "Vaksdal",
+    address: "Fabrikkvegen",
+    postal_code: "5722",
+    city: "Dalekvam",
+    latitude: 60.5895,
+    longitude: 5.82503,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Konvertering av en nedlagt fabrikk til AI-datasenter, i en kommune med 4 000 innbyggere. Det " +
+      "er mønsteret bransjen følger: kraft og nett finnes fra før på gamle industritomter.",
+    notes:
+      "DataCenterMap fører anlegget under markedet «Bergen», men Dalekvam ligger i Vaksdal kommune. " +
+      "Kommunen er satt fra geokodet adresse.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: ASP Dalekvam",
+        source_url: "https://www.datacentermap.com/norway/bergen/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør ASP Datacenter, adresse Fabrikkvegen, 5722 Dalekvam.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Datafjellet, Bønes",
+    description:
+      "Datasenter i fjellhall på Bønes i Bergen, med private, spesialbygde datarom. Datafjellet AS er " +
+      "Nkom-registrert.",
+    municipality: "Bergen",
+    address: "Gullstølsstien 258",
+    postal_code: "5153",
+    city: "Bønes",
+    latitude: 60.33899,
+    longitude: 5.31271,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Et fjellanlegg midt i et boligområde i Bergen — den typen anlegg som er helt usynlig fra " +
+      "overflaten.",
+    notes: "Kun katalogkilde pluss Nkom-registrering.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Datafjellet, Bønes",
+        source_url: "https://www.datacentermap.com/norway/bergen/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Datafjellet AS, adresse Gullstølsstien 258, 5153 Bønes.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Arcem Bergen, Haukeland",
+    description:
+      "Planlagt datasenter til flere milliarder kroner i Haukeland, med nærhet til " +
+      "transformatorstasjoner og hovedveg oppgitt som begrunnelse.",
+    municipality: "Bergen",
+    address: "Langedalen",
+    postal_code: "5268",
+    city: "Haukeland",
+    latitude: 60.37466,
+    longitude: 5.45259,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "medium",
+    why_interesting:
+      "Et stort planlagt anlegg i Bergen øst. Nærheten til transformatorstasjoner er akkurat det " +
+      "kraftsporet vi leter etter.",
+    notes:
+      "Kun én katalogkilde, ingen effekt oppgitt. Bør følges opp mot kommunen og nettselskapet.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Arcem Bergen, Haukeland",
+        source_url: "https://www.datacentermap.com/norway/bergen/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør Arcem, Inc., adresse Langedalen, 5268 Haukeland.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "ITsjefen NDC1, NDC2 og NDC4, Trondheim",
+    description:
+      "Tre anlegg i Trondheim drevet av ITsjefen: NDC1 i Havnegata 9, NDC2 på Brattørkaia 17B og " +
+      "NDC4 i Tungavegen 30. Tre separate bygg, én operatør. Nkom-registrert.",
+    municipality: "Trondheim",
+    address: "Brattørkaia 17B",
+    postal_code: "7010",
+    city: "Trondheim",
+    latitude: 63.43772,
+    longitude: 10.3984,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "low",
+    why_interesting: "Den største regionale colocation-aktøren i Trøndelag.",
+    notes:
+      "Samlet i ett funn fordi de tre er samme operatørs bynett, men de er fysisk atskilte bygg. " +
+      "Koordinaten er NDC2 på Brattørkaia.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: ITsjefen NDC1, NDC2 og NDC4, Trondheim",
+        source_url: "https://www.datacentermap.com/norway/trondheim/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppført med operatør ITsjefen AS, adresse Brattørkaia 17B, 7010 Trondheim.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    item_type: "note",
+    title: "Dekningsstatus for den nasjonale datasenterkartleggingen",
+    description:
+      "Av 112 katalogoppføringer nasjonalt er omtrent 74 åpnet og vurdert enkeltvis i de " +
+      "gjennomgåtte markedene. Rundt 38 gjenstår, fordelt på Kristiansand, Skien, " +
+      "Sandefjord, Halden, Husnes og en rekke markeder med ett anlegg hver.",
+    municipality: null,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "low",
+    notes:
+      "Neste steg er å åpne de gjenstående markedene. De er identifisert med navn og antall, " +
+      "så arbeidet er avgrenset og kan tas opp igjen uten ny discovery.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: markeder gjennomgått i denne runden",
+        source_url: "https://www.datacentermap.com/norway/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Markedene Oslo (34), Stavanger (10), Bergen (8), Bryne (6), Aksdal (6), Trondheim (4), Gaupne (3), Fauske (1), Billingstad (1) og Namsskogan (1) er åpnet og gjennomgått oppføring for oppføring. Gjenstår: Kristiansand (4), Skien (4), Sandefjord (3), Halden (2), Husnes (2) og rundt 20 markeder med ett anlegg hver.",
+      },
+    ],
+  },
+  {
+    category: "Kilder",
+    item_type: "data_issue",
+    title: "Markedsnavn er systematisk feil kommune i katalogen",
+    description:
+      "Ikke enkelttilfeller: i denne runden ga fire av de gjennomgåtte markedene feil " +
+      "kommune hvis markedsnavnet var blitt brukt. Sammen med Tydal under «Ås» og " +
+      "Billingstad som eget marked er dette et systematisk trekk, ikke en glipp.",
+    municipality: null,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    notes:
+      "Kommune settes alltid fra geokodet adresse med postnummer, aldri fra markedsnavn.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: markedsnavn mot geokodet kommune",
+        source_url: "https://www.datacentermap.com/norway/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Fire nye tilfeller der markedsnavnet ikke er kommunen: Kvernaland ligger i Klepp, ikke Time («Bryne»); Dalekvam i Vaksdal og Børdalen utenfor Bergen, begge ført under «Bergen»; Jørpeland i Strand, ført under «Stavanger».",
       },
     ],
   },
