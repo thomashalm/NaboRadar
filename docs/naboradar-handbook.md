@@ -356,6 +356,45 @@ sesjonen, og kjører kun på `/admin`.
 kjøringene, scheduler-status (jobb, tidsplan, siste kjøring, siste HTTP-status), og legge
 «Kjør sync nå» / «Kjør full sync» i kø.
 
+### De tre admin-verktøyene
+
+| Side | Spørsmålet den svarer på |
+|---|---|
+| `/admin/adresse` | Hva finnes rundt denne adressen? Offentlig resultat pluss intern research |
+| `/admin/research` | Hva vet vi om dette funnet? Oversikt, søk, redigering, kilder og kildestatus |
+| `/admin/kart` | Hvor i landet finnes denne typen funn? Nasjonal geografisk utforskning |
+
+### `/admin/kart` — research-kartet
+
+Kartet er hovedflaten, ikke et tillegg til en liste. Standardutsnittet er **hele Norge**, ikke
+Oslo: dette er et nasjonalt verktøy, og et startpunkt i hovedstaden ville gjort resten av landet
+til noe man må lete seg fram til. Utsnittet følger **ikke** filtrene automatisk — et kart som
+hopper ved hvert avkryssing er umulig å jobbe i. «Vis alle treff» gjør det eksplisitt.
+
+**Datauttrekk:** `research_map()`, egen funksjon og ikke en utvidelse av `research_near`. De to
+svarer på ulike spørsmål: radius rundt ett punkt, mot nasjonalt filtersøk uten senterpunkt. Den
+returnerer bare feltene kartet og listen viser — beskrivelse, notater og kilder hentes først når
+et funn åpnes, slik at et nasjonalt uttrekk ikke drar med seg fritekst per punkt. Funksjonen tar
+imot bbox allerede nå, slik at viewport-avgrensning kan slås på uten ny migrasjon.
+
+**Kategorimapping** ligger i `lib/admin/research-map-filters.ts`. De interne kategoriene er for
+grove for et kart — «Datasenter / industri / tekniske anlegg» er én kategori i basen, men
+datasenter, avfall, pukkverk og kjemisk industri er fire ulike spørsmål. Gruppene skiller derfor
+på underkategori der kategorien ikke holder. Nye grupper legges til ett sted.
+
+**Standardvalg:** avviste og arkiverte funn er skjult (de er konkludert research), funn uten
+koordinat er skjult (kartet er hovedflaten), og sorteringen er interesse → sikkerhet → tittel.
+Avstandssortering gir ikke mening uten et søkepunkt. En ødelagt URL-verdi gir «alle», ikke
+«ingenting» — et tomt kart uten forklaring er verre enn å ignorere en ugyldig parameter.
+
+**URL-en er tilstanden.** Bare det som avviker fra standard havner i query-strengen, så
+`/admin/kart?kategori=datasenter&drift=planned` er et delbart utsnitt og fram/tilbake virker.
+
+**Klynging** er nødvendig på nasjonalt nivå: anleggene ligger tett i Oslo og Rogaland. Klikk på
+en klynge zoomer inn til den sprer seg — den åpner aldri et vilkårlig funn. Enkeltpunktene bruker
+samme rolige uttrykk som de interne markørene i adressevisningen, og interessenivået styrer
+størrelsen, ikke fargen.
+
 **`/admin/adresse`** er adressesøk for drift: **samme resultatside som brukeren ser**, med intern
 research under. Den er ikke en egen implementasjon — den bruker `AreaExplorer` og
 `buildAreaView()` akkurat som `/omrade`, og legger sitt eget innhold i `extraSections`-sømmen.

@@ -46,6 +46,21 @@ describe("research holdes utenfor det offentlige", () => {
     expect(side).toMatch(/leadSections=\{<InternSeksjon/);
   });
 
+  it("holder research-kartet utenfor den offentlige koden", () => {
+    // Kartsiden er admin-only og skal ikke være nådd fra noe offentlig.
+    for (const fil of ["app/omrade/page.tsx", "app/sitemap.ts", "app/robots.ts"]) {
+      expect(les(fil)).not.toMatch(/admin\/kart|research_map|research-map/i);
+    }
+    expect(les("app/admin/kart/page.tsx")).toMatch(/getAdminSession/);
+    expect(les("app/admin/kart/page.tsx")).toMatch(/robots: \{ index: false, follow: false \}/);
+  });
+
+  it("henter kartdata bare med admins egen sesjon", () => {
+    const lag = les("lib/admin/research-map-query.ts");
+    expect(lag).toMatch(/^import "server-only";/m);
+    expect(lag).not.toMatch(/SECRET|SERVICE_ROLE/);
+  });
+
   it("holder datakvalitetsblokken utenfor adressevisningen", () => {
     // Kildestatus er drift- og dekningsinformasjon, ikke et funn. Den hører hjemme i
     // research-oversikten, der den ikke konkurrerer med faktiske steder.

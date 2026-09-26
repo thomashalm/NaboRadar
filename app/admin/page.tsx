@@ -91,6 +91,9 @@ export default async function AdminPage() {
         <Link href="/admin/research" className="text-[15px] font-medium text-accent hover:underline">
           Research →
         </Link>
+        <Link href="/admin/kart" className="text-[15px] font-medium text-accent hover:underline">
+          Research-kart →
+        </Link>
       </p>
 
       <SchedulerCard scheduler={scheduler} />
