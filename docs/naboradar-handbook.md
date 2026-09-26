@@ -1730,6 +1730,14 @@ mobil, der kartet ligger over listen, hentes kartet fram når du velger fra list
 koordinat kommer aldri fra `research_near`, og kortet deres er ikke klikkbart — det står «uten
 kartpunkt» i stedet.
 
+### Research-runder
+
+`admin_research_runs` logger hva hver runde faktisk gjorde: kilder gjennomgått, kilder som var
+blokkert, kandidater, opprettede og oppdaterte funn, negative undersøkelser og de viktigste
+hullene. Det er metadata om arbeidet, ikke en parallell funnmodell — poenget er at neste runde
+skal slippe å gjette seg til hva forrige runde rakk. Samme tilgangsmodell som resten: ingenting
+til anon, RLS på `is_admin()`, lesing gjennom `research_runs()`.
+
 ### Første research-runde
 
 Kuraterte funn ligger i `scripts/seed-research.ts` (`npm run research:seed`), som er idempotent og
@@ -1751,5 +1759,20 @@ som faktisk fikk konsekvenser:
   fraværet er ikke en konklusjon om at det ikke finnes datasentre.
 - **Ingen masseimport av omsorgsadresser.** Enhetsregisteret ble vurdert og forkastet som inngang;
   næringskode viser kontoradresser, ikke tjenester.
+
+### Andre research-runde
+
+43 funn og 65 kilder totalt. Runden la til 26 funn og reviderte 8. Det som flyttet mest:
+
+- **Miljødirektoratets utslippsregister** viste seg å være den beste enkeltkilden til fysiske
+  industrianlegg i disse kommunene — det gir navn, bransje, forurensningsmyndighet og koordinat
+  for anlegg som faktisk finnes, i motsetning til virksomhetsregistrene
+- **Nkoms datasenterregister** er autoritativt for *hvem* som driver datasenter, men oppgir aldri
+  hvor. Alle 60 operatørene ble slått opp i Enhetsregisteret; ni har adresse i Oslo eller Bærum,
+  og bare én av dem (Selma Ellefsens vei 1 på Ulven) lot seg bekrefte som et anlegg
+- **Forsvarsbyggs skytefelt-WFS** ga et rent negativt svar: ingen av Forsvarets 68 skyte- og
+  øvingsfelt ligger i Oslo, Bærum eller Asker. Lagret som funn, så spørsmålet ikke stilles igjen
+- **Kartverkets stedsnavnregister** kan bekrefte et militært anlegg, men ikke utelukke det: det
+  har to militære navn i Oslo og null i Bærum, selv om Kolsås base er dokumentert av Forsvaret
 
 ---

@@ -1,0 +1,1917 @@
+/**
+ * De kuraterte research-funnene.
+ *
+ * Datagrunnlaget til `npm run research:seed`. Hvert funn står med kildene sine, slik at det
+ * som ble undersøkt kan leses her i stedet for å måtte hentes ut av databasen.
+ *
+ * Reglene funnene er skrevet etter:
+ * - et fysisk sted er ett funn med flere kilder, ikke ett funn per kilde
+ * - en kilde som ble undersøkt uten å støtte påstanden lagres med `supports_claim: false`
+ * - confidence gjelder påstanden, ikke kilden: en sikker kilde om noe uklart gir ikke `high`
+ * - koordinat settes bare når *stedet* er kjent, aldri fra en selskaps- eller c/o-adresse
+ */
+
+export interface Kilde {
+  source_name: string;
+  source_url?: string;
+  publisher?: string;
+  source_type: string;
+  source_date?: string;
+  primary_source?: boolean;
+  /** Falsk når kilden ble undersøkt og *ikke* støtter påstanden. Det er poenget med den. */
+  supports_claim?: boolean;
+  excerpt_or_summary?: string;
+}
+
+export interface Funn {
+  category: string;
+  subcategory?: string;
+  item_type: string;
+  title: string;
+  description: string;
+  address?: string;
+  postal_code?: string;
+  city?: string;
+  /** Null for funn som ikke gjelder én bestemt kommune, som kilde- og datakvalitetssaker. */
+  municipality?: string | null;
+  latitude?: number;
+  longitude?: number;
+  verification_status: string;
+  operational_status: string;
+  sensitivity: string;
+  confidence: string;
+  interest_level: string;
+  /**
+   * Påkrevd for fysiske funn med medium eller høy interesse. Utelatt for notater,
+   * datakvalitetssaker og svake leads, der spørsmålet ikke gir mening.
+   */
+  why_interesting?: string;
+  notes?: string;
+  kilder: Kilde[];
+}
+
+export const FUNN: Funn[] = [
+  {
+    category: "Omsorg / bofellesskap",
+    subcategory: "Mulig bofellesskap",
+    item_type: "lead",
+    title: "Mulig omsorgsrelatert virksomhet",
+    description:
+      "Adressen ble meldt inn som et omsorgstilbud som mangler i NaboRadar. Undersøkelsen fant ingen " +
+      "offentlig publisert, navngitt tjeneste på adressen. Adressen finnes i Kartverket (5A og 5B), men " +
+      "verken Enhetsregisteret eller Bærum kommunes egne omsorgssider omtaler et tilbud der.",
+    address: "Egne Hjems vei 5",
+    postal_code: "1356",
+    city: "Bekkestua",
+    municipality: "Bærum",
+    // Representasjonspunktet for 5A. Funnet gjelder adressen, ikke en bestemt bygning.
+    latitude: 59.919488,
+    longitude: 10.597865,
+    verification_status: "investigated_not_confirmed",
+    operational_status: "unknown",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "medium",
+    why_interesting:
+      "Referansetilfellet for skillet mellom et datagap og riktig oppførsel. Gapet for Bærum er ekte " +
+      "(kommunen publiserer 14 omsorgstilbud vi ikke har tatt inn), men denne adressen ville ikke dukket " +
+      "opp uansett — ingen ansvarlig myndighet har publisert et navngitt tilbud der.",
+    notes:
+      "Adressen er undersøkt mot Bærum kommune, Helsenorge og Enhetsregisteret, men er ikke funnet som " +
+      "offentlig publisert omsorgstilbud. Skal ikke publiseres uten at ansvarlig myndighet selv " +
+      "publiserer et navngitt tilbud på adressen. Se håndboken, «Regresjonseksempel: Egne Hjems vei 5».",
+    kilder: [
+      {
+        source_name:
+          "Kartverket adresse-API: Egne Hjems vei 5A og 5B, 1356 Bekkestua",
+        source_url:
+          "https://ws.geonorge.no/adresser/v1/sok?sok=Egne%20Hjems%20vei%205&postnummer=1356",
+        publisher: "Kartverket",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Adressen finnes som 5A (59.919488, 10.597865) og 5B. Sier ingenting om bruk eller virksomhet.",
+      },
+      {
+        source_name: "Enhetsregisteret, søk på enheter i postnummer 1356",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        supports_claim: false,
+        excerpt_or_summary:
+          "Ingen enhet i hele postnummer 1356 har forretnings- eller beliggenhetsadresse på nr. 5. " +
+          "En undersøkt kilde som ikke støtter påstanden — det er den som gjør statusen etterprøvbar.",
+      },
+      {
+        source_name: "Helsenorge, Velg behandlingssted",
+        source_url: "https://www.helsenorge.no/velg-behandlingssted/",
+        publisher: "Norsk helsenett / Helsedirektoratet",
+        source_type: "web",
+        supports_claim: false,
+        excerpt_or_summary:
+          "Helsenorge har ingen søkbar oversikt over kommunale omsorgstilbud per adresse. Tjenesten " +
+          "dekker planlagt behandling i spesialisthelsetjenesten, ikke bofellesskap eller sykehjem, og " +
+          "kan derfor verken bekrefte eller avkrefte et tilbud på adressen.",
+      },
+      {
+        source_name: "Bærum kommune, omsorgssidene",
+        source_url: "https://www.baerum.kommune.no/",
+        publisher: "Bærum kommune",
+        source_type: "web",
+        supports_claim: false,
+        excerpt_or_summary:
+          "Adressen omtales ingen steder på kommunens omsorgssider. Eneste treff på nettstedet er en side " +
+          "om stedsutvikling.",
+      },
+    ],
+  },
+
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Eksplosivproduksjon",
+    item_type: "finding",
+    title: "Planlagt produksjonsanlegg for eksplosiver",
+    description:
+      "Varslet planoppstart for et produksjonsanlegg for eksplosiver i skogsområdet ved Dustad, " +
+      "sør i Asker (tidligere Hurum). Planområdet ligger uten adresse innen 600 m; nærmeste " +
+      "adressenavn er Dustadveien, 1,2 km unna. Forslagsstiller er oppgitt som foretak, ikke kommunen.",
+    municipality: "Asker",
+    city: "Tofte",
+    latitude: 59.56754,
+    longitude: 10.51647,
+    verification_status: "verified_public_source",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Et eksplosivanlegg er blant de få virksomhetene som faktisk endrer hva det betyr å bo i " +
+      "nærheten. Planen er dokumentert; hvem som står bak og hva anlegget skal brukes til er det ikke.",
+    notes:
+      "Runde 2: Miljødirektoratets utslippsregister plasserer Chemring Nobels anlegg på Engeneveien 7A, " +
+      "samme adresse som selskapet er registrert på, og 12 km fra dette planområdet. Det bekrefter at " +
+      "planen gjelder et annet sted enn det eksisterende anlegget. Ingen forsvarstilknytning er dokumentert. Chemring Nobel AS er den eneste eksplosivprodusenten " +
+      "registrert i Asker, men den registrerte adressen ligger 12 km nord for planområdet, så " +
+      "selskapet kan ikke knyttes til stedet på grunnlag av adresse alene.",
+    kilder: [
+      {
+        source_name: "DiBK planleggingigangsatt, arealplan 1600 (3203_202606)",
+        source_url:
+          "https://plandata.ft.dibk.no/services/rest/planleggingigangsatt/collections/arealplan/items/1600?f=html",
+        publisher: "Direktoratet for byggkvalitet",
+        source_type: "map_service",
+        source_date: "2026-04-27",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel om planoppstart 2026-04-27: «Detaljregulering for produksjonsanlegg for eksplosiver». Forslagsstillertype: Foretak. " +
+          "Kunngjøringen er offentlig og dokumenterer at planarbeidet er startet — ikke hva anlegget " +
+          "til slutt blir.",
+      },
+      {
+        source_name:
+          "Enhetsregisteret: Chemring Nobel AS, Engeneveien 7, 3475 Sætre",
+        source_url:
+          "https://data.brreg.no/enhetsregisteret/api/enheter?navn=chemring",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        supports_claim: false,
+        excerpt_or_summary:
+          "Næringskode 20.590, produksjon av andre kjemiske produkter. Registrert adresse er " +
+          "geokodet til 59.679, 10.542 — 12 km fra planområdet. Undersøkt og forkastet som " +
+          "kobling: selskapsadresse er ikke bevis på fysisk anlegg.",
+      },
+      {
+        source_name: "Egen gjennomgang av NaboRadars plandata",
+        publisher: "NaboRadar",
+        source_type: "correspondence",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Planområdets senterpunkt reverse-geokodet mot Kartverket: ingen adresse innen 600 m, nærmeste adressenavn Dustadveien 1,2 km unna.",
+      },
+    ],
+  },
+  {
+    category: "Støy / nabobelastning",
+    subcategory: "Idrettsanlegg",
+    item_type: "finding",
+    title: "Løvenskioldbanen under omregulering",
+    description:
+      "Varslet detaljregulering for Løvenskioldbanen ved Dælimosen i Bærum. Kartverket fører " +
+      "«Løvenskioldbanen» som idrettsanlegg 332 m fra planområdets senterpunkt, og «Skytterkollen» " +
+      "som idrettshall 155 m unna.",
+    municipality: "Bærum",
+    address: "Dælimosen",
+    postal_code: "1359",
+    city: "Eiksmarka",
+    latitude: 59.96122,
+    longitude: 10.58635,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "high",
+    why_interesting:
+      "Skytestøy er en av de få nabobelastningene folk faktisk søker etter, og den fanges ikke av " +
+      "de modellberegnede støysonene våre, som dekker veitrafikk og bane.",
+    notes:
+      "Forsvarsbyggs nasjonale datasett over skyte- og øvingsfelt er gjennomgått: dette er ikke et " +
+      "militært felt. Skytefunksjon er *ikke* verifisert. Kartverket klassifiserer anlegget som «Idrettsanlegg», " +
+      "ikke «Skytebane». Navnet Skytterkollen 155 m unna peker mot skyting, men et stedsnavn er " +
+      "ikke en kilde på bruk. Må bekreftes mot Bærum kommune eller anleggseier før noe sies om støy.",
+    kilder: [
+      {
+        source_name: "DiBK planleggingigangsatt, arealplan 1680 (3201_2025010)",
+        source_url:
+          "https://plandata.ft.dibk.no/services/rest/planleggingigangsatt/collections/arealplan/items/1680?f=html",
+        publisher: "Direktoratet for byggkvalitet",
+        source_type: "map_service",
+        source_date: "2026-05-28",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel om planoppstart 2026-05-28: «Detaljregulering for Løvenskioldbanen». Forslagsstillertype: Foretak. " +
+          "Kunngjøringen er offentlig og dokumenterer at planarbeidet er startet — ikke hva anlegget " +
+          "til slutt blir.",
+      },
+      {
+        source_name: "Kartverket stedsnavn, punktsøk 59.96122 / 10.58635",
+        source_url:
+          "https://api.kartverket.no/stedsnavn/v1/punkt?nord=59.96122&ost=10.58635&koordsys=4258&radius=1200",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "«Løvenskioldbanen», navneobjekttype Idrettsanlegg, 332 m. «Skytterkollen», Idrettshall, 155 m. " +
+          "Ingen forekomst med navneobjekttype Skytebane innen 1200 m.",
+      },
+    ],
+  },
+  {
+    category: "Infrastruktur / større prosjekter",
+    item_type: "finding",
+    title: "E18 Ramstadsletta–Nesbru",
+    description:
+      "Områderegulering for E18-strekningen Ramstadsletta–Nesbru. Planen har planid i to kommuner (3203_2021005 og 3201_2026007), altså et prosjekt som krysser kommunegrensen Bærum/Asker.",
+    municipality: "Bærum",
+    address: "Bjerkoddveien 15",
+    postal_code: "1341",
+    city: "Slependen",
+    latitude: 59.88171,
+    longitude: 10.51346,
+    verification_status: "verified_public_source",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "En E18-utvidelse endrer støy, luft og adkomst for tusenvis av adresser, og går over mange år.",
+    notes:
+      "Adressen er nærmeste adresse til planområdets senterpunkt, ikke tiltakets egen adresse.",
+    kilder: [
+      {
+        source_name:
+          "DiBK planleggingigangsatt, arealplan 1385 (3203_2021005 / 3201_2026007)",
+        source_url:
+          "https://plandata.ft.dibk.no/services/rest/planleggingigangsatt/collections/arealplan/items/1385?f=html",
+        publisher: "Direktoratet for byggkvalitet",
+        source_type: "map_service",
+        source_date: "2026-02-10",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel om planoppstart 2026-02-10: «E18 Ramstadsletta-Nesbru». Forslagsstillertype: Foretak. " +
+          "Kunngjøringen er offentlig og dokumenterer at planarbeidet er startet — ikke hva anlegget " +
+          "til slutt blir.",
+      },
+    ],
+  },
+  {
+    category: "Infrastruktur / større prosjekter",
+    item_type: "finding",
+    title:
+      "E18-korridoren Lysaker–Ramstadsletta med tverrforbindelsen Gjønnes–Fornebu",
+    description:
+      "Områderegulering i E18-korridoren, varslet som en reduksjon av bredden på hensynssonen for tunnel. Omfatter tverrforbindelsen Gjønnes–Fornebu.",
+    municipality: "Bærum",
+    address: "Krokvolden 1",
+    postal_code: "1369",
+    city: "Stabekk",
+    latitude: 59.90648,
+    longitude: 10.5896,
+    verification_status: "verified_public_source",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Hensynssone for tunnel begrenser hva en nabo kan gjøre på egen eiendom. Selve varselet gjelder " +
+      "likevel bare en innsnevring av sonen — en teknisk justering i et prosjekt som er vedtatt fra før.",
+    notes:
+      "Adressen er nærmeste adresse til planområdets senterpunkt, ikke tiltakets egen adresse.",
+    kilder: [
+      {
+        source_name: "DiBK planleggingigangsatt, arealplan 752 (E32014012)",
+        source_url:
+          "https://plandata.ft.dibk.no/services/rest/planleggingigangsatt/collections/arealplan/items/752?f=html",
+        publisher: "Direktoratet for byggkvalitet",
+        source_type: "map_service",
+        source_date: "2025-04-04",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel om planoppstart 2025-04-04: «E18-korridoren Lysaker – Ramstadsletta med tverrforbindelsen Gjønnes-Fornebu – reduksjon bredde hensynssone tunnel». Forslagsstillertype: Foretak. " +
+          "Kunngjøringen er offentlig og dokumenterer at planarbeidet er startet — ikke hva anlegget " +
+          "til slutt blir.",
+      },
+    ],
+  },
+  {
+    category: "Infrastruktur / større prosjekter",
+    item_type: "finding",
+    title: "Planarbeid i sykehusområdet Helgerud/Dønski/Hamang/Evje",
+    description:
+      "Forenklet endring i reguleringsplan 1973180, varslet under navnet «HELGERUD/DØNSKI/HAMANG/EVJE (sykhussaken)». Hva endringen består i står ikke i kunngjøringen.",
+    municipality: "Bærum",
+    address: "Dønskiveien 7",
+    postal_code: "1346",
+    city: "Gjettum",
+    latitude: 59.89891,
+    longitude: 10.50904,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Området rundt Bærum sykehus er under utvikling, og navnet på kunngjøringen peker på sykehussaken. Innholdet må bekreftes mot kommunen — «sykhussaken» er kommunens egen skrivefeil, ikke en beskrivelse.",
+    notes:
+      "Adressen er nærmeste adresse til planområdets senterpunkt, ikke tiltakets egen adresse.",
+    kilder: [
+      {
+        source_name: "DiBK planleggingigangsatt, arealplan 1452 (1973180)",
+        source_url:
+          "https://plandata.ft.dibk.no/services/rest/planleggingigangsatt/collections/arealplan/items/1452?f=html",
+        publisher: "Direktoratet for byggkvalitet",
+        source_type: "map_service",
+        source_date: "2026-03-10",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel om planoppstart 2026-03-10: «HELGERUD/DØNSKI/HAMANG/EVJE (sykhussaken)». Forslagsstillertype: Foretak. " +
+          "Kunngjøringen er offentlig og dokumenterer at planarbeidet er startet — ikke hva anlegget " +
+          "til slutt blir.",
+      },
+    ],
+  },
+  {
+    category: "Infrastruktur / større prosjekter",
+    item_type: "finding",
+    title: "Grorud ventespor",
+    description:
+      "Varsel om utvidet planområde for ventespor ved Grorud. Ventespor er jernbaneinfrastruktur for hensetting av tog.",
+    municipality: "Oslo",
+    address: "Østre Aker vei 255",
+    postal_code: "0976",
+    city: "Oslo",
+    latitude: 59.95361,
+    longitude: 10.90201,
+    verification_status: "verified_public_source",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Jernbanetiltak gir støy og anleggsperiode, og hensetting er blant de tiltakene naboer merker om natten.",
+    notes:
+      "Adressen er nærmeste adresse til planområdets senterpunkt, ikke tiltakets egen adresse.",
+    kilder: [
+      {
+        source_name: "DiBK planleggingigangsatt, arealplan 875 (?)",
+        source_url:
+          "https://plandata.ft.dibk.no/services/rest/planleggingigangsatt/collections/arealplan/items/875?f=html",
+        publisher: "Direktoratet for byggkvalitet",
+        source_type: "map_service",
+        source_date: "2025-08-11",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel om planoppstart 2025-08-11: «Grorud ventespor - Varsel om utvidet planområde». Forslagsstillertype: Foretak. " +
+          "Kunngjøringen er offentlig og dokumenterer at planarbeidet er startet — ikke hva anlegget " +
+          "til slutt blir.",
+      },
+    ],
+  },
+  {
+    category: "Infrastruktur / større prosjekter",
+    item_type: "finding",
+    title: "Retningsdrift Brynsbakken",
+    description:
+      "Detaljreguleringsplan for retningsdrift i Brynsbakken — omlegging av togtrafikkens kjøremønster inn mot Oslo S.",
+    municipality: "Oslo",
+    address: "Schweigaards gate 98J",
+    postal_code: "0656",
+    city: "Oslo",
+    latitude: 59.90636,
+    longitude: 10.78092,
+    verification_status: "verified_public_source",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Brynsbakken er flaskehalsen inn til Oslo S. Tiltaket har vært omstridt nettopp på grunn av naboene.",
+    notes:
+      "Adressen er nærmeste adresse til planområdets senterpunkt, ikke tiltakets egen adresse.",
+    kilder: [
+      {
+        source_name: "DiBK planleggingigangsatt, arealplan 1443 (?)",
+        source_url:
+          "https://plandata.ft.dibk.no/services/rest/planleggingigangsatt/collections/arealplan/items/1443?f=html",
+        publisher: "Direktoratet for byggkvalitet",
+        source_type: "map_service",
+        source_date: "2026-03-05",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel om planoppstart 2026-03-05: «Detaljreguleringsplan for Retningsdrift Brynsbakken». Forslagsstillertype: Foretak. " +
+          "Kunngjøringen er offentlig og dokumenterer at planarbeidet er startet — ikke hva anlegget " +
+          "til slutt blir.",
+      },
+    ],
+  },
+  {
+    category: "Infrastruktur / større prosjekter",
+    item_type: "finding",
+    title: "Driftsbase for Sporveien, Enebakkveien 310",
+    description:
+      "Detaljregulering for driftsbase for Sporveien i Enebakkveien 310 m.fl.",
+    municipality: "Oslo",
+    address: "Enebakkveien 302",
+    postal_code: "1188",
+    city: "Oslo",
+    latitude: 59.8691,
+    longitude: 10.83019,
+    verification_status: "verified_public_source",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "En driftsbase er tungtrafikk og nattarbeid i et boligområde.",
+    notes:
+      "Adressen er nærmeste adresse til planområdets senterpunkt, ikke tiltakets egen adresse.",
+    kilder: [
+      {
+        source_name: "DiBK planleggingigangsatt, arealplan 454 (?)",
+        source_url:
+          "https://plandata.ft.dibk.no/services/rest/planleggingigangsatt/collections/arealplan/items/454?f=html",
+        publisher: "Direktoratet for byggkvalitet",
+        source_type: "map_service",
+        source_date: "2025-12-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel om planoppstart 2025-12-02: «Enebakkveien 310 m.fl.- Driftsbase for Sporveien». Forslagsstillertype: Foretak. " +
+          "Kunngjøringen er offentlig og dokumenterer at planarbeidet er startet — ikke hva anlegget " +
+          "til slutt blir.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    item_type: "finding",
+    title: "VEAS anlegg Bjerkås",
+    description:
+      "Mindre reguleringsendring for VEAS-anlegget på Bjerkås. VEAS er renseanlegget for avløp fra Oslo, Bærum og Asker.",
+    municipality: "Asker",
+    address: "Bjerkåsholmen 21",
+    postal_code: "3470",
+    city: "Slemmestad",
+    latitude: 59.78919,
+    longitude: 10.4975,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Et regionalt renseanlegg er både lukt og tungtrafikk, og endringer der treffer et stort nærområde.",
+    notes:
+      "Adressen er nærmeste adresse til planområdets senterpunkt, ikke anleggets egen adresse.",
+    kilder: [
+      {
+        source_name: "DiBK planleggingigangsatt, arealplan 1628 (2012009)",
+        source_url:
+          "https://plandata.ft.dibk.no/services/rest/planleggingigangsatt/collections/arealplan/items/1628?f=html",
+        publisher: "Direktoratet for byggkvalitet",
+        source_type: "map_service",
+        source_date: "2026-05-08",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel om planoppstart 2026-05-08: «VEAS anlegg Bjerkås». Forslagsstillertype: Foretak. " +
+          "Kunngjøringen er offentlig og dokumenterer at planarbeidet er startet — ikke hva anlegget " +
+          "til slutt blir.",
+      },
+    ],
+  },
+  {
+    category: "Miljø / grunn / forurensning",
+    item_type: "finding",
+    title: "Oredalen avfallsanlegg",
+    description:
+      "Forenklet endring i reguleringsplan for Oredalen avfallsanlegg i sørlige Asker.",
+    municipality: "Asker",
+    address: "Tofteveien 35",
+    postal_code: "3483",
+    city: "Kana",
+    latitude: 59.55422,
+    longitude: 10.51914,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Deponi og avfallsanlegg er blant de mest støy- og luktutsatte nabolagene vi kan vise.",
+    notes:
+      "Adressen er nærmeste adresse til planområdets senterpunkt, ikke anleggets egen adresse.",
+    kilder: [
+      {
+        source_name: "DiBK planleggingigangsatt, arealplan 1069 (06285078)",
+        source_url:
+          "https://plandata.ft.dibk.no/services/rest/planleggingigangsatt/collections/arealplan/items/1069?f=html",
+        publisher: "Direktoratet for byggkvalitet",
+        source_type: "map_service",
+        source_date: "2025-08-14",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel om planoppstart 2025-08-14: «Oredalen avfallsanlegg». Forslagsstillertype: Foretak. " +
+          "Kunngjøringen er offentlig og dokumenterer at planarbeidet er startet — ikke hva anlegget " +
+          "til slutt blir.",
+      },
+    ],
+  },
+  {
+    category: "Omsorg / bofellesskap",
+    subcategory: "Tidligere institusjon",
+    item_type: "finding",
+    title: "Blakstad, tidligere sykehusområde",
+    description:
+      "Områderegulering for Blakstad, oppgitt i kunngjøringen som tidligere sykehusområde.",
+    municipality: "Asker",
+    address: "Strandveien 43",
+    postal_code: "1392",
+    city: "Vettre",
+    latitude: 59.81986,
+    longitude: 10.47188,
+    verification_status: "verified_public_source",
+    operational_status: "historical",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Et institusjonsområde som omreguleres er både historikk og et varsel om stor utbygging. Statusen er «tidligere» ifølge kilden — dagens bruk er ikke undersøkt.",
+    notes:
+      "Kunngjøringen sier «tidligere sykehusområde». Om noen del av området fortsatt er i bruk til helse- eller omsorgsformål er ikke undersøkt.",
+    kilder: [
+      {
+        source_name: "DiBK planleggingigangsatt, arealplan 384 (202506)",
+        source_url:
+          "https://plandata.ft.dibk.no/services/rest/planleggingigangsatt/collections/arealplan/items/384?f=html",
+        publisher: "Direktoratet for byggkvalitet",
+        source_type: "map_service",
+        source_date: "2025-03-20",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel om planoppstart 2025-03-20: «Blakstad (tidligere sykehusområde)». Forslagsstillertype: Foretak. " +
+          "Kunngjøringen er offentlig og dokumenterer at planarbeidet er startet — ikke hva anlegget " +
+          "til slutt blir.",
+      },
+    ],
+  },
+  {
+    category: "Datakvalitetsavvik",
+    item_type: "data_issue",
+    title: "municipality_name er tom for alle plansaker",
+    description:
+      "Ingen av de 1552 plansakene i basen har municipality_name satt. Feltet vises på /sak/[id] " +
+      "i raden «Kommunenummer», som derfor bare viser tallet. DiBK-kilden gir kommunenummer, ikke " +
+      "kommunenavn, og vi slår det ikke opp noe sted.",
+    municipality: null,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "low",
+    why_interesting:
+      "Et synlig, billig hull: kommunenummer→navn er et oppslag vi allerede har data til gjennom Kartverket.",
+    kilder: [
+      {
+        source_name: "Egen gjennomgang av NaboRadars plandata",
+        publisher: "NaboRadar",
+        source_type: "correspondence",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "select count(*), count(municipality_name) from events → 1552 / 0. Bekreftet mot app/sak/[id]/page.tsx, som viser feltet i raden «Kommunenummer».",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    item_type: "note",
+    title: "Ingen datasenter-funn i plandataene for Oslo, Bærum og Asker",
+    description:
+      "Søk i alle 124 plansaker i Oslo (49), Bærum (38) og Asker (37) på datasenter, datalagring og " +
+      "serverpark ga null treff. Negativt resultat, ikke en konklusjon om at det ikke finnes " +
+      "datasentre: DiBK-kilden dekker bare *nylig varslet* planoppstart, ikke eksisterende anlegg.",
+    municipality: null,
+    verification_status: "investigated_not_confirmed",
+    operational_status: "unknown",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "low",
+    why_interesting:
+      "Avløst i runde 2: Nkoms datasenterregister er nå gjennomgått i nettleser, og ga både et bekreftet " +
+      "fysisk anlegg og flere leads. Notatet står igjen som dokumentasjon på at plandata ikke er veien inn.",
+    notes:
+      "Enhetsregisteret ble vurdert og forkastet som inngang: næringskode viser selskapsadresser, ikke fysiske anlegg, og ville gitt masseimport av kontoradresser.",
+    kilder: [
+      {
+        source_name: "Egen gjennomgang av NaboRadars plandata",
+        publisher: "NaboRadar",
+        source_type: "correspondence",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Regexsøk i events.title på /datasenter|datalagring|serverpark/ for kommunenummer 0301, 3201 og 3203: 0 treff av 124 saker.",
+      },
+      {
+        source_name: "Nkom, forsøkt søk etter datasenterregister",
+        source_url: "https://www.nkom.no/",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "web",
+        source_date: "2026-09-26",
+        supports_claim: false,
+        excerpt_or_summary:
+          "nkom.no/sok gir HTTP 403 (Azure WAF) fra script, og de antatte URL-ene for et " +
+          "datasenterregister gir 404. Kilden er ikke avklart — den må åpnes i nettleser.",
+      },
+    ],
+  },
+  {
+    category: "Datakvalitetsavvik",
+    item_type: "data_issue",
+    title: "Bærums 14 publiserte omsorgstilbud er ikke tatt inn",
+    description:
+      "Bærum kommune publiserer selv 14 omsorgstilbud med navn og adresse: 6 sykehjem og " +
+      "bo- og behandlingssentre, 3 helsehus og 5 omsorgsboliger. De er innenfor visningsregelen " +
+      "vår, men er ikke integrert.",
+    municipality: "Bærum",
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Det konkrete, kjente gapet bak meldinger om at omsorgstilbud «mangler» utenfor Oslo.",
+    notes:
+      "Satt på vent: kilden er kommunens egne nettsider uten API, og lisensen er ikke avklart. Hører sammen med skolekrets for Bærum og Asker i én henvendelse til kommunen.",
+    kilder: [
+      {
+        source_name:
+          "Bærum kommune, oversikt over sykehjem, helsehus og omsorgsboliger",
+        source_url: "https://www.baerum.kommune.no/",
+        publisher: "Bærum kommune",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "14 tilbud publisert med navn og adresse. Ingen API, og ingen lisensangivelse på sidene.",
+      },
+    ],
+  },
+  {
+    category: "Kilder",
+    item_type: "data_issue",
+    title: "Skolekretsdata for Bærum og Asker: lisens ikke avklart",
+    description:
+      "Begge kommunene har teknisk gode karttjenester med inntaksområder, men ingen av dem oppgir lisens for videre bruk.",
+    municipality: null,
+    verification_status: "investigated_not_confirmed",
+    operational_status: "unknown",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "low",
+    why_interesting:
+      "Skolekrets er den mest etterspurte utvidelsen utenfor Oslo, og den stopper på lisens — ikke på teknikk.",
+    notes:
+      "Stoppet før produksjonsbruk, etter regelen om at uklar lisens ikke skal gjettes. Samme henvendelse som Bærums omsorgstilbud.",
+    kilder: [
+      {
+        source_name: "Egen gjennomgang av NaboRadars plandata",
+        publisher: "NaboRadar",
+        source_type: "correspondence",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Discovery for skolekrets i Bærum og Asker: tjenestene svarer og har inntaksområder, men ingen lisensangivelse er funnet på tjenestene eller i kommunenes åpne data-sider.",
+      },
+    ],
+  },
+  {
+    category: "Kilder",
+    item_type: "data_issue",
+    title:
+      "Poenggrenser for videregående skole finnes ikke som åpen kilde per skole",
+    description:
+      "Discovery fant ingen offentlig, maskinlesbar kilde med inntaksgrenser per skole og programområde for Oslo eller Akershus.",
+    municipality: null,
+    verification_status: "investigated_not_confirmed",
+    operational_status: "unknown",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "low",
+    why_interesting:
+      "Poenggrenser er blant de mest etterspurte tallene rundt en adresse, og fraværet av kilde er svaret — ikke noe å gjette på.",
+    kilder: [
+      {
+        source_name: "Egen gjennomgang av NaboRadars plandata",
+        publisher: "NaboRadar",
+        source_type: "correspondence",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Discovery for poenggrenser VGS: ingen åpen kilde per skole og programområde funnet hos fylkene eller Utdanningsdirektoratet.",
+      },
+    ],
+  },
+
+  {
+    category: "Forsvar / militært",
+    subcategory: "Festning",
+    item_type: "finding",
+    title: "Akershus slott og festning",
+    description:
+      "Nasjonalt festningsverk midt i Oslo sentrum, forvaltet av Forsvarsbygg og i aktiv bruk. " +
+      "Kartverket fører anlegget som «Militært bygg/anlegg» med aktiv stedstatus. Akershus " +
+      "kommandantskap er i dag lokalisert på Kolsås base.",
+    municipality: "Oslo",
+    city: "Oslo",
+    latitude: 59.9075,
+    longitude: 10.73703,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et stort militært og statlig område midt i sentrum, med egne ferdselsregler og " +
+      "arrangementer, som påvirker et helt bykvartal uten å dukke opp i vanlige eiendoms- " +
+      "eller plandata.",
+    kilder: [
+      {
+        source_name:
+          "Kartverket sentralt stedsnavnregister: Akershus slott og festning",
+        source_url:
+          "https://api.kartverket.no/stedsnavn/v1/navn?sok=Akershus%20festning",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Navneobjekttype «Militært bygg/anlegg», stedstatus aktiv, representasjonspunkt " +
+          "59.90750, 10.73703.",
+      },
+      {
+        source_name: "Forsvarsbygg, Festningene",
+        source_url:
+          "https://www.forsvarsbygg.no/eiendomsforvaltning/festningene",
+        publisher: "Forsvarsbygg",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Forsvarsbygg forvalter 14 nasjonale festningsverk og holder dem åpne for publikum " +
+          "hele året.",
+      },
+    ],
+  },
+  {
+    category: "Forsvar / militært",
+    subcategory: "Leir",
+    item_type: "finding",
+    title: "Gardeleiren (Huseby leir)",
+    description:
+      "Militærleir på Huseby i Oslo vest, base for Hans Majestet Kongens Garde. Registrert i " +
+      "Kartverkets stedsnavnregister som militært bygg/anlegg med aktiv status, og omtalt av " +
+      "Forsvarsbygg som et av stedene de bygger på.",
+    municipality: "Oslo",
+    city: "Oslo",
+    latitude: 59.94435,
+    longitude: 10.65465,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "En aktiv militærleir i et ellers rolig boligområde, med vakthold, øvelser og " +
+      "byggevirksomhet. Det er nabolagsinformasjon som ikke finnes i noen av de offentlige " +
+      "kildene NaboRadar bruker i dag.",
+    kilder: [
+      {
+        source_name: "Kartverket sentralt stedsnavnregister: Gardeleiren",
+        source_url:
+          "https://api.kartverket.no/stedsnavn/v1/navn?sok=Gardeleiren",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Navneobjekttype «Militært bygg/anlegg», stedstatus aktiv, representasjonspunkt " +
+          "59.94435, 10.65465. Ett av bare to militære navn registrert i Oslo.",
+      },
+      {
+        source_name: "Forsvarsbygg, prosjekter på Østlandet",
+        source_url:
+          "https://www.forsvarsbygg.no/prosjekter/vi-bygger-forsvarsevne-hver-dag/ostlandet",
+        publisher: "Forsvarsbygg",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Forsvarsbygg oppgir byggevirksomhet ved blant annet Akershus festning, Linderud leir, " +
+          "Lutvann leir, Huseby leir og Kolsås base.",
+      },
+    ],
+  },
+  {
+    category: "Forsvar / militært",
+    subcategory: "Base",
+    item_type: "finding",
+    title: "Kolsås base",
+    description:
+      "Militær base i Bærum med flere sentrale forsvars- og sikkerhetsvirksomheter, blant dem " +
+      "Cyberforsvaret, Nasjonal sikkerhetsmyndighet, Forsvarsmateriell og Akershus " +
+      "kommandantskap. Anlegget er det tidligere NATO-hovedkvarteret for Nord-Europa.",
+    municipality: "Bærum",
+    address: "Rødskiferveien 20",
+    postal_code: "1352",
+    city: "Kolsås",
+    latitude: 59.91745,
+    longitude: 10.50518,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Den klart største forsvarsrelaterte lokasjonen i Bærum, med virksomheter som gir " +
+      "adkomstkontroll, trafikk og byggeaktivitet i et boligområde — og som ikke finnes i " +
+      "noen av de offentlige datasettene vi bruker.",
+    notes:
+      "Basen står ikke i Kartverkets stedsnavnregister som militært anlegg. Den er dokumentert av " +
+      "Forsvaret selv, med adresse.",
+    kilder: [
+      {
+        source_name: "Forsvaret, tjenestesteder: Kolsås",
+        source_url:
+          "https://www.forsvaret.no/om-forsvaret/tjenestesteder/kolsas",
+        publisher: "Forsvaret",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppgir adressen Rødskiferveien 20, 1352 Kolsås. På basen ligger blant annet " +
+          "Cyberforsvaret, Forsvarsmateriell, Nasjonal sikkerhetsmyndighet, Forsvarets " +
+          "logistikkorganisasjon, Forsvarsbygg, Akershus kommandantskap og NATO NEC CCIS.",
+      },
+      {
+        source_name: "Kartverket adresse-API: Rødskiferveien 20, 1352 Kolsås",
+        source_url:
+          "https://ws.geonorge.no/adresser/v1/sok?sok=R%C3%B8dskiferveien%2020&postnummer=1352",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen finnes i Bærum kommune, representasjonspunkt 59.91745, 10.50518.",
+      },
+      {
+        source_name:
+          "Kartverket sentralt stedsnavnregister, søk på militære navn i Bærum",
+        source_url:
+          "https://api.kartverket.no/stedsnavn/v1/navn?sok=k*&knr=3201",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        supports_claim: false,
+        excerpt_or_summary:
+          "Ingen navn med navneobjekttype «Militært bygg/anlegg» er registrert i Bærum. " +
+          "Stedsnavnregisteret bekrefter altså ikke basen — den er dokumentert av Forsvaret selv.",
+      },
+    ],
+  },
+  {
+    category: "Forsvar / militært",
+    subcategory: "Leir",
+    item_type: "finding",
+    title: "Linderud leir",
+    description:
+      "Militærleir i Oslo, oppgitt av Forsvarsbygg som et av stedene de bygger på. " +
+      "Nøyaktig utstrekning og dagens bruk er ikke undersøkt.",
+    municipality: "Oslo",
+    city: "Oslo",
+    latitude: 59.94205,
+    longitude: 10.83347,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "En aktiv militærleir i et boligområde betyr vakthold, øvelsesaktivitet og " +
+      "byggeperioder som naboer merker.",
+    notes:
+      "Koordinaten er omtrentlig — leiren har ikke eget oppslag i stedsnavnregisteret, så punktet " +
+      "er satt fra «Linderud gård» i nærheten.",
+    kilder: [
+      {
+        source_name: "Forsvarsbygg, prosjekter på Østlandet",
+        source_url:
+          "https://www.forsvarsbygg.no/prosjekter/vi-bygger-forsvarsevne-hver-dag/ostlandet",
+        publisher: "Forsvarsbygg",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Forsvarsbygg oppgir Linderud leir blant stedene de har byggevirksomhet på i Oslo-området.",
+      },
+      {
+        source_name: "Kartverket sentralt stedsnavnregister: Linderud gård",
+        source_url: "https://api.kartverket.no/stedsnavn/v1/navn",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Leiren har ikke eget navn i stedsnavnregisteret. Koordinaten er hentet fra " +
+          "«Linderud gård» like ved, og er derfor omtrentlig.",
+      },
+    ],
+  },
+  {
+    category: "Forsvar / militært",
+    subcategory: "Leir",
+    item_type: "finding",
+    title: "Lutvann leir",
+    description:
+      "Militærleir i Oslo, oppgitt av Forsvarsbygg som et av stedene de bygger på. " +
+      "Nøyaktig utstrekning og dagens bruk er ikke undersøkt.",
+    municipality: "Oslo",
+    city: "Oslo",
+    latitude: 59.91347,
+    longitude: 10.87779,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "En aktiv militærleir i et boligområde betyr vakthold, øvelsesaktivitet og " +
+      "byggeperioder som naboer merker.",
+    notes:
+      "Koordinaten er omtrentlig — leiren har ikke eget oppslag i stedsnavnregisteret, så punktet " +
+      "er satt fra «Lutvannet» i nærheten.",
+    kilder: [
+      {
+        source_name: "Forsvarsbygg, prosjekter på Østlandet",
+        source_url:
+          "https://www.forsvarsbygg.no/prosjekter/vi-bygger-forsvarsevne-hver-dag/ostlandet",
+        publisher: "Forsvarsbygg",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Forsvarsbygg oppgir Lutvann leir blant stedene de har byggevirksomhet på i Oslo-området.",
+      },
+      {
+        source_name: "Kartverket sentralt stedsnavnregister: Lutvannet",
+        source_url: "https://api.kartverket.no/stedsnavn/v1/navn",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Leiren har ikke eget navn i stedsnavnregisteret. Koordinaten er hentet fra " +
+          "«Lutvannet» like ved, og er derfor omtrentlig.",
+      },
+    ],
+  },
+  {
+    category: "Forsvar / militært",
+    item_type: "note",
+    title:
+      "Ingen av Forsvarets skyte- og øvingsfelt ligger i Oslo, Bærum eller Asker",
+    description:
+      "Hypotesen var at minst ett av Forsvarets skyte- og øvingsfelt kunne berøre de tre " +
+      "kommunene. Hele det nasjonale datasettet fra Forsvarsbygg ble hentet og gjennomgått: " +
+      "68 felt, ingen i Oslo, Bærum eller Asker. Nærmeste er Rygge i Moss.",
+    municipality: null,
+    verification_status: "investigated_not_confirmed",
+    operational_status: "unknown",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "low",
+    notes:
+      "Undersøkt 2026-09-26 mot Forsvarsbyggs egne data. Skytestøy i disse kommunene kommer fra " +
+      "sivile baner, ikke fra Forsvarets felt — se Franskleiv og Løvenskioldbanen. Trenger ikke " +
+      "undersøkes på nytt.",
+    kilder: [
+      {
+        source_name: "Forsvarsbygg, Forsvarets skyte- og øvingsfelt land (WFS)",
+        source_url:
+          "https://wfs.geonorge.no/skwms1/wfs.forsvarets_skyteogovingsfelt?service=WFS&request=GetCapabilities",
+        publisher: "Forsvarsbygg via Geonorge",
+        source_type: "map_service",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nasjonalt datasett over Forsvarets skyte- og øvingsfelt på land, 68 felt. Hentet i sin " +
+          "helhet og gjennomgått: ingen av feltene ligger i Oslo, Bærum eller Asker. Nærmeste er " +
+          "Rygge skyte- og øvingsfelt i Moss. «Ulven skyte- og øvingsfelt» i datasettet ligger på " +
+          "60.196, 5.426 i Vestland — ikke Ulven i Oslo.",
+      },
+    ],
+  },
+  {
+    category: "Datakvalitetsavvik",
+    item_type: "data_issue",
+    title: "Stedsnavnregisteret er ikke uttømmende for militære anlegg",
+    description:
+      "Kartverkets stedsnavnregister har bare to militære navn i Oslo og ingen i Bærum eller " +
+      "Asker, selv om Kolsås base er en dokumentert, aktiv militær base i Bærum. Registeret " +
+      "kan brukes til å bekrefte et anlegg, men ikke til å utelukke at det finnes.",
+    municipality: null,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "low",
+    notes:
+      "Metodemerknad for senere runder: for forsvarsanlegg må Forsvaret og Forsvarsbygg brukes som " +
+      "primærkilde, med stedsnavnregisteret som supplement.",
+    kilder: [
+      {
+        source_name:
+          "Kartverket sentralt stedsnavnregister, gjennomgang av navneobjekttype «Militært bygg/anlegg»",
+        source_url: "https://api.kartverket.no/stedsnavn/v1/navn",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Alfabetisk uttømmende søk per kommune: Oslo har to navn av typen «Militært " +
+          "bygg/anlegg» (Akershus slott og festning, Gardeleiren). Bærum og Asker har null — " +
+          "til tross for at Kolsås base er dokumentert av Forsvaret.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "STACK OSL01 datasenter, Ulven",
+    description:
+      "Eksisterende fysisk datasenter på Ulven i Oslo, tidligere DigiPlex Oslo. Operatøren er " +
+      "registrert hos Nkom som kommersiell datasenteroperatør, og har beliggenhetsadresse og " +
+      "ansatte på stedet. Kategori E i datasenter-inndelingen: eksisterende fysisk anlegg.",
+    municipality: "Oslo",
+    address: "Selma Ellefsens vei 1",
+    postal_code: "0581",
+    city: "Oslo",
+    latitude: 59.92498,
+    longitude: 10.80889,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et stort datasenter midt i et område under boligtransformasjon. Slike anlegg gir " +
+      "kjøleanlegg, nødstrømsaggregat, høy effektbruk og lite arbeidsplasser per kvadratmeter " +
+      "— relevant både for naboer og for å forstå hva et næringsbygg i området faktisk er.",
+    notes:
+      "Koordinaten er Kartverkets punkt for Selma Ellefsens vei 1. De øvrige SI OSL-selskapene i " +
+      "Nkom-registeret (02, 03.1, 03.2, 04) har adresser i Nordre Follo, Lillestrøm og Indre Østfold " +
+      "og faller utenfor dette området.",
+    kilder: [
+      {
+        source_name: "Nkom, registrerte kommersielle datasenteroperatører",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Offentlig register over kommersielle datasenteroperatører med registreringsplikt etter " +
+          "ekomloven. 60 operatører og 112 registrerte datasentre. Registeret oppgir firmanavn og " +
+          "organisasjonsnummer, ikke fysisk lokasjon.",
+      },
+      {
+        source_name: "Enhetsregisteret: SI OSL 01 AS",
+        source_url:
+          "https://data.brreg.no/enhetsregisteret/api/enheter/981663322",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Beliggenhetsadresse Selma Ellefsens vei 1, 0581 Oslo. " +
+          "Næringskode 63.100 databehandling og datalagring, 23 ansatte. Selskapsnavnet «OSL 01» og " +
+          "ansatte på adressen peker mot at dette er selve anlegget, ikke et kontor.",
+      },
+      {
+        source_name: "Bransjeomtaler av STACK OSL01 / DigiPlex Oslo Ulven",
+        source_url: "https://www.stackinfra.com/locations/emea/oslo/",
+        publisher: "STACK Infrastructure m.fl.",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Flere uavhengige bransjeoversikter plasserer datasenteret på Selma Ellefsens vei 1 med " +
+          "over 5 100 m² teknisk areal over fire etasjer, EMP-beskyttelse og 25+ operatører. " +
+          "Bygget skal opprinnelig være oppført i 1981 som datasenter og kommunikasjonsknutepunkt " +
+          "for staten. Kommersielle kilder, ikke myndighetskilder — derfor støtte, ikke bevis.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "lead",
+    title: "Blix Solutions — registrert datasenteroperatør på Lindeberg",
+    description:
+      "Selskapet står i Nkoms register over kommersielle datasenteroperatører og har " +
+      "beliggenhetsadresse i et næringsområde på Lindeberg i Oslo. Kategori B: mulig fysisk " +
+      "datasenter, ikke bekreftet.",
+    municipality: "Oslo",
+    address: "Lindeberg næringsvei 26",
+    postal_code: "1067",
+    city: "Oslo",
+    latitude: 59.93549,
+    longitude: 10.88559,
+    verification_status: "partially_verified",
+    operational_status: "unknown",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "medium",
+    why_interesting:
+      "Et datasenter i et næringsområde tett på bolig ville vært relevant for naboer. " +
+      "Registreringsplikten viser at selskapet driver minst ett datasenter — spørsmålet er " +
+      "bare hvor.",
+    notes:
+      "Koordinaten er adressen fra Enhetsregisteret, ikke et bekreftet anlegg. Må bekreftes mot " +
+      "byggesak eller selskapets egne opplysninger før den behandles som en lokasjon.",
+    kilder: [
+      {
+        source_name: "Nkom, registrerte kommersielle datasenteroperatører",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Offentlig register over kommersielle datasenteroperatører med registreringsplikt etter " +
+          "ekomloven. 60 operatører og 112 registrerte datasentre. Registeret oppgir firmanavn og " +
+          "organisasjonsnummer, ikke fysisk lokasjon.",
+      },
+      {
+        source_name: "Enhetsregisteret: BLIX SOLUTIONS AS",
+        source_url:
+          "https://data.brreg.no/enhetsregisteret/api/enheter/993128708",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Beliggenhetsadresse Lindeberg næringsvei 26, 1067 Oslo. " +
+          "Næringskode 62.200, 10 ansatte. Registrert hos Nkom som kommersiell datasenteroperatør. " +
+          "Adressen er et næringsområde, men at anlegget ligger nettopp her er ikke bekreftet.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "lead",
+    title:
+      "Akvatechnic — eneste registrerte datasenteroperatør med Bærum-adresse",
+    description:
+      "Selskapet står i Nkoms datasenterregister og er det eneste med adresse i Bærum. " +
+      "Adressen er i et boligstrøk på Haslum, og ingen ansatte er registrert. Kategori B: " +
+      "lead, ikke bekreftet fysisk anlegg.",
+    municipality: "Bærum",
+    address: "Nesveien 19",
+    postal_code: "1344",
+    city: "Haslum",
+    verification_status: "unverified",
+    operational_status: "unknown",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "medium",
+    why_interesting:
+      "Hvis det faktisk finnes et registrert datasenter i Bærum, er det verdt å vite hvor. " +
+      "Registreringsplikten gjelder anlegg over 0,5 MW, så det er ikke en serverskap i en kjeller.",
+    notes:
+      "Bevisst uten koordinat: adressen ligger i et boligstrøk, og et anlegg på over 0,5 MW er lite " +
+      "sannsynlig der. Selskapsadresse skal ikke settes som anleggslokasjon.",
+    kilder: [
+      {
+        source_name: "Nkom, registrerte kommersielle datasenteroperatører",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Offentlig register over kommersielle datasenteroperatører med registreringsplikt etter " +
+          "ekomloven. 60 operatører og 112 registrerte datasentre. Registeret oppgir firmanavn og " +
+          "organisasjonsnummer, ikke fysisk lokasjon.",
+      },
+      {
+        source_name: "Enhetsregisteret: AKVATECHNIC AS",
+        source_url:
+          "https://data.brreg.no/enhetsregisteret/api/enheter/936306225",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Beliggenhetsadresse Nesveien 19, 1344 Haslum, Bærum. " +
+          "Registrert hos Nkom som kommersiell datasenteroperatør. Adressen er den eneste i Bærum i " +
+          "hele registeret. Ingen ansatte oppgitt.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "lead",
+    title:
+      "Odin Green DC — registrert datasenteroperatør med c/o-adresse i Asker",
+    description:
+      "Selskapet står i Nkoms datasenterregister med en c/o-adresse hos et forvaltningsselskap " +
+      "i Asker. Kategori A: selskap registrert på en adresse. Hvor anlegget ligger er ukjent, " +
+      "og ingenting tyder på at det er i Asker.",
+    municipality: "Asker",
+    verification_status: "investigated_not_confirmed",
+    operational_status: "unknown",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "low",
+    notes:
+      "Uten koordinat med vilje. En c/o-adresse hos en regnskapsfører sier ingenting om hvor et " +
+      "datasenter ligger, og skal ikke plasseres i kartet.",
+    kilder: [
+      {
+        source_name: "Nkom, registrerte kommersielle datasenteroperatører",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Offentlig register over kommersielle datasenteroperatører med registreringsplikt etter " +
+          "ekomloven. 60 operatører og 112 registrerte datasentre. Registeret oppgir firmanavn og " +
+          "organisasjonsnummer, ikke fysisk lokasjon.",
+      },
+      {
+        source_name: "Enhetsregisteret: ODIN GREEN DC AS",
+        source_url:
+          "https://data.brreg.no/enhetsregisteret/api/enheter/925218790",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Beliggenhetsadresse c/o TMF Norway AS, Hagaløkkveien 26, 1383 Asker. " +
+          "Registrert hos Nkom som kommersiell datasenteroperatør. Adressen er en c/o-adresse hos et " +
+          "regnskaps- og forvaltningsselskap, ikke et anlegg.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    item_type: "note",
+    title: "Registrerte datasenteroperatører med kontoradresse i Oslo og Bærum",
+    description:
+      "Ni av de 60 operatørene i Nkoms register har hovedkontor- eller c/o-adresse i Oslo eller " +
+      "Bærum. Ingen av adressene er dokumentert som anleggslokasjon. Kategori A: selskap " +
+      "registrert på en adresse — samlet i ett funn framfor ni svake registertreff.",
+    municipality: null,
+    verification_status: "investigated_not_confirmed",
+    operational_status: "unknown",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "low",
+    notes:
+      "Metoderegel bekreftet i praksis: Nkom-registeret gir selskap og organisasjonsnummer, aldri " +
+      "lokasjon. Bulk sine fire selskaper deler én kontoradresse på Skøyen mens anleggene deres " +
+      "ligger andre steder i landet. Neste steg for å finne fysiske anlegg er byggesak og " +
+      "nettselskapenes tilknytningssaker, ikke flere registeroppslag.",
+    kilder: [
+      {
+        source_name: "Nkom, registrerte kommersielle datasenteroperatører",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Offentlig register over kommersielle datasenteroperatører med registreringsplikt etter " +
+          "ekomloven. 60 operatører og 112 registrerte datasentre. Registeret oppgir firmanavn og " +
+          "organisasjonsnummer, ikke fysisk lokasjon.",
+      },
+      {
+        source_name:
+          "Enhetsregisteret, oppslag på alle 60 registrerte operatører",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Samtlige 60 organisasjonsnumre fra Nkoms register ble slått opp. Med adresse i Oslo: " +
+          "Bulk Data Centers (fire selskaper, Karenslyst allé 53), Telia Norge (Lørenfaret 1A), " +
+          "Atea (Karvesvingen 5), Skygard (Karenslyst allé 10), Iteam (Innspurten 1A), " +
+          "Hovedkvarteret IT (Maridalsveien 91), PolarDC DRA (c/o, Grundingen 6) og " +
+          "GlobalConnect (Snarøyveien 36, Fornebu i Bærum). Alle er hovedkontor- eller " +
+          "c/o-adresser; ingen av dem er dokumentert som anleggslokasjon.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Avfallsforbrenning",
+    item_type: "finding",
+    title: "Hafslund Celsio Klemetsrud energigjenvinningsanlegg",
+    description:
+      "Norges største anlegg for energigjenvinning av avfall, med utslippstillatelse fra " +
+      "Miljødirektoratet og utslipp til både luft og vann.",
+    municipality: "Oslo",
+    address: "Klemetsrudveien 1",
+    postal_code: "1278",
+    city: "Oslo",
+    latitude: 59.84062,
+    longitude: 10.83576,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et forbrenningsanlegg av denne størrelsen er den tyngste enkeltvirksomheten i søndre Oslo, " +
+      "med tungtrafikk, lukt og luftutslipp, og er samtidig det mest omtalte karbonfangstprosjektet " +
+      "i kommunen.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Registeret dokumenterer " +
+      "at anlegget har tillatelse, ikke hvor mye det faktisk slipper ut i dag.",
+    kilder: [
+      {
+        source_name:
+          "Norske utslipp: Hafslund Celsio Klemetsrud energigjenvinningsanlegg",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse. Bransje 38.220 energigjenvinning. Forurensningsmyndighet: Miljødirektoratet. " +
+          "Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Avfall og fjernvarme",
+    item_type: "finding",
+    title: "Haraldrud energigjenvinnings- og varmesentralanlegg",
+    description:
+      "Samlet anleggsområde på Haraldrud med både materialgjenvinning og varmesentral. Begge har " +
+      "egen utslippstillatelse og utslipp til luft og vann. Ett fysisk sted, to tillatelser.",
+    municipality: "Oslo",
+    address: "Brobekkveien 87",
+    postal_code: "0582",
+    city: "Oslo",
+    latitude: 59.92954,
+    longitude: 10.82713,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et stort avfalls- og energianlegg omgitt av næring og bolig på Løren og Økern, i et område " +
+      "som bygges tett ut. Tungtrafikk og lukt er de merkbare sidene for naboer.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Registeret dokumenterer " +
+      "at anlegget har tillatelse, ikke hvor mye det faktisk slipper ut i dag.",
+    kilder: [
+      {
+        source_name:
+          "Norske utslipp: Haraldrud energigjenvinnings- og varmesentralanlegg",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse. Bransje 38.210 materialgjenvinning og 35.300 fjernvarme. Forurensningsmyndighet: Miljødirektoratet. " +
+          "Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Drivstofflager",
+    item_type: "finding",
+    title: "Ekeberg Oljelager og Ekeberg Tank, Sjursøya",
+    description:
+      "To tillatelser på samme sted: Ekeberg Oljelager med utslipp til både luft og vann, og " +
+      "Ekeberg Tank med utslipp til vann. Drivstoffhavna på Sjursøya.",
+    municipality: "Oslo",
+    address: "Kongshavnveien 23",
+    postal_code: "0193",
+    city: "Oslo",
+    latitude: 59.88986,
+    longitude: 10.76094,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et stort drivstofflager i havneområdet rett under boligområdene på Ekeberg. Anlegget er " +
+      "blant de få i Oslo der et uhell ville hatt konsekvenser langt utenfor tomtegrensen.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Registeret dokumenterer " +
+      "at anlegget har tillatelse, ikke hvor mye det faktisk slipper ut i dag.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Ekeberg Oljelager og Ekeberg Tank",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse. Bransje 52.100 lagring. Forurensningsmyndighet: Miljødirektoratet. " +
+          "Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Kjemisk industri",
+    item_type: "finding",
+    title: "Nordox kjemisk fabrikk",
+    description:
+      "Produksjon av kobberforbindelser, med utslippstillatelse fra Miljødirektoratet og utslipp " +
+      "til luft.",
+    municipality: "Oslo",
+    address: "Østensjøveien 13",
+    postal_code: "0661",
+    city: "Oslo",
+    latitude: 59.91177,
+    longitude: 10.80713,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Kjemisk produksjon midt i et byområde under transformasjon på Bryn og Helsfyr. Det er få " +
+      "slike igjen innenfor Ring 3, og virksomhetstypen er relevant for naboer.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Registeret dokumenterer " +
+      "at anlegget har tillatelse, ikke hvor mye det faktisk slipper ut i dag.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Nordox kjemisk fabrikk",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse. Bransje 20.120 produksjon av fargestoffer og pigmenter. Forurensningsmyndighet: Miljødirektoratet. " +
+          "Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Farmasøytisk industri",
+    item_type: "finding",
+    title: "GE Healthcare, farmasøytisk produksjon på Storo",
+    description:
+      "Produksjonsanlegg med utslippstillatelse, midt i et tett bebygd område på Storo/Nydalen.",
+    municipality: "Oslo",
+    address: "Nycoveien 1",
+    postal_code: "0485",
+    city: "Oslo",
+    latitude: 59.94587,
+    longitude: 10.77315,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Et av de største industrielle produksjonsanleggene som er igjen innenfor bybebyggelsen i " +
+      "Oslo, i et område folk i dag oppfatter som bolig og kontor.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Registeret dokumenterer " +
+      "at anlegget har tillatelse, ikke hvor mye det faktisk slipper ut i dag.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: GE Healthcare",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse. Bransje 21.200 produksjon av farmasøytiske preparater. Forurensningsmyndighet: Statsforvalteren. " +
+          "Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Pukkverk",
+    item_type: "finding",
+    title: "Franzefoss Pukk, Bondkall pukkverk",
+    description: "Pukkverk med utslippstillatelse i nordøstre Oslo.",
+    municipality: "Oslo",
+    address: "Trondheimsveien 658",
+    postal_code: "0964",
+    city: "Oslo",
+    latitude: 59.97992,
+    longitude: 10.92407,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Pukkverk gir sprengning, støv og tungtrafikk, og er blant de mest merkbare naboene et " +
+      "boligområde kan ha. Driften er langvarig og endrer seg lite over tid.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Registeret dokumenterer " +
+      "at anlegget har tillatelse, ikke hvor mye det faktisk slipper ut i dag.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Franzefoss Pukk",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse. Bransje 08.120 uttak av masse. Forurensningsmyndighet: Statsforvalteren. " +
+          "Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Pukkverk",
+    item_type: "finding",
+    title: "Franzefoss Pukk, Steinskogen pukkverk",
+    description:
+      "Pukkverk med utslippstillatelse ved Bærums Verk, i et område med boligbebyggelse og " +
+      "friluftsområder rundt.",
+    municipality: "Bærum",
+    address: "Gamle Ringeriksvei 219",
+    postal_code: "1353",
+    city: "Bærums Verk",
+    latitude: 59.93853,
+    longitude: 10.52619,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Det største tunge industrianlegget i Bærum, med sprengning, støv og tungtrafikk tett på " +
+      "boligområder. Dette er den typen nabo folk faktisk spør om.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Registeret dokumenterer " +
+      "at anlegget har tillatelse, ikke hvor mye det faktisk slipper ut i dag.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Franzefoss Pukk",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse. Bransje 08.120 uttak av masse. Forurensningsmyndighet: Statsforvalteren. " +
+          "Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Eksplosivproduksjon",
+    item_type: "finding",
+    title: "Chemring Nobel, produksjon av høyenergimaterialer på Engene",
+    description:
+      "Anlegg for produksjon av høyenergimaterialer med utslippstillatelse fra Miljødirektoratet, " +
+      "på Engene ved Sætre i Asker. Miljødirektoratets register plasserer anlegget på samme adresse " +
+      "som selskapet er registrert på, noe verken plandata eller Enhetsregisteret alene kunne vise.",
+    municipality: "Asker",
+    address: "Engeneveien 7",
+    postal_code: "3475",
+    city: "Sætre",
+    latitude: 59.67896,
+    longitude: 10.54233,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Eksplosivproduksjon er blant de få virksomhetstypene som gir sikkerhetssoner og " +
+      "beredskapsplaner utenfor egen tomt. Anlegget er det tyngste i Asker og har lang historie på stedet.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Registeret dokumenterer " +
+      "at anlegget har tillatelse, ikke hvor mye det faktisk slipper ut i dag.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Chemring Nobel",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse. Bransje 20.590 produksjon av andre kjemiske produkter. Forurensningsmyndighet: Miljødirektoratet. " +
+          "Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Prosessindustri",
+    item_type: "finding",
+    title: "Tofte industriområde: Statkraft flisproduksjon og Silva Green Fuel",
+    description:
+      "Det gamle celluloseindustriområdet på Tofte, i dag med flisproduksjon og Silva Green Fuels " +
+      "demonstrasjonsanlegg for biodrivstoff. To tillatelser på samme industriområde.",
+    municipality: "Asker",
+    address: "Østre Strandvei 52",
+    postal_code: "3482",
+    city: "Tofte",
+    latitude: 59.54676,
+    longitude: 10.56656,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Det største industriområdet i søndre Asker, og stedet hvor et helt lokalsamfunn ble bygget " +
+      "rundt én bedrift. Ny virksomhet på tomta endrer forutsetningene for hele Tofte.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Registeret dokumenterer " +
+      "at anlegget har tillatelse, ikke hvor mye det faktisk slipper ut i dag.",
+    kilder: [
+      {
+        source_name:
+          "Norske utslipp: Tofte industriområde: Statkraft flisproduksjon og Silva Green Fuel",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse. Bransje 16.100 saging og impregnering samt demonstrasjonsanlegg for biodrivstoff. Forurensningsmyndighet: Miljødirektoratet og Statsforvalteren. " +
+          "Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Næringsmiddelindustri",
+    item_type: "finding",
+    title: "Fatland Oslo slakteri",
+    description: "Slakteri med utslippstillatelse på Furuset i Oslo.",
+    municipality: "Oslo",
+    address: "Professor Birkelands vei 3",
+    postal_code: "1081",
+    city: "Oslo",
+    latitude: 59.94152,
+    longitude: 10.88087,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Slakteri gir lukt og tungtrafikk, og ligger her i utkanten av et boligområde.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Registeret dokumenterer " +
+      "at anlegget har tillatelse, ikke hvor mye det faktisk slipper ut i dag.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Fatland Oslo slakteri",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse. Bransje 10.110 bearbeiding og konservering av kjøtt. Forurensningsmyndighet: Statsforvalteren. " +
+          "Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Kommunalteknisk anlegg",
+    item_type: "finding",
+    title: "NCC snøsmelteanlegg ved Grønlia",
+    description:
+      "Anlegg for smelting av brøytesnø i havneområdet, med egen utslippstillatelse fordi " +
+      "smeltevannet inneholder veistøv og salt.",
+    municipality: "Oslo",
+    address: "Akershusstranda",
+    postal_code: "0150",
+    city: "Oslo",
+    latitude: 59.90642,
+    longitude: 10.73494,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "low",
+    why_interesting:
+      "Et anlegg de fleste ikke vet finnes, midt i havnebassenget, med sesongdrift og tungtrafikk " +
+      "gjennom sentrum om vinteren.",
+    notes:
+      "Adressen er nærmeste adresse til anleggets registrerte punkt. Registeret dokumenterer " +
+      "at anlegget har tillatelse, ikke hvor mye det faktisk slipper ut i dag.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: NCC snøsmelteanlegg ved Grønlia",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse. Bransje 42.110 bygging av veier. Forurensningsmyndighet: Statsforvalteren. " +
+          "Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+    ],
+  },
+  {
+    category: "Støy / nabobelastning",
+    subcategory: "Skytebane",
+    item_type: "finding",
+    title: "Franskleiv skiskytteranlegg",
+    description:
+      "Skiskytteranlegg i Vestmarka i Bærum, registrert hos Miljødirektoratet som anlegg med " +
+      "tillatelse. Skiskyting innebærer skytebane, og anlegget er dermed en dokumentert " +
+      "sivil skytestøykilde — ikke et av Forsvarets felt.",
+    municipality: "Bærum",
+    address: "Vestmarkveien 241",
+    postal_code: "1341",
+    city: "Slependen",
+    latitude: 59.88628,
+    longitude: 10.42047,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Skytestøy bærer langt i skogsterreng og fanges ikke av de strategiske støykartene " +
+      "våre, som dekker vei og bane. For hytter og boliger i Vestmarka er dette en reell " +
+      "nabobelastning som ikke vises noe sted i dag.",
+    notes:
+      "Støynivå ved bolig er ikke undersøkt, og skal ikke antas. Funnet beskriver kilden, ikke " +
+      "belastningen.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Franskleiv skiskytteranlegg",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse. Bransje 93.120 aktiviteter i idrettslag. Forurensningsmyndighet: Statsforvalteren. " +
+          "Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+      {
+        source_name: "Forsvarsbygg, Forsvarets skyte- og øvingsfelt land (WFS)",
+        source_url:
+          "https://wfs.geonorge.no/skwms1/wfs.forsvarets_skyteogovingsfelt?service=WFS&request=GetCapabilities",
+        publisher: "Forsvarsbygg via Geonorge",
+        source_type: "map_service",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nasjonalt datasett over Forsvarets skyte- og øvingsfelt på land, 68 felt. Hentet i sin " +
+          "helhet og gjennomgått: ingen av feltene ligger i Oslo, Bærum eller Asker. Nærmeste er " +
+          "Rygge skyte- og øvingsfelt i Moss. «Ulven skyte- og øvingsfelt» i datasettet ligger på " +
+          "60.196, 5.426 i Vestland — ikke Ulven i Oslo.",
+      },
+    ],
+  },
+  {
+    category: "Støy / nabobelastning",
+    subcategory: "Idrettsanlegg",
+    item_type: "finding",
+    title: "Lillomarka arena",
+    description:
+      "Idretts- og aktivitetsanlegg ved Huken i nordøstre Oslo, registrert med tillatelse hos " +
+      "Statsforvalteren. Ligger på det gamle Huken pukkverk-området.",
+    municipality: "Oslo",
+    address: "Hukenveien 29C",
+    postal_code: "0963",
+    city: "Oslo",
+    latitude: 59.97279,
+    longitude: 10.87689,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Et stort anlegg på et tidligere pukkverk, i overgangen mellom boligområdet på " +
+      "Grorud og marka. Aktivitetstype og åpningstider avgjør hvor merkbart det er for naboene.",
+    notes:
+      "Hva anlegget faktisk brukes til, og hvorfor det har utslippstillatelse, er ikke undersøkt.",
+    kilder: [
+      {
+        source_name: "Norske utslipp: Lillomarka arena",
+        source_url: "https://www.norskeutslipp.no/",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Anlegg med utslippstillatelse. Bransje 81.109 tjenester tilknyttet eiendomsdrift. Forurensningsmyndighet: Statsforvalteren. " +
+          "Registeret dokumenterer at anlegget finnes og er regulert, ikke hvor store utslippene er i dag.",
+      },
+    ],
+  },
+  {
+    category: "Infrastruktur / større prosjekter",
+    subcategory: "Kraftnett",
+    item_type: "finding",
+    title: "Statnett Hamang–Bærum–Smestad, ny 420 kV kabelforbindelse",
+    description:
+      "Utskifting av hovedstrømnettet gjennom Bærum og Oslo vest: luftledningen fra 1952 " +
+      "erstattes av 7,7 km kabelgrøft og 3,3 km tunnel. Tunnelarbeidene pågår. Statnett har " +
+      "varslet at de vil søke om endringer i kabelløsningen og om utvidelse av Bærum " +
+      "transformatorstasjon.",
+    municipality: "Bærum",
+    city: "Sandvika",
+    latitude: 59.92675,
+    longitude: 10.55788,
+    verification_status: "verified_public_source",
+    operational_status: "under_construction",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Anleggsarbeid i mange år langs en 11 km lang trasé gjennom tett bebygde deler av " +
+      "Bærum og Oslo vest, og samtidig en sanering av en luftledning som i dag legger " +
+      "båndlegging på eiendommer. Begge deler endrer forutsetningene for boliger langs traseen.",
+    notes:
+      "Koordinaten er Bærum transformatorstasjon, omtrent midt på traseen, ikke hele anlegget. " +
+      "Traseen berører både Bærum og Oslo.",
+    kilder: [
+      {
+        source_name: "Statnett, prosjektside Hamang–Bærum–Smestad",
+        source_url:
+          "https://www.statnett.no/vare-prosjekter/region-ost/hamang-barum-smestad/",
+        publisher: "Statnett",
+        source_type: "web",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Ny 420 kV forbindelse som erstatter luftledningen fra 1952. Løsningen er 7,7 km " +
+          "kabelgrøft fra Hamang via Bærum transformatorstasjon til Hagabråten, og videre 3,3 km " +
+          "i tunnel til Smestad. Tunnelarbeidene var halvveis i 2025.",
+      },
+      {
+        source_name: "Anleggskonsesjon fra NVE, Hamang–Bærum–Smestad",
+        source_url:
+          "https://www.statnett.no/globalassets/her-er-vare-prosjekter/region-ost/nettplan-stor-oslo/hbs/anleggskonsesjon-nve.pdf",
+        publisher: "NVE",
+        source_type: "document",
+        primary_source: true,
+        excerpt_or_summary:
+          "Meddelt anleggskonsesjon til Statnett SF. Energidepartementet vedtok i 2024 at " +
+          "luftledningen skal erstattes av kabel i grøft og tunnel.",
+      },
+      {
+        source_name:
+          "NVE nettanlegg: transformatorstasjonene Hamang, Bærum og Smestad",
+        source_url: "https://www.nve.no/",
+        publisher: "NVE",
+        source_type: "map_service",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Alle tre stasjonene er registrert som Statnett-anlegg: Hamang 59.89685/10.49851, " +
+          "Bærum 59.92675/10.55788, Smestad 59.93494/10.66767. Traseen går mellom disse.",
+      },
+    ],
+  },
+];
