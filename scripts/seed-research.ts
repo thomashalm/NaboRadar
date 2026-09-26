@@ -46,6 +46,13 @@ async function main() {
         );
         if (påTittel.rows.length === 1) finnes = påTittel;
       }
+      if (finnes.rows.length === 0 && funn.tidligere_titler?.length) {
+        const påGammelTittel = await client.query<{ id: string }>(
+          `select id from admin_research_items where title = any($1)`,
+          [funn.tidligere_titler],
+        );
+        if (påGammelTittel.rows.length === 1) finnes = påGammelTittel;
+      }
 
       const id = finnes.rows[0]?.id ?? (await settInn(client, funn));
       if (finnes.rows[0]) await oppdater(client, id, funn);
@@ -141,7 +148,7 @@ async function oppdater(
     `update admin_research_items set
        item_type = $2, category = $3, subcategory = $4, description = $5,
        municipality = $6, postal_code = $7, city = $8, latitude = $9, longitude = $10,
-       address = $18,
+       address = $18, title = $19,
        geom = case when $9::double precision is not null
                 then extensions.st_setsrid(extensions.st_makepoint($10, $9), 4326) end,
        verification_status = $11, operational_status = $12, sensitivity = $13,
@@ -167,6 +174,7 @@ async function oppdater(
       funn.why_interesting ?? null,
       funn.notes ?? null,
       funn.address ?? null,
+      funn.title,
     ],
   );
 }

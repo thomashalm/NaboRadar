@@ -24,6 +24,13 @@ export interface Kilde {
 }
 
 export interface Funn {
+  /**
+   * Tidligere titler, når et funn har byttet navn.
+   *
+   * Gjenkjenningen går på tittel; uten dette ville en omdøping opprettet en ny rad ved siden av
+   * den gamle i stedet for å oppdatere den.
+   */
+  tidligere_titler?: string[];
   category: string;
   subcategory?: string;
   item_type: string;
@@ -1096,7 +1103,7 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
-    title: "STACK OSL01 datasenter, Ulven",
+    title: "OSL01 datasenter, Selma Ellefsens vei 1 på Ulven",
     description:
       "Eksisterende fysisk datasenter på Ulven i Oslo, tidligere DigiPlex Oslo. Operatøren er " +
       "registrert hos Nkom som kommersiell datasenteroperatør, og har beliggenhetsadresse og " +
@@ -1117,9 +1124,12 @@ export const FUNN: Funn[] = [
       "kjøleanlegg, nødstrømsaggregat, høy effektbruk og lite arbeidsplasser per kvadratmeter " +
       "— relevant både for naboer og for å forstå hva et næringsbygg i området faktisk er.",
     notes:
-      "Koordinaten er Kartverkets punkt for Selma Ellefsens vei 1. De øvrige SI OSL-selskapene i " +
+      "Aliaser og operatørhistorikk: DigiPlex Oslo Ulven → STACK OSL01 → Vaultica OSL01. PeeringDB " +
+      "fører anlegget på Ulvenveien 89B, DataCenterMap på Selma Ellefsens vei 1 — samme kvartal på " +
+      "Ulven. Koordinaten er Kartverkets punkt for Selma Ellefsens vei 1. De øvrige SI OSL-selskapene i " +
       "Nkom-registeret (02, 03.1, 03.2, 04) har adresser i Nordre Follo, Lillestrøm og Indre Østfold " +
       "og faller utenfor dette området.",
+    tidligere_titler: ["STACK OSL01 datasenter, Ulven"],
     kilder: [
       {
         source_name: "Nkom, registrerte kommersielle datasenteroperatører",
@@ -1162,30 +1172,33 @@ export const FUNN: Funn[] = [
   {
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
-    item_type: "lead",
-    title: "Blix Solutions — registrert datasenteroperatør på Lindeberg",
+    item_type: "finding",
+    title: "Blix BDC, Lindeberg næringsvei 26",
     description:
-      "Selskapet står i Nkoms register over kommersielle datasenteroperatører og har " +
-      "beliggenhetsadresse i et næringsområde på Lindeberg i Oslo. Kategori B: mulig fysisk " +
-      "datasenter, ikke bekreftet.",
+      "Bekreftet datasenter på Lindeberg: karriernøytralt anlegg bygget i 2021, med colocation-bur " +
+      "og varmegjenvinning. Kategori E: eksisterende fysisk anlegg. Operatøren står også i Nkoms " +
+      "register, og adressen er beliggenhetsadressen i Enhetsregisteret.",
     municipality: "Oslo",
     address: "Lindeberg næringsvei 26",
     postal_code: "1067",
     city: "Oslo",
     latitude: 59.93549,
     longitude: 10.88559,
-    verification_status: "partially_verified",
-    operational_status: "unknown",
+    verification_status: "verified_public_source",
+    operational_status: "active",
     sensitivity: "internal_only",
-    confidence: "low",
+    confidence: "high",
     interest_level: "medium",
     why_interesting:
       "Et datasenter i et næringsområde tett på bolig ville vært relevant for naboer. " +
       "Registreringsplikten viser at selskapet driver minst ett datasenter — spørsmålet er " +
       "bare hvor.",
     notes:
-      "Koordinaten er adressen fra Enhetsregisteret, ikke et bekreftet anlegg. Må bekreftes mot " +
-      "byggesak eller selskapets egne opplysninger før den behandles som en lokasjon.",
+      "Oppgradert i runde 4: bransjeoversikter bekrefter anlegget på adressen, og Blix har tre " +
+      "Oslo-sites — BDC på Lindeberg, CJH i sentrum og NR5 på Rommen.",
+    tidligere_titler: [
+      "Blix Solutions — registrert datasenteroperatør på Lindeberg",
+    ],
     kilder: [
       {
         source_name: "Nkom, registrerte kommersielle datasenteroperatører",
@@ -1326,10 +1339,10 @@ export const FUNN: Funn[] = [
     confidence: "high",
     interest_level: "low",
     notes:
-      "Metoderegel bekreftet i praksis: Nkom-registeret gir selskap og organisasjonsnummer, aldri " +
-      "lokasjon. Bulk sine fire selskaper deler én kontoradresse på Skøyen mens anleggene deres " +
-      "ligger andre steder i landet. Neste steg for å finne fysiske anlegg er byggesak og " +
-      "nettselskapenes tilknytningssaker, ikke flere registeroppslag.",
+      "Korrigert i runde 4: konklusjonen om kontoradressene står, men den ga feil inntrykk av at " +
+      "anleggene lå utenfor byen. Bulk driver OS-IX i Hans Møller Gasmanns vei 9, GlobalConnect har " +
+      "minst tre Oslo-sites, og Skygard, Telia og Atea har alle anlegg i byen. Kontoradressen sa " +
+      "ingenting — men det gjorde heller ikke fraværet av en anleggsadresse.",
     kilder: [
       {
         source_name: "Nkom, registrerte kommersielle datasenteroperatører",
@@ -2537,13 +2550,14 @@ export const FUNN: Funn[] = [
   {
     category: "Datasenter / industri / tekniske anlegg",
     item_type: "note",
-    title: "Ingen planlagte datasentre dokumentert i Oslo, Bærum eller Asker",
+    title: "Plan- og byggesak er ikke en farbar vei til datasentre",
     description:
-      "Etter tre runder — plandata (runde 1), Nkoms register og Enhetsregisteret (runde 2), og " +
-      "kommunale planressurser (runde 3) — er STACK OSL01 på Ulven fortsatt det eneste " +
-      "bekreftede fysiske datasenteret i de tre kommunene. Ingen planlagte anlegg er funnet.",
+      "Konklusjonen fra runde 3 var feil og er erstattet. Plandata og kommunale planinnsyn ga ingen " +
+      "datasentre, men runde 4 fant femten fysiske anlegg gjennom bransjekilder. Det plan- og " +
+      "byggesak *ikke* ga, er altså ikke det samme som at anleggene ikke finnes — de er bygget i " +
+      "eksisterende næringsbygg, som sjelden utløser en egen plansak.",
     municipality: null,
-    verification_status: "investigated_not_confirmed",
+    verification_status: "verified_public_source",
     operational_status: "unknown",
     sensitivity: "internal_only",
     confidence: "high",
@@ -2552,6 +2566,9 @@ export const FUNN: Funn[] = [
       "Veien videre er det nye arealformålet: planer varslet etter juli 2025 kan angi datasenter " +
       "eksplisitt, og da blir de søkbare i plandata. Nettselskapenes tilknytningssaker er den andre " +
       "inngangen — de er ikke undersøkt ennå.",
+    tidligere_titler: [
+      "Ingen planlagte datasentre dokumentert i Oslo, Bærum eller Asker",
+    ],
     kilder: [
       {
         source_name:
@@ -2741,6 +2758,806 @@ export const FUNN: Funn[] = [
         excerpt_or_summary:
           "Varsel om planoppstart 2025-11-23: «Storsand bolig- og golfområde Grønsand og Havnemyra OG Slottet - Storsand». Kunngjøringen dokumenterer at planarbeidet " +
           "er startet, ikke hva området til slutt blir.",
+      },
+    ],
+  },
+
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Alfabygget, Hans Møller Gasmanns vei 9 — OS-IX",
+    description:
+      "Et av Norges største datasenterbygg, på Økern/Alnabru. Tre operatører er oppført på samme " +
+      "adresse: Bulk Infrastructure driver Oslo Internet Exchange (OS-IX) her, Verizon har anlegget " +
+      "«Alfabygget», og GlobalConnect har site HMG9. Ett fysisk bygg, tre oppføringer.",
+    municipality: "Oslo",
+    address: "Hans Møller Gasmanns vei 9",
+    postal_code: "0598",
+    city: "Oslo",
+    latitude: 59.93843,
+    longitude: 10.83497,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et av landets best tilknyttede bygg, med den strømbruken og de kjøleanleggene et stort " +
+      "datasenter innebærer, midt i et næringsområde som grenser til bolig. Bulks kontoradresse på " +
+      "Skøyen sa ingenting om dette.",
+    notes:
+      "Aliaser: Alfabygget, OS-IX, Oslo Internet Exchange, HMG9. Bulk Infrastructure har " +
+      "forretningsadresse Karenslyst allé 53 på Skøyen — det er kontoret, ikke anlegget.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Oslo Internet Exchange - OS-IX",
+        source_url: "https://www.datacentermap.com/norway/oslo/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppført som Oslo Internet Exchange - OS-IX, operatør Bulk Infrastructure, adresse Hans Møller Gasmanns vei 9. " +
+          "Beskrevet som et av Norges best tilknyttede bygg med colocation og datasentertjenester.",
+      },
+      {
+        source_name: "DataCenterMap: Alfabygget",
+        source_url: "https://www.datacentermap.com/norway/oslo/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppført som Alfabygget, operatør Verizon Communications, adresse Hans Møller Gasmansvei 9. " +
+          "Beskrevet som «one of Norways largest data centers».",
+      },
+      {
+        source_name:
+          "PeeringDB: Bulk Oslo Internet Exchange OS-IX, GlobalConnect HMG9 og Verizon HMG9",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Registrert fasilitet med adresse Hans Møller Gasmanns vei 9, organisasjon tre ulike organisasjoner på samme adresse. PeeringDB er " +
+          "bransjens eget register over samtrafikkpunkter, og oppgir faktisk gateadresse.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "GlobalConnect HMG1, Hans Møller Gasmanns vei 1",
+    description:
+      "Datasenter-site oppført av GlobalConnect i samme gate som Alfabygget, men i et annet bygg.",
+    municipality: "Oslo",
+    address: "Hans Møller Gasmanns vei 1",
+    postal_code: "0598",
+    city: "Oslo",
+    latitude: 59.93658,
+    longitude: 10.83247,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Området rundt Hans Møller Gasmanns vei framstår som en datasenterklynge med flere bygg og " +
+      "operatører — det er nyttig å vite når man ser på næringsbygg i Hovinbyen.",
+    notes:
+      "Kun én kilde. Bør bekreftes mot GlobalConnects egne sider eller byggesak.",
+    kilder: [
+      {
+        source_name: "PeeringDB: GlobalConnect Oslo (HMG1)",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Registrert fasilitet med adresse Hans Møller Gasmanns vei 1, organisasjon GlobalConnect Group. PeeringDB er " +
+          "bransjens eget register over samtrafikkpunkter, og oppgir faktisk gateadresse.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Nedre Rommen 5 — Blix NR5 og Magnora AI-datasenter",
+    description:
+      "Næringsbygg på Rommen med to datasenteroppføringer: Blix Solutions' site NR5, og Magnora " +
+      "Oslo — et AI-datasenter utviklet av Magnora Data Center og Blix Group i et tidligere " +
+      "finansanlegg, med 1 MW innledende effekt skalerbart til 9 MW.",
+    municipality: "Oslo",
+    address: "Nedre Rommen 5",
+    postal_code: "0988",
+    city: "Oslo",
+    latitude: 59.96245,
+    longitude: 10.90631,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et AI-datasenter som skal skaleres til 9 MW i et bolignært næringsbygg er en vesentlig " +
+      "endring i effektbruk og kjølebehov, og den typen anlegg som nå får eget arealformål i plan.",
+    notes:
+      "Aliaser: Blix NR5, Magnora Oslo. Bygget er 6 050 m² fra 1988, eid av Bruun Eiendom. " +
+      "Effekttallene kommer fra bransjeomtale, ikke fra en myndighetskilde.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Magnora Oslo",
+        source_url: "https://www.datacentermap.com/norway/oslo/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppført som Magnora Oslo, operatør Magnora ASA, adresse Nedre Rommen 5. " +
+          "AI-datasenter utviklet av Magnora Data Center og Blix Group i et tidligere finansanlegg, " +
+          "1 MW innledende kapasitet skalerbart til 9 MW.",
+      },
+      {
+        source_name: "DataCenterMap: Blix NR5 Oslo",
+        source_url: "https://www.datacentermap.com/norway/oslo/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppført som Blix NR5 Oslo, operatør Blix Solutions AS, adresse Nedre Rommen 5. " +
+          "Urbant datasenter.",
+      },
+      {
+        source_name: "PeeringDB: Blix NR5 Oslo",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Registrert fasilitet med adresse Nedre Rommen 5, organisasjon Blix Solutions AS. PeeringDB er " +
+          "bransjens eget register over samtrafikkpunkter, og oppgir faktisk gateadresse.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Skygard OSL1, Østre Aker vei 24C",
+    description:
+      "Datasenterprosjekt i Hovinbyen, beskrevet av operatøren som et anlegg som skal sette ny " +
+      "standard for bærekraft og sikkerhet. Om det er i drift, under bygging eller planlagt går " +
+      "ikke klart fram av kilden.",
+    municipality: "Oslo",
+    address: "Østre Aker vei 24C",
+    postal_code: "0581",
+    city: "Oslo",
+    latitude: 59.92941,
+    longitude: 10.8181,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Et nytt datasenter midt i Hovinbyen, Oslos største transformasjonsområde, der det ellers " +
+      "planlegges tett bolig. Effektbehov og kjøling er relevant for hele nabolaget.",
+    notes:
+      "Driftsstatus er ikke bekreftet. Skygard er registrert hos Nkom som kommersiell " +
+      "datasenteroperatør, med kontoradresse Karenslyst allé 10.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Skygard OSL1",
+        source_url: "https://www.datacentermap.com/norway/oslo/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppført som Skygard OSL1, operatør Skygard, adresse Østre Aker vei 24C. " +
+          "«Visionary project located in Hovinbyen, Oslo.»",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Skygard OSL3, Stanseveien 30",
+    description:
+      "Datasenter på Grorud, oppført både som Skygard OSL3 og — i PeeringDB — som Basefarm OSL3 " +
+      "med stedsangivelse Grorud. Basefarm er forgjengeren til Skygard, så dette er sannsynligvis " +
+      "samme anlegg under to navn.",
+    municipality: "Oslo",
+    address: "Stanseveien 30",
+    postal_code: "0976",
+    city: "Oslo",
+    latitude: 59.94951,
+    longitude: 10.88071,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Et etablert datasenter i et næringsområde på Grorud, tett på bolig.",
+    notes:
+      "Aliaser: Basefarm OSL3, Orange OSL5. Sammenkoblingen av Skygard og Basefarm bygger på at " +
+      "adressene sammenfaller og at Basefarm er tidligere navn — ikke på en kilde som sier det direkte.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Skygard OSL3",
+        source_url: "https://www.datacentermap.com/norway/oslo/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppført som Skygard OSL3, operatør Skygard, adresse Stanseveien 30. " +
+          "Oppført med referanse til «Orange OSL5».",
+      },
+      {
+        source_name: "PeeringDB: Basefarm OSL3",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Registrert fasilitet med adresse Grorud, 0976 Oslo, organisasjon Basefarm AS. PeeringDB er " +
+          "bransjens eget register over samtrafikkpunkter, og oppgir faktisk gateadresse.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Østre Aker vei 18 — Telia og Arelion samtrafikkpunkt",
+    description:
+      "Colocation- og samtrafikkanlegg med to operatøroppføringer på samme adresse: Telia (OKR/C) " +
+      "og Arelion (Oslo OKR/C). Samme facility-kode peker mot ett fysisk anlegg.",
+    municipality: "Oslo",
+    address: "Østre Aker vei 18",
+    postal_code: "0581",
+    city: "Oslo",
+    latitude: 59.92822,
+    longitude: 10.81206,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Et knutepunkt i Ulven/Økern-klyngen. Sammen med Alfabygget og OSL01 viser det at Hovinbyen " +
+      "er Oslos tyngste område for digital infrastruktur.",
+    notes: "Aliaser: OKR/C, TeliaSonera OKR/C.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: TeliaSonera OKR/C",
+        source_url: "https://www.datacentermap.com/norway/oslo/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppført som TeliaSonera OKR/C, operatør Telia Company, adresse Östre Akers vej 18A. " +
+          "Colocation for kunder.",
+      },
+      {
+        source_name: "PeeringDB: Arelion Oslo OKR/C",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Registrert fasilitet med adresse Østre Aker Vei 18, organisasjon Arelion. PeeringDB er " +
+          "bransjens eget register over samtrafikkpunkter, og oppgir faktisk gateadresse.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "GlobalConnect Nydalen, Sandakerveien 121",
+    description:
+      "Datasenter i Nydalen, nybygget og i drift fra 2014, med 500 m² gulvflate. V-Hosting er " +
+      "oppført på samme adresse — sannsynligvis en operatør i samme bygg.",
+    municipality: "Oslo",
+    address: "Sandakerveien 121",
+    postal_code: "0484",
+    city: "Oslo",
+    latitude: 59.94931,
+    longitude: 10.7701,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Et datasenter midt i Nydalen, et område som ellers er kontor, bolig og høyskole.",
+    notes: "Aliaser: V-Hosting Data Center, Availo.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: GlobalConnect Nydalen",
+        source_url: "https://www.datacentermap.com/norway/oslo/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppført som GlobalConnect Nydalen, operatør GlobalConnect, adresse Sandakerveien 121. " +
+          "Nybygg klart for drift i 2014, 500 m² gulvflate.",
+      },
+      {
+        source_name: "PeeringDB: GlobalConnect Nydalen og V-Hosting",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Registrert fasilitet med adresse Sandakerveien 121, organisasjon GlobalConnect Group og V-Hosting AS. PeeringDB er " +
+          "bransjens eget register over samtrafikkpunkter, og oppgir faktisk gateadresse.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Blix CJH, C. J. Hambros plass 2",
+    description:
+      "Nettverksanlegg midt i Oslo sentrum, oppført av Blix Solutions som DR- og backupsite og " +
+      "som nettverks-PoP. Serverhotell henvises til Blix' anlegg på Lindeberg.",
+    municipality: "Oslo",
+    address: "C. J. Hambros plass 2",
+    postal_code: "0164",
+    city: "Oslo",
+    latitude: 59.916,
+    longitude: 10.74109,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Et nettverksknutepunkt i et sentrumskvartal, i et bygg folk flest oppfatter som kontor.",
+    notes: "Beskrevet som nettverksanlegg, ikke et fullt datasenter.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Blix CJH Oslo",
+        source_url: "https://www.datacentermap.com/norway/oslo/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppført som Blix CJH Oslo, operatør Blix Solutions AS, adresse C. J. Hambros Plass 2. " +
+          "Nettverksanlegg i Oslo sentrum, DR- og backupsite.",
+      },
+      {
+        source_name: "PeeringDB: Blix CJH Oslo",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Registrert fasilitet med adresse C.J. Hambros plass 2, organisasjon Blix Solutions AS. PeeringDB er " +
+          "bransjens eget register over samtrafikkpunkter, og oppgir faktisk gateadresse.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Forskningsparken, Gaustadalléen 21",
+    description:
+      "Mindre datasenter i Forskningsparken på Gaustad, direkte tilknyttet NIX. Fire oppføringer " +
+      "på adressen — Nordlo, AVUR, SSC Networks og en uspesifisert — peker mot ett bygg med flere " +
+      "operatører.",
+    municipality: "Oslo",
+    address: "Gaustadalléen 21",
+    postal_code: "0349",
+    city: "Oslo",
+    latitude: 59.94229,
+    longitude: 10.71674,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Forskningsparken er et av de eldste samtrafikkpunktene i Norge, og ligger midt i et " +
+      "universitets- og boligområde.",
+    notes:
+      "Aliaser: AVUR Oslo, Nordlo Forskningsparken, SSC Networks. AVUR er registrert hos Nkom.",
+    kilder: [
+      {
+        source_name:
+          "DataCenterMap: Forskningsparken / AVUR OSLO / Forskningsparken Oslo",
+        source_url: "https://www.datacentermap.com/norway/oslo/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppført som Forskningsparken / AVUR OSLO / Forskningsparken Oslo, operatør Nordlo, AVUR, uspesifisert, adresse Gaustadalléen 21. " +
+          "«Small datacenter with wide interconnection possibilites, directly connected to NIX.»",
+      },
+      {
+        source_name: "PeeringDB: Forskningsparken Oslo",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Registrert fasilitet med adresse Gaustadalléen 21, organisasjon SSC Networks. PeeringDB er " +
+          "bransjens eget register over samtrafikkpunkter, og oppgir faktisk gateadresse.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Fujitsu Oslo, Østensjøveien 32",
+    description: "Datasenteranlegg oppført av Fujitsu Norway på Bryn.",
+    municipality: "Oslo",
+    address: "Østensjøveien 32",
+    postal_code: "0667",
+    city: "Oslo",
+    latitude: 59.91135,
+    longitude: 10.81132,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "low",
+    why_interesting:
+      "Et datasenter i et kontorområde på Bryn som er under transformasjon til bolig.",
+    notes: "Kun én kilde.",
+    kilder: [
+      {
+        source_name: "PeeringDB: Fujitsu Oslo",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Registrert fasilitet med adresse Østensjøveien 32, organisasjon Fujitsu Norway AS. PeeringDB er " +
+          "bransjens eget register over samtrafikkpunkter, og oppgir faktisk gateadresse.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Rent a Rack, Ulvenveien 87",
+    description:
+      "Colocation-anlegg drevet av Webhuset, på Ulven — samme kvartal som OSL01.",
+    municipality: "Oslo",
+    address: "Ulvenveien 87",
+    postal_code: "0581",
+    city: "Oslo",
+    latitude: 59.92474,
+    longitude: 10.81292,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "low",
+    why_interesting:
+      "Enda et anlegg i Ulven-klyngen; samlet gjør de området til Oslos tetteste ansamling av " +
+      "datasentre.",
+    notes: "Kun én kilde.",
+    kilder: [
+      {
+        source_name: "PeeringDB: Rent a Rack",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Registrert fasilitet med adresse Ulvenveien 87, organisasjon Webhuset AS. PeeringDB er " +
+          "bransjens eget register over samtrafikkpunkter, og oppgir faktisk gateadresse.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Vault OSL1, Økernveien 121",
+    description:
+      "Datasenter oppført av Vault AS i Økernveien 121. Kun én bransjekilde; ikke bekreftet " +
+      "mot operatør eller myndighet.",
+    municipality: "Oslo",
+    address: "Økernveien 121",
+    postal_code: "0579",
+    city: "Oslo",
+    latitude: 59.92657,
+    longitude: 10.80009,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "medium",
+    why_interesting:
+      "Nok et anlegg i Økern-klyngen, i et område med tung boligutbygging.",
+    notes: "Svakt dokumentert. Bør bekreftes før det behandles som et faktum.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: OSL1",
+        source_url: "https://www.datacentermap.com/norway/oslo/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppført som OSL1, operatør Vault AS, adresse Økernveien 121. " +
+          "Oppført i oversikten over datasentre i Oslo.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Ullevål Stadion datasenter, Sognsveien 75",
+    description:
+      "Fasilitet oppført i PeeringDB på Ullevål Stadion, med DNB Næringseiendom som organisasjon.",
+    municipality: "Oslo",
+    address: "Sognsveien 75",
+    postal_code: "0855",
+    city: "Oslo",
+    latitude: 59.94856,
+    longitude: 10.73282,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "low",
+    why_interesting:
+      "Et samtrafikkpunkt i et idretts- og kontoranlegg midt i byen.",
+    notes:
+      "Kun én kilde, og organisasjonen er en eiendomsbesitter — det kan være et teknisk rom i " +
+      "bygget snarere enn et datasenter.",
+    kilder: [
+      {
+        source_name: "PeeringDB: Ullevål Stadion",
+        source_url: "https://www.peeringdb.com/api/fac?country=NO",
+        publisher: "PeeringDB",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Registrert fasilitet med adresse Sognsveien 75, organisasjon DNB Næringseiendom AS. PeeringDB er " +
+          "bransjens eget register over samtrafikkpunkter, og oppgir faktisk gateadresse.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Astrofarm Oslo, Nye Vakås vei 8 i Hvalstad",
+    description:
+      "Datasenteranlegg oppført av Astrofarm AS i næringsområdet på Hvalstad. Det eneste anlegget " +
+      "i de tre kommunene utenfor Oslo som dukker opp i bransjeoversiktene.",
+    municipality: "Asker",
+    address: "Nye Vakås vei 8",
+    postal_code: "1395",
+    city: "Hvalstad",
+    latitude: 59.85647,
+    longitude: 10.47605,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Det første dokumenterte datasenteret i Asker. Ligger i et næringsområde tett på bolig og " +
+      "på E18-korridoren, og er verdt å følge med på om det utvides.",
+    notes:
+      "Kun én bransjekilde. Bør bekreftes mot operatøren, Nkom-registeret eller byggesak.",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Astrofarm Oslo",
+        source_url: "https://www.datacentermap.com/norway/oslo/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppført som Astrofarm Oslo, operatør Astrofarm AS, adresse Nye Vakas v. 8, 1395 Hvalstad. " +
+          "Oppført i oversikten over datasentre i Oslo-regionen.",
+      },
+      {
+        source_name: "Kartverket adresse-API",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    item_type: "note",
+    title: "Datasentre i Oslo-regionen utenfor Oslo, Bærum og Asker",
+    description:
+      "Seks anlegg og campuser i Oslo-regionen som bruker OSL-koder, men ligger utenfor våre " +
+      "tre kommuner. Lagret for å forstå navnekonvensjonen: «OSL» i et facility-navn betyr " +
+      "Oslo-markedet, ikke Oslo kommune. Det var en av grunnene til at registerbasert søk " +
+      "bommet i runde 2.",
+    municipality: null,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "low",
+    kilder: [
+      {
+        source_name: "DataCenterMap: Oversikt over datasentre i Oslo-regionen",
+        source_url: "https://www.datacentermap.com/norway/oslo/",
+        publisher: "DataCenterMap",
+        source_type: "web",
+        source_date: "2026-09-26",
+        excerpt_or_summary:
+          "Oppført som Oversikt over datasentre i Oslo-regionen, operatør flere, adresse ulike. " +
+          "OSL02 Vaultica, Rosenholmveien 25 i Trollåsen (Nordre Follo). STACK OSL03-campus, Heiaveien 9 " +
+          "i Fetsund (Lillestrøm), 22 MW over fire bygg. STACK OSL04-campus, Holtskogen i Tomter (Indre " +
+          "Østfold), 18 MW over tre bygg. Skygard OSL5, Rasta i Lørenskog. Green Mountain OSL1-Enebakk, " +
+          "Granittveien 100, med oppgitt kapasitet opp mot 93 MW. Polarise AI Hub ONE i Oslo Airport " +
+          "City på Jessheim.",
+      },
+    ],
+  },
+  {
+    category: "Kilder",
+    item_type: "data_issue",
+    title: "Registerbasert metode fant 1 av 15 datasentre",
+    description:
+      "Metodefunn. To runder med utgangspunkt i offentlige registre fant ett datasenter i " +
+      "Oslo, Bærum og Asker. Én runde med bred bransjediscovery fant femten. Registrene " +
+      "dokumenterer hvem som driver datasenter, aldri hvor — og da blir fravær i registeret " +
+      "tolket som fravær i virkeligheten.",
+    municipality: null,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    notes:
+      "Regel for senere runder: discovery først, verifisering etterpå. Bransjekilder som " +
+      "PeeringDB og DataCenterMap er gode nok til å gi kandidater og adresser, men ikke alene til " +
+      "høy confidence — de skal følges opp mot operatør, Nkom, byggesak eller nettselskap.",
+    kilder: [
+      {
+        source_name: "Egen metodegjennomgang etter runde 4",
+        publisher: "NaboRadar",
+        source_type: "correspondence",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Runde 2 og 3 startet i autoritative registre — Nkom og Enhetsregisteret — og " +
+          "konkluderte med ett bekreftet datasenter i de tre kommunene. Bred web-discovery via " +
+          "PeeringDB og DataCenterMap ga umiddelbart 34 oppføringer i Oslo alene, og 14 " +
+          "deduplikerte fysiske anlegg i Oslo pluss ett i Asker. Feilen var å behandle fravær i " +
+          "et register som fravær i virkeligheten: Nkom oppgir aldri lokasjon, og ingen " +
+          "myndighetskilde gjør det.",
       },
     ],
   },

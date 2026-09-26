@@ -1760,6 +1760,26 @@ som faktisk fikk konsekvenser:
 - **Ingen masseimport av omsorgsadresser.** Enhetsregisteret ble vurdert og forkastet som inngang;
   næringskode viser kontoradresser, ikke tjenester.
 
+### Fjerde research-runde: discovery først
+
+**Metodefeil rettet.** Runde 2 og 3 startet i autoritative registre og konkluderte med ett
+datasenter i de tre kommunene. Bred bransjediscovery fant femten. Feilen var å lese fravær i et
+register som fravær i virkeligheten — Nkom og Enhetsregisteret dokumenterer *hvem* som driver
+datasenter, aldri *hvor*, og ingen myndighetskilde gjør det.
+
+Regelen er nå **discovery først, verifisering etterpå**:
+
+1. Bred kandidatliste fra bransjekilder — PeeringDB har et åpent API med gateadresser, og
+   DataCenterMap lister anlegg per by
+2. Verifiser hver kandidat mot operatør, Nkom, byggesak eller nettselskap
+3. Dedupliser på **adresse**, ikke navn: tre operatører delte Hans Møller Gasmanns vei 9, og to
+   delte Nedre Rommen 5
+4. Lagre aliaser og operatørhistorikk på funnet — DigiPlex → STACK → Vaultica er samme bygg
+
+Bransjekilder er gode nok til å gi kandidater og adresser, men ikke alene til høy confidence.
+Merk også at «OSL» i et facility-navn betyr Oslo-*markedet*, ikke Oslo kommune: OSL02 ligger i
+Nordre Follo, OSL03 i Lillestrøm og OSL04 i Indre Østfold.
+
 ### Tredje research-runde
 
 61 funn og 100 kilder totalt. Runden la til 18 funn og oppdaterte 4, og gikk målrettet etter
