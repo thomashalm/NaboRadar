@@ -1679,11 +1679,31 @@ Planlagt produksjonsanlegg for eksplosiver
 PLANLAGT · MEDIUM SIKKERHET · INTERESSE HØY · 3 KILDER · INTERN
 ```
 
+Hele kortet er trykkflaten. Knappen dekker kortet i stedet for å pakke innholdet, fordi kortet
+inneholder en lenke — en lenke inne i en knapp er ugyldig. Det gir to tydelige tabstopp: velg
+punktet, og åpne funnet. Adressen ligger over trykkflaten, så den kan markeres og kopieres.
+
 Funn med koordinat tegnes på **samme** kart som de offentlige objektene, gjennom
-`internalFeatures` og `lib/map/layers/internal-findings.ts`: hul grå ring med en liten kjerne.
-Alle offentlige kategorier bruker fylte, fargede punkter, så formen alene skiller dem. Valget går
-gjennom `MapSelectionProvider`, så et trykk i research-listen uthever markøren, panorerer og åpner
-popupen akkurat som et trykk i en offentlig liste.
+`internalFeatures` og `lib/map/layers/internal-findings.ts`. Markøren er en annen *form*, ikke
+bare en annen farge: en grå ring med kjerne, mens alle offentlige kilder er fylte punkter. Valgt
+funn får en glorie, tykkere strek og større kjerne, så ett internt funn skiller seg fra de andre
+interne — ikke bare fra de offentlige.
+
+| | Uvalgt | Valgt |
+|---|---|---|
+| Glorie | — | r 19, `#0f172a` 16 % |
+| Ring | r 8, strek 2,5 `#334155` | r 12, strek 4 `#0f172a` |
+| Kjerne | r 2,5 | r 4 |
+
+Valget går gjennom `MapSelectionProvider`. Popupen viser tittel, adresse, kategori, avstand fra
+søkepunktet, verifisering, driftsstatus, sikkerhet, INTERN og lenken «Åpne funnet» — teksten
+formuleres i `lib/admin/research-map.ts`, på serveren, ikke i kartet.
+
+Et valgt punkt sentreres på zoom 16 (`minZoom` i `MapPopupContent`) hvis kartet står lenger ute,
+og kartet flytter seg ikke i det hele tatt hvis punktet allerede er synlig på et høyt nok nivå. På
+mobil, der kartet ligger over listen, hentes kartet fram når du velger fra listen. Funn uten
+koordinat kommer aldri fra `research_near`, og kortet deres er ikke klikkbart — det står «uten
+kartpunkt» i stedet.
 
 ### Første research-runde
 

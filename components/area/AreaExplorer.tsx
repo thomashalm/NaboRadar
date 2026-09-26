@@ -121,6 +121,15 @@ const NO_INTERNAL: readonly InternalMapFeature[] = [];
 const MIN_PROPERTY_ZOOM = 14;
 
 /**
+ * Zoomnivået et valgt internt punkt sentreres på når kartet står lenger ute.
+ *
+ * Research-funn er punkter, ikke flater, og velges nettopp for å se hvor de ligger. 16 er nivået
+ * der enkelttomter og gatenavn er lesbare. Ligger punktet allerede i utsnittet på dette nivået
+ * eller nærmere, flytter kartet seg ikke.
+ */
+const INTERNAL_FOCUS_ZOOM = 16;
+
+/**
  * Resultatsiden: kart og feed deler valgt sak. Radius/sortering/sted endres via URL i en
  * transition — kartet beholdes, og feeden viser lastetilstand til nye data er klare.
  */
@@ -167,6 +176,7 @@ export function AreaExplorer({
   const [eventsExpanded, setEventsExpanded] = useState<boolean | null>(null);
   const propertyRequest = useRef<AbortController | null>(null);
   const propertyRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef(new Map<string, HTMLElement>());
 
   const events = result?.status === "ok" ? result.events : NO_EVENTS;
@@ -265,7 +275,15 @@ export function AreaExplorer({
     (id: string): MapPopupContent | null => {
       const intern = internalFeatures.find((f) => f.id === id);
       if (intern) {
-        return { lngLat: intern.center, title: intern.title, lines: ["Intern research", ...intern.lines] };
+        return {
+          lngLat: intern.center,
+          title: intern.title,
+          lines: intern.lines,
+          href: intern.href,
+          linkLabel: intern.linkLabel,
+          // Et punkt uten flate må zoomes inn på for å si noe om hvor det er.
+          minZoom: INTERNAL_FOCUS_ZOOM,
+        };
       }
       const place = mapFeatures.find((f) => f.id === id);
       if (place) {
@@ -309,6 +327,18 @@ export function AreaExplorer({
     cardRefs.current.get(selectedId)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [selection, selectedId]);
 
+  /**
+   * Valg fra listen på mobil: hent kartet fram.
+   *
+   * På mobil ligger kartet over listen, og et trykk i en rad ville ellers uthevet en markør
+   * brukeren ikke kan se. På desktop ligger kartet ved siden av og er alltid synlig.
+   */
+  useEffect(() => {
+    if (selection?.from !== "list" || !selectedId) return;
+    if (window.matchMedia("(min-width: 1024px)").matches) return;
+    mapRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [selection, selectedId]);
+
   return (
     <main className="lg:grid lg:grid-cols-[minmax(24rem,30rem)_1fr] lg:grid-rows-[auto_1fr]">
       <section className="px-5 pt-7 pb-6 sm:px-8 lg:col-start-1 lg:row-start-1 lg:px-10 lg:pt-12">
@@ -328,7 +358,7 @@ export function AreaExplorer({
         {skolekrets}
       </section>
 
-      <div className="relative mx-5 h-[48vh] min-h-72 overflow-hidden rounded-2xl border border-line sm:mx-8 lg:sticky lg:top-16 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:m-0 lg:h-[calc(100dvh-4rem)] lg:rounded-none lg:border-0 lg:border-l">
+      <div ref={mapRef} className="relative mx-5 h-[48vh] min-h-72 overflow-hidden rounded-2xl border border-line sm:mx-8 lg:sticky lg:top-16 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:m-0 lg:h-[calc(100dvh-4rem)] lg:rounded-none lg:border-0 lg:border-l">
         <AreaMap
           tiles={tiles}
           title={`Kart over området innen ${formatRadius(radius)} fra ${label}${events.length ? `, ${events.length} planområder` : ""}${sites.length ? `, ${sites.length} registrerte lokaliteter med forurenset grunn` : ""}${places.length ? `, ${places.length} steder i nærområdet` : ""}`}

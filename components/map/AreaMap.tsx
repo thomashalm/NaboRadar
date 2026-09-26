@@ -27,6 +27,14 @@ export interface MapPopupContent {
   lines: string[];
   href?: string;
   linkLabel?: string;
+  /**
+   * Minste zoomnivå objektet skal vises på når det velges.
+   *
+   * Et punkt uten flate er lett å miste på et utzoomet kart, og et research-funn velges nettopp
+   * for å se *hvor* det er. Ligger objektet allerede i utsnittet på et høyt nok nivå, gjør
+   * kartet ingenting — vi flytter ikke utsnittet under brukeren uten grunn.
+   */
+  minZoom?: number;
 }
 
 interface AreaMapProps {
@@ -272,7 +280,17 @@ export function AreaMap(props: AreaMapProps) {
     const content = latestProps.current.popupFor?.(selectedId);
     if (!content) return;
     popup.setLngLat(content.lngLat).setDOMContent(popupElement(content, latestProps.current.onNavigate)).addTo(map);
-    if (!map.getBounds().contains(content.lngLat)) map.easeTo({ center: content.lngLat, duration: 400 });
+
+    const utenforUtsnittet = !map.getBounds().contains(content.lngLat);
+    const forLangtUte = content.minZoom !== undefined && map.getZoom() < content.minZoom;
+    if (utenforUtsnittet || forLangtUte) {
+      map.easeTo({
+        center: content.lngLat,
+        // Zoomer aldri ut: et objekt som velges skal ikke gjøre kartet mindre detaljert.
+        zoom: forLangtUte ? content.minZoom : map.getZoom(),
+        duration: 400,
+      });
+    }
   }, [selectedId, loaded]);
 
   // MapLibre gir canvaset role="region"; hold beskrivelsen oppdatert for skjermlesere.

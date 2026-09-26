@@ -4,24 +4,32 @@ import type { MapLayer } from "./types";
 /**
  * Interne research-funn i kartet.
  *
- * Bevisst en annen markørform enn alt annet: hul ring med en liten kjerne, i grått. Alle
- * offentlige kilder bruker fylte, fargede punkter, så en hul grå ring leses umiddelbart som
- * «ikke en av de publiserte». Den skal være synlig for den som ser etter den, og ellers holde
- * seg i bakgrunnen — et internt arbeidsnotat, ikke et funn vi står for overfor brukerne.
+ * Bevisst en annen *form* enn alt annet, ikke bare en annen farge: en ring med en kjerne, i
+ * grått. Alle offentlige kilder bruker fylte, fargede punkter, så en grå smultring leses
+ * umiddelbart som «ikke en av de publiserte» — også for den som ikke skiller fargene.
  *
- * Laget er montert kun i admin-visningen. Den offentlige /omrade sender aldri data hit.
+ * Valgt funn får en glorie under ringen, tykkere strek og større kjerne. Glorien er et eget lag
+ * som bare tegnes for det valgte punktet, slik at ett funn skiller seg fra de andre interne, ikke
+ * bare fra de offentlige.
+ *
+ * Laget monteres bare i admin-visningen. Den offentlige /omrade sender aldri data hit.
  */
 
 export interface InternalMapFeature {
   id: string;
   title: string;
   center: [number, number];
-  /** Ferdig formulerte linjer til popupen. */
+  /** Ferdig formulerte linjer til popupen. Kartet setter aldri sammen tekst selv. */
   lines: string[];
+  /** Lenke i popupen, f.eks. til funnet i research-oversikten. */
+  href?: string;
+  linkLabel?: string;
 }
 
 /** Dempet skifergrå. Ingen av de offentlige kategoriene bruker den. */
-export const INTERNAL_COLOR = "#64748b";
+export const INTERNAL_COLOR = "#334155";
+/** Valgt funn: nesten svart, så det skiller seg fra de andre interne ringene. */
+export const INTERNAL_SELECTED_COLOR = "#0f172a";
 
 const SOURCE = "internal-findings";
 
@@ -34,24 +42,39 @@ export const internalFindingsLayer: MapLayer<readonly InternalMapFeature[]> = {
   mount(map, data) {
     map.addSource(SOURCE, { type: "geojson", data: collection(data), promoteId: "featureId" });
     const selected: ExpressionSpecification = ["boolean", ["feature-state", "selected"], false];
+
+    // Glorie, kun for det valgte funnet. Radius 0 skjuler den for de andre.
+    map.addLayer({
+      id: "internal-findings-halo",
+      type: "circle",
+      source: SOURCE,
+      paint: {
+        "circle-radius": ["case", selected, 19, 0],
+        "circle-color": INTERNAL_SELECTED_COLOR,
+        "circle-opacity": 0.16,
+      },
+    });
     map.addLayer({
       id: "internal-findings-ring",
       type: "circle",
       source: SOURCE,
       paint: {
-        "circle-radius": ["case", selected, 10, 7.5],
-        // Hul: bakgrunnen skinner gjennom, bare ringen tegnes.
+        "circle-radius": ["case", selected, 12, 8],
+        // Lys kjerneflate slik at ringen leses mot både flyfoto og topografisk bakgrunn.
         "circle-color": "#ffffff",
-        "circle-opacity": 0.25,
-        "circle-stroke-color": INTERNAL_COLOR,
-        "circle-stroke-width": ["case", selected, 3, 2],
+        "circle-opacity": 0.6,
+        "circle-stroke-color": ["case", selected, INTERNAL_SELECTED_COLOR, INTERNAL_COLOR],
+        "circle-stroke-width": ["case", selected, 4, 2.5],
       },
     });
     map.addLayer({
       id: "internal-findings-core",
       type: "circle",
       source: SOURCE,
-      paint: { "circle-radius": 2, "circle-color": INTERNAL_COLOR, "circle-opacity": 0.9 },
+      paint: {
+        "circle-radius": ["case", selected, 4, 2.5],
+        "circle-color": ["case", selected, INTERNAL_SELECTED_COLOR, INTERNAL_COLOR],
+      },
     });
   },
 

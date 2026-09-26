@@ -11,8 +11,7 @@ import { buildAreaView } from "@/lib/area-view";
 import { getAdminSession } from "@/lib/admin/session";
 import { getAreaResearch } from "@/lib/admin/area-research";
 import { researchNear } from "@/lib/admin/research";
-import { CATEGORY_SHORT, OPERATIONAL_LABEL, VERIFICATION_LABEL, type NearbyResearch } from "@/lib/admin/research-types";
-import type { InternalMapFeature } from "@/lib/map/layers/internal-findings";
+import { internalFeatures } from "@/lib/admin/research-map";
 import { DEFAULT_RADIUS_M } from "@/lib/geo/constants";
 import { getMapTileConfig } from "@/lib/map/config";
 
@@ -71,27 +70,11 @@ export default async function AdminAddressPage({ searchParams }: { searchParams:
         tiles={getMapTileConfig()}
         basePath="/admin/adresse"
         skolekrets={<SkolekretsNotis lat={lat} lng={lng} />}
-        internalFeatures={funn ? funn.map(kartobjekt) : []}
+        internalFeatures={funn ? internalFeatures(funn) : []}
         extraSections={<InternSeksjon research={research} funn={funn} radiusM={radius} />}
       />
     </AreaShell>
   );
-}
-
-/**
- * Et funn som kartobjekt. Popup-linjene formuleres her, på serveren, av samme grunn som ellers
- * i prosjektet: kartet skal aldri sette sammen tekst selv.
- */
-function kartobjekt(funn: NearbyResearch): InternalMapFeature {
-  return {
-    id: funn.id,
-    title: funn.title,
-    center: [funn.longitude, funn.latitude],
-    lines: [
-      `${CATEGORY_SHORT[funn.category] ?? funn.category} / ${OPERATIONAL_LABEL[funn.operational_status]}`,
-      VERIFICATION_LABEL[funn.verification_status],
-    ],
-  };
 }
 
 function Søk() {

@@ -95,39 +95,47 @@ function FunnKort({ funn }: { funn: NearbyResearch }) {
 
   return (
     <li
-      className={`rounded-2xl border border-dashed px-5 py-4 transition-colors ${
+      className={`relative rounded-2xl border border-dashed px-5 py-4 transition-colors ${
         valgt ? "border-accent bg-accent-soft" : "border-line-strong bg-surface"
-      }`}
+      } ${kanVelges && !valgt ? "hover:border-ink/30" : ""}`}
     >
-      <p className="text-[12px] font-medium tracking-[0.04em] text-muted uppercase">
-        {over}
-      </p>
-      <h5 className="mt-0.5 text-[17px] font-medium tracking-[-0.01em] text-ink [overflow-wrap:anywhere]">
-        {kanVelges ? (
-          <button
-            type="button"
-            onClick={() => select(funn.id)}
-            aria-pressed={valgt}
-            className="text-left hover:underline"
-          >
-            {funn.title}
-          </button>
-        ) : (
-          funn.title
-        )}
-      </h5>
-      <p className="mt-0.5 text-[12px] font-medium tracking-[0.04em] text-muted uppercase">
-        {under}
-      </p>
-      {funn.address && (
-        <p className="mt-0.5 text-[15px] text-muted">{funn.address}</p>
+      {/*
+        Hele kortet velger funnet i kartet. Knappen dekker kortet i stedet for å pakke innholdet,
+        fordi kortet inneholder en lenke — en lenke inne i en knapp er ugyldig, og gir en
+        trykkflate som gjør to ting. Slik blir det to tydelige tabstopp: velg, og åpne funnet.
+      */}
+      {kanVelges && (
+        <button
+          type="button"
+          onClick={() => select(funn.id)}
+          aria-pressed={valgt}
+          className="absolute inset-0 z-10 cursor-pointer rounded-2xl focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+        >
+          <span className="sr-only">Vis {funn.title} i kartet</span>
+        </button>
       )}
-      {funn.description && (
-        <p className="mt-2 text-[15px] leading-relaxed text-ink">
-          {funn.description}
+
+      <div className="pointer-events-none relative">
+        <p className="text-[12px] font-medium tracking-[0.04em] text-muted uppercase">
+          {over}
         </p>
-      )}
-      <p className="mt-2 text-[13px] text-muted">
+        <h5 className="mt-0.5 text-[17px] font-medium tracking-[-0.01em] text-ink [overflow-wrap:anywhere]">
+          {funn.title}
+        </h5>
+        <p className="mt-0.5 text-[12px] font-medium tracking-[0.04em] text-muted uppercase">
+          {under}
+        </p>
+        {funn.address && (
+          <p className="mt-1 text-[15px] text-muted">{funn.address}</p>
+        )}
+        {funn.description && (
+          <p className="mt-2 text-[15px] leading-relaxed text-ink">
+            {funn.description}
+          </p>
+        )}
+      </div>
+
+      <p className="relative z-20 mt-2 text-[13px] text-muted">
         {VERIFICATION_LABEL[funn.verification_status]} ·{" "}
         <Link
           href={`/admin/research/${funn.id}`}
@@ -135,6 +143,7 @@ function FunnKort({ funn }: { funn: NearbyResearch }) {
         >
           Åpne funnet
         </Link>
+        {!kanVelges && <span className="ml-1">· uten kartpunkt</span>}
       </p>
     </li>
   );
