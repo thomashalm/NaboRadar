@@ -162,7 +162,14 @@ viser hvilket anlegg, hvor stort, i hvilken status, sist kontrollert når.
 Fire løft. Rekkefølgen er bevisst: de tre første er hygiene og tar uker, den fjerde er
 konkurransefortrinnet og tar måneder.
 
-#### 1. Naturfarepakken
+#### 1. Naturfarepakken ✅ levert 27.09.2026
+
+Bygget som fire direkte oppslag, ikke som providere — se
+[håndboken → Naturfare](naboradar-handbook.md#naturfare). To premisser endret seg underveis og er
+verdt å ta med videre: NVEs aktsomhetstjenester har **rasteriserte oversiktslag ved siden av
+polygonlagene**, og et `identify` mot feil lag gir treff overalt; og Kartverkets `Dekningsområde`
+for stormflo dekker praktisk talt hele landet, så det kan ikke brukes som port for om en adresse er
+i spill. Begge ble bare synlige i QA mot ekte adresser.
 
 | | |
 |---|---|
@@ -387,7 +394,7 @@ begrunnelsen — så slipper vi å vurdere samme idé på nytt om et halvår.
 
 I rekkefølge:
 
-1. **Naturfarepakken** — flom, jord-/flomskred, radon, stormflo
+1. ~~**Naturfarepakken** — flom, jord-/flomskred, radon, stormflo~~ — levert 27.09.2026
 2. **ÅDT** — trafikkmengde fra Statens vegvesen
 3. **Jernbanestøy** — Bane NORs støysoner
 4. **Store prosjekter** — design av research- og hybridmodellen, ikke et providerlag

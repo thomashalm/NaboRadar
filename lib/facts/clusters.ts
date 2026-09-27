@@ -116,12 +116,29 @@ export function grunnforholdCluster(facts: AreaFact[], radiusM: number): FactClu
   const sortert = [...facts].sort(byRelevance);
   if (sortert.length === 0) return null;
 
+  // Kildens egne ord for de kartlagte sonene, i samme rekkefølge som radene.
+  const SONELABEL: Record<string, string> = {
+    flom_sone: "flomsone",
+    skred_faresone: "skredfaresone",
+    stormflo: "stormflonivå",
+  };
+  const AKTSOMHET = new Set(["flom_aktsomhet", "skred_jord_flom_aktsomhet", "skred_sno_stein_aktsomhet"]);
+
   const summary = describeGrunnforholdSummary({
     aktsomhetVedPunkt: sortert.some((fact) => fact.subtype === "kvikkleire_aktsomhet"),
     utredetVedPunkt: sortert.some((fact) => fact.subtype === "kvikkleire_utredet_uten_fare"),
     soneVedPunkt: sortert.some((fact) => fact.subtype === "kvikkleire_sone" && fact.contains),
     soner: sortert.filter((fact) => fact.subtype === "kvikkleire_sone").length,
     radiusLabel: formatRadius(radiusM),
+    kartlagteSoner: [
+      ...new Set(
+        sortert
+          .filter((fact) => fact.contains && SONELABEL[fact.subtype] !== undefined)
+          .map((fact) => SONELABEL[fact.subtype]!),
+      ),
+    ],
+    aktsomhetsomrader: sortert.filter((fact) => AKTSOMHET.has(fact.subtype)).length,
+    radonLinje: sortert.find((fact) => fact.subtype === "radon_aktsomhet")?.compact?.headline ?? null,
   });
 
   const forside = sortert.slice(0, CLUSTER_PREVIEW);
@@ -130,7 +147,9 @@ export function grunnforholdCluster(facts: AreaFact[], radiusM: number): FactClu
   return {
     sectionId: "grunnforhold",
     id: "grunnforhold",
-    label: "Grunnforhold",
+    // Seksjonen heter «Naturfare», og gruppen er den eneste i seksjonen. Merkelappen sier derfor
+    // hva radene gjelder, ikke seksjonsnavnet om igjen.
+    label: "Ved adressen og i nærheten",
     summary,
     facts: forside,
     lists: [],

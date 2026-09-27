@@ -12,6 +12,18 @@ import type { AreaAttributes } from "@/types/area-feature";
  *  - årstall vises når kilden har det
  */
 
+/**
+ * Radonklassene slik NGU navngir dem, oversatt til visningsform — ikke omgjort til nye nivåer.
+ * Kilden har fem klasser, og vi viser fem klasser.
+ */
+export const RADON_LABEL: Record<string, string> = {
+  megetHøy: "Meget høy",
+  høy: "Høy",
+  middels: "Middels",
+  lav: "Lav",
+  usikker: "Usikker",
+};
+
 export interface FactText {
   headline: string;
   details: string[];
@@ -52,6 +64,30 @@ export const SOURCES: Record<string, SourceInfo> = {
   "nve-kvikkleire-aktsomhet": {
     name: "Aktsomhetskart for kvikkleireskred",
     owner: "NVE",
+    licenseName: "NLOD",
+    licenseUrl: "https://data.norge.no/nlod/no/1.0",
+  },
+  "nve-flom": {
+    name: "Flomsoner og aktsomhetsområde for flom",
+    owner: "NVE",
+    licenseName: "NLOD",
+    licenseUrl: "https://data.norge.no/nlod/no/1.0",
+  },
+  "nve-skred": {
+    name: "Skredfaresoner og aktsomhetsområder for skred",
+    owner: "NVE",
+    licenseName: "NLOD",
+    licenseUrl: "https://data.norge.no/nlod/no/1.0",
+  },
+  "ngu-radon-aktsomhet": {
+    name: "Nasjonalt aktsomhetskart for radon",
+    owner: "Norges geologiske undersøkelse og Direktoratet for strålevern og atomsikkerhet",
+    licenseName: "NLOD",
+    licenseUrl: "https://data.norge.no/nlod/no/1.0",
+  },
+  "kartverket-stormflo": {
+    name: "Stormflo og havnivå",
+    owner: "Kartverket",
     licenseName: "NLOD",
     licenseUrl: "https://data.norge.no/nlod/no/1.0",
   },
@@ -381,6 +417,169 @@ export function describeFact(input: {
         caveat: null,
       };
 
+    /*
+     * NATURFARE.
+     *
+     * Regelen som styrer all tekst under: kildens ord, ikke våre. «Aktsomhetsområde» er et
+     * screeningkart som sier at forholdene bør undersøkes nærmere — ikke at noe kommer til å skje.
+     * En kartlagt sone er en utredning på stedet, og sies tydeligere. Ingen av dem blir «høy fare»
+     * eller «flomfarlig bolig» i vår tekst, og det finnes ingen samlet risikoscore.
+     */
+    case "flom_sone": {
+      const ar = num(a.gjentaksintervallAr);
+      const alle = str(a.alleIntervaller);
+      const klima = str(a.klimaIntervaller);
+      return {
+        headline: ar !== null ? `Innenfor kartlagt flomsone (${ar}-årsflom)` : "Innenfor kartlagt flomsone",
+        details: [
+          ar !== null
+            ? `En ${ar}-årsflom er en flom som statistisk inntreffer én gang per ${ar} år. Arealet er beregnet av NVE for dette vassdraget.`
+            : "Arealet er beregnet av NVE for dette vassdraget.",
+        ],
+        compact: { headline: "Kartlagt flomsone", context: ar !== null ? `${ar}-årsflom` : "NVEs flomsonekart" },
+        technical: [
+          alle !== null ? `Gjentaksintervaller som dekker punktet: ${alle} år` : null,
+          klima !== null ? `Med klimapåslag: ${klima} år` : null,
+          "NVEs flomsonekart dekker utvalgte vassdrag, ikke alle vassdrag i landet",
+        ].filter((line): line is string => line !== null),
+        caveat: null,
+      };
+    }
+
+    case "flom_utenfor_sone":
+      return {
+        headline: "Utenfor kartlagt flomsone",
+        // Ikke «ingen flomfare»: kartet dekker de vassdragene NVE har kartlagt, ikke alt vann.
+        details: ["Punktet ligger i et område NVE har flomsonekartlagt, men utenfor de beregnede sonene."],
+        compact: { headline: "Utenfor kartlagt flomsone", context: "NVEs flomsonekart" },
+        technical: [
+          "Kartleggingen gjelder vassdraget som er analysert. Lokal overvannsflom, bekker og små vassdrag er ikke med",
+        ],
+        caveat: null,
+      };
+
+    case "flom_aktsomhet":
+      return {
+        headline: "Aktsomhetsområde for flom",
+        details: ["Området kan bli berørt av flom. Aktsomhetskartet er en landsdekkende oversikt, ikke en beregning for stedet."],
+        compact: { headline: "Aktsomhetsområde for flom", context: "landsdekkende oversiktskart" },
+        technical: [
+          "Modellert av NVE fra terrengmodell og vannkart",
+          "Sier ikke hvor høyt vannet kan stå, og erstatter ikke en flomsoneberegning",
+        ],
+        caveat: null,
+      };
+
+    case "skred_faresone": {
+      const ar = num(a.gjentaksintervallAr);
+      const typer = str(a.skredtyper);
+      return {
+        headline: "Innenfor kartlagt skredfaresone",
+        details: [
+          [
+            "NVE har utredet skredfare på stedet.",
+            ar !== null ? `Sonen gjelder en årlig sannsynlighet på 1/${ar}.` : null,
+            typer !== null ? `Skredtype: ${typer}.` : null,
+          ]
+            .filter(Boolean)
+            .join(" "),
+        ],
+        compact: {
+          headline: "Kartlagt skredfaresone",
+          context: ar !== null ? `årlig sannsynlighet 1/${ar}` : "NVEs faresonekart",
+        },
+        technical: [
+          "Faresonekart for skred i bratt terreng finnes bare for utvalgte, utredede områder",
+          "Nivåene 1/100, 1/1000 og 1/5000 følger sikkerhetsklassene i byggteknisk forskrift",
+        ],
+        caveat: null,
+      };
+    }
+
+    case "skred_jord_flom_aktsomhet":
+      return {
+        headline: "Aktsomhetsområde for jord- og flomskred",
+        details: ["Området er modellert som potensielt utsatt. Det er ikke en utredning av forholdene på eiendommen."],
+        compact: { headline: "Aktsomhetsområde for jord- og flomskred", context: "landsdekkende kartserie" },
+        technical: [
+          "Landsdekkende kartserie fra NVE, modellert fra terreng og løsmasser",
+          "Brukes til å avgjøre om en nærmere vurdering er nødvendig ved tiltak",
+        ],
+        caveat: null,
+      };
+
+    case "skred_sno_stein_aktsomhet":
+      return {
+        headline: "Aktsomhetsområde for snø- og steinskred",
+        details: ["NVE kartlegger de to skredtypene sammen. Området er modellert som potensielt utsatt."],
+        compact: { headline: "Aktsomhetsområde for snø- og steinskred", context: "kartlagt samlet for begge typer" },
+        technical: [
+          "Snø- og steinskred vises i samme aktsomhetsområde hos NVE; kartet skiller dem ikke",
+          "Modellert fra terreng, ikke utredet for den enkelte eiendom",
+        ],
+        caveat: null,
+      };
+
+    case "radon_aktsomhet": {
+      const grad = str(a.aktsomhetsgrad);
+      const label = grad !== null ? (RADON_LABEL[grad] ?? grad) : null;
+      return {
+        headline: label !== null ? `${label} radonaktsomhet i området` : "Radonaktsomhet i området",
+        // Dette er den viktigste setningen i hele naturfaredelen, og den er ikke valgfri.
+        details: ["Dette er ikke en måling i boligen. Faktisk radonnivå kan bare fastslås ved måling."],
+        compact: {
+          headline: label !== null ? `${label} radonaktsomhet` : "Radonaktsomhet",
+          context: "aktsomhet for området, ikke måling i boligen",
+        },
+        technical: [
+          grad !== null ? `Kildens klasse: ${grad}` : null,
+          "Nasjonalt aktsomhetskart for radon (NGU og DSA), modellert fra inneluftmålinger, flymålinger og løsmasser",
+          "Alle boliger bør måle radon uavhengig av aktsomhetsgrad",
+        ].filter((line): line is string => line !== null),
+        caveat: null,
+      };
+    }
+
+    case "stormflo": {
+      const ar = num(a.gjentaksintervallAr);
+      const fram = num(a.framtidigGjentaksintervallAr);
+      const framAr = num(a.framtidigAr);
+      return {
+        headline:
+          ar !== null
+            ? `Kan bli berørt av stormflo (${ar}-årsnivå)`
+            : "Kan bli berørt av stormflo ved framtidig havnivå",
+        details: [
+          ar !== null
+            ? `Eiendommen ligger innenfor arealet Kartverket har beregnet for et ${ar}-årsnivå med dagens havnivå.`
+            : fram !== null && framAr !== null
+              ? `Eiendommen ligger innenfor arealet for et ${fram}-årsnivå med forventet havnivå i ${framAr}.`
+              : "Eiendommen ligger innenfor et beregnet stormflonivå.",
+          fram !== null && framAr !== null && ar !== null
+            ? `Med forventet havnivå i ${framAr} gjelder det også et ${fram}-årsnivå.`
+            : null,
+        ].filter((line): line is string => line !== null),
+        compact: {
+          headline: "Kan bli berørt av stormflo",
+          context: ar !== null ? `${ar}-årsnivå` : framAr !== null ? `framtidig havnivå ${framAr}` : "beregnet nivå",
+        },
+        technical: [
+          "Beregnet av Kartverket ut fra terrengmodell og vannstandsstatistikk",
+          "Viser hvilket areal som kan stå under vann ved nivået, ikke hva som skjer med bygningen",
+        ],
+        caveat: null,
+      };
+    }
+
+    case "stormflo_utenfor":
+      return {
+        headline: "Ikke berørt av kartlagte stormflonivåer",
+        details: ["Eiendommen ligger i et kartlagt kystområde, men utenfor arealene Kartverket har beregnet."],
+        compact: { headline: "Utenfor kartlagt stormflonivå", context: "Kartverkets stormflokart" },
+        technical: ["Gjelder nivåene vi viser: 20- og 200-årsnivå med dagens havnivå, og 200-årsnivå med havnivå i 2100"],
+        caveat: null,
+      };
+
     case "kvikkleire_aktsomhet":
       return {
         headline: "Aktsomhetsområde for kvikkleireskred",
@@ -601,22 +800,67 @@ export function describeClusterToggle(input: { flertall: string; vist: number; t
  * Oppsummeringen på «Grunnforhold». Det som gjelder søkepunktet selv står først; en sone langt
  * unna skal ikke dominere seksjonen.
  */
+/**
+ * Oppsummeringen på «Naturfare».
+ *
+ * Rekkefølgen er rangeringen: kartlagte soner er utredninger på stedet og nevnes først,
+ * aktsomhetsområder er oversiktskart og telles, radon står for seg fordi det er en annen slags
+ * opplysning. Ingen samlet score, og ingen vurdering av hvor alvorlig summen er.
+ */
 export function describeGrunnforholdSummary(input: {
   aktsomhetVedPunkt: boolean;
   utredetVedPunkt: boolean;
   soneVedPunkt: boolean;
   soner: number;
   radiusLabel: string;
+  /** Kartlagte soner ved punktet utover kvikkleire, med kildens ord: «flomsone», «skredfaresone». */
+  kartlagteSoner?: string[];
+  /** Antall aktsomhetsområder ved punktet utover kvikkleire. */
+  aktsomhetsomrader?: number;
+  /**
+   * Radonlinjen, gjenbrukt fra radonkortets egen kortform («Meget høy radonaktsomhet»).
+   *
+   * Sendes som ferdig tekst framfor som klasse, fordi AreaFact er visningsformen og ikke bærer
+   * attributter. Da slipper vi å tolke kildeverdier på nytt her — all ordlyd står ett sted.
+   */
+  radonLinje?: string | null;
 }): string {
+  const andreSoner = input.kartlagteSoner ?? [];
+  const aktsomhet = (input.aktsomhetVedPunkt ? 1 : 0) + (input.aktsomhetsomrader ?? 0);
+  const radon = input.radonLinje?.trim() ? input.radonLinje.trim() : null;
+
+  /*
+   * Ordlyden for kvikkleire alene er bevart som den var. Telleformen brukes først når seksjonen
+   * faktisk har flere forhold — «1 aktsomhetsområde» sier mindre enn «Aktsomhetsområde ved
+   * søkepunktet», og kvikkleire-visningen fungerte godt før naturfare kom til.
+   */
+  const soneDel =
+    input.soneVedPunkt && andreSoner.length === 0
+      ? "Kvikkleiresone ved søkepunktet"
+      : input.soneVedPunkt || andreSoner.length > 0
+        ? `Kartlagt ${liste([...(input.soneVedPunkt ? ["kvikkleiresone"] : []), ...andreSoner])} ved søkepunktet`
+        : null;
+
   const deler = [
-    input.soneVedPunkt ? "Kvikkleiresone ved søkepunktet" : null,
-    input.aktsomhetVedPunkt ? "Aktsomhetsområde ved søkepunktet" : null,
+    soneDel,
+    aktsomhet === 1
+      ? "Aktsomhetsområde ved søkepunktet"
+      : aktsomhet > 1
+        ? `${aktsomhet} aktsomhetsområder ved søkepunktet`
+        : null,
     input.utredetVedPunkt ? "Utredet: ikke fare for områdeskred ved søkepunktet" : null,
+    radon !== null ? radon.charAt(0).toLowerCase() + radon.slice(1) : null,
     input.soner > 0
       ? `${input.soner} ${input.soner === 1 ? "kartlagt kvikkleiresone" : "kartlagte kvikkleiresoner"} innen ${input.radiusLabel}`
       : null,
   ].filter((del): del is string => del !== null);
   return deler.join(" · ");
+}
+
+/** «a», «a og b», «a, b og c». */
+function liste(ord: string[]): string {
+  if (ord.length <= 1) return ord[0] ?? "";
+  return `${ord.slice(0, -1).join(", ")} og ${ord[ord.length - 1]}`;
 }
 
 /** Oppsummeringen på «Infrastruktur». Typene har lange navn, så vi teller dem samlet. */

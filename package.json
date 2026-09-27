@@ -23,7 +23,8 @@
     "alerts:check": "tsx scripts/alert-check.ts",
     "research:seed": "tsx scripts/seed-research.ts",
     "review:backfill": "tsx scripts/research-review-backfill.ts",
-    "fix:dsb-identitet": "tsx scripts/fix-dsb-identity.ts"
+    "fix:dsb-identitet": "tsx scripts/fix-dsb-identity.ts",
+    "qa:naturfare": "tsx scripts/qa-naturfare.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

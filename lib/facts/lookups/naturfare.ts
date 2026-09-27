@@ -1,0 +1,408 @@
+import { ArcgisClient } from "@/lib/providers/arcgis";
+import { fetchGml } from "@/lib/providers/gml";
+import type { AreaLookup, LookupContext, LookupHit } from "./types";
+
+/**
+ * Naturfare rundt en adresse: flom, skred, radon og stormflo.
+ *
+ * ALLE FIRE ER DIREKTE OPPSLAG, ikke providere. Grunnen er den samme for hver av dem: det er
+ * landsdekkende polygonlag med hundretusener av flater, og spørsmålet er «ligger denne adressen
+ * innenfor?». Å kopiere Norges flomsoner, skredaktsomhet og radonaktsomhet inn i Supabase ville
+ * gitt oss vedlikehold og lagring uten å svare bedre på det spørsmålet. Samme vurdering som for
+ * aktsomhetsområdet for kvikkleire, som lå her fra før.
+ *
+ * DET VIKTIGSTE SKILLET: aktsomhet er ikke fare.
+ *
+ *   * Et **aktsomhetsområde** er et landsdekkende screeningkart, laget av terrengmodell og
+ *     løsmassekart. Et treff betyr «her bør forholdene undersøkes nærmere», ikke at noe vil skje.
+ *   * En **kartlagt faresone** eller **flomsone** er en detaljert utredning på et utvalgt sted,
+ *     med gjentaksintervall. Den finnes bare der NVE har kartlagt, og er et sterkere signal.
+ *
+ * Derfor spør hvert oppslag alltid også om **dekning**: ligger punktet i det hele tatt innenfor
+ * området kilden har kartlagt? Uten det ville «ingen treff» blitt lest som «ingen fare», og det er
+ * den samme feilen som å lese fravær i et register som fravær i virkeligheten.
+ */
+
+/** Kortere budsjett enn sync: brukeren venter. Oppslagene kjøres parallelt av runLookups(). */
+const LOOKUP_RETRY = { timeoutMs: 5_000, maxRetries: 1, baseDelayMs: 200 };
+
+const FLOMSONER = "https://kart.nve.no/enterprise/rest/services/Flomsoner2/MapServer";
+const FLOMAKTSOMHET = "https://kart.nve.no/enterprise/rest/services/Flomaktsomhet/MapServer";
+const JORDFLOMSKRED = "https://kart.nve.no/enterprise/rest/services/JordFlomskredAktsomhet/MapServer";
+const SNOSTEIN = "https://kart.nve.no/enterprise/rest/services/SkredSnoSteinAkt/MapServer";
+const SKREDFARESONER = "https://kart.nve.no/enterprise/rest/services/Skredfaresoner3/MapServer";
+const RADON_API = "https://geo.ngu.no/api/features/radonaktsomhet/collections/radonaktsomhet/items";
+const STORMFLO_WFS = "https://wfs.geonorge.no/skwms1/wfs.stormflo_havniva";
+
+/**
+ * Flomsonelagene, ett per gjentaksintervall.
+ *
+ * Lag 0 er analyseområdet — NVEs egen dekning. Vi leser gjentaksintervallet av lagnavnet og ikke
+ * av attributtet `gjentaksinterval`, fordi attributtet er 0 på enkelte rader i samme lag.
+ */
+const FLOMSONE_LAG: Record<number, { ar: number; klima: boolean }> = {
+  13: { ar: 10, klima: false },
+  14: { ar: 20, klima: false },
+  15: { ar: 50, klima: false },
+  16: { ar: 100, klima: false },
+  17: { ar: 200, klima: false },
+  18: { ar: 500, klima: false },
+  19: { ar: 1000, klima: false },
+  20: { ar: 20, klima: true },
+  21: { ar: 200, klima: true },
+  22: { ar: 1000, klima: true },
+};
+const FLOMSONE_DEKNING_LAG = 0;
+
+/** Polygonlaget for jord- og flomskred. Lag 0 i samme tjeneste er et oversiktslag uten geometri. */
+const JORDFLOMSKRED_LAG = 1;
+
+interface FaresoneLag {
+  ar: number;
+  /** Skredtypen laget gjelder, eller null for de samlede sonene. */
+  type: string | null;
+}
+
+/**
+ * Faresonelagene i Skredfaresoner3.
+ *
+ * Tallet i lagnavnet er gjentaksintervallet: 100 betyr en årlig sannsynlighet på 1/100. Gruppelagene
+ * («Skredfaresoner_Samlet», «Skredfaresoner_Snoskred» …) har ingen geometri og kan ikke spørres —
+ * det er barnelagene under dem som har flatene.
+ */
+const FARESONE_LAG: Record<number, FaresoneLag> = {
+  6: { ar: 100, type: null },
+  7: { ar: 1000, type: null },
+  8: { ar: 5000, type: null },
+  10: { ar: 100, type: "jord- og flomskred" },
+  14: { ar: 100, type: "sørpeskred" },
+  18: { ar: 100, type: "snøskred" },
+  22: { ar: 100, type: "steinskred" },
+};
+const FARESONE_DEKNING_LAG = 0;
+
+/**
+ * Flom: kartlagt flomsone først, ellers nasjonal flomaktsomhet.
+ *
+ * To forespørsler, ikke tolv: én `identify` dekker alle flomsonelagene, og én dekker
+ * aktsomhetskartet med sitt eget dekningslag.
+ */
+export class NveFlomLookup implements AreaLookup {
+  readonly id = "nve-flom";
+  readonly name = "Flomsoner og flomaktsomhet";
+  readonly owner = "Norges vassdrags- og energidirektorat";
+  readonly category = "grunnforhold" as const;
+  private readonly client: ArcgisClient;
+
+  constructor(fetchImpl: typeof fetch = fetch) {
+    this.client = new ArcgisClient(fetchImpl, LOOKUP_RETRY);
+  }
+
+  async run({ lat, lng, signal }: LookupContext): Promise<LookupHit[]> {
+    const [soner, aktsomhet] = await Promise.all([
+      this.client.identify(FLOMSONER, [FLOMSONE_DEKNING_LAG, ...Object.keys(FLOMSONE_LAG).map(Number)], { lat, lng, signal }),
+      this.client.identify(FLOMAKTSOMHET, [1, 2], { lat, lng, signal }),
+    ]);
+
+    const hits: LookupHit[] = [];
+
+    const iAnalyseomrade = soner.some((r) => r.layerId === FLOMSONE_DEKNING_LAG);
+    const traff = soner.filter((r) => FLOMSONE_LAG[r.layerId] !== undefined).map((r) => FLOMSONE_LAG[r.layerId]!);
+    const utenKlima = traff.filter((t) => !t.klima).map((t) => t.ar);
+    const medKlima = traff.filter((t) => t.klima).map((t) => t.ar);
+
+    if (utenKlima.length > 0 || medKlima.length > 0) {
+      /*
+       * Ligger punktet i flere soner, er den *minste* gjentaksperioden den strengeste: en
+       * 20-årsflom skjer oftere enn en 200-årsflom, og arealet er da med i begge.
+       */
+      const minste = Math.min(...(utenKlima.length > 0 ? utenKlima : medKlima));
+      hits.push({
+        subtype: "flom_sone",
+        title: "Kartlagt flomsone",
+        attributes: {
+          gjentaksintervallAr: minste,
+          alleIntervaller: utenKlima.length > 0 ? utenKlima.sort((a, b) => a - b).join(", ") : null,
+          klimaIntervaller: medKlima.length > 0 ? medKlima.sort((a, b) => a - b).join(", ") : null,
+        },
+        distanceM: 0,
+        contains: true,
+      });
+    } else if (iAnalyseomrade) {
+      // Kartlagt, men utenfor sonene. Det er en opplysning, ikke et tomt svar.
+      hits.push({
+        subtype: "flom_utenfor_sone",
+        title: "Utenfor kartlagt flomsone",
+        attributes: {},
+        distanceM: null,
+        contains: false,
+      });
+    }
+
+    // Aktsomhetskartet er landsdekkende, men har eget dekningslag. Uten dekning sier vi ingenting.
+    const harAktsomhetsdekning = aktsomhet.some((r) => r.layerId === 2);
+    const iAktsomhet = aktsomhet.some((r) => r.layerId === 1);
+    if (iAktsomhet && harAktsomhetsdekning) {
+      hits.push({
+        subtype: "flom_aktsomhet",
+        title: "Aktsomhetsområde for flom",
+        attributes: {},
+        distanceM: 0,
+        contains: true,
+      });
+    }
+
+    return hits;
+  }
+}
+
+/**
+ * Skred: kartlagt faresone først, deretter aktsomhetsområdene.
+ *
+ * Tre tjenester, tre forespørsler. Faresonene (Skredfaresoner3) finnes bare der NVE har utredet,
+ * og er det sterkeste signalet. Aktsomhetskartene for jord- og flomskred og for snø- og steinskred
+ * er landsdekkende screening.
+ */
+export class NveSkredLookup implements AreaLookup {
+  readonly id = "nve-skred";
+  readonly name = "Skredfaresoner og aktsomhetsområder for skred";
+  readonly owner = "Norges vassdrags- og energidirektorat";
+  readonly category = "grunnforhold" as const;
+  private readonly client: ArcgisClient;
+
+  constructor(fetchImpl: typeof fetch = fetch) {
+    this.client = new ArcgisClient(fetchImpl, LOOKUP_RETRY);
+  }
+
+  async run({ lat, lng, signal }: LookupContext): Promise<LookupHit[]> {
+    const [faresoner, jordFlom, snoStein] = await Promise.all([
+      this.client.identify(SKREDFARESONER, [FARESONE_DEKNING_LAG, ...Object.keys(FARESONE_LAG).map(Number)], {
+        lat,
+        lng,
+        signal,
+      }),
+      // Lag 1 er polygonlaget med de 503 461 aktsomhetsområdene. Lag 0 er et rasterisert
+      // oversiktslag uten geometritype, og `identify` mot det ga treff overalt — også på flat
+      // bygrunn i Oslo og Lillestrøm. Det ble oppdaget i QA mot ekte adresser.
+      this.client.identify(JORDFLOMSKRED, [JORDFLOMSKRED_LAG], { lat, lng, signal }),
+      // Lag 0 = aktsomhetsområde, lag 1 = kartlagt område (dekning).
+      this.client.identify(SNOSTEIN, [0, 1], { lat, lng, signal }),
+    ]);
+
+    const hits: LookupHit[] = [];
+
+    const faresonetreff = faresoner.map((r) => FARESONE_LAG[r.layerId]).filter((v): v is FaresoneLag => v !== undefined);
+    if (faresonetreff.length > 0) {
+      /*
+       * Strengeste nivå er det med lavest gjentaksintervall: en sone for 1/100 per år treffer
+       * oftere enn 1/5000. Skredtypene tas fra de typespesifikke lagene — «Samlet» er et
+       * gruppelag uten geometri, og «Dimensjonerende_skredtype» er et punktlag som sjelden
+       * treffer et adressepunkt.
+       */
+      const nivaer = faresonetreff.map((f) => f.ar);
+      const typer = [...new Set(faresonetreff.map((f) => f.type).filter((v): v is string => v !== null))];
+      hits.push({
+        subtype: "skred_faresone",
+        title: "Kartlagt skredfaresone",
+        attributes: {
+          gjentaksintervallAr: Math.min(...nivaer),
+          skredtyper: typer.length > 0 ? typer.join(", ") : null,
+        },
+        distanceM: 0,
+        contains: true,
+      });
+    }
+
+    if (jordFlom.some((r) => r.layerId === JORDFLOMSKRED_LAG)) {
+      hits.push({
+        subtype: "skred_jord_flom_aktsomhet",
+        title: "Aktsomhetsområde for jord- og flomskred",
+        attributes: {},
+        distanceM: 0,
+        contains: true,
+      });
+    }
+
+    // Snø og stein er ett felles aktsomhetskart hos NVE, og skilles ikke her.
+    if (snoStein.some((r) => r.layerId === 0) && snoStein.some((r) => r.layerId === 1)) {
+      hits.push({
+        subtype: "skred_sno_stein_aktsomhet",
+        title: "Aktsomhetsområde for snø- og steinskred",
+        attributes: {},
+        distanceM: 0,
+        contains: true,
+      });
+    }
+
+    return hits;
+  }
+}
+
+/** Kildens egne klasser. Vi lager ingen egne risikokategorier oppå dem. */
+const RADONKLASSER = new Set(["megetHøy", "høy", "middels", "lav", "usikker"]);
+
+/**
+ * Radonaktsomhet (NGU og DSA, versjon 2 fra september 2026).
+ *
+ * OGC API Features med bbox-spørring rundt punktet. Merk at dette er **modellert aktsomhet for
+ * området**, ikke en måling i boligen — den forskjellen står i formuleringsregisteret, og den er
+ * ikke valgfri: radonnivå i en konkret bolig kan bare fastslås ved måling.
+ */
+export class NguRadonLookup implements AreaLookup {
+  readonly id = "ngu-radon-aktsomhet";
+  readonly name = "Nasjonalt aktsomhetskart for radon";
+  readonly owner = "Norges geologiske undersøkelse";
+  readonly category = "grunnforhold" as const;
+
+  constructor(private readonly fetchImpl: typeof fetch = fetch) {}
+
+  async run({ lat, lng, signal }: LookupContext): Promise<LookupHit[]> {
+    // ~11 m boks rundt punktet: nok til å treffe flaten punktet ligger i, lite nok til å ikke
+    // plukke opp naboflater med en annen klasse.
+    const d = 0.0001;
+    const url = `${RADON_API}?bbox=${lng - d},${lat - d},${lng + d},${lat + d}&limit=5&f=json`;
+    const body = await fetchJsonLite(url, this.fetchImpl, signal);
+    const features = Array.isArray((body as { features?: unknown[] }).features)
+      ? ((body as { features: unknown[] }).features as { properties?: Record<string, unknown> }[])
+      : [];
+
+    for (const feature of features) {
+      const grad = tekst(feature.properties?.radonAktsomhetGrad);
+      if (grad === null || !RADONKLASSER.has(grad)) continue;
+      return [
+        {
+          subtype: "radon_aktsomhet",
+          title: "Radonaktsomhet",
+          attributes: {
+            aktsomhetsgrad: grad,
+            datametode: tekst(feature.properties?.radonUranDatametode),
+          },
+          distanceM: 0,
+          contains: true,
+          sourceUpdatedAt: iso(feature.properties?.oppdateringsdato),
+        },
+      ];
+    }
+    // Ingen flate her betyr at kartet ikke dekker punktet, ikke at radon er utelukket.
+    return [];
+  }
+}
+
+/**
+ * Stormflo (Kartverket).
+ *
+ * Scenarioene er valgt for en boligkjøper, ikke for fullstendighet: 20 år (skjer ofte), 200 år
+ * (nivået plan- og bygningsregelverket bruker for bolig) og 200 år med havnivå for 2100 (samme
+ * hendelse senere i husets levetid). 500-, 1000-års og øvre-estimat-scenarioene utelates — de
+ * gjør ikke svaret mer brukbart, og hvert scenario koster en forespørsel.
+ *
+ * `Middelhøyvann` er bevisst ikke med: det er normal vannstand, ikke en hendelse.
+ *
+ * Teknisk: WFS med `Intersects`-filter og `resulttype=hits`. Det gir ekte punkt-i-polygon og et
+ * svar på ~50 byte. Samme spørring med geometri ga 3,2 MB, som ikke hører hjemme i et adressesøk.
+ */
+const STORMFLO_SCENARIOER = [
+  { type: "Stormflo20År_KlimaÅrNå", ar: 20, klimaAr: null },
+  { type: "Stormflo200År_KlimaÅrNå", ar: 200, klimaAr: null },
+  { type: "Stormflo200År_KlimaÅr2100", ar: 200, klimaAr: 2100 },
+] as const;
+
+/**
+ * Det ytterste scenarioet kilden har, brukt som port for om adressen er i spill i det hele tatt.
+ *
+ * `Dekningsområde` viste seg å dekke praktisk talt hele landet: QA ga «ikke berørt av kartlagte
+ * stormflonivåer» på Grünerløkka, i Lillestrøm og på Elverum, som er støy og ikke opplysning.
+ * Treffer ikke øvre estimat for 2150 heller, ligger adressen for høyt eller for langt fra sjøen,
+ * og da sier vi ingenting.
+ */
+const STORMFLO_YTTERSTE = "StormfloØvreEstimat_KlimaÅr2150";
+
+export class KartverketStormfloLookup implements AreaLookup {
+  readonly id = "kartverket-stormflo";
+  readonly name = "Stormflo og havnivå";
+  readonly owner = "Kartverket";
+  readonly category = "grunnforhold" as const;
+
+  constructor(private readonly fetchImpl: typeof fetch = fetch) {}
+
+  async run({ lat, lng, signal }: LookupContext): Promise<LookupHit[]> {
+    const [iSpill, ...scenarioer] = await Promise.all([
+      this.treff(STORMFLO_YTTERSTE, lat, lng, signal),
+      ...STORMFLO_SCENARIOER.map((s) => this.treff(s.type, lat, lng, signal)),
+    ]);
+
+    // Ikke engang det ytterste scenarioet treffer: adressen er ikke i spill. Ingen uttalelse.
+    if (!iSpill) return [];
+
+    const berort = STORMFLO_SCENARIOER.filter((_, i) => scenarioer[i]);
+    if (berort.length === 0) {
+      return [
+        {
+          subtype: "stormflo_utenfor",
+          title: "Ikke berørt av kartlagte stormflonivåer",
+          attributes: {},
+          distanceM: null,
+          contains: false,
+        },
+      ];
+    }
+
+    // Laveste gjentaksintervall er det strengeste: det skjer oftest.
+    const dagens = berort.filter((s) => s.klimaAr === null).map((s) => s.ar);
+    const framtid = berort.filter((s) => s.klimaAr !== null).map((s) => s.ar);
+    return [
+      {
+        subtype: "stormflo",
+        title: "Innenfor område som kan bli berørt av stormflo",
+        attributes: {
+          gjentaksintervallAr: dagens.length > 0 ? Math.min(...dagens) : null,
+          framtidigGjentaksintervallAr: framtid.length > 0 ? Math.min(...framtid) : null,
+          framtidigAr: framtid.length > 0 ? 2100 : null,
+        },
+        distanceM: 0,
+        contains: true,
+      },
+    ];
+  }
+
+  /** Ett `resulttype=hits`-kall: sant når punktet ligger i minst én flate av denne typen. */
+  private async treff(typeName: string, lat: number, lng: number, signal?: AbortSignal): Promise<boolean> {
+    const filter =
+      `<fes:Filter xmlns:fes="http://www.opengis.net/fes/2.0" xmlns:gml="http://www.opengis.net/gml/3.2">` +
+      `<fes:Intersects><fes:ValueReference>app:område</fes:ValueReference>` +
+      `<gml:Point srsName="urn:ogc:def:crs:EPSG::4326"><gml:pos>${lat} ${lng}</gml:pos></gml:Point>` +
+      `</fes:Intersects></fes:Filter>`;
+    const params = new URLSearchParams({
+      service: "WFS",
+      version: "2.0.0",
+      request: "GetFeature",
+      typeNames: `app:${typeName}`,
+      resulttype: "hits",
+      filter,
+    });
+    const xml = await fetchGml(`${STORMFLO_WFS}?${params.toString()}`, {
+      retry: { timeoutMs: LOOKUP_RETRY.timeoutMs, maxRetries: LOOKUP_RETRY.maxRetries, baseDelayMs: LOOKUP_RETRY.baseDelayMs },
+      signal,
+      fetchImpl: this.fetchImpl,
+    });
+    const match = /numberMatched="(\d+)"/.exec(xml);
+    return match !== null && Number(match[1]) > 0;
+  }
+}
+
+/** Minimal JSON-henting for OGC API Features. Samme budsjett som resten av oppslagene. */
+async function fetchJsonLite(url: string, fetchImpl: typeof fetch, signal?: AbortSignal): Promise<unknown> {
+  const response = await fetchImpl(url, { signal, headers: { accept: "application/geo+json, application/json" } });
+  if (!response.ok) throw new Error(`${url} svarte ${response.status}`);
+  return response.json();
+}
+
+function tekst(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function iso(value: unknown): string | null {
+  if (typeof value !== "string" || !value.trim()) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+}

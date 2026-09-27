@@ -69,7 +69,7 @@ describe("rekkefølge på kategoriene", () => {
     expect(groups.map((g) => g.label)).toEqual([
       "Nærområdet",
       "Støy",
-      "Grunnforhold",
+      "Naturfare",
       "Infrastruktur",
       "Forurenset grunn",
     ]);
@@ -143,7 +143,7 @@ describe("rekkefølge på kategoriene", () => {
     expect(utenGrunnforhold.map((g) => g.label)).toEqual(["Støy", "Forurenset grunn"]);
 
     const utenStoy = groupFacts([fact("grunnforhold"), fact("oppvekst"), fact("miljo")]);
-    expect(utenStoy.map((g) => g.label)).toEqual(["Nærområdet", "Grunnforhold", "Forurenset grunn"]);
+    expect(utenStoy.map((g) => g.label)).toEqual(["Nærområdet", "Naturfare", "Forurenset grunn"]);
 
     // Også når forurenset grunn er løftet: de som mangler, faller bort.
     const løftet = groupFacts([fact("miljo", { contains: true }), fact("oppvekst")], [], sectionOrder({ contaminationAtSearchPoint: true }));

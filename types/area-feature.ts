@@ -65,7 +65,22 @@ export const AREA_SECTIONS: readonly AreaSection[] = [
     categories: ["oppvekst", "helse", "omsorg", "servering", "industri"],
   },
   { id: "stoy", label: "Støy", intro: null, categories: ["stoy"] },
-  { id: "grunnforhold", label: "Grunnforhold", intro: null, categories: ["grunnforhold"] },
+  /*
+   * Naturfare samler kvikkleire, flom, skred, radon og stormflo.
+   *
+   * Seksjons-id-en er fortsatt «grunnforhold»: den er i bruk i lenker, tester og lagringsnøkler,
+   * og kategorien i databasen heter det samme. Det er merkelappen brukeren ser som er endret,
+   * fordi kvikkleiresoner, flomsoner og radonaktsomhet er naturfare — ikke byggegrunn generelt.
+   *
+   * Ingressen finnes fordi hele seksjonen hviler på ett skille: et aktsomhetsområde er et
+   * screeningkart, en kartlagt sone er en utredning. Sies det ikke her, må det sies i hver rad.
+   */
+  {
+    id: "grunnforhold",
+    label: "Naturfare",
+    intro: "Kartlagte soner sier at forholdene er utredet på stedet. Aktsomhetsområder er oversiktskart som sier at de bør undersøkes nærmere.",
+    categories: ["grunnforhold"],
+  },
   { id: "infrastruktur", label: "Infrastruktur", intro: null, categories: ["infrastruktur"] },
   // Plansaker, og senere lokale saker som bydelsvedtak og støysaker knyttet til et sted.
   // De hører hjemme som undertyper her, ikke som en egen hovedseksjon.

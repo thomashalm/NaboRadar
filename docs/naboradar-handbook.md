@@ -803,6 +803,10 @@ For store til å synke, eller svarer bare på «ligger punktet innenfor?».
 | Strategisk støykartlegging | Miljødirektoratet | Lden ved søkepunktet | Modellberegnet, kartlagt 2022 |
 | Støysoner veg | Statens vegvesen | Gul/rød sone langs veg | Geonorge blokkerer punktfilter, så Vegvesenets egen tjeneste brukes |
 | Støysoner fly | Avinor | Gul/rød sone rundt lufthavn | — |
+| Flomsoner og flomaktsomhet | NVE | Kartlagt flomsone og aktsomhetsområde for flom | Ett `identify`-kall dekker alle gjentaksintervallene. Analyseområdet avgjør om «utenfor sone» kan sies |
+| Skredfaresoner og skredaktsomhet | NVE | Kartlagt faresone, jord-/flomskred, snø-/steinskred | Faresone (utredet) skilles alltid fra aktsomhet (screening) |
+| Radonaktsomhet | NGU og DSA (versjon 2, 2026) | Modellert aktsomhetsgrad for området | Fem klasser fra kilden. Aldri framstilt som måling i boligen |
+| Stormflo og havnivå | Kartverket | 20- og 200-årsnivå i dag, 200-årsnivå med havnivå 2100 | WFS med `Intersects` og `resulttype=hits`: ekte punkt-i-polygon på ~50 byte |
 | Høyspent distribusjonsnett | NVE | Distribusjonsnett | For stort til synk |
 
 ### Grunntjenester
@@ -876,6 +880,73 @@ Hele poenget er at NaboRadar ikke skal si mer enn kilden gjør.
 - Kretsnavnet er ikke alltid skolenavnet: kretsen «Majorstua» hører til Majorstuen skole, og
   «Svarttjern og Tiurleiken» deles av to skoler. Koblingen ligger kuratert i
   `data/skolekretser.json`, aldri som navnegjetting i kjøretid.
+
+### Naturfare
+
+Flom, skred, radon og stormflo ligger sammen med kvikkleire i seksjonen **Naturfare**. Alle fem er
+**direkte oppslag**, ikke providere: det er landsdekkende polygonlag med hundretusener av flater, og
+spørsmålet er «ligger denne adressen innenfor?». `JordFlomskredAktsomhet` alene har 503 461
+polygoner. Å kopiere dem inn i Supabase ville gitt lagring og vedlikehold uten å svare bedre.
+
+#### Aktsomhet er ikke fare
+
+Dette skillet styrer all ordlyd, og kildene har det selv:
+
+| | Hva det er | Hva vi skriver |
+|---|---|---|
+| **Aktsomhetsområde** | Landsdekkende screeningkart, modellert fra terreng og løsmasser | «Aktsomhetsområde for …» — området bør undersøkes nærmere |
+| **Kartlagt sone / faresone** | Detaljert utredning på et utvalgt sted, med gjentaksintervall | «Innenfor kartlagt …» med nivået kilden oppgir |
+
+Ingen av dem blir «høy fare», «flomfarlig bolig» eller en samlet risikoscore. Det finnes ingen score.
+
+#### Per faretype
+
+| Tema | Kilde og tjeneste | Dekning | Hva «ingen treff» betyr |
+|---|---|---|---|
+| **Flom** | NVE `Flomsoner2` (lag 0 analyseområde, 13–22 sonene) og `Flomaktsomhet` (lag 1 sone, lag 2 dekning) | Flomsoner: utvalgte vassdrag. Aktsomhet: landsdekkende | Utenfor analyseområdet sier vi ingenting. Innenfor sier vi «utenfor kartlagt flomsone» — ikke «ingen flomfare» |
+| **Skred** | NVE `Skredfaresoner3` (lag 0 kartleggingsområde, 6–8 samlet, 10/14/18/22 per type), `JordFlomskredAktsomhet` **lag 1**, `SkredSnoSteinAkt` (lag 0 sone, lag 1 dekning) | Faresoner: utredede områder. Aktsomhet: landsdekkende | Ingen uttalelse. Flatt terreng gir ingen rader |
+| **Radon** | NGU OGC API Features, `radonaktsomhet` | Landsdekkende | Kartet dekker ikke punktet. Ikke at radon er utelukket |
+| **Stormflo** | Kartverket WFS `wfs.stormflo_havniva` | Kyst | Ingen uttalelse i innlandet |
+| **Kvikkleire** | Uendret: synkede soner + aktsomhetskart som direkte oppslag | Se over | Uendret |
+
+Alle fem er **NLOD**.
+
+#### Nivåene vi viser, og de vi ikke viser
+
+- **Flom:** alle gjentaksintervaller kilden har (10–1000 år, med og uten klimapåslag). Det strengeste
+  — lavest gjentaksintervall — er hovedlinjen, resten står under «Detaljer».
+- **Skred:** 1/100, 1/1000 og 1/5000, som følger sikkerhetsklassene i byggteknisk forskrift.
+- **Stormflo:** 20- og 200-årsnivå med dagens havnivå, og 200-årsnivå med havnivå i 2100. 500-,
+  1000-års- og øvre-estimat-scenarioene vises **ikke** — de gjør ikke svaret mer brukbart, og hvert
+  scenario koster en forespørsel. `Middelhøyvann` er utelatt fordi det er normal vannstand, ikke en
+  hendelse.
+
+#### Punkt-i-polygon, ikke nærhet
+
+Naturfare svarer på om **adressen** ligger innenfor. Ingen av oppslagene bruker søkeradiusen, og
+ingen av dem sier «flomsone 180 m unna» — det ville lest som om eiendommen var berørt. Kvikkleire
+beholder sin radiusvisning, som før.
+
+#### To feil QA mot ekte adresser avdekket
+
+Begge ville passert en enhetstest, og begge er verdt å huske:
+
+1. **`JordFlomskredAktsomhet` lag 0 er et rasterisert oversiktslag** uten geometritype, ment for
+   utzoomet kartvisning. `identify` mot det ga treff **overalt** — også på flat bygrunn på
+   Grünerløkka og i Lillestrøm sentrum. Polygonene ligger i lag 1. Samme felle finnes i
+   `Skredfaresoner3`, der «Samlet» og de typevise gruppene er gruppelag uten geometri.
+2. **Kartverkets `Dekningsområde` dekker praktisk talt hele landet.** Brukt som port ga det «ikke
+   berørt av kartlagte stormflonivåer» på Elverum og i Lillestrøm. Porten er nå det ytterste
+   scenarioet kilden har (øvre estimat 2150): treffer ikke det, er adressen ikke i spill.
+
+`npm run qa:naturfare` kjører åtte kjente adresser mot de ekte tjenestene og skriver ut hva hver av
+dem gir. Kjør den etter endringer i lagvalg, terskler eller ordlyd.
+
+#### Kart
+
+Naturfare tegnes **ikke** i kartet. Oppslagene henter ikke geometri — de spør bare om punktet ligger
+innenfor — og fem store polygonlag samtidig ville gjort kartet uleselig uten å svare på noe kartet
+ikke alt svarer på. Skal det inn senere, hører det sammen med valgt rad, ikke som standardlag.
 
 ### Tilfluktsrom
 

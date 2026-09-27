@@ -22,6 +22,20 @@ const arcgisPageSchema = z.object({
 
 export type ArcgisFeature = z.infer<typeof arcgisFeatureSchema>;
 
+/** Én treffrad fra `identify`. `layerName` er kildens eget lagnavn, f.eks. «Flomsone_200arsflom». */
+const identifyResultSchema = z.object({
+  layerId: z.number(),
+  layerName: z.string(),
+  attributes: z.record(z.string(), z.unknown()).default({}),
+});
+
+const identifySchema = z.object({
+  results: z.array(identifyResultSchema).default([]),
+  error: z.object({ message: z.string() }).loose().optional(),
+});
+
+export type IdentifyResult = z.infer<typeof identifyResultSchema>;
+
 export class ArcgisError extends Error {
   constructor(url: string, reason: string) {
     super(`ArcGIS-feil (${new URL(url).pathname}): ${reason}`);
@@ -139,6 +153,46 @@ export class ArcgisClient {
       offset += features.length;
     }
     throw new ArcgisError(`${serviceUrl}/${layer}/query`, "for mange sider");
+  }
+
+  /**
+   * `identify`: hvilke av flere lag inneholder punktet — i **én** forespørsel.
+   *
+   * Finnes fordi naturfare-tjenestene bruker ett lag per nivå: NVEs flomsoner har ett lag per
+   * gjentaksintervall, og et `query`-kall per lag ville gitt ti forespørsler for ett adressesøk.
+   * `identify` svarer på alle samtidig, og `layerName` følger med — så nivået kan leses av
+   * lagnavnet framfor av et attributt som ikke alltid er satt.
+   */
+  async identify(
+    serviceUrl: string,
+    layers: number[],
+    input: { lat: number; lng: number; toleranceM?: number; signal?: AbortSignal },
+  ): Promise<IdentifyResult[]> {
+    // 200 m vindu over 200 piksler ⇒ ett piksel ≈ én meter, slik at tolerance kan leses som meter.
+    const halvGrad = 0.001;
+    const params = new URLSearchParams({
+      f: "json",
+      geometry: JSON.stringify({ x: input.lng, y: input.lat }),
+      geometryType: "esriGeometryPoint",
+      sr: "4326",
+      layers: `all:${layers.join(",")}`,
+      tolerance: String(Math.max(0, Math.round(input.toleranceM ?? 0))),
+      mapExtent: [input.lng - halvGrad, input.lat - halvGrad, input.lng + halvGrad, input.lat + halvGrad].join(","),
+      imageDisplay: "200,200,96",
+      returnGeometry: "false",
+    });
+    const url = `${serviceUrl}/identify?${params.toString()}`;
+    const body = await fetchJson(url, {
+      timeoutMs: this.retry.timeoutMs,
+      retries: this.retry.maxRetries,
+      baseDelayMs: this.retry.baseDelayMs,
+      signal: input.signal,
+      fetchImpl: this.fetchImpl,
+    });
+    const parsed = identifySchema.safeParse(body);
+    if (!parsed.success) throw new ArcgisError(url, "uventet identify-svar");
+    if (parsed.data.error) throw new ArcgisError(url, parsed.data.error.message);
+    return parsed.data.results;
   }
 
   /** Antall objekter i et lag (eller innen punkt/radius). */
