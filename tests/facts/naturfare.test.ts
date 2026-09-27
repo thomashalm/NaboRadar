@@ -43,12 +43,32 @@ function wfsFake(treff: string[]): typeof fetch {
   }) as typeof fetch;
 }
 
-function radonFake(grad: string | null): typeof fetch {
-  return (async () => {
-    const features = grad === null ? [] : [{ properties: { radonAktsomhetGrad: grad, oppdateringsdato: "2026-08-31T22:00:00Z" } }];
-    return new Response(JSON.stringify({ features }), { status: 200, headers: { "content-type": "application/json" } });
+/**
+ * Svarer som NGUs publikumskart: GetFeatureInfo med GML, der `aktsomhetgrad` er tallkoden som
+ * styrer fargen i legenden. `kode = null` betyr at kartet ikke dekker punktet.
+ */
+const radonKall: string[] = [];
+function radonFake(kode: string | null, besk = ""): typeof fetch {
+  return (async (input: RequestInfo | URL) => {
+    radonKall.push(String(input));
+    const body =
+      kode === null
+        ? `<?xml version="1.0"?><msGMLOutput></msGMLOutput>`
+        : `<?xml version="1.0"?><msGMLOutput><Radon_aktsomhet_layer><Radon_aktsomhet_feature>` +
+          `<objectid>495519</objectid><objekttype>RadonAktsomhet</objekttype>` +
+          `<aktsomhetgrad>${kode}</aktsomhetgrad><aktsomhetgrad_besk>${besk}</aktsomhetgrad_besk>` +
+          `</Radon_aktsomhet_feature></Radon_aktsomhet_layer></msGMLOutput>`;
+    return new Response(body, { status: 200, headers: { "content-type": "application/vnd.ogc.gml" } });
   }) as typeof fetch;
 }
+
+/** Kildens fire klasser: tallkode → nøkkel og visningstekst. Rekkefølgen er legendens. */
+const RADON_FASIT = [
+  { kode: "3", kildetekst: "Særlig høy aktsomhet", nokkel: "særligHøy", vises: "Særlig høy" },
+  { kode: "2", kildetekst: "Høy aktsomhet", nokkel: "høy", vises: "Høy" },
+  { kode: "1", kildetekst: "Moderat til lav aktsomhet", nokkel: "moderatTilLav", vises: "Moderat til lav" },
+  { kode: "0", kildetekst: "Usikker aktsomhet", nokkel: "usikker", vises: "Usikker" },
+] as const;
 
 describe("flom", () => {
   it("sier at punktet er innenfor kartlagt flomsone, med strengeste gjentaksintervall", async () => {
@@ -126,38 +146,115 @@ describe("skred", () => {
   });
 });
 
+/**
+ * Radon henger på ett valg: vi viser **det kartet NGU publiserer**, ikke det nyeste endepunktet.
+ *
+ * NGU har også et «versjon 2»-datasett fra september 2026 med fem andre klasser, som ga en annen
+ * klasse på 40 av 40 testede steder. Testene her låser klassene til publikumskartets fire, slik at
+ * et bytte tilbake til v2 ikke kan skje ved et uhell.
+ */
 describe("radon", () => {
-  it("bruker kildens egne klasser", async () => {
-    for (const grad of Object.keys(RADON_LABEL)) {
-      const hits = await new NguRadonLookup(radonFake(grad)).run(ctx);
-      expect(hits[0]!.attributes.aktsomhetsgrad).toBe(grad);
+  it("bruker publikumskartets fire klasser, og bare dem", () => {
+    expect(Object.keys(RADON_LABEL).sort()).toEqual(["høy", "moderatTilLav", "særligHøy", "usikker"]);
+    // Klassene fra v2-datasettet skal ikke finnes her.
+    for (const v2 of ["megetHøy", "middels", "lav"]) expect(RADON_LABEL[v2]).toBeUndefined();
+    // «Moderat til lav» er én klasse hos NGU, ikke to.
+    expect(RADON_LABEL.moderatTilLav).toBe("Moderat til lav");
+  });
+
+  it("oversetter kildens tallkode til kildens egen klasse", async () => {
+    for (const { kode, kildetekst, nokkel, vises } of RADON_FASIT) {
+      const hits = await new NguRadonLookup(radonFake(kode, kildetekst)).run(ctx);
+      expect(hits[0]!.attributes.aktsomhetsgrad).toBe(nokkel);
+      expect(hits[0]!.attributes.kildetekst).toBe(kildetekst);
       const tekst = describeFact({ subtype: "radon_aktsomhet", title: hits[0]!.title, attributes: hits[0]!.attributes, contains: true })!;
-      expect(tekst.headline).toContain(RADON_LABEL[grad]!);
+      expect(tekst.headline).toBe(`${vises} radonaktsomhet i området`);
+      // Kildens egen ordlyd skal være etterprøvbar under detaljer.
+      expect(tekst.technical!.join(" ")).toContain(kildetekst);
     }
   });
 
-  it("avviser en klasse kilden ikke har", async () => {
-    const hits = await new NguRadonLookup(radonFake("ekstrem")).run(ctx);
-    expect(hits).toEqual([]);
+  it("spør publikumskartet, med ekte punkt-i-polygon", async () => {
+    radonKall.length = 0;
+    await new NguRadonLookup(radonFake("1", "Moderat til lav aktsomhet")).run(ctx);
+    const url = new URL(radonKall[0]!);
+    expect(url.origin + url.pathname).toBe("https://geo.ngu.no/mapserver/RadonWMS2");
+    expect(url.searchParams.get("LAYERS")).toBe("Radon_aktsomhet");
+    // GetFeatureInfo svarer «hvilken flate ligger punktet i». bbox + features[0] gjorde ikke det.
+    expect(url.searchParams.get("REQUEST")).toBe("GetFeatureInfo");
+    // CRS:84 er alltid lon,lat. EPSG:4326 i WMS 1.3.0 er lat,lon og kan byttes om ved et uhell.
+    expect(url.searchParams.get("CRS")).toBe("CRS:84");
+    const [minX, minY, maxX, maxY] = url.searchParams.get("BBOX")!.split(",").map(Number);
+    expect(minX! < ctx.lng && ctx.lng < maxX!).toBe(true);
+    expect(minY! < ctx.lat && ctx.lat < maxY!).toBe(true);
+  });
+
+  it("henter ikke lenger fra v2-endepunktet", async () => {
+    radonKall.length = 0;
+    await new NguRadonLookup(radonFake("1", "Moderat til lav aktsomhet")).run(ctx);
+    expect(radonKall.join(" ")).not.toContain("api/features/radonaktsomhet");
+    expect(radonKall.join(" ")).not.toContain("RadonUranAktsomhetWMS");
+  });
+
+  it("avviser en kode kilden ikke har", async () => {
+    expect(await new NguRadonLookup(radonFake("9", "Noe nytt")).run(ctx)).toEqual([]);
   });
 
   it("sier eksplisitt at dette ikke er en måling i boligen", async () => {
-    const hits = await new NguRadonLookup(radonFake("megetHøy")).run(ctx);
+    const hits = await new NguRadonLookup(radonFake("2", "Høy aktsomhet")).run(ctx);
     const tekst = describeFact({ subtype: "radon_aktsomhet", title: hits[0]!.title, attributes: hits[0]!.attributes, contains: true })!;
     expect(tekst.details.join(" ")).toContain("ikke en måling i boligen");
-    expect(tekst.details.join(" ")).toContain("måling");
     expect(tekst.headline).toContain("i området");
     // Aldri formulert som et nivå i boligen.
     expect(tekst.headline).not.toMatch(/radonnivå i boligen|Bq/i);
   });
 
-  it("tar vare på kildens oppdateringsdato, ikke vår hentedato", async () => {
-    const hits = await new NguRadonLookup(radonFake("høy")).run(ctx);
-    expect(hits[0]!.sourceUpdatedAt).toBe("2026-08-31T22:00:00.000Z");
+  it("overpresiserer ikke tomten", async () => {
+    const hits = await new NguRadonLookup(radonFake("1", "Moderat til lav aktsomhet")).run(ctx);
+    const tekst = describeFact({ subtype: "radon_aktsomhet", title: hits[0]!.title, attributes: hits[0]!.attributes, contains: true })!;
+    // NGU: «Kartet kan ikke benyttes til å forutsi radonkonsentrasjonen i enkeltbygninger.»
+    expect(tekst.details.join(" ")).toContain("ikke en måling eller detaljert vurdering av den enkelte tomten");
+    // Hovedkortet skal være kort — forbeholdene hører under detaljer.
+    expect(tekst.headline.length).toBeLessThan(60);
   });
 
   it("gir ingen treff når kartet ikke dekker punktet", async () => {
     expect(await new NguRadonLookup(radonFake(null)).run(ctx)).toEqual([]);
+  });
+
+  it("kildevisningen peker på NGUs eget publikumskart", () => {
+    const kilde = SOURCES["ngu-radon-aktsomhet"]!;
+    expect(kilde.name).toBe("Radon – aktsomhetsområder");
+    expect(kilde.url).toBe("https://geo.ngu.no/kart/radon/");
+    // «versjon 2» er ikke noe NGU omtaler produktet som offentlig.
+    expect(JSON.stringify(kilde)).not.toMatch(/versjon 2|v2/i);
+  });
+});
+
+/**
+ * Regresjon på en reell adresse.
+ *
+ * Langmyrgrenda 26C i Oslo var saken som avdekket at vi hadde koblet oss på feil produkt: vi viste
+ * «Meget høy», mens NGUs publiserte kart viser «Moderat til lav». Koordinatet er det Kartverkets
+ * adresse-API gir (EPSG:4258), altså nøyaktig det `/omrade` slår opp med.
+ */
+describe("regresjon: Langmyrgrenda 26C", () => {
+  const LANGMYRGRENDA = { lat: 59.96646353771135, lng: 10.747149073750538, radiusM: 1000 };
+
+  it("klassifiseres som «Moderat til lav», ikke «Meget høy»", async () => {
+    const hits = await new NguRadonLookup(radonFake("1", "Moderat til lav aktsomhet")).run(LANGMYRGRENDA);
+    expect(hits[0]!.attributes.aktsomhetsgrad).toBe("moderatTilLav");
+    const tekst = describeFact({ subtype: "radon_aktsomhet", title: hits[0]!.title, attributes: hits[0]!.attributes, contains: true })!;
+    expect(tekst.headline).toBe("Moderat til lav radonaktsomhet i området");
+    expect(tekst.headline).not.toContain("Meget høy");
+  });
+
+  it("slår opp på adressens eget koordinat", async () => {
+    radonKall.length = 0;
+    await new NguRadonLookup(radonFake("1", "Moderat til lav aktsomhet")).run(LANGMYRGRENDA);
+    const bbox = new URL(radonKall[0]!).searchParams.get("BBOX")!.split(",").map(Number);
+    expect((bbox[0]! + bbox[2]!) / 2).toBeCloseTo(LANGMYRGRENDA.lng, 5);
+    expect((bbox[1]! + bbox[3]!) / 2).toBeCloseTo(LANGMYRGRENDA.lat, 5);
   });
 });
 

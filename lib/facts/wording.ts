@@ -13,14 +13,14 @@ import type { AreaAttributes } from "@/types/area-feature";
  */
 
 /**
- * Radonklassene slik NGU navngir dem, oversatt til visningsform — ikke omgjort til nye nivåer.
- * Kilden har fem klasser, og vi viser fem klasser.
+ * Radonklassene slik NGU navngir dem i det publiserte kartet, ikke omgjort til nye nivåer.
+ * Kilden har fire klasser, og vi viser fire klasser — «Moderat til lav» er én klasse hos NGU,
+ * og skal ikke splittes i «middels» og «lav».
  */
 export const RADON_LABEL: Record<string, string> = {
-  megetHøy: "Meget høy",
+  særligHøy: "Særlig høy",
   høy: "Høy",
-  middels: "Middels",
-  lav: "Lav",
+  moderatTilLav: "Moderat til lav",
   usikker: "Usikker",
 };
 
@@ -39,6 +39,8 @@ export interface SourceInfo {
   owner: string;
   licenseName: string;
   licenseUrl: string;
+  /** Etatens egen publiserte kartside, når den finnes, slik at svaret kan etterprøves der. */
+  url?: string;
 }
 
 /** Kilde per provider/lookup. Vises alltid sammen med faktaene. */
@@ -80,10 +82,12 @@ export const SOURCES: Record<string, SourceInfo> = {
     licenseUrl: "https://data.norge.no/nlod/no/1.0",
   },
   "ngu-radon-aktsomhet": {
-    name: "Nasjonalt aktsomhetskart for radon",
+    name: "Radon – aktsomhetsområder",
     owner: "Norges geologiske undersøkelse og Direktoratet for strålevern og atomsikkerhet",
     licenseName: "NLOD",
     licenseUrl: "https://data.norge.no/nlod/no/1.0",
+    // NGUs eget publikumskart. Klassen vi viser skal kunne slås opp her og stemme.
+    url: "https://geo.ngu.no/kart/radon/",
   },
   "kartverket-stormflo": {
     name: "Stormflo og havnivå",
@@ -525,15 +529,20 @@ export function describeFact(input: {
       const label = grad !== null ? (RADON_LABEL[grad] ?? grad) : null;
       return {
         headline: label !== null ? `${label} radonaktsomhet i området` : "Radonaktsomhet i området",
-        // Dette er den viktigste setningen i hele naturfaredelen, og den er ikke valgfri.
-        details: ["Dette er ikke en måling i boligen. Faktisk radonnivå kan bare fastslås ved måling."],
+        details: [
+          // Dette er den viktigste setningen i hele naturfaredelen, og den er ikke valgfri.
+          "Dette er ikke en måling i boligen. Faktisk radonnivå kan bare fastslås ved måling.",
+          // NGU sier det selv: «Kartet kan ikke benyttes til å forutsi radonkonsentrasjonen i
+          // enkeltbygninger.» Da skal vi ikke la kortet framstå som en vurdering av tomten.
+          "Kartet viser aktsomhet i området og er ikke en måling eller detaljert vurdering av den enkelte tomten.",
+        ],
         compact: {
           headline: label !== null ? `${label} radonaktsomhet` : "Radonaktsomhet",
           context: "aktsomhet for området, ikke måling i boligen",
         },
         technical: [
-          grad !== null ? `Kildens klasse: ${grad}` : null,
-          "Nasjonalt aktsomhetskart for radon (NGU og DSA), modellert fra inneluftmålinger, flymålinger og løsmasser",
+          str(a.kildetekst) !== null ? `Kildens klasse: ${str(a.kildetekst)}` : null,
+          "Nasjonalt aktsomhetskart for radon (NGU og DSA), modellert fra inneluftmålinger og geologi",
           "Alle boliger bør måle radon uavhengig av aktsomhetsgrad",
         ].filter((line): line is string => line !== null),
         caveat: null,

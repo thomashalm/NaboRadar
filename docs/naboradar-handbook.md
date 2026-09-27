@@ -805,7 +805,7 @@ For store til å synke, eller svarer bare på «ligger punktet innenfor?».
 | Støysoner fly | Avinor | Gul/rød sone rundt lufthavn | — |
 | Flomsoner og flomaktsomhet | NVE | Kartlagt flomsone og aktsomhetsområde for flom | Ett `identify`-kall dekker alle gjentaksintervallene. Analyseområdet avgjør om «utenfor sone» kan sies |
 | Skredfaresoner og skredaktsomhet | NVE | Kartlagt faresone, jord-/flomskred, snø-/steinskred | Faresone (utredet) skilles alltid fra aktsomhet (screening) |
-| Radonaktsomhet | NGU og DSA (versjon 2, 2026) | Modellert aktsomhetsgrad for området | Fem klasser fra kilden. Aldri framstilt som måling i boligen |
+| Radonaktsomhet | NGU og DSA | Modellert aktsomhetsgrad for området | NGUs publiserte kart, fire klasser. `GetFeatureInfo` gir ekte punkt-i-polygon. Aldri framstilt som måling i boligen |
 | Stormflo og havnivå | Kartverket | 20- og 200-årsnivå i dag, 200-årsnivå med havnivå 2100 | WFS med `Intersects` og `resulttype=hits`: ekte punkt-i-polygon på ~50 byte |
 | Høyspent distribusjonsnett | NVE | Distribusjonsnett | For stort til synk |
 
@@ -905,7 +905,7 @@ Ingen av dem blir «høy fare», «flomfarlig bolig» eller en samlet risikoscor
 |---|---|---|---|
 | **Flom** | NVE `Flomsoner2` (lag 0 analyseområde, 13–22 sonene) og `Flomaktsomhet` (lag 1 sone, lag 2 dekning) | Flomsoner: utvalgte vassdrag. Aktsomhet: landsdekkende | Utenfor analyseområdet sier vi ingenting. Innenfor sier vi «utenfor kartlagt flomsone» — ikke «ingen flomfare» |
 | **Skred** | NVE `Skredfaresoner3` (lag 0 kartleggingsområde, 6–8 samlet, 10/14/18/22 per type), `JordFlomskredAktsomhet` **lag 1**, `SkredSnoSteinAkt` (lag 0 sone, lag 1 dekning) | Faresoner: utredede områder. Aktsomhet: landsdekkende | Ingen uttalelse. Flatt terreng gir ingen rader |
-| **Radon** | NGU OGC API Features, `radonaktsomhet` | Landsdekkende | Kartet dekker ikke punktet. Ikke at radon er utelukket |
+| **Radon** | NGU WMS `RadonWMS2`, laget `Radon_aktsomhet` — tjenesten bak geo.ngu.no/kart/radon. Punktoppslag med `GetFeatureInfo` | Landsdekkende | Kartet dekker ikke punktet. Ikke at radon er utelukket |
 | **Stormflo** | Kartverket WFS `wfs.stormflo_havniva` | Kyst | Ingen uttalelse i innlandet |
 | **Kvikkleire** | Uendret: synkede soner + aktsomhetskart som direkte oppslag | Se over | Uendret |
 
@@ -939,8 +939,40 @@ Begge ville passert en enhetstest, og begge er verdt å huske:
    berørt av kartlagte stormflonivåer» på Elverum og i Lillestrøm. Porten er nå det ytterste
    scenarioet kilden har (øvre estimat 2150): treffer ikke det, er adressen ikke i spill.
 
-`npm run qa:naturfare` kjører åtte kjente adresser mot de ekte tjenestene og skriver ut hva hver av
-dem gir. Kjør den etter endringer i lagvalg, terskler eller ordlyd.
+`npm run qa:naturfare` kjører ti kjente adresser mot de ekte tjenestene og skriver ut hva hver av
+dem gir. For radon sammenlignes klassen mot NGUs publiserte kart, og skriptet avslutter med
+exit-kode 1 ved avvik. Kjør den etter endringer i lagvalg, terskler eller ordlyd.
+
+#### Flere versjoner av samme datasett
+
+**Når en offentlig etat har flere tekniske datasett eller versjoner av samme tema, skal NaboRadar
+ikke automatisk velge det nyeste endepunktet. For offentlig visning skal vi først finne ut hvilket
+produkt etaten faktisk publiserer og ber brukerne forholde seg til, og bruke det.**
+
+Et nyere teknisk datasett kan brukes internt og i research, tydelig merket. Men det offentlige
+resultatet skal ikke avvike fra etatens publiserte produkt uten en eksplisitt og dokumentert
+beslutning — for brukeren skal kunne slå opp svaret vårt hos kilden og finne det samme.
+
+Slik finner du ut hvilket produkt som er det publiserte: **åpne etatens eget kart og les hvilke
+tjenester siden faktisk kaller.** Ikke gå etter navn i en datakatalog. To tjenester kan hete det
+samme, ha samme produktnavn og samme eier, og likevel svare ulikt på samme punkt.
+
+**Radon er caset som ga regelen.** NGU har to samtidige produkter:
+
+| | Publisert kart | «Versjon 2» |
+|---|---|---|
+| Tjeneste | WMS `RadonWMS2`, lag `Radon_aktsomhet` | OGC API Features `radonaktsomhet` + `RadonUranAktsomhetWMS` |
+| Publisert | 2014-produktet | September 2026 |
+| Klasser | Særlig høy · Høy · Moderat til lav · Usikker | megetHøy · høy · middels · lav · usikker |
+| Lenket fra ngu.no | ja | nei |
+
+Vi hadde koblet oss på v2 fordi det var nyest og hadde det reneste API-et. På **40 av 40** testede
+steder over hele landet ga de to produktene ulik klasse. Langmyrgrenda 26C i Oslo ble vist som
+«Meget høy» hos oss og «Moderat til lav» i NGUs eget kart. Vi var ikke faglig feil — vi var
+uetterprøvbare, og det er like ille for et produkt som lever av at folk kan kontrollere oss.
+
+Bytter NGU sitt publikumskart til v2, bytter vi med. Det skal være en bevisst endring med ny QA,
+ikke noe som skjer fordi et endepunkt ble oppgradert.
 
 #### Kart
 

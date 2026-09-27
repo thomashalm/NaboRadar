@@ -336,7 +336,18 @@ function Kildelinjer({
                   key={source.name}
                   className="py-2.5 text-[13px] leading-relaxed"
                 >
-                  <span className="text-ink">{source.name}</span>
+                  {source.url ? (
+                    <a
+                      href={source.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-ink underline decoration-line underline-offset-2 hover:decoration-ink"
+                    >
+                      {source.name}
+                    </a>
+                  ) : (
+                    <span className="text-ink">{source.name}</span>
+                  )}
                   <span className="block text-muted">
                     {source.owner} · {source.licenseName}
                   </span>

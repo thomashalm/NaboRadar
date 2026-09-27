@@ -31,7 +31,9 @@ const FLOMAKTSOMHET = "https://kart.nve.no/enterprise/rest/services/Flomaktsomhe
 const JORDFLOMSKRED = "https://kart.nve.no/enterprise/rest/services/JordFlomskredAktsomhet/MapServer";
 const SNOSTEIN = "https://kart.nve.no/enterprise/rest/services/SkredSnoSteinAkt/MapServer";
 const SKREDFARESONER = "https://kart.nve.no/enterprise/rest/services/Skredfaresoner3/MapServer";
-const RADON_API = "https://geo.ngu.no/api/features/radonaktsomhet/collections/radonaktsomhet/items";
+/** Karttjenesten bak geo.ngu.no/kart/radon — det radonkartet NGU publiserer til publikum. */
+const RADON_WMS = "https://geo.ngu.no/mapserver/RadonWMS2";
+const RADON_LAG = "Radon_aktsomhet";
 const STORMFLO_WFS = "https://wfs.geonorge.no/skwms1/wfs.stormflo_havniva";
 
 /**
@@ -238,15 +240,39 @@ export class NveSkredLookup implements AreaLookup {
   }
 }
 
-/** Kildens egne klasser. Vi lager ingen egne risikokategorier oppå dem. */
-const RADONKLASSER = new Set(["megetHøy", "høy", "middels", "lav", "usikker"]);
+/**
+ * Kildens fire klasser, slik `aktsomhetgrad` koder dem i det publiserte kartet.
+ *
+ * Vi nøkler på tallkoden og ikke på `aktsomhetgrad_besk`, fordi tallet er det feltet som styrer
+ * fargen i NGUs egen legend. Teksten leses likevel ut og sammenlignes, slik at en omskriving hos
+ * NGU blir synlig som et avvik i stedet for å passere stille.
+ */
+const RADONKLASSER: Record<string, { nokkel: string; kildetekst: string }> = {
+  "0": { nokkel: "usikker", kildetekst: "Usikker aktsomhet" },
+  "1": { nokkel: "moderatTilLav", kildetekst: "Moderat til lav aktsomhet" },
+  "2": { nokkel: "høy", kildetekst: "Høy aktsomhet" },
+  "3": { nokkel: "særligHøy", kildetekst: "Særlig høy aktsomhet" },
+};
 
 /**
- * Radonaktsomhet (NGU og DSA, versjon 2 fra september 2026).
+ * Radonaktsomhet (NGU og DSA) — **det kartet NGU publiserer til publikum**.
  *
- * OGC API Features med bbox-spørring rundt punktet. Merk at dette er **modellert aktsomhet for
- * området**, ikke en måling i boligen — den forskjellen står i formuleringsregisteret, og den er
- * ikke valgfri: radonnivå i en konkret bolig kan bare fastslås ved måling.
+ * Kilden er `RadonWMS2`, laget `Radon_aktsomhet`: nøyaktig den tjenesten geo.ngu.no/kart/radon
+ * tegner, med de fire klassene særlig høy / høy / moderat til lav / usikker.
+ *
+ * VALGET AV KILDE ER BEVISST, og det er ikke det nyeste endepunktet. NGU har også publisert en
+ * «versjon 2» av datasettet (OGC API Features + RadonUranAktsomhetWMS, september 2026) med fem
+ * andre klasser. Den klassifiserer mange adresser høyere: på et testsett på 40 steder over hele
+ * landet ga de to produktene ulik klasse i 40 av 40 tilfeller. Så lenge NGU selv sender publikum
+ * til 2014-kartet, er det dette svaret en bruker kan etterprøve, og da er det dette vi viser.
+ * Se «Flere versjoner av samme datasett» i håndboken.
+ *
+ * OPPSLAGET ER EKTE PUNKT-I-POLYGON. GetFeatureInfo spør «hvilken flate ligger dette punktet i»
+ * og lar serveren avgjøre. En bbox-spørring gjør ikke det: den returnerer alt som *overlapper*
+ * boksen, og nær en klassegrense ble feil flate valgt.
+ *
+ * Merk at dette er **modellert aktsomhet for området**, ikke en måling i boligen — den forskjellen
+ * står i formuleringsregisteret, og den er ikke valgfri.
  */
 export class NguRadonLookup implements AreaLookup {
   readonly id = "ngu-radon-aktsomhet";
@@ -257,34 +283,44 @@ export class NguRadonLookup implements AreaLookup {
   constructor(private readonly fetchImpl: typeof fetch = fetch) {}
 
   async run({ lat, lng, signal }: LookupContext): Promise<LookupHit[]> {
-    // ~11 m boks rundt punktet: nok til å treffe flaten punktet ligger i, lite nok til å ikke
-    // plukke opp naboflater med en annen klasse.
-    const d = 0.0001;
-    const url = `${RADON_API}?bbox=${lng - d},${lat - d},${lng + d},${lat + d}&limit=5&f=json`;
-    const body = await fetchJsonLite(url, this.fetchImpl, signal);
-    const features = Array.isArray((body as { features?: unknown[] }).features)
-      ? ((body as { features: unknown[] }).features as { properties?: Record<string, unknown> }[])
-      : [];
+    // CRS:84 og ikke EPSG:4326: i WMS 1.3.0 er akserekkefølgen for EPSG:4326 lat,lon, mens CRS:84
+    // alltid er lon,lat. Begge svarer likt her, men CRS:84 kan ikke byttes om ved et uhell.
+    const d = 0.00002;
+    const params = new URLSearchParams({
+      SERVICE: "WMS",
+      VERSION: "1.3.0",
+      REQUEST: "GetFeatureInfo",
+      CRS: "CRS:84",
+      LAYERS: RADON_LAG,
+      QUERY_LAYERS: RADON_LAG,
+      STYLES: "default",
+      FORMAT: "image/png",
+      INFO_FORMAT: "application/vnd.ogc.gml",
+      // 3×3 piksler med I/J i midten: minste ramme som treffer punktet og ingenting rundt det.
+      WIDTH: "3",
+      HEIGHT: "3",
+      I: "1",
+      J: "1",
+      BBOX: `${lng - d},${lat - d},${lng + d},${lat + d}`,
+      FEATURE_COUNT: "1",
+    });
+    const gml = await fetchTekst(`${RADON_WMS}?${params.toString()}`, this.fetchImpl, signal);
 
-    for (const feature of features) {
-      const grad = tekst(feature.properties?.radonAktsomhetGrad);
-      if (grad === null || !RADONKLASSER.has(grad)) continue;
-      return [
-        {
-          subtype: "radon_aktsomhet",
-          title: "Radonaktsomhet",
-          attributes: {
-            aktsomhetsgrad: grad,
-            datametode: tekst(feature.properties?.radonUranDatametode),
-          },
-          distanceM: 0,
-          contains: true,
-          sourceUpdatedAt: iso(feature.properties?.oppdateringsdato),
-        },
-      ];
-    }
-    // Ingen flate her betyr at kartet ikke dekker punktet, ikke at radon er utelukket.
-    return [];
+    const kode = gml.match(/<aktsomhetgrad>\s*(\d+)\s*<\/aktsomhetgrad>/)?.[1];
+    const klasse = kode !== undefined ? RADONKLASSER[kode] : undefined;
+    // Ukjent kode er et signal om at kilden har endret seg, ikke noe vi skal gjette oss forbi.
+    if (klasse === undefined) return [];
+
+    return [
+      {
+        subtype: "radon_aktsomhet",
+        title: "Radonaktsomhet",
+        attributes: { aktsomhetsgrad: klasse.nokkel, kildetekst: klasse.kildetekst },
+        distanceM: 0,
+        contains: true,
+        sourceUpdatedAt: null,
+      },
+    ];
   }
 }
 
@@ -390,19 +426,9 @@ export class KartverketStormfloLookup implements AreaLookup {
   }
 }
 
-/** Minimal JSON-henting for OGC API Features. Samme budsjett som resten av oppslagene. */
-async function fetchJsonLite(url: string, fetchImpl: typeof fetch, signal?: AbortSignal): Promise<unknown> {
-  const response = await fetchImpl(url, { signal, headers: { accept: "application/geo+json, application/json" } });
+/** GetFeatureInfo svarer med GML, ikke JSON. */
+async function fetchTekst(url: string, fetchImpl: typeof fetch, signal?: AbortSignal): Promise<string> {
+  const response = await fetchImpl(url, { signal, headers: { accept: "application/vnd.ogc.gml, text/xml" } });
   if (!response.ok) throw new Error(`${url} svarte ${response.status}`);
-  return response.json();
-}
-
-function tekst(value: unknown): string | null {
-  return typeof value === "string" && value.trim() ? value.trim() : null;
-}
-
-function iso(value: unknown): string | null {
-  if (typeof value !== "string" || !value.trim()) return null;
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+  return response.text();
 }
