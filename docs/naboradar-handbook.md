@@ -4,6 +4,10 @@ Dette dokumentet beskriver **hvordan NaboRadar faktisk fungerer nå**. Det er ik
 endringer, og ikke en plan for hva vi skal bygge. Der eksisterende dokumentasjon sier noe annet enn
 koden, er koden fasit, og dokumentasjonen skal rettes.
 
+**Hva vi skal bygge videre, og i hvilken rekkefølge, står i [data-roadmapen](data-roadmap.md).** Den
+er source of truth for dataprioritering: hvilke kategorier som er hygiene og hvilke som er moat,
+hva som er vurdert og forkastet, og beslutningsregelen nye datakategorier måles mot.
+
 Sist kryssjekket mot repoet: **2026-09-25**.
 
 > ## Vedlikehold av dokumentet
@@ -36,7 +40,9 @@ Sist kryssjekket mot repoet: **2026-09-25**.
 [29. Secrets](#29-secrets-oversikt) · [30. Kommandoer](#30-viktige-kommandoer) ·
 [31. Arkitekturbeslutninger](#31-viktige-arkitekturbeslutninger) · [32. Roadmap](#32-roadmap--idébank) ·
 [33. Milepæler](#33-milepæler) · [34. Synlighet og indeksering](#34-synlighet-og-indeksering) ·
-[35. Privat research](#35-privat-research)
+[35. Privat research](#35-privat-research) ·
+[36. Research lifecycle](#36-research-lifecycle-freshness-og-review-kø) ·
+[Data-roadmap (eget dokument)](data-roadmap.md)
 
 ---
 
@@ -762,6 +768,10 @@ passert.
 ---
 
 ## 13. Datakilder
+
+Nye kilder vurderes mot [data-roadmapen](data-roadmap.md), som også holder kildekravene: lisens,
+geografisk dekning, identitetsstrategi og regelen om at en ekstern ID ikke behandles som permanent
+før stabiliteten er bevist over flere uttrekk.
 
 Kun kilder som faktisk er aktive i koden. Se [docs/data-sources.md](data-sources.md) for
 testdetaljer og eksempelresponser.
@@ -1655,6 +1665,10 @@ innsynsløsning er hverken robust eller ryddig.
 ## 32. Roadmap / idébank
 
 **Alt i denne seksjonen er `Ikke implementert`.** Ingenting her skal leses som at det finnes.
+
+Dette er en idébank for *funksjonalitet*. Prioritering av **datakategorier** hører ikke hit — den
+står i [data-roadmapen](data-roadmap.md), som også dokumenterer hva som er vurdert og bevisst lagt
+bort.
 
 | Idé | Status | Merknad |
 |---|---|---|

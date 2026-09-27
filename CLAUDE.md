@@ -19,6 +19,19 @@ kjente begrensninger.
 Ikke oppdater håndboken for små copy-endringer, vanlig styling eller trivielle bugfikser uten
 systempåvirkning.
 
+## Nye datakategorier
+
+Før en ny datakategori bygges — provider, research eller hybrid — skal den vurderes mot
+[data-roadmapen](docs/data-roadmap.md). Den er source of truth for dataprioritering og sier hva som
+er **hygiene** (forventet dekning, tas billig og raskt) og hva som er **moat** (verdi bygget over
+tid gjennom dedup, kapasitet, status, verifisering og review), hvilken modell kategorien hører til,
+og hva som allerede er vurdert og bevisst lagt bort. Står ideen i «ikke verdt det nå», skal den ikke
+bygges uten at premisset som satte den der har endret seg — og da oppdateres roadmapen i samme
+commit.
+
+Ikke press et research-problem inn i provider-arkitekturen, og ikke gjør noe til research fordi det
+er lettere å skrive enn en provider.
+
 ## Research
 
 All intern research følger **discovery først → verifisering etterpå → aktiv oppfølging av svake
