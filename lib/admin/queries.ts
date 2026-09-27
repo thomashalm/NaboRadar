@@ -1,13 +1,32 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { assessAll, type ProviderHealth, type ProviderHealthRow, type SyncRunSummary } from "@/lib/sync/health";
+import {
+  assessAll,
+  type ProviderHealth,
+  type ProviderHealthRow,
+  type SyncRequestRow,
+  type SyncRunSummary,
+} from "@/lib/sync/health";
 
 /** Kjøringer på tvers av providere, til historikktabellen. */
 export interface SyncRunRow extends SyncRunSummary {
   provider_id: string;
 }
 
-/** Klokka som utløser sync-workflowen. pg_cron primært, GitHubs egen schedule som reserve. */
+/** Manuelle forespørsler per provider, til feilsøking i detaljene på kortet. */
+export interface SyncRequestHistoryRow extends SyncRequestRow {
+  provider_id: string;
+  /** Utfallet av kjøringen forespørselen ble, når den rakk å bli en. */
+  run_status: string | null;
+}
+
+/**
+ * Klokka som utløser sync-workflowen.
+ *
+ * pg_cron er den eneste primære triggeren: den er synlig her og i /admin, og sender
+ * workflow_dispatch hvert 15. minutt. GitHubs egen schedule i sync.yml står igjen som en
+ * dokumentert daglig reserve, ikke som en parallell kadens — se docs/naboradar-handbook.md.
+ */
 export interface SchedulerStatus {
   jobname: string;
   schedule: string;
@@ -24,6 +43,8 @@ export interface SchedulerStatus {
 export interface AdminOverview {
   health: ProviderHealth[];
   runs: SyncRunRow[];
+  /** Siste manuelle forespørsler, gruppert per provider-id. */
+  requests: Map<string, SyncRequestHistoryRow[]>;
   scheduler: SchedulerStatus | null;
   errors: string[];
 }
@@ -42,20 +63,30 @@ function withMinutes(status: SchedulerStatus | null, now: Date): SchedulerStatus
  * Feiler én spørring, vises resten — admin skal ikke stå uten oversikt fordi én del er nede.
  */
 export async function loadAdminOverview(client: SupabaseClient, now = new Date()): Promise<AdminOverview> {
-  const [healthResult, runsResult, schedulerResult] = await Promise.all([
+  const [healthResult, runsResult, schedulerResult, requestsResult] = await Promise.all([
     client.rpc("provider_health"),
     client.rpc("recent_sync_runs", { p_limit: 40 }),
     client.rpc("scheduler_status"),
+    client.rpc("recent_sync_requests", { p_limit: 5 }),
   ]);
 
   const errors: string[] = [];
   if (healthResult.error) errors.push(`provider_health: ${healthResult.error.message}`);
   if (runsResult.error) errors.push(`recent_sync_runs: ${runsResult.error.message}`);
   if (schedulerResult.error) errors.push(`scheduler_status: ${schedulerResult.error.message}`);
+  if (requestsResult.error) errors.push(`recent_sync_requests: ${requestsResult.error.message}`);
+
+  const requests = new Map<string, SyncRequestHistoryRow[]>();
+  for (const rad of (requestsResult.data ?? []) as SyncRequestHistoryRow[]) {
+    const liste = requests.get(rad.provider_id) ?? [];
+    liste.push(rad);
+    requests.set(rad.provider_id, liste);
+  }
 
   return {
     health: assessAll((healthResult.data ?? []) as ProviderHealthRow[], now),
     runs: (runsResult.data ?? []) as SyncRunRow[],
+    requests,
     scheduler: withMinutes(((schedulerResult.data ?? []) as SchedulerStatus[])[0] ?? null, now),
     errors,
   };

@@ -10,9 +10,17 @@
 name: Sync
 
 on:
+  # ÉN primær trigger: pg_cron i Supabase sender workflow_dispatch hvert 15. minutt. Den er valgt
+  # fordi kjeden da er synlig i databasen og i /admin — scheduler_status() leser cron.job og siste
+  # utgående kall, så vi ser om det var klokka som stoppet og ikke bare at en sync uteble.
+  #
+  # Denne schedulen sto tidligere på samme kadens som pg_cron, altså hvert 15. minutt. Det ga to
+  # kjøringer per kvarter av samme worker, serialisert av concurrency-gruppen under — dobbelt
+  # forbruk uten at noen hadde bestemt det. Den er nå en bevisst reserve, én gang i døgnet: hvis
+  # pg_cron, pg_net eller tokenet skulle ryke, går syncen fortsatt daglig mens Healthchecks og
+  # /admin viser at den primære kjeden er nede.
   schedule:
-    # Hvert 15. minutt. GitHub kan forsinke planlagte kjøringer ved last.
-    - cron: "*/15 * * * *"
+    - cron: "17 5 * * *"
   workflow_dispatch:
     inputs:
       provider:

@@ -575,8 +575,25 @@ delete from vault.secrets where name = 'github_workflow_dispatch_token';
 ```
 
 Mellom revoke og ny lagring står scheduleren stille. `trigger_sync_workflow()` feiler ikke da — den
-gir en `notice` i cron-loggen og returnerer. GitHubs egen `schedule` og Healthchecks fanger opp at
-kjeden er brutt.
+gir en `notice` i cron-loggen og returnerer. Healthchecks fanger opp at kjeden er brutt, og den
+daglige reserve-schedulen i `sync.yml` sørger for at syncen fortsatt går én gang i døgnet.
+
+### Én primær trigger
+
+**pg_cron er source of truth.** Den sender `workflow_dispatch` hvert 15. minutt, og valget er tatt
+fordi kjeden da er synlig der vi ser etter: `scheduler_status()` leser `cron.job`, siste
+`cron.job_run_details` og siste utgående kall fra pg_net, så `/admin` kan svare på om det var klokka
+som stoppet — ikke bare at en sync uteble. Det var nettopp GitHubs egen cron som sviktet en gang, og
+som er grunnen til at dette laget finnes.
+
+GitHubs `schedule` i `sync.yml` sto tidligere på **samme kadens**, `*/15 * * * *`. Resultatet var to
+kjøringer av samme worker per kvarter, serialisert av concurrency-gruppen `naboradar-sync` — altså
+dobbelt forbruk uten at noen hadde bestemt det, og to mulige kilder til «hvem startet denne».
+
+Den er nå en **bevisst daglig reserve** (`17 5 * * *`): ryker pg_cron, pg_net eller tokenet, går
+syncen fortsatt én gang i døgnet mens Healthchecks og `/admin` viser at den primære kjeden er nede.
+Regresjonstesten i `tests/sync/request-state.test.ts` feiler hvis noen setter en kvarters-schedule
+tilbake i workflowen.
 
 ---
 
@@ -625,6 +642,20 @@ interface DataProvider<TRecord> {
 `normalize()` tar en hel batch, ikke én feature, fordi DiBK må gruppere flere features til én
 plansak. Den er ren, og derfor enhetstestbar uten nettverk.
 
+### Ekstern ID må bevises stabil
+
+**Et felt som ser ut som en permanent ID er ikke det før det er bevist over flere uttrekk.** Hent
+kilden to ganger med tid mellom, og sammenlign ID-mengdene før feltet tas i bruk som `externalId`.
+Er overlappet lavt, er det ikke identitet — det er et eksportartefakt.
+
+**Lik objektmengde kombinert med massiv `inserted` og `removed` samtidig er et
+datakvalitetssignal**, ikke en normal kjøring. Vakten i `lib/sync/guards.ts` flagger det nå
+automatisk, men signalet er verdt å kjenne igjen manuelt også: like mange poster som sist, og
+nesten ingen som gjenkjennes, betyr at ID-ene har endret seg og ikke virkeligheten.
+
+Se [Tilfluktsrom](#tilfluktsrom) for tilfellet som ga regelen: DSBs `lokalId` var ny for hvert
+uttrekk, og 0 av 556 ID-er var felles mellom to uttrekk et døgn fra hverandre.
+
 ### Kjøringen
 
 `npm run sync:worker` gjør to ting i rekkefølge:
@@ -650,6 +681,45 @@ Områdefakta synkes alltid fullt. Intervallene ligger i `providers`-tabellen:
 | `mdir-forurenset-grunn`, `mdir-industri-tillatelse` | 1 440 min | 24 t | 72 t |
 | `nve-kvikkleire-soner`, `nve-nettanlegg`, `udir-skoler`, `udir-barnehager`, `oslo-skjenkebevilling` | 1 440 min | 24 t | 168 t |
 | `helsenorge-sykehus`, `omsorgstilbud` | 10 080 min | 168 t | 336 t |
+
+### Manuelle sync-forespørsler
+
+«Kjør sync nå» og «Kjør full sync» i `/admin` legger en rad i `sync_requests`. Webappen har ingen
+skrivenøkkel — knappen kaller `request_sync()`, og workeren utfører jobben.
+
+```
+klikk → pending → (pg_cron dispatcher hvert 15. min) → workeren claimer → running
+      → sync_run (trigger «admin») → done eller failed, med sync_run_id
+```
+
+| Tilstand | Hva den betyr | Hva UI-et sier |
+|---|---|---|
+| `pending` < 15 min | Venter på neste dispatch | «Full oppdatering er lagt i kø · forventet oppstart innen 15 minutter» |
+| `pending` 15–45 min | Har stått over én kadens | «Venter på neste synk-kjøring · lagt i kø 09:20» |
+| `pending` > 45 min | Tre kadenser uten å bli plukket | «Oppdateringen ser ut til å ha stoppet» |
+| `running` < 30 min | Kjører | «Oppdaterer nå · startet 09:30» |
+| `running` > 30 min | Over ryddejobbens grense | «Oppdateringen ser ut til å ha stoppet» |
+| `failed` | Forespørselen feilet | «Siste manuelle oppdatering feilet · 27. september 09:42» |
+
+**Tilstanden beregnes, den lagres ikke.** Alt utledes av tidsstemplene i
+`lib/sync/request-state.ts`, ett sted, så `if (pending && alder > 45)` ikke havner i flere
+komponenter. Grensene henger på dispatch-kadensen: 45 minutter er tre kvarter, og 30 minutter er
+samme grense som `expire_stale_sync_requests()` bruker i databasen — UI-et lager ingen parallell
+timeout, det sier bare det ryddejobben kommer til å gjøre. En test binder de to sammen.
+
+**Ingen auto-fail av `pending`.** En forespørsel som ser fastlåst ut blir merket i UI-et, ikke
+avbrutt. Årsaken ligger nesten alltid utenfor databasen — dispatch-kjeden — og da er det den som
+skal fikses, ikke køen som skal tømmes.
+
+**Feil er synlige.** `provider_health()` returnerer også siste feilede forespørsel, og kortet viser
+den **bare når den er nyere enn siste vellykkede kjøring**: en gammel feil skal ikke lyse etter at
+problemet er løst. Den endrer aldri providerens helsestatus — den sier noe om én forespørsel, ikke
+om dataene. Feilteksten vaskes gjennom `trygtFeilutdrag()`: første linje, kuttet, og med det som
+ser ut som tokens eller nøkler fjernet.
+
+**Forespørselen peker på kjøringen.** `sync_requests.sync_run_id` fylles nå av workeren, så kjeden
+request → run → resultat kan følges i etterkant. Historikken ligger bak «Manuelle oppdateringer» på
+provider-kortet, fra `recent_sync_requests()`.
 
 ### Vaktene mot stille feil
 

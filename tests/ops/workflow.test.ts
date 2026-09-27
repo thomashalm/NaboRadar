@@ -24,8 +24,17 @@ const steps = workflow.jobs.sync.steps;
 const step = (name: string) => steps.find((s) => s.name === name)!;
 
 describe("sync-workflow", () => {
-  it("kjører hvert 15. minutt og kan startes manuelt", () => {
-    expect(workflow.on.schedule).toEqual([{ cron: "*/15 * * * *" }]);
+  /**
+   * Primærtriggeren er pg_cron, som sender workflow_dispatch hvert 15. minutt. GitHubs egen
+   * schedule sto tidligere på samme kadens og ga to kjøringer per kvarter av samme worker; den er
+   * nå en dokumentert daglig reserve. Se docs/naboradar-handbook.md → Én primær trigger.
+   */
+  it("har workflow_dispatch som primær inngang, og bare en daglig reserve-schedule", () => {
+    expect(workflow.on.schedule).toHaveLength(1);
+    const [minutt, time] = workflow.on.schedule[0]!.cron.split(" ");
+    // Ingen */n — en kvarters-schedule her ville duplisert pg_cron.
+    expect(minutt).toMatch(/^\d+$/);
+    expect(time).toMatch(/^\d+$/);
     expect(Object.keys(workflow.on.workflow_dispatch.inputs)).toEqual(["provider", "mode", "force"]);
   });
 

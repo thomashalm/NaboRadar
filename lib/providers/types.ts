@@ -101,6 +101,13 @@ export type SyncTrigger = "manual" | "scheduled" | "admin";
 
 export interface SyncResult {
   providerId: string;
+  /**
+   * Raden i sync_runs denne kjøringen skrev til.
+   *
+   * Null bare hvis kjøringen aldri kom så langt som til å opprette den. Feltet finnes for at en
+   * manuell forespørsel skal kunne peke på kjøringen sin: request → running → sync_run → resultat.
+   */
+  runId: string | null;
   mode: SyncMode;
   trigger: SyncTrigger;
   startedAt: string;

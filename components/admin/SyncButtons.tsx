@@ -2,12 +2,16 @@
 
 import { useActionState } from "react";
 import { requestSyncAction, type SyncRequestState } from "@/app/admin/actions";
+import { beskrivRequest, type SyncRequestLike } from "@/lib/sync/request-state";
 
 const initial: SyncRequestState = { status: "idle" };
 
 /**
  * «Kjør sync nå» / «Kjør full sync». Knappene legger en forespørsel i kø;
  * sync-worker utfører den. Når en forespørsel allerede ligger der, vises den i stedet.
+ *
+ * Teksten kommer fra `beskrivRequest`, ikke fra rå databasestatus: den som leser driftssiden skal
+ * få vite hva som skjer og hvor lenge det har gått, uten å kjenne verdiene `pending` og `running`.
  */
 export function SyncButtons({
   providerId,
@@ -17,17 +21,19 @@ export function SyncButtons({
 }: {
   providerId: string;
   supportsIncremental: boolean;
-  pendingRequest: { mode: string; status: string } | null;
+  pendingRequest: SyncRequestLike | null;
   /** Vises bare når siste kjøring ble stoppet av datafall-vakten. */
   offerForce?: boolean;
 }) {
   const [state, action, pending] = useActionState(requestSyncAction, initial);
 
   if (pendingRequest) {
+    const view = beskrivRequest(pendingRequest);
     return (
-      <p className="text-[13px] text-muted">
-        {pendingRequest.status === "running" ? "Kjører nå" : "Ligger i kø"} ({pendingRequest.mode})
-      </p>
+      <div className={`text-[13px] ${view.varsler ? "text-danger" : "text-muted"}`}>
+        <p className="font-medium">{view.tittel}</p>
+        <p>{view.detalj}</p>
+      </div>
     );
   }
 

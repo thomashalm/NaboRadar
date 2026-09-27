@@ -46,7 +46,18 @@ async function main() {
   // Review-laget. record_research_review_unchecked står med vilje *ikke* her: den er kjernen som
   // bare eieren skal kunne kalle, og skal derfor ikke ha grant til authenticated heller.
   const REVIEW = ["research_review_queue", "research_review_metrics", "research_reviews", "research_review_status", "research_review_interval", "research_review_interval_for", "record_research_review", "set_research_review_plan"];
-  const AUTH_OK = new Set([...ANON_OK, "is_admin", "provider_health", "recent_sync_runs", "request_sync", "scheduler_status", ...RESEARCH, ...REVIEW]);
+  // recent_sync_requests er historikken bak «Kjør sync nå» — admin-only, som provider_health.
+  const AUTH_OK = new Set([
+    ...ANON_OK,
+    "is_admin",
+    "provider_health",
+    "recent_sync_runs",
+    "recent_sync_requests",
+    "request_sync",
+    "scheduler_status",
+    ...RESEARCH,
+    ...REVIEW,
+  ]);
 
   const grants = await q<{ proname: string; anon: boolean; auth: boolean; service: boolean }>(
     `select p.proname,

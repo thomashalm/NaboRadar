@@ -3,7 +3,14 @@ import Link from "next/link";
 import { LoginForm } from "@/components/admin/LoginForm";
 import { SignOutButton } from "@/components/admin/SignOutButton";
 import { SyncButtons } from "@/components/admin/SyncButtons";
-import { loadAdminOverview, type SchedulerStatus, type SyncRunRow } from "@/lib/admin/queries";
+import {
+  loadAdminOverview,
+  type SchedulerStatus,
+  type SyncRequestHistoryRow,
+  type SyncRunRow,
+} from "@/lib/admin/queries";
+import { beskrivRequest, datoOgKlokke, feilErFortsattRelevant, trygtFeilutdrag } from "@/lib/sync/request-state";
+import type { SyncRequestRow } from "@/lib/sync/health";
 import { hentReviewMetrics } from "@/lib/admin/review";
 import { getAdminSession } from "@/lib/admin/session";
 import { formatDate } from "@/lib/format";
@@ -59,7 +66,7 @@ export default async function AdminPage() {
     );
   }
 
-  const { health, runs, scheduler, errors } = await loadAdminOverview(session.client);
+  const { health, runs, requests, scheduler, errors } = await loadAdminOverview(session.client);
   /*
    * Køtallet hentes i samme runde som driftsstatusen og feiler stille. Admin-navigasjonen skal
    * ikke bli treg, og et manglende tall er bedre enn en side som ikke laster.
@@ -89,7 +96,7 @@ export default async function AdminPage() {
 
       <section className="mt-8 flex flex-col gap-4">
         {scheduled.map((item) => (
-          <ProviderCard key={item.id} item={item} />
+          <ProviderCard key={item.id} item={item} requests={requests.get(item.id) ?? []} />
         ))}
       </section>
 
@@ -130,10 +137,19 @@ export default async function AdminPage() {
   );
 }
 
-function ProviderCard({ item }: { item: ProviderHealth }) {
+function ProviderCard({ item, requests }: { item: ProviderHealth; requests: SyncRequestHistoryRow[] }) {
   const row = item.row;
   const run = row.last_run;
   const suspicious = row.last_run_status === "suspicious";
+  /*
+   * En feilet manuell forespørsel vises bare når den er nyere enn siste vellykkede kjøring.
+   * Ellers ville en gammel feil stått og lyst i ukevis etter at problemet var løst — den hører da
+   * i historikken under «Manuelle oppdateringer». Den endrer aldri providerens helsestatus.
+   */
+  const feilet =
+    row.last_failed_request && feilErFortsattRelevant(row.last_failed_request, row.last_success_at)
+      ? row.last_failed_request
+      : null;
 
   return (
     <article className="rounded-2xl border border-line bg-surface px-5 py-4">
@@ -183,15 +199,72 @@ function ProviderCard({ item }: { item: ProviderHealth }) {
         </ul>
       )}
 
+      {feilet && <FeiletForespørsel request={feilet} />}
+
       <div className="mt-4">
         <SyncButtons
           providerId={row.id}
           supportsIncremental={row.supports_incremental}
-          pendingRequest={row.open_request ? { mode: row.open_request.mode, status: row.open_request.status } : null}
+          pendingRequest={row.open_request}
           offerForce={suspicious}
         />
       </div>
+
+      {requests.length > 0 && <Forespørselshistorikk requests={requests} />}
     </article>
+  );
+}
+
+/**
+ * En manuell oppdatering som feilet, og som ingen senere kjøring har rettet opp.
+ *
+ * Før lukket denne feilen seg selv i stillhet: provider_health() returnerte bare åpne
+ * forespørsler, så kortet gikk rett tilbake til knappen og ingenting sa at forsøket hadde feilet.
+ */
+function FeiletForespørsel({ request }: { request: SyncRequestRow }) {
+  const view = beskrivRequest(request);
+  const feil = trygtFeilutdrag(request.error);
+  return (
+    <div className="mt-3 rounded-xl bg-danger-soft px-4 py-3 text-[13px] text-danger">
+      <p className="font-medium">{view.tittel}</p>
+      <p>{view.detalj}</p>
+      {feil && <p className="mt-1">{feil}</p>}
+    </div>
+  );
+}
+
+/**
+ * Historikken bak forespørslene, sammenklappet.
+ *
+ * Kortet skal fortsatt kunne leses av et menneske som bare vil vite om dataene er i orden, så
+ * dette ligger bak en expander. Det er feilsøkingsinformasjon: hvem ba om hva, hvor lenge den lå
+ * i kø, og hvilken kjøring den ble.
+ */
+function Forespørselshistorikk({ requests }: { requests: SyncRequestHistoryRow[] }) {
+  return (
+    <details className="mt-3">
+      <summary className="cursor-pointer text-[13px] text-muted">Manuelle oppdateringer ({requests.length})</summary>
+      <ul className="mt-2 flex flex-col gap-1.5">
+        {requests.map((r) => {
+          const view = beskrivRequest(r);
+          const køMin =
+            r.started_at !== null && r.started_at !== undefined
+              ? Math.round((Date.parse(r.started_at) - Date.parse(r.requested_at)) / 60_000)
+              : null;
+          return (
+            <li key={r.id} className="text-[13px] text-muted">
+              <span className={view.varsler ? "text-danger" : undefined}>{view.tittel}</span>
+              {" · "}
+              {datoOgKlokke(r.requested_at)}
+              {køMin !== null && ` · ${køMin} min i kø`}
+              {r.requested_by && ` · ${r.requested_by}`}
+              {r.sync_run_id && <span className="font-mono"> · kjøring {r.sync_run_id.slice(0, 8)}</span>}
+              {r.run_status && ` (${r.run_status})`}
+            </li>
+          );
+        })}
+      </ul>
+    </details>
   );
 }
 

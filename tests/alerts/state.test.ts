@@ -31,6 +31,7 @@ const row = (over: Partial<ProviderHealthRow> = {}): ProviderHealthRow => ({
   alert_notified_at: null,
   last_run: null,
   open_request: null,
+  last_failed_request: null,
   ...over,
 });
 

@@ -155,6 +155,51 @@ describe("sync-worker", { timeout: 60_000 }, () => {
     expect(Number(run!.records)).toBe(30);
   });
 
+  /**
+   * Forespørselen skal peke på kjøringen den ble.
+   *
+   * Workeren sendte tidligere alltid null som sync_run_id, så kolonnen sto tom og kjeden request →
+   * running → sync_run → resultat kunne ikke følges i etterkant.
+   */
+  it("knytter forespørselen til kjøringen den ble", async () => {
+    await db.rpc("request_sync", { p_provider_id: A, p_mode: "full", p_force: false });
+    const outcome = await runSyncWorker(db, { providers, skipDue: true });
+
+    const [request] = (
+      await db.pg.query<{ status: string; sync_run_id: string | null }>(
+        "select status, sync_run_id from sync_requests where provider_id = $1",
+        [A],
+      )
+    ).rows;
+    expect(request!.status).toBe("done");
+    expect(request!.sync_run_id).not.toBeNull();
+    expect(request!.sync_run_id).toBe(outcome.results[0]!.runId);
+
+    // Og den peker på en kjøring som faktisk finnes, med admin som trigger.
+    const [run] = (
+      await db.pg.query<{ id: string; trigger: string }>("select id, trigger from sync_runs where id = $1", [
+        request!.sync_run_id,
+      ])
+    ).rows;
+    expect(run!.trigger).toBe("admin");
+  });
+
+  it("knytter også en feilet forespørsel til kjøringen, med feiltekst", async () => {
+    a.fail = true;
+    await db.rpc("request_sync", { p_provider_id: A, p_mode: "full", p_force: false });
+    await runSyncWorker(db, { providers, skipDue: true });
+
+    const [request] = (
+      await db.pg.query<{ status: string; sync_run_id: string | null; error: string | null }>(
+        "select status, sync_run_id, error from sync_requests where provider_id = $1",
+        [A],
+      )
+    ).rows;
+    expect(request!.status).toBe("failed");
+    expect(request!.sync_run_id).not.toBeNull();
+    expect(request!.error).toContain("kilden svarer ikke");
+  });
+
   it("melder fra om ukjent provider uten å krasje kjøringen", async () => {
     await db.rpc("request_sync", { p_provider_id: "nve-nettanlegg", p_mode: "full" });
     const outcome = await runSyncWorker(db, { providers, skipDue: true });

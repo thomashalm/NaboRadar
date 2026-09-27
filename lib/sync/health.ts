@@ -34,7 +34,28 @@ export interface ProviderHealthRow {
   alert_state_since: string | null;
   alert_notified_at: string | null;
   last_run: SyncRunSummary | null;
-  open_request: { id: string; mode: string; status: string; requested_at: string; requested_by: string | null } | null;
+  open_request: SyncRequestRow | null;
+  /**
+   * Siste manuelle forespørsel som feilet.
+   *
+   * Den påvirker aldri providerens helsestatus — den sier noe om én forespørsel, ikke om dataene.
+   * Har en senere kjøring lykkes, hører den i historikken; se feilErFortsattRelevant().
+   */
+  last_failed_request: SyncRequestRow | null;
+}
+
+/** Rad fra sync_requests, slik provider_health() og recent_sync_requests() gir den. */
+export interface SyncRequestRow {
+  id: string;
+  mode: string;
+  status: string;
+  requested_at: string;
+  requested_by: string | null;
+  started_at?: string | null;
+  finished_at?: string | null;
+  sync_run_id?: string | null;
+  error?: string | null;
+  force?: boolean;
 }
 
 export interface SyncRunSummary {

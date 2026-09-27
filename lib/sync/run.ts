@@ -71,6 +71,7 @@ export async function runSync<TRecord>(
   const trigger = options.trigger ?? "manual";
   const result: SyncResult = {
     providerId: provider.id,
+    runId: null,
     mode: options.mode,
     trigger,
     startedAt,
@@ -99,6 +100,7 @@ export async function runSync<TRecord>(
     p_trigger: trigger,
   });
   if (!runId) throw new SyncError("Kunne ikke opprette sync_run");
+  result.runId = runId;
 
   try {
     let since: Date | undefined;
@@ -206,7 +208,7 @@ export async function runSync<TRecord>(
   }
 
   result.completedAt = new Date().toISOString();
-  const { errors, warnings, ...counts } = result;
+  const { errors, warnings, runId: _runId, ...counts } = result;
   await db.rpc("sync_run_finish", {
     p_run_id: runId,
     p_status: result.status,

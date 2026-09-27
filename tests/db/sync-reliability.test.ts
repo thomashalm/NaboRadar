@@ -185,6 +185,70 @@ describe("sync-tilstand i databasen", { timeout: 30_000 }, () => {
     expect(Number(await asUser("ikke.admin@example.com", "select count(*)::int n from public.recent_sync_runs(10, null)"))).toBe(0);
   });
 
+  /**
+   * En feilet manuell forespørsel skal ikke forsvinne.
+   *
+   * Før returnerte provider_health() bare forespørsler med status pending eller running. Feilet
+   * en, gikk kortet rett tilbake til knappen og ingenting sa at forsøket hadde feilet.
+   */
+  it("provider_health viser den siste feilede forespørselen", async () => {
+    await db.rpc("request_sync", { p_provider_id: PROVIDER, p_mode: "full" });
+    const [claimed] = await db.rpc<{ id: string }>("claim_sync_request");
+    await db.rpc("finish_sync_request", {
+      p_id: claimed!.id,
+      p_status: "failed",
+      p_sync_run_id: null,
+      p_error: "Kilden svarte 500",
+    });
+
+    const health = await db.rpc<Record<string, { status: string; error: string } | null>>("provider_health");
+    const row = health.find((h) => (h as Record<string, unknown>).id === PROVIDER)!;
+    expect(row.open_request).toBeNull();
+    expect(row.last_failed_request).not.toBeNull();
+    expect(row.last_failed_request!.status).toBe("failed");
+    expect(row.last_failed_request!.error).toContain("500");
+  });
+
+  it("recent_sync_requests gir historikken med kobling til kjøringen", async () => {
+    const [runId] = await db.rpc<string>("sync_run_start", {
+      p_provider_id: PROVIDER,
+      p_mode: "full",
+      p_trigger: "admin",
+    });
+    await db.rpc("sync_run_finish", { p_run_id: runId, p_status: "success", p_counts: { records: 3 } });
+
+    await db.rpc("request_sync", { p_provider_id: PROVIDER, p_mode: "incremental" });
+    const [claimed] = await db.rpc<{ id: string }>("claim_sync_request");
+    await db.rpc("finish_sync_request", { p_id: claimed!.id, p_status: "done", p_sync_run_id: runId });
+
+    const historikk = await db.rpc<{
+      provider_id: string;
+      mode: string;
+      status: string;
+      sync_run_id: string | null;
+      run_status: string | null;
+    }>("recent_sync_requests", { p_limit: 5 });
+
+    const min = historikk.find((r) => r.provider_id === PROVIDER && r.mode === "incremental")!;
+    expect(min.status).toBe("done");
+    // Hele poenget: forespørselen peker på kjøringen, og kjøringens utfall følger med.
+    expect(min.sync_run_id).toBe(runId);
+    expect(min.run_status).toBe("success");
+  });
+
+  it("recent_sync_requests er admin-only", async () => {
+    const som = async (claims: Record<string, string>) =>
+      db.pg.transaction(async (tx) => {
+        await tx.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify(claims)]);
+        return Number((await tx.query<{ n: number }>("select count(*)::int n from public.recent_sync_requests(5)")).rows[0]!.n);
+      });
+
+    await db.rpc("request_sync", { p_provider_id: PROVIDER, p_mode: "full" });
+    expect(await som({ role: "authenticated", email: "thomas@fink.no" })).toBeGreaterThan(0);
+    expect(await som({ role: "authenticated", email: "ikke.admin@example.com" })).toBe(0);
+    expect(await som({ role: "anon" })).toBe(0);
+  });
+
   it("provider_health og recent_sync_runs gir det admin trenger", async () => {
     const health = await db.rpc<Record<string, unknown>>("provider_health");
     const row = health.find((h) => h.id === PROVIDER)!;

@@ -116,7 +116,8 @@ export async function runSyncWorker(db: Db, options: WorkerOptions = {}): Promis
           db,
           request.id,
           result.status === "failed" ? "failed" : "done",
-          null,
+          // Kjøringen forespørselen ble. Uten denne kan ingen følge request → run → resultat.
+          result.runId,
           result.status === "failed" ? result.errors[0] ?? "Ukjent feil" : null,
           outcome,
         );
