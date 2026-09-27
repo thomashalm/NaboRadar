@@ -248,7 +248,7 @@ kopiere resultatet ved å kjøpe et datasett.
 |---|---|
 | Brannstasjon og beredskap (DSB WFS, Politiet WFS) | Billig og nasjonalt, men lav beslutningsverdi før et boligkjøp |
 | Energianlegg utenfor dagens dekning: fjernvarme, biogass, batteriparker, sol og vind | Ingen brukbar nasjonal kilde. Rent research, svært dynamisk. Verdifullt, men dyrt per funn |
-| Kommunale byggesaker i de største kommunene | Hybrid med per-kommune API-arbeid. Stor verdi, men skalerer dårlig |
+| Kommunale byggesaker i de største kommunene | Hybrid med per-kommune API-arbeid. Stor verdi, men skalerer dårlig. **Avgjort september 2026: ikke prioritert** — se [Eiendomshistorikk / byggesakshistorikk](#eiendomshistorikk--byggesakshistorikk) |
 | Havnivåscenarier over tid | Naturfarepakken dekker dagens stormflo først |
 | Skolekapasitet og planlagte skoleendringer | Ligger i kommunale saksdokumenter. Research, moderat dynamisk, høy verdi for familier — men 357 kommuner |
 
@@ -264,8 +264,28 @@ kopiere resultatet ved å kjøpe et datasett.
 | Live luftkvalitetsmålinger | For få stasjoner, og en måleverdi nå er ikke en egenskap ved adressen. Vi dekker *kildene* bedre gjennom industri og trafikk |
 | Mobildekning og master | Helseframingen er et minefelt, og dekning måles bedre av operatørene selv |
 | Historiske flyfoto | Norge i bilder gjør det. Det er en nettleseropplevelse, ikke et datapunkt |
+| **Eiendomshistorikk / byggesakshistorikk** | Ikke prioritert nå. Se beslutningen under tabellen |
 
 Disse kan vurderes på nytt hvis premissene endrer seg. Men de skal ikke inn «fordi de var enkle».
+
+#### Eiendomshistorikk / byggesakshistorikk
+
+**Ikke prioritert nå.** Bevisst produktbeslutning, september 2026.
+
+- **Full byggesakshistorikk** vurderes på nytt dersom det blir tilgjengelig dokumentert
+  maskinlesbar tilgang til kommunale byggesaksdata, eller eksplisitt tilgang fra en relevant
+  kommune — for eksempel Oslo PBE.
+- **Bygningsstatus og SEFRAK** bygges ikke nå, fordi forventet brukerverdi ikke forsvarer
+  kompleksiteten. Dette gjelder eiendomshistorikk-pakken; kulturminner og vern fra Riksantikvaren
+  står fortsatt i [SNART](#snart) som en egen sak.
+- Feasibility-kartleggingen ligger i
+  [docs/research/eiendomshistorikk-feasibility.md](research/eiendomshistorikk-feasibility.md).
+  Den dokumenterer kildelandskapet slik det faktisk er, testet mot live tjenester, slik at en
+  ny vurdering ikke må starte på nytt.
+
+**Dette er en produktbeslutning, ikke en teknisk blokkering vi skal følge opp aktivt.** Vi
+overvåker ikke kildene, og ingen har ansvar for å sjekke om noe har endret seg. Blir tilgangen
+tilgjengelig, vil det være synlig av seg selv.
 
 ---
 
