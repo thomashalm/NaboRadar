@@ -2472,6 +2472,13 @@ Datakvalitetsrunden 2026-09-30 fjernet tre tall på denne regelen: Googles 840 M
 Husnes' 40 MW (kø hos Statnett) og Fauskes 13 MW (bare presse). Narvik ble rettet fra 230 til 130
 MW i en egen korreksjon samme dag.
 
+**En post i Statnetts lister er et lead, ikke et anlegg.** Statnetts reservasjons- og kølister er
+den beste discovery-kilden vi har for store datasenterprosjekter, men et navn i køen er ikke et
+prosjekt. Et nytt funn opprettes først når prosjektet er offentlig bekreftet (kommunevedtak,
+plansak eller aktørens egen kunngjøring) og området er stedfestet. I runde 2 ga ni Statnett-leads
+to nye anlegg (Google Våler, Bulk Arendal). Fem ble avvist: TikTok Norway AS på Ringerike hadde
+bare en køplass og er TikToks salgsselskap. To var anlegg som allerede lå i basen.
+
 **3. Påstand og kilde.** `admin_research_datacenter_field_sources` knytter et strukturert felt til
 kilden som bærer det. Ikke full event sourcing — det ville kostet mer enn det smaker på 67 funn —
 men nok til at et MW-tall kan spores til noe. Roller bærer sin egen `source_id` inline.
