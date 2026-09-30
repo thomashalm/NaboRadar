@@ -852,8 +852,18 @@ Hele poenget er at NaboRadar ikke skal si mer enn kilden gjør.
   - X — mistanke eller lite informasjon, oppfølging uavklart
 - **Grad 1 og 2 er kildens egen konklusjon om at det ikke er noe å følge opp** — de telles ikke som
   «til oppfølging».
+- **Offentlig vises bare relevante funn:** grad 3, grad X og lokaliteter der tiltak pågår
+  (`prosessStatus = tiltakIgangsatt`). Finnes ingen slike innen radiusen, vises ikke seksjonen i
+  det hele tatt — ingen «0 funn» og ingen «alt er trygt». Grad 1 og 2 skjules også når søkepunktet
+  ligger i lokaliteten, og «oppfølging uavklart» alene gjør dem ikke relevante: et gammelt deponi
+  «lite eller ikke forurenset, uten behov for tiltak» skal ikke få en seksjon som heter
+  «Forurenset grunn». Alder filtrerer ikke; et gammelt grad 3-funn vises fortsatt.
+- Regelen er presentasjon, ikke data: alt synkes og lagres som før, og admins adressevisning
+  (`buildAreaView({ contaminatedScope: "alle" })`) viser alle registreringene med «Se alle» og kart.
 - Det skilles mellom at søkepunktet ligger **inne i** en lokalitet og at en lokalitet ligger i
   nærheten. Ligger søkepunktet inne i en grad 3- eller X-lokalitet, løftes seksjonen øverst.
+- Datoen på kortet er kildens `oppdateringsdato` og vises som «Kildedata sist oppdatert {år}» —
+  når registreringen sist ble endret hos Miljødirektoratet, ikke en fersk vurdering av stedet.
 - **Stofftype antas aldri** når kilden ikke oppgir den.
 
 ### Planer

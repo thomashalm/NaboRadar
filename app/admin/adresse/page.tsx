@@ -45,7 +45,8 @@ export default async function AdminAddressPage({ searchParams }: { searchParams:
   if (!parsed.success) return <Søk />;
 
   const { lat, lng, radius, sortering: sort } = parsed.data;
-  const { events, storedFacts, lookupFacts } = buildAreaView({ lat, lng, radius, sort });
+  // Admin ser alle registreringene av forurenset grunn, også grad 1 og 2 som skjules offentlig.
+  const { events, storedFacts, lookupFacts } = buildAreaView({ lat, lng, radius, sort, contaminatedScope: "alle" });
   /*
    * Bare faktiske steder og prosjekter her. Datakvalitets- og kildesaker er research de også,
    * men de hører hjemme i /admin/research — i en adressevisning ville de fortrengt funnene

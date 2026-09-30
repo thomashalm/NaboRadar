@@ -777,6 +777,40 @@ export function describeContaminatedGroupSummary(input: {
 export const INGEN_FORURENSNING_TIL_OPPFOLGING =
   "Ingen av registreringene i området er vurdert til å kreve tiltak eller oppfølging.";
 
+/**
+ * Sammendraget på gruppen i den offentlige visningen, der bare relevante funn er med.
+ *
+ * Hver del sier hva kilden faktisk har registrert — behov for tiltak, uavklart mistanke eller
+ * tiltak som pågår — i stedet for et samlet «krever oppfølging» som får alt til å høres likt ut.
+ */
+export function describeContaminatedRelevantSummary(input: {
+  tiltak: number;
+  uavklart: number;
+  pagaende: number;
+}): string {
+  return [
+    input.tiltak > 0 ? `${input.tiltak} med behov for tiltak` : null,
+    input.uavklart > 0 ? `${input.uavklart} med uavklart mistanke` : null,
+    input.pagaende > 0 ? `${input.pagaende} der tiltak pågår` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+/**
+ * Oppsummeringen inne i «Se alle» i den offentlige visningen. Den skal ikke antyde at dette er
+ * alle registreringene i databasen, og den sier hva som er utelatt.
+ */
+export function describeContaminatedRelevantOverview(input: { total: number; radiusLabel: string }): FactText {
+  const lokaliteter = input.total === 1 ? "lokalitet" : "lokaliteter";
+  return {
+    headline: `${input.total} ${lokaliteter} med behov for tiltak, uavklart mistanke eller pågående tiltak innen ${input.radiusLabel}`,
+    details: [],
+    caveat:
+      "Lokaliteter som Miljødirektoratet har vurdert som lite forurenset eller akseptable med dagens arealbruk, vises ikke. Registreringene gjelder lokaliteten, ikke nødvendigvis hele eiendommen eller naboeiendommene.",
+  };
+}
+
 /** Én undertype i en gruppe, med antall: «7 barnehager». */
 export interface ClusterCount {
   antall: number;
