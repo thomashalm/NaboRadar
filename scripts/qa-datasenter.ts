@@ -96,6 +96,42 @@ async function main() {
     for (const r of mw) console.log(`   ${r.title}: ${r.verdi} MW — ${r.felt}`);
   }
 
+  // Et MW-tall uten kilde er et tall vi ikke kan forsvare, uansett hvilket felt det står i.
+  const ukildet = await q<{ title: string; felt: string }>(
+    `select i.title, x.felt
+       from admin_research_datacenter_details d
+       join admin_research_items i on i.id = d.research_item_id,
+       lateral (values ('it_load_mw', d.it_load_mw), ('operational_capacity_mw', d.operational_capacity_mw),
+                       ('secured_power_mw', d.secured_power_mw), ('planned_capacity_mw', d.planned_capacity_mw),
+                       ('campus_potential_mw', d.campus_potential_mw)) as x(felt, verdi)
+      where x.verdi is not null
+        and not exists (select 1 from admin_research_datacenter_field_sources fs
+                         where fs.research_item_id = d.research_item_id and fs.field_name = x.felt)`,
+  );
+  if (ukildet.length === 0) {
+    console.log("   ✓ alle MW-tall har kilde");
+  } else {
+    for (const u of ukildet) console.log(`   ✗ ${u.title}: ${u.felt} uten kilde`);
+    avvik += ukildet.length;
+  }
+
+  // ---- Type ---------------------------------------------------------------
+  // `unknown` er et gyldig svar, men ikke en utfylt type: den skal fortsatt stå som mangel.
+  console.log("\n■ Type");
+  const [typeTall] = await q<{ ukjent: number; feilTalt: number }>(
+    `select count(*) filter (where coalesce(facility_type, 'unknown') = 'unknown')::int ukjent,
+            count(*) filter (where coalesce(facility_type, 'unknown') = 'unknown'
+                               and not ('type' = any(missing_fields)))::int "feilTalt"
+       from datacenter_items()`,
+  );
+  console.log(`   ${typeTall!.ukjent} anlegg med type ukjent`);
+  if (typeTall!.feilTalt === 0) {
+    console.log("   ✓ ukjent type teller som mangel");
+  } else {
+    console.log(`   ✗ ${typeTall!.feilTalt} anlegg med ukjent type regnes som utfylt`);
+    avvik += typeTall!.feilTalt;
+  }
+
   // ---- Kunde-terskelen holder -------------------------------------------
   console.log("\n■ Kunde-terskelen");
   const svake = await q<{ title: string; name: string; confidence: string }>(

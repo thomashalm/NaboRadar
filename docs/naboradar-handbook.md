@@ -2455,6 +2455,15 @@ forskjellen er hele saken for en nabo:
 forsvare, og en test håndhever at kolonnen ikke dukker opp igjen. `mwTekst()` sørger for at
 tallet aldri vises uten hvilket tall det er — «700 MW sikret kraft», aldri bare «700 MW».
 
+**Hva som regnes som sikret.** `secured_power_mw` er kapasitet som er *tilknyttet* eller
+*reservert/avtalt* hos Statnett eller netteier: reservasjon, anleggsbidragsavtale eller
+tilknytningsavtale. Søkt kapasitet, køplass og «ønsket tilknytning» er ikke sikret, og står i
+notatet, ikke i feltet. Statnett-tallene leses fra Statnetts egne lister (tilknyttet, reservert og
+kø), som skiller nøyaktig disse tre. Er en reservasjon gitt til netteieren og ikke til anlegget, som
+i Kvandal, står den i feltet med forklaring om hvem som har den og hvor mye som er videretildelt.
+Datakvalitetsrunden 2026-09-30 fjernet tre tall på denne regelen: Googles 840 MW (søkt/kø), Arcem
+Husnes' 40 MW (kø hos Statnett) og Fauskes 13 MW (bare presse).
+
 **3. Påstand og kilde.** `admin_research_datacenter_field_sources` knytter et strukturert felt til
 kilden som bærer det. Ikke full event sourcing — det ville kostet mer enn det smaker på 67 funn —
 men nok til at et MW-tall kan spores til noe. Roller bærer sin egen `source_id` inline.
@@ -2463,8 +2472,9 @@ men nok til at et MW-tall kan spores til noe. Roller bærer sin egen `source_id`
 
 Kontrollert vokabular: `colocation`, `hyperscale`, `ai_hpc`, `enterprise`, `crypto`,
 `network_pop`, `mixed`, `unknown`. Fritekstsynonymer ville gjort filtrering umulig etter tjue
-funn. **`unknown` er en gyldig verdi og skal brukes framfor å gjette** — et felt som er undersøkt
-uten å finnes, settes til ukjent og forsvinner fra «mangler».
+funn. **`unknown` er en gyldig verdi og skal brukes framfor å gjette**, men den er ikke en utfylt
+type: `missing_fields` fortsetter å vise `type` til en kjent type er dokumentert. «Vi vet ikke» skal
+ikke se ut som ferdig enrichment. En test og `qa:datasenter` holder regelen.
 
 ### Refresh-flyten
 

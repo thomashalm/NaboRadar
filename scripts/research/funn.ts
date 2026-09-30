@@ -3215,6 +3215,7 @@ export const FUNN: Funn[] = [
         publisher: "Skygard",
         source_type: "web",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary: "Operatørens egen side for anlegget.",
       },
       {
@@ -4169,25 +4170,28 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Tydal Data Center, Kirkvollen",
     description:
-      "Norges største datasenterutbygging: 180 MW under bygging i Kirkvollen industriområde " +
-      "i Tydal, eid av Bitdeer Technologies Group. Etablert 2021 for bitcoinutvinning, nå " +
-      "under konvertering til AI-kolokasjon. Nkom oppgir 33 % kryptoutvinning.",
+      "Datasenteranlegg på Kirkvollen i Tydal, eid og driftet av Tydal Data Center AS i " +
+      "Bitdeer-konsernet. Etablert 2021 for bitcoinutvinning og nå under ombygging til " +
+      "AI-kolokasjon med 180 MW brutto kapasitet. Volta Tydal AS har inngått 16-årig leie. Statnett " +
+      "oppgir 180 MW tilknyttet ved Nea.",
     municipality: "Tydal",
+    address: "Stugudalsvegen 196",
+    postal_code: "7590",
     city: "Tydal",
-    latitude: 63.03392,
-    longitude: 11.67715,
+    latitude: 63.0332,
+    longitude: 11.68684,
     verification_status: "verified_public_source",
     operational_status: "under_construction",
     sensitivity: "internal_only",
     confidence: "high",
     interest_level: "high",
     why_interesting:
-      "180 MW er i en annen størrelsesorden enn alt annet i dette datasettet — mer enn " +
-      "det samlede dokumenterte forbruket i Oslo. Det endrer kraftbalansen i en liten " +
-      "kommune, og viser hva et datasenter kan bli.",
+      "180 MW i en liten fjellkommune, og et av de tydeligste eksemplene på et kryptoanlegg " +
+      "som bygges om til AI. Kraftuttaket er allerede tilknyttet.",
     notes:
-      "Koordinaten er Kartverkets punkt for Kirkvollen i Tydal, ikke anleggets egen adresse. " +
-      "Effekttallet kommer fra operatøren og entreprenøren, ikke fra en myndighetskilde.",
+      "Kvalitetsrunde 2026-09-30: koordinaten er flyttet fra et gårdspunkt ca. 500 m vest til " +
+      "Stugudalsvegen 196, blant anleggets bygg. Kapasitetstallene kommer fra Bitdeers " +
+      "børsmeldinger og Statnett.",
     kilder: [
       {
         source_name: "Bitdeer og Data Center Installations: utbygging i Tydal",
@@ -4707,26 +4711,27 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "atNorth NOR01, Haugaland Business Park",
     description:
-      "Planlagt datasentercampus på 350 MW med fire bygg i Haugaland Business Park, rettet mot " +
-      "AI-arbeidslast med fornybar kraft og avansert kjøling. Fem katalogoppføringer — campus pluss " +
-      "fire bygg — er ett fysisk anlegg.",
+      "Planlagt datasentercampus i den nordlige delen av Haugaland Business Park. Første fase er " +
+      "120 MW med drift planlagt i 2028, og atNorth oppgir 350 MW som campuspotensial. atNorth har " +
+      "anleggsbidragsavtale med Fagne for 120 MW. Selskapet eies av CPP Investments og Equinix.",
     municipality: "Tysvær",
-    address: "Havnavegen 73",
     postal_code: "5570",
     city: "Aksdal",
-    latitude: 59.3154,
-    longitude: 5.42391,
+    latitude: 59.32677,
+    longitude: 5.42717,
     verification_status: "partially_verified",
     operational_status: "planned",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "high",
     interest_level: "high",
     why_interesting:
-      "Det største planlagte datasenteret i Norge etter oppgitt effekt. 350 MW i én næringspark er " +
-      "en kraftbruk i samme størrelsesorden som en mellomstor by.",
+      "Et av de største planlagte datasentrene i Norge. 120 MW er avtalt med netteier, og campusen " +
+      "kan vokse til 350 MW.",
     notes:
-      "Effekttallet kommer fra operatøren via bransjekatalog, ikke fra konsesjon eller myndighet. " +
-      "Bygg 1–4 er lagret som struktur på dette funnet, ikke som egne anlegg.",
+      "Kvalitetsrunde 2026-09-30: koordinaten er omtrentlig — midtpunktet av matrikkelenhet 3/45 " +
+      "(ca. 373 daa) i parkens datasentersone. At dette er atNorths tomt er utledet, ikke " +
+      "dokumentert. Tidligere stod anlegget på parkens adresse, Havnavegen 73, sammen med Green " +
+      "Mountain Gismarvik. Bygg 1–4 er lagret som struktur på dette funnet, ikke som egne anlegg.",
     kilder: [
       {
         source_name: "DataCenterMap: atNorth NOR01, Haugaland Business Park",
@@ -4734,7 +4739,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør atNorth, adresse Havnavegen 73, 5570 Aksdal.",
       },
@@ -4759,12 +4763,11 @@ export const FUNN: Funn[] = [
       "næringspark som atNorths NOR01. Ingen byggestart er dokumentert, og anlegget står ikke på Green " +
       "Mountains egen anleggsliste. 300 MW og 100 000 m² finnes bare i bransjekataloger.",
     municipality: "Tysvær",
-    address: "Havnavegen 73",
     postal_code: "5570",
     city: "Aksdal",
     latitude: 59.3154,
     longitude: 5.42391,
-    verification_status: "partially_verified",
+    verification_status: "investigated_not_confirmed",
     operational_status: "unknown",
     sensitivity: "internal_only",
     confidence: "low",
@@ -4773,10 +4776,12 @@ export const FUNN: Funn[] = [
       "En opsjon på datasentertomt i samme næringspark som atNorths 120–350 MW-prosjekt. Blir den utløst, " +
       "samles to store kraftuttak i én park i Tysvær.",
     notes:
-      "Eget anlegg, ikke samme campus som atNorth, men samme næringspark. Koordinaten er parkens " +
-      "adresse; anleggenes egne tomter er ikke stedfestet hver for seg. Status satt til ukjent i " +
-      "datasenter-enrichment runde 1 (2026-09-30): eneste dokumenterte steg er opsjonsavtalen fra 2021, " +
-      "og næringsparken omtaler atNorth som første store etablering (juni 2026).",
+      "Kvalitetsrunde 2026-09-30: undersøkt, ikke bekreftet. Eneste dokumenterte steg er en opsjon " +
+      "på 50 dekar fra april 2021. Gismarvik mangler på Green Mountains anleggsliste og i " +
+      "pressearkivet 2023–2026, og har ikke eget selskap i Brønnøysund. Næringsparken omtaler " +
+      "atNorth som første store etablering, og parkens kart har bare én datasentersone. Opsjonen er " +
+      "trolig sovende eller bortfalt. Koordinaten er et referansepunkt i næringsparken, ikke en " +
+      "tomt.",
     kilder: [
       {
         source_name: "DataCenterMap: Green Mountain Gismarvik",
@@ -4784,7 +4789,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør Green Mountain, adresse Havnavegen 73, 5570 Aksdal.",
       },
@@ -5051,7 +5055,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør Microsoft, adresse Kvålkroken, 4323 Sandnes.",
       },
@@ -5061,6 +5064,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
       },
@@ -5171,11 +5175,10 @@ export const FUNN: Funn[] = [
       "13 MW nettilknytning; mer krever ny kapasitet fra Statnett. Mål om åpning i 2027, men ingen " +
       "dokumentert byggestart. Oppgitt til rundt 1 000 arbeidsplasser i byggefasen og 100–150 varige.",
     municipality: "Fauske",
-    address: "Follaveien",
     postal_code: "8200",
     city: "Fauske",
-    latitude: 67.25948,
-    longitude: 15.39275,
+    latitude: 67.27587,
+    longitude: 15.41365,
     verification_status: "partially_verified",
     operational_status: "planned",
     sensitivity: "internal_only",
@@ -5196,7 +5199,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør Nscale, adresse Follaveien, 8200 Fauske.",
       },
@@ -5206,6 +5208,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
       },
@@ -5263,8 +5266,9 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "ASP Dalekvam",
     description:
-      "ASP Data Center har kjøpt en tidligere tekstilfabrikk i Dalekvam og planlegger å gjøre den om " +
-      "til et AI-rettet datasenter på 20 MW.",
+      "Asp Data Center planlegger AI-rettet datasenter i den tidligere Dale-fabrikken i Dalekvam. " +
+      "Første fase er 20 MW med levering i Q4 2027, og ASP oppgir 300 MW som langsiktig potensial. " +
+      "Vaksdal kommunestyre ga dispensasjon 24.09.2026.",
     municipality: "Vaksdal",
     address: "Fabrikkvegen",
     postal_code: "5722",
@@ -5289,7 +5293,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør ASP Datacenter, adresse Fabrikkvegen, 5722 Dalekvam.",
       },
@@ -5355,24 +5358,27 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Arcem Bergen, Haukeland",
     description:
-      "Planlagt datasenter til flere milliarder kroner i Haukeland, med nærhet til " +
-      "transformatorstasjoner og hovedveg oppgitt som begrunnelse.",
+      "Planlagt datasenter i Langedalen ved Arna transformatorstasjon i søndre Arna, utviklet av " +
+      "Arcem gjennom Arcem Langedalen AS. Arcem søker inntil 130 MW nettkapasitet, men ingenting er " +
+      "tildelt. Planinitiativet fra april 2026 har møtt motstand fra Bymiljøetaten og Statens " +
+      "vegvesen.",
     municipality: "Bergen",
-    address: "Langedalen",
     postal_code: "5268",
     city: "Haukeland",
-    latitude: 60.37466,
-    longitude: 5.45259,
+    latitude: 60.39432,
+    longitude: 5.45573,
     verification_status: "partially_verified",
     operational_status: "planned",
     sensitivity: "internal_only",
-    confidence: "low",
+    confidence: "medium",
     interest_level: "medium",
     why_interesting:
       "Et stort planlagt anlegg i Bergen øst. Nærheten til transformatorstasjoner er akkurat det " +
       "kraftsporet vi leter etter.",
     notes:
-      "Kun én katalogkilde, ingen effekt oppgitt. Bør følges opp mot kommunen og nettselskapet.",
+      "Kvalitetsrunde 2026-09-30: koordinaten er omtrentlig, satt ved Arna transformatorstasjon " +
+      "fordi tomta ikke er stedfestet i noen kilde. Tittelen «Haukeland» er beholdt for " +
+      "gjenkjenning; prosjektet omtales som Langedalen/Arnatippen. 130 MW er søkt, ikke tildelt.",
     kilder: [
       {
         source_name: "DataCenterMap: Arcem Bergen, Haukeland",
@@ -5380,7 +5386,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør Arcem, Inc., adresse Langedalen, 5268 Haukeland.",
       },
@@ -5507,27 +5512,30 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Stargate Norway / Nscale Narvik, Kvanndal",
     description:
-      "AI-infrastrukturprosjekt fra OpenAI, Nscale og Aker ASA i Kvanndal ved Narvik. Oppgitt til " +
-      "100 000 NVIDIA-GPU-er innen utgangen av 2026, med 230 MW i første fase og mulig utvidelse til " +
-      "520 MW, utelukkende på fornybar kraft.",
+      "AI-datasenter under bygging på Kvandal ved Bjerkvik, eid og utviklet av Nscale Norway AS og " +
+      "driftet av Nordscale Operations AS (Nscale 51 %, Nordkraft 49 %). Første fase er 230 MW, og " +
+      "Microsoft er kunde. Lansert som «Stargate Norway» med OpenAI i 2025, men OpenAI inngikk " +
+      "aldri avtale. Utvidelse med 290 MW til 520 MW er en ambisjon uten nettreservasjon.",
     municipality: "Narvik",
-    address: "Kvanndal",
+    address: "Nordmoveien 301",
     postal_code: "8530",
     city: "Bjerkvik",
-    latitude: 68.53,
-    longitude: 17.6,
+    latitude: 68.57838,
+    longitude: 17.59023,
     verification_status: "partially_verified",
     operational_status: "under_construction",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "high",
     interest_level: "high",
     why_interesting:
       "Det desidert største digitale infrastrukturprosjektet i Norge. 520 MW i full utbygging er mer " +
       "enn alle andre anlegg i dette datasettet til sammen, i en kommune med 22 000 innbyggere.",
     notes:
-      "Koordinaten er grov og satt fra stedsangivelsen Kvanndal ved Bjerkvik, ikke fra en verifisert " +
-      "adresse. Effekttallene er prosjekttall fra aktørene, ikke konsesjonsgitt kapasitet. Skill " +
-      "mellom første fase (230 MW) og oppgitt sluttkapasitet (520 MW).",
+      "Kvalitetsrunde 2026-09-30: koordinaten er industribygget med igangsettingstillatelse på " +
+      "gnr/bnr 10/742 (Nordmoveien 301), der Narvik kommune ga rammetillatelse til datasenter. " +
+      "Koblingen bygg–datasenter er utledet fra matrikkelen. 230 MW er reservert hos Statnett for " +
+      "netteier Nordkraft Industrinett, som har tildelt 130 MW til de to første byggene. 520 MW er " +
+      "ikke sikret.",
     kilder: [
       {
         source_name: "DataCenterMap: Stargate Norway / Nscale Narvik, Kvanndal",
@@ -5535,7 +5543,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør Nscale, OpenAI og Aker, adresse Kvanndal, 8530 Bjerkvik.",
       },
@@ -5545,6 +5552,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet med postnummer som krav.",
       },
@@ -5556,25 +5564,28 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Google Skien",
     description:
-      "Google bygger datasenter i Skien med en oppgitt investering på 600 millioner euro, ventet i " +
-      "drift i 2026.",
+      "Googles datasenter på Gromstul i Skien, eid av WS Computing AS. Byggetrinn 1 var under " +
+      "idriftsettelse i august 2026, og trinn 2 har rammetillatelse. Statnett oppgir 240 MW for " +
+      "Googles prosjekt ved Rød (120 MW tilknyttet og 120 MW reservert). Oppgitt investering i " +
+      "første trinn er 600 millioner euro.",
     municipality: "Skien",
-    address: "Skådalsvegen",
+    address: "Gromstulvegen 82",
     postal_code: "3721",
     city: "Skien",
-    latitude: 59.2723,
-    longitude: 9.48707,
+    latitude: 59.27012,
+    longitude: 9.51852,
     verification_status: "partially_verified",
     operational_status: "under_construction",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "high",
     interest_level: "high",
     why_interesting:
       "En hyperskala-aktør som bygger fysisk i Norge. Investeringsbeløpet gjør det til et av de " +
       "største industriprosjektene i Telemark.",
     notes:
-      "Effekt er ikke oppgitt, bare investeringsbeløp. Koordinaten er Skådalsvegen 361, nærmeste " +
-      "husnummer — tomtens eget punkt er ikke stedfestet.",
+      "Kvalitetsrunde 2026-09-30: koordinaten er flyttet fra Skådalsvegen 361 (utenfor tomta) til " +
+      "bygget med midlertidig brukstillatelse på teig 11/28, Gromstulvegen 82. 840 og 860 MW i " +
+      "presse er søkt kapasitet og kø, ikke tildelt, og er ikke strukturert.",
     kilder: [
       {
         source_name: "DataCenterMap: Google Skien",
@@ -5582,7 +5593,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør Google, adresse Skådalsvegen, 3721 Skien.",
       },
@@ -5603,14 +5613,14 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "BW Frier Vest, Bamble",
     description:
-      "Planlagt datasenter på 250 MW i Frier Vest industripark i Grenland, med fornybar kraft og " +
-      "dypvannskai.",
+      "Planlagt datasenter i Frier Vest industriområde, utviklet av BW Velora (BW Group). Inntil " +
+      "250 MW ved full utbygging, uten besluttet fase. Lede har meldt at regionalnettet ikke har " +
+      "kapasitet for store nye laster før ny Frier-stasjon er bygget.",
     municipality: "Bamble",
-    address: "Frier Vest næringspark",
-    postal_code: "3960",
-    city: "Stathelle",
-    latitude: 59.04511,
-    longitude: 9.69821,
+    postal_code: "3965",
+    city: "Herre",
+    latitude: 59.0985,
+    longitude: 9.55013,
     verification_status: "partially_verified",
     operational_status: "planned",
     sensitivity: "internal_only",
@@ -5619,7 +5629,8 @@ export const FUNN: Funn[] = [
     why_interesting:
       "250 MW i Grenland, i et industriområde som allerede har tung prosessindustri og kaianlegg.",
     notes:
-      "Koordinaten er tettstedet Stathelle, ikke næringsparkens egen adresse.",
+      "Kvalitetsrunde 2026-09-30: koordinaten er flyttet fra Stathelle tettsted til Fløyåsen ved " +
+      "Herre, stedfestet bare gjennom et debattinnlegg i Varden. Punktet er omtrentlig.",
     kilder: [
       {
         source_name: "DataCenterMap: BW Frier Vest, Bamble",
@@ -5933,7 +5944,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør Bulk Infrastructure, adresse Stølevegen 39, 4715 Øvrebø.",
       },
@@ -5999,14 +6009,14 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Arcem Husnes, Grøn Næringspark",
     description:
-      "Planlagt datasenter på 90 MW i Grøn Næringspark, med 40 MW i første fase ventet i 2031, på " +
-      "60 000 m² tomt.",
+      "Planlagt datasenter i Grøn Næringspark på Husnes. Arcem oppgir 90 MW totalt, med første fase " +
+      "på 40 MW godkjent av netteier Fagne og mål om drift i 2031–2032. Første fase står i " +
+      "Statnetts kø.",
     municipality: "Kvinnherad",
-    address: "Grøn Næringspark",
     postal_code: "5460",
     city: "Husnes",
-    latitude: 59.86377,
-    longitude: 5.74533,
+    latitude: 59.8725,
+    longitude: 5.77,
     verification_status: "partially_verified",
     operational_status: "planned",
     sensitivity: "internal_only",
@@ -6016,8 +6026,9 @@ export const FUNN: Funn[] = [
       "90 MW i Kvinnherad, i samme næringspark som et annet planlagt anlegg. To store prosjekter i " +
       "én park i en kommune med 13 000 innbyggere.",
     notes:
-      "Skill mellom første fase (40 MW, 2031) og oppgitt sluttkapasitet (90 MW). Koordinaten er " +
-      "tettstedet Husnes, ikke parkens egen adresse.",
+      "Kvalitetsrunde 2026-09-30: koordinaten er flyttet fra Husnes sentrum til et punkt i " +
+      "næringsparken. Arcems egen tomt er ikke stedfestet. 40 MW er ikke ført som sikret kraft, " +
+      "fordi prosjektet står i kø hos Statnett. 60 000 m² tomt er ikke bekreftet i primærkilde.",
     kilder: [
       {
         source_name: "DataCenterMap: Arcem Husnes, Grøn Næringspark",
@@ -6025,7 +6036,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør Arcem, Inc., adresse Grøn Næringspark, 5460 Husnes.",
       },

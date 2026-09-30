@@ -388,6 +388,28 @@ describe("datasenter-enrichment", { timeout: 90_000 }, () => {
       expect(etter[0]!.missing_fields).toEqual(["owner", "status", "primary_source"]);
     });
 
+    it("type satt til unknown teller fortsatt som manglende", async () => {
+      // `unknown` er et gyldig svar på «hva slags anlegg», men ikke en utfylt type. Et anlegg som
+      // går tilbake fra kjent type til unknown skal komme tilbake på mangellista.
+      const id = await nyttAnlegg("Anlegg med ukjent type");
+      const typeMangler = async () =>
+        (
+          await drift<{ missing_fields: string[] }>(
+            `select missing_fields from admin_datacenter_overview where id = $1`,
+            [id],
+          )
+        )[0]!.missing_fields.includes("type");
+
+      await drift(`select save_datacenter_details($1, '{"facility_type":"unknown"}')`, [id]);
+      expect(await typeMangler()).toBe(true);
+
+      await drift(`select save_datacenter_details($1, '{"facility_type":"hyperscale"}')`, [id]);
+      expect(await typeMangler()).toBe(false);
+
+      await drift(`select save_datacenter_details($1, '{"facility_type":"unknown"}')`, [id]);
+      expect(await typeMangler()).toBe(true);
+    });
+
     it("koordinat teller som manglende felt når det ikke finnes", async () => {
       const rows = await drift<{ id: string }>(
         `insert into admin_research_items (item_type, category, subcategory, title, operational_status)
