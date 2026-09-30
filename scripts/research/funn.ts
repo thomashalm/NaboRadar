@@ -3040,7 +3040,9 @@ export const FUNN: Funn[] = [
       "Området rundt Hans Møller Gasmanns vei framstår som en datasenterklynge med flere bygg og " +
       "operatører — det er nyttig å vite når man ser på næringsbygg i Hovinbyen.",
     notes:
-      "Kun én kilde. Bør bekreftes mot GlobalConnects egne sider eller byggesak.",
+      "Primærkilde-runde 2026-09-30: primærkilde for anlegget søkt, ikke funnet. Adressen (gnr/bnr " +
+      "88/273) og GlobalConnect AS er bekreftet i Kartverket og Brønnøysund, men selskapet har " +
+      "ingen underenhet på adressen. Blix' PoP-liste nevner «GC HMG1» (sekundær).",
     kilder: [
       {
         source_name: "PeeringDB: GlobalConnect Oslo (HMG1)",
@@ -3058,6 +3060,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
       },
@@ -3224,9 +3227,9 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Skygard OSL3, Stanseveien 30",
     description:
-      "Datasenter på Grorud, oppført både som Skygard OSL3 og — i PeeringDB — som Basefarm OSL3 " +
-      "med stedsangivelse Grorud. Basefarm er forgjengeren til Skygard, så dette er sannsynligvis " +
-      "samme anlegg under to navn.",
+      "Skygards datasenter på Grorud, kjøpt fra Orange Business Services Norway (avtale desember " +
+      "2025). Skygard og HitecVision bekrefter anlegget i egne meldinger. Gateadressen Stanseveien " +
+      "30 kommer fra katalogkilder.",
     municipality: "Oslo",
     address: "Stanseveien 30",
     postal_code: "0976",
@@ -3241,8 +3244,9 @@ export const FUNN: Funn[] = [
     why_interesting:
       "Et etablert datasenter i et næringsområde på Grorud, tett på bolig.",
     notes:
-      "Aliaser: Basefarm OSL3, Orange OSL5. Sammenkoblingen av Skygard og Basefarm bygger på at " +
-      "adressene sammenfaller og at Basefarm er tidligere navn — ikke på en kilde som sier det direkte.",
+      "Primærkilde-runde 2026-09-30: rettet. Skygard kjøpte OSL3 fra Orange, ikke fra Basefarm, og " +
+      "«Orange OSL5» er et eget anlegg på Lørenskog – aliaset er fjernet. PeeringDB fører anlegget " +
+      "som Basefarm OSL3 (Grorud), som er det tidligere navnet på operatøren hos Orange.",
     kilder: [
       {
         source_name: "PeeringDB: nettverk til stede i fasiliteten",
@@ -3279,6 +3283,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
       },
@@ -3306,7 +3311,11 @@ export const FUNN: Funn[] = [
     why_interesting:
       "Et knutepunkt i Ulven/Økern-klyngen. Sammen med Alfabygget og OSL01 viser det at Hovinbyen " +
       "er Oslos tyngste område for digital infrastruktur.",
-    notes: "Aliaser: OKR/C, TeliaSonera OKR/C.",
+    notes:
+      "Aliaser: OKR/C, TeliaSonera OKR/C. Primærkilde-runde 2026-09-30: primærkilde for anlegget " +
+      "søkt, ikke funnet. Adressen er bekreftet i Kartverket (gnr/bnr 122/354). Arelion Norway AS " +
+      "og Telia Norge AS har ingen underenhet på adressen, og Telenor er også oppført der i " +
+      "katalogene.",
     kilder: [
       {
         source_name: "DataCenterMap: TeliaSonera OKR/C",
@@ -3334,6 +3343,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
       },
@@ -3356,11 +3366,15 @@ export const FUNN: Funn[] = [
     verification_status: "verified_public_source",
     operational_status: "active",
     sensitivity: "internal_only",
-    confidence: "high",
+    confidence: "medium",
     interest_level: "medium",
     why_interesting:
       "Et datasenter midt i Nydalen, et område som ellers er kontor, bolig og høyskole.",
-    notes: "Aliaser: V-Hosting Data Center, Availo.",
+    notes:
+      "Aliaser: V-Hosting Data Center, Availo. Primærkilde-runde 2026-09-30: ingen operatørkilde " +
+      "bekrefter datasenteret. Oslo kommune og OBOS viser at eiendommen ble omregulert fra trykkeri " +
+      "til ca. 700 boliger (vedtatt 27.08.2025). Sikkerhet senket til middels; status bør " +
+      "verifiseres manuelt. V-Hosting AS er registrert på Drammensveien 288.",
     public_candidate: true,
     public_candidate_note:
       "Bekreftet fysisk anlegg i drift siden 2014, verifisert adresse.",
@@ -3391,6 +3405,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
       },
@@ -3445,6 +3460,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
       },
@@ -3456,9 +3472,9 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Forskningsparken, Gaustadalléen 21",
     description:
-      "Mindre datasenter i Forskningsparken på Gaustad, direkte tilknyttet NIX. Fire oppføringer " +
-      "på adressen — Nordlo, AVUR, SSC Networks og en uspesifisert — peker mot ett bygg med flere " +
-      "operatører.",
+      "Samtrafikk- og colocation-punkt i Forskningsparken på Gaustad, direkte tilknyttet NIX. " +
+      "Nordlo (tidligere SSC Networks) og AVUR er oppført på adressen, men AVUR oppgir selv at " +
+      "selskapets datasenter ligger i Bergen, og at det bare har egne rutere her.",
     municipality: "Oslo",
     address: "Gaustadalléen 21",
     postal_code: "0349",
@@ -3474,7 +3490,10 @@ export const FUNN: Funn[] = [
       "Forskningsparken er et av de eldste samtrafikkpunktene i Norge, og ligger midt i et " +
       "universitets- og boligområde.",
     notes:
-      "Aliaser: AVUR Oslo, Nordlo Forskningsparken, SSC Networks. AVUR er registrert hos Nkom.",
+      "Aliaser: Nordlo Forskningsparken, SSC Networks, AVUR Oslo. Primærkilde-runde 2026-09-30: " +
+      "AVUR er rettet fra operatør til tilstedeværelse med rutere (AVURs egen side). Nordlos kjøp " +
+      "av SSC Networks er bekreftet i Nordlos pressemelding, men den nevner ikke adressen. " +
+      "Primærkilde for selve anlegget er søkt, ikke funnet.",
     kilder: [
       {
         source_name: "PeeringDB: nettverk til stede i fasiliteten",
@@ -3512,6 +3531,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
       },
@@ -3538,8 +3558,9 @@ export const FUNN: Funn[] = [
       "Et datasenter i et kontorområde på Bryn som er under transformasjon til bolig.",
     notes:
       "Nedgradert i runde 5: det eneste nettverket i fasiliteten er Fujitsus eget, samme mønster " +
-      "som Sognsveien 75. Trolig et internt teknisk rom. Ikke avvist, men ikke dokumentert som " +
-      "kommersielt anlegg.",
+      "som Sognsveien 75. Trolig et internt teknisk rom. Primærkilde-runde 2026-09-30: primærkilde " +
+      "søkt, ikke funnet. Det finnes ikke noe aktivt Fujitsu Norway AS i Brønnøysund, og Fujitsu " +
+      "står ikke i Nkoms register.",
     kilder: [
       {
         source_name: "PeeringDB: nettverk til stede i fasiliteten",
@@ -3566,6 +3587,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
       },
@@ -3619,6 +3641,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
       },
@@ -3645,7 +3668,11 @@ export const FUNN: Funn[] = [
     interest_level: "medium",
     why_interesting:
       "Nok et anlegg i Økern-klyngen, i et område med tung boligutbygging.",
-    notes: "Svakt dokumentert. Bør bekreftes før det behandles som et faktum.",
+    notes:
+      "Primærkilde-runde 2026-09-30: primærkilde søkt, ikke funnet. Vault AS finnes i Brønnøysund " +
+      "med datasenterformål, men med forretningsadresse Frydenbergveien 46B. DataCenterMap merker " +
+      "selv oppføringen som ikke lenger aktiv, og bygget markedsføres som kontorbygg. Sikkerhet " +
+      "senket til lav; status bør vurderes manuelt. Ikke samme anlegg som Vaultica OSL01.",
     kilder: [
       {
         source_name: "DataCenterMap: OSL1",
@@ -3663,6 +3690,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
       },
@@ -3761,10 +3789,11 @@ export const FUNN: Funn[] = [
       "Det første dokumenterte datasenteret i Asker. Ligger i et næringsområde tett på bolig og " +
       "på E18-korridoren, og er verdt å følge med på om det utvides.",
     notes:
-      "Oppfølgingsrunde: selskapet og adressen er bekreftet i flere kilder, men Astrofarm står ikke i " +
-      "Nkoms register — anlegget er trolig under 0,5 MW. DataCenterMap bruker dessuten samme ordlyd " +
-      "her som for Blix BDC, så beskrivelsen av anlegget er ikke uavhengig bekreftet. Interessenivå " +
-      "nedjustert til middels: et lite anlegg, ikke en stor installasjon.",
+      "Oppfølgingsrunde: selskapet og adressen er bekreftet i flere kilder, men Astrofarm står ikke " +
+      "i Nkoms register — anlegget er trolig under 0,5 MW. Interessenivå nedjustert til middels: et " +
+      "lite anlegg, ikke en stor installasjon. Primærkilde-runde 2026-09-30: Brønnøysund bekrefter " +
+      "selskapet på adressen, og Astrofarm nevner «our Norwegian datacenters» uten adresse. " +
+      "Primærkilde for selve anlegget søkt, ikke funnet.",
     kilder: [
       {
         source_name: "Bedriftsoppslag: Astrofarm AS, orgnr 979 905 173",
@@ -3782,6 +3811,7 @@ export const FUNN: Funn[] = [
         publisher: "Nasjonal kommunikasjonsmyndighet",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Astrofarm står ikke i registeret over de 60 kommersielle operatørene. Registreringsplikten gjelder anlegg over 0,5 MW.",
       },
@@ -3801,6 +3831,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
       },
@@ -5540,6 +5571,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
       },
@@ -5597,10 +5629,11 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
-    title: "ITsjefen NDC1, NDC2 og NDC4, Trondheim",
+    tidligere_titler: ["ITsjefen NDC1, NDC2 og NDC4, Trondheim"],
+    title: "ITsjefen NDC2, NDC3 og NDC4, Trondheim",
     description:
-      "Tre anlegg i Trondheim drevet av ITsjefen: NDC1 i Havnegata 9, NDC2 på Brattørkaia 17B og " +
-      "NDC4 i Tungavegen 30. Tre separate bygg, én operatør. Nkom-registrert.",
+      "Tre datasentre i Trondheim drevet av ITsjefen AS (del av ECIT), som operatøren selv kaller " +
+      "NDC2, NDC3 og NDC4. Tre separate bygg, én operatør. Nkom-registrert.",
     municipality: "Trondheim",
     address: "Brattørkaia 17B",
     postal_code: "7010",
@@ -5614,8 +5647,10 @@ export const FUNN: Funn[] = [
     interest_level: "low",
     why_interesting: "Den største regionale colocation-aktøren i Trøndelag.",
     notes:
-      "Samlet i ett funn fordi de tre er samme operatørs bynett, men de er fysisk atskilte bygg. " +
-      "Koordinaten er NDC2 på Brattørkaia.",
+      "Primærkilde-runde 2026-09-30: tittelen er rettet fra «NDC1, NDC2 og NDC4» fordi ITsjefens " +
+      "egen side lister NDC2, NDC3 og NDC4. NDC1 (Havnegata 9) er ikke nevnt, men heller ikke " +
+      "bekreftet nedlagt; Havnegata 9 er forretningsadressen. Adressene per anlegg er ikke " +
+      "primærbekreftet. Koordinaten er Brattørkaia 17B.",
     kilder: [
       {
         source_name: "DataCenterMap: ITsjefen NDC1, NDC2 og NDC4, Trondheim",
@@ -5632,6 +5667,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
       },
@@ -5653,8 +5689,9 @@ export const FUNN: Funn[] = [
     confidence: "high",
     interest_level: "low",
     notes:
-      "De gjenstående markedene er navngitt i det egne funnet om gratisgrensen. Elverum og Hamar " +
-      "er dekket gjennom PeeringDB i stedet.",
+      "De gjenstående markedene er navngitt i det egne funnet om gratisgrensen. Elverum og Hamar er " +
+      "dekket gjennom PeeringDB i stedet. Primærkilde-runde 2026-09-30: notatet beskriver vår egen " +
+      "dekning av en katalog og har ingen ekstern primærkilde.",
     kilder: [
       {
         source_name: "DataCenterMap: markeder gjennomgått i denne runden",
@@ -6209,7 +6246,11 @@ export const FUNN: Funn[] = [
     interest_level: "medium",
     why_interesting:
       "Rjukan er selve symbolet på norsk vannkraftindustri, og anlegget viderefører den bruken.",
-    notes: "Effekt og areal er ikke oppgitt i kilden.",
+    notes:
+      "Primærkilde-runde 2026-09-30: drift siden 2014 er bekreftet av Green Mountain, Brønnøysund " +
+      "(avdeling Rjukan) og Nkom. Statnett viser 33 MW tilknyttet og 33 MW reservert ved Rjukan TRA " +
+      "med Green Mountain AS som sluttkunde, og 112,5 MW i kø. MW er ikke strukturert i denne " +
+      "runden.",
     kilder: [
       {
         source_name: "DataCenterMap: Green Mountain RJU1-Rjukan",
@@ -6226,6 +6267,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet med postnummer som krav.",
       },
@@ -6674,6 +6716,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet med postnummer som krav.",
       },
@@ -6831,8 +6874,9 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Halden DC01",
     description:
-      "Colocation-anlegg i Halden med 250 kW tilgjengelig kapasitet, ISO 27001-sertifisert, eid av " +
-      "Storespeed AS med Magnora ASA i ryggen.",
+      "Colocation-anlegg i Halden drevet av Storespeed AS, ISO 27001-sertifisert. Magnora eier 75 % " +
+      "og oppgir rundt 1 MW installert med potensial for 5 MW. Storespeed oppgir 250 kW ledig " +
+      "kapasitet for nye kunder.",
     municipality: "Halden",
     address: "Violgata 8",
     postal_code: "1776",
@@ -6845,10 +6889,12 @@ export const FUNN: Funn[] = [
     confidence: "medium",
     interest_level: "low",
     why_interesting:
-      "Et lite, men reelt anlegg. 250 kW gjør det til det minste dokumenterte i datasettet.",
+      "Et lite, men reelt anlegg med kjent eier, og en av Magnoras datasenterinvesteringer.",
     notes:
-      "Merk størrelsen: 250 kW, ikke MW. Storespeed er Nkom-registrert, og Magnora står også bak " +
-      "AI-datasenteret på Nedre Rommen i Oslo.",
+      "Primærkilde-runde 2026-09-30: 250 kW er ledig kapasitet, ikke anleggets størrelse " +
+      "(Storespeed). Magnoras børsmelding 06.10.2025 oppgir ca. 1 MW installert og 5 MW potensial. " +
+      "Storespeed har 5 MW i Statnetts kø, som ikke er sikret kraft. MW er ikke strukturert i denne " +
+      "runden.",
     kilder: [
       {
         source_name: "DataCenterMap: Halden DC01",
@@ -6865,6 +6911,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet med postnummer som krav.",
       },
@@ -6875,7 +6922,11 @@ export const FUNN: Funn[] = [
     subcategory: "Datasenter",
     item_type: "finding",
     title: "PolarDC HER01, Herøya",
-    description: "Datasenter i Herøya industripark i Porsgrunn.",
+    description:
+      "Planlagt AI-datasenter fra Polar Data Centers i Herøya industripark i Porsgrunn, med ca. 40 " +
+      "MW startkapasitet. Polar meldte i mai 2026 at prosjektet er klart for bygging, og " +
+      "reguleringsendringen for Fjordgata 48 var på høring i februar 2026. Statnett har reservert " +
+      "15 MW til prosjektselskapet POLARDC HER AS.",
     municipality: "Porsgrunn",
     address: "Fjordgata 48",
     postal_code: "3936",
@@ -6883,15 +6934,17 @@ export const FUNN: Funn[] = [
     latitude: 59.11356,
     longitude: 9.63635,
     verification_status: "partially_verified",
-    operational_status: "active",
+    operational_status: "planned",
     sensitivity: "internal_only",
     confidence: "medium",
     interest_level: "medium",
     why_interesting:
       "Herøya er Norges største industripark, med kraft og infrastruktur fra før.",
     notes:
-      "Effekt og areal er ikke oppgitt. DataCenterMap fører anlegget under markedet «Skien», men det " +
-      "ligger i Porsgrunn kommune.",
+      "Primærkilde-runde 2026-09-30: status rettet fra aktiv til planlagt etter Polars egen " +
+      "melding. Planlagt tilknytning for Statnett-reservasjonen er 30.12.2028. MW er ikke " +
+      "strukturert i denne runden. DataCenterMap fører anlegget under markedet «Skien», men det " +
+      "ligger i Porsgrunn.",
     kilder: [
       {
         source_name: "DataCenterMap: PolarDC HER01, Herøya",
@@ -6908,6 +6961,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet med postnummer som krav.",
       },
