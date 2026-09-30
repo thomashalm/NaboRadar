@@ -2479,6 +2479,16 @@ plansak eller aktørens egen kunngjøring) og området er stedfestet. I runde 2 
 to nye anlegg (Google Våler, Bulk Arendal). Fem ble avvist: TikTok Norway AS på Ringerike hadde
 bare en køplass og er TikToks salgsselskap. To var anlegg som allerede lå i basen.
 
+**Duplikater slås sammen med arkivering, ikke sletting.** Nkom-registeret gir selskaper, ikke
+anlegg, så et operatørlead kan være det samme som et anlegg vi har stedfestet. Kriteriet er samme
+fysiske anlegg, ikke bare selskaper som henger sammen. Det sekundære funnet får
+`verification_status = 'archived'` og et notat om hvor det er slått sammen. Kildene flyttes til
+det kanoniske funnet, og den gamle tittelen legges i `tidligere_titler`. Funnet fjernes fra
+`funn.ts`, men seeden sletter aldri, så raden og historikken blir liggende. `datacenter_items()`
+utelater avviste og arkiverte funn (migrasjon 20261016000000), slik refresh-kandidatene og kartet
+allerede gjorde. Første sak var Odin Green DC: selskapets eneste formål er datasenteret i
+Hønefoss, så leadet er slått sammen med hscale OSL1.
+
 **3. Påstand og kilde.** `admin_research_datacenter_field_sources` knytter et strukturert felt til
 kilden som bærer det. Ikke full event sourcing — det ville kostet mer enn det smaker på 67 funn —
 men nok til at et MW-tall kan spores til noe. Roller bærer sin egen `source_id` inline.

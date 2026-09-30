@@ -1447,52 +1447,6 @@ export const FUNN: Funn[] = [
   {
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
-    item_type: "lead",
-    title:
-      "Odin Green DC — registrert datasenteroperatør med c/o-adresse i Asker",
-    description:
-      "Selskapet står i Nkoms datasenterregister med en c/o-adresse hos et forvaltningsselskap " +
-      "i Asker. Kategori A: selskap registrert på en adresse. Hvor anlegget ligger er ukjent, " +
-      "og ingenting tyder på at det er i Asker.",
-    municipality: "Asker",
-    verification_status: "investigated_not_confirmed",
-    operational_status: "unknown",
-    sensitivity: "internal_only",
-    confidence: "low",
-    interest_level: "low",
-    notes:
-      "Uten koordinat med vilje. En c/o-adresse hos en regnskapsfører sier ingenting om hvor et " +
-      "datasenter ligger, og skal ikke plasseres i kartet.",
-    kilder: [
-      {
-        source_name: "Nkom, registrerte kommersielle datasenteroperatører",
-        source_url: "https://nkom.no/datasenter/oversikt",
-        publisher: "Nasjonal kommunikasjonsmyndighet",
-        source_type: "register",
-        source_date: "2026-09-26",
-        primary_source: true,
-        excerpt_or_summary:
-          "Offentlig register over kommersielle datasenteroperatører med registreringsplikt etter " +
-          "ekomloven. 60 operatører og 112 registrerte datasentre. Registeret oppgir firmanavn og " +
-          "organisasjonsnummer, ikke fysisk lokasjon.",
-      },
-      {
-        source_name: "Enhetsregisteret: ODIN GREEN DC AS",
-        source_url:
-          "https://data.brreg.no/enhetsregisteret/api/enheter/925218790",
-        publisher: "Brønnøysundregistrene",
-        source_type: "register",
-        source_date: "2026-09-26",
-        excerpt_or_summary:
-          "Beliggenhetsadresse c/o TMF Norway AS, Hagaløkkveien 26, 1383 Asker. " +
-          "Registrert hos Nkom som kommersiell datasenteroperatør. Adressen er en c/o-adresse hos et " +
-          "regnskaps- og forvaltningsselskap, ikke et anlegg.",
-      },
-    ],
-  },
-  {
-    category: "Datasenter / industri / tekniske anlegg",
-    subcategory: "Datasenter",
     item_type: "note",
     title: "Registrerte datasenteroperatører med kontoradresse i Oslo og Bærum",
     description:
@@ -4587,7 +4541,10 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
-    tidligere_titler: ["AQ Compute / hscale OSL1, Hønefoss"],
+    tidligere_titler: [
+      "AQ Compute / hscale OSL1, Hønefoss",
+      "Odin Green DC — registrert datasenteroperatør med c/o-adresse i Asker",
+    ],
     title: "hscale OSL1 (tidl. AQ Compute), Hønefoss",
     description:
       "Datasenter for AI og HPC på Nedre Kilemoen i Hønefoss, eid av Odin Green DC AS og driftet av " +
@@ -4608,11 +4565,23 @@ export const FUNN: Funn[] = [
     why_interesting:
       "Et av de større anleggene i Oslos randsone, på et tidligere industriområde.",
     notes:
-      "Runde 2 (2026-09-30): nytt navn etter at AQ Compute ble hscale. Odin Green DC AS er både " +
-      "eier her og eget notat-funn («Odin Green DC — registrert datasenteroperatør med c/o-adresse " +
-      "i Asker») – kandidat for sammenslåing i neste runde. TikTok Norway AS og Bulk i Statnetts kø " +
-      "ved Ringerike er ikke dette anlegget.",
+      "Runde 2 (2026-09-30): nytt navn etter at AQ Compute ble hscale. Eier er Odin Green DC AS, " +
+      "som har som eneste formål å utvikle, eie og drive dette datasenteret. Selskapet lå tidligere " +
+      "som et eget lead fra Nkom-registeret med c/o-adresse i Asker; det er slått sammen hit og " +
+      "arkivert (dedup 2026-09-30). TikTok Norway AS og Bulk i Statnetts kø ved Ringerike er ikke " +
+      "dette anlegget.",
     kilder: [
+      {
+        source_name: "Nkom: Odin Green DC AS registrert som datasenteroperatør",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-09-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Odin Green DC AS (925218790) står i Nkoms register over kommersielle datasenteroperatører. " +
+          "Registeret oppgir ikke lokasjon; selskapets eneste formål er datasenteret i Hønefoss.",
+      },
       {
         source_name: "DataCenterMap: AQ Compute / hscale OSL1, Hønefoss",
         source_url: "https://www.datacentermap.com/norway/",

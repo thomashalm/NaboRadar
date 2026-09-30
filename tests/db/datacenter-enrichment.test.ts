@@ -425,6 +425,32 @@ describe("datasenter-enrichment", { timeout: 90_000 }, () => {
   });
 
   // -------------------------------------------------------------------------
+  describe("konkluderte funn", () => {
+    it("arkiverte og avviste funn er ute av lista og køen, men kan fortsatt åpnes", async () => {
+      // Et arkivert duplikat skal ikke telle som et eget datasenter. Historikken skal likevel
+      // kunne leses fra funnet selv.
+      const arkivert = await nyttAnlegg("Duplikat som er slått sammen", { verification_status: "archived" });
+      const avvist = await nyttAnlegg("Adresse som ikke er et datasenter", { verification_status: "rejected" });
+      const levende = await nyttAnlegg("Anlegg som fortsatt teller");
+
+      const liste = (await drift<{ id: string }>(`select id from datacenter_items()`)).map((r) => r.id);
+      expect(liste).toContain(levende);
+      expect(liste).not.toContain(arkivert);
+      expect(liste).not.toContain(avvist);
+
+      const kø = (await drift<{ id: string }>(`select id from datacenter_refresh_candidates('full')`)).map((r) => r.id);
+      expect(kø).not.toContain(arkivert);
+      expect(kø).not.toContain(avvist);
+
+      const detalj = await drift<{ datacenter_detail: Record<string, unknown> | null }>(
+        `select datacenter_detail($1)`,
+        [arkivert],
+      );
+      expect(detalj[0]!.datacenter_detail).not.toBeNull();
+    });
+  });
+
+  // -------------------------------------------------------------------------
   describe("refresh-køen", () => {
     it("review_due tar bare det som trenger tilsyn, og sier hvorfor", async () => {
       const k = await drift<{ title: string; queued_reasons: string[] }>(
