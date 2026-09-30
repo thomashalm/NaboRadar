@@ -1244,7 +1244,7 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
-    title: "OSL01 datasenter, Selma Ellefsens vei 1 på Ulven",
+    title: "Vaultica OSL01, Ulven",
     description:
       "Eksisterende fysisk datasenter på Ulven i Oslo, tidligere DigiPlex Oslo. Operatøren er " +
       "registrert hos Nkom som kommersiell datasenteroperatør, og har beliggenhetsadresse og " +
@@ -1270,7 +1270,10 @@ export const FUNN: Funn[] = [
       "Ulven. Koordinaten er Kartverkets punkt for Selma Ellefsens vei 1. De øvrige SI OSL-selskapene i " +
       "Nkom-registeret (02, 03.1, 03.2, 04) har adresser i Nordre Follo, Lillestrøm og Indre Østfold " +
       "og faller utenfor dette området.",
-    tidligere_titler: ["STACK OSL01 datasenter, Ulven"],
+    tidligere_titler: [
+      "STACK OSL01 datasenter, Ulven",
+      "OSL01 datasenter, Selma Ellefsens vei 1 på Ulven",
+    ],
     public_candidate: true,
     public_candidate_note:
       "Bekreftet fysisk anlegg med Nkom-registrert operatør, beliggenhetsadresse i Enhetsregisteret og flere bransjekilder.",
@@ -1303,6 +1306,7 @@ export const FUNN: Funn[] = [
         publisher: "Brønnøysundregistrene",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Beliggenhetsadresse Selma Ellefsens vei 1, 0581 Oslo. " +
           "Næringskode 63.100 databehandling og datalagring, 23 ansatte. Selskapsnavnet «OSL 01» og " +
@@ -2934,7 +2938,8 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
-    title: "Alfabygget, Hans Møller Gasmanns vei 9 — OS-IX",
+    tidligere_titler: ["Alfabygget, Hans Møller Gasmanns vei 9 — OS-IX"],
+    title: "Bulk OS-IX, Hans Møller Gasmanns vei 9",
     description:
       "Et av Norges største datasenterbygg, på Økern/Alnabru. Tre operatører er oppført på samme " +
       "adresse: Bulk Infrastructure driver Oslo Internet Exchange (OS-IX) her, Verizon har anlegget " +
@@ -3007,6 +3012,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
       },
@@ -4074,7 +4080,7 @@ export const FUNN: Funn[] = [
     verification_status: "verified_public_source",
     operational_status: "active",
     sensitivity: "internal_only",
-    confidence: "high",
+    confidence: "medium",
     interest_level: "high",
     why_interesting:
       "Det best dokumenterte datasenteret i Asker, i et næringsområde tett på bolig og " +
@@ -4192,10 +4198,10 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Exanorth / Bitzero, Tunnsjødalen i Namsskogan",
     description:
-      "Kraftkrevende containeranlegg i Tunnsjødalen med 8 500 maskiner og 300 servere, som " +
-      "utvinner kryptovaluta for søsterselskapet Bitzero Inc. Nkom oppgir 100 % " +
-      "kryptoutvinning. Driften har vært omtalt som truet etter et underskudd på 55 " +
-      "millioner kroner.",
+      "Containeranlegg for kryptoutvinning i Tunnsjødalen, eid og driftet av Exanorth AS i " +
+      "Bitzero-konsernet. 40 MW er i drift, og Statnett har ytterligere 70 MW reservert til " +
+      "anlegget. Bitzero har et bindende intensjonsbrev om å leie hele kapasiteten til " +
+      "AI-leverandøren OneQode fra 2027. Nkom oppgir 100 % kryptoutvinning.",
     municipality: "Namsskogan",
     address: "Tunnsjødalsveien 178",
     postal_code: "7892",
@@ -4211,8 +4217,9 @@ export const FUNN: Funn[] = [
       "viser hvor sårbart et lokalsamfunn blir når ett kraftkrevende anlegg står for en " +
       "stor del av inntektene.",
     notes:
-      "Aliaser: Bitzero Namsskogan, Exanorth Tunnsjødalen. Selskapet oppga først at bruken var " +
-      "hemmelig og beskrev den som skylagring.",
+      "Runde 3 (2026-09-30): omtalen av at «driften er truet» stammer fra en artikkel fra 2024 og " +
+      "er fjernet. Aliaser: Bitzero Namsskogan, Exanorth Tunnsjødalen. OneQode er ikke ført som " +
+      "kunde, fordi avtalen er et intensjonsbrev.",
     kilder: [
       {
         source_name: "Namdalsavisa og Trønder-Avisa om Exanorth i Namsskogan",
@@ -4607,6 +4614,94 @@ export const FUNN: Funn[] = [
   {
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Green Mountain Hønefoss, Kilemoen",
+    description:
+      "Planlagt datasenter fra Green Mountain på Kilemoen ved Hønefoss. Green Mountain kjøpte " +
+      "tomt fra Follum gård i 2025 og fikk rammetillatelse fra Ringerike kommune samme år. " +
+      "Prosjektselskapet er Green Mountain Hønefoss AS. Tidslinje og kapasitet for anlegget er " +
+      "ikke oppgitt.",
+    municipality: "Ringerike",
+    city: "Hønefoss",
+    latitude: 60.20179,
+    longitude: 10.23277,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Et nytt hyperskala-aktuelt anlegg på Kilemoen, noen hundre meter fra hscale OSL1, i et " +
+      "område der flere aktører har nettreservasjoner eller køplass ved Ringerike " +
+      "transformatorstasjon.",
+    notes:
+      "Opprettet i runde 3 (2026-09-30). Statnett har reservert 18,5 MW til Green Mountain AS ved " +
+      "Ringerike TRA og har 145 MW i kø; reservasjonen står på selskapet, ikke på " +
+      "prosjektselskapet eller anlegget, og er derfor ikke ført som sikret kraft. Koordinaten er " +
+      "Kartverkets stedsnavnpunkt for Kilemoen industriområde, ikke tomta. Ikke samme anlegg som " +
+      "hscale OSL1 (Odin Green DC AS).",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Statnett: reservasjoner og kapasitetskø (forbruk)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/#reservasjoner",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Green Mountain AS, Ringerike TRA (Glitre Nett): 18,5 MW reservert (23/01370, tilknytning " +
+          "29.09.2027) og 145 MW i kø (24/01806, 2031). Lest via GitHub-speil, snapshot 30.09.2026.",
+      },
+      {
+        source_name: "Brønnøysundregistrene: Green Mountain Hønefoss AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/935038499",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Org.nr. 935038499, stiftet 05.02.2025, Hodneveien 260 i Stavanger. Formål: investering i " +
+          "datasentervirksomhet. Styreleder Rafi Wunsh. Søsterselskapet Green Mountain Hønefoss " +
+          "Investment AS har org.nr. 935038529.",
+      },
+      {
+        source_name: "Ringerike kommune: Utbyggingsavtale for Nedre Kilemoen, nord",
+        source_url: "https://www.ringerike.kommune.no/innhold/pagaende-planprosesser/arkiv-planprosesser-2025/arkiv-utbyggingsavtaler-2025/utbyggingsavtale-for-nedre-kilemoen-nord2/",
+        publisher: "Ringerike kommune",
+        source_type: "regulation",
+        source_date: "2025-03-17",
+        primary_source: true,
+        excerpt_or_summary:
+          "Utbyggingsavtale mellom Odin Green DC AS og kommunen for plan 226 «Nedre Kilemoen, nord» " +
+          "(51/46). Gjelder hscale OSL1 og brukes her bare til dedup: det er ikke Green Mountain.",
+      },
+      {
+        source_name: "Kartverket stedsnavn: Kilemoen Industriområde",
+        source_url: "https://ws.geonorge.no/stedsnavn/v1/navn?sok=Kilemoen&utkoordsys=4258",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stedsnavnpunktet for Kilemoen Industriområde er 60,20179 / 10,23277 (Ringerike). Brukt som " +
+          "omtrentlig områdepunkt.",
+      },
+      {
+        source_name: "Azrieli Group completes acquisition of Green Mountain",
+        source_url: "https://greenmountain.no/green-mountain-data-centers-acquired-by-azrieli-group-ltd/",
+        publisher: "Green Mountain AS",
+        source_type: "web",
+        source_date: "2021-07-19",
+        primary_source: true,
+        excerpt_or_summary:
+          "Azrieli Group kjøper 100 % av Green Mountain AS. Oppkjøpet ble fullført 31.08.2021.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
     item_type: "note",
     title: "Nasjonalt bilde: 112 oppføringer i 42 markeder",
     description:
@@ -4632,7 +4727,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "112 oppføringer fordelt på 42 markeder. Størst: Oslo 34, Stavanger 9, Bergen 8, " +
           "Bryne 5, Aksdal 5, Kristiansand 4, Skien 4, Trondheim 4, Sandefjord 3. Resten har " +
@@ -4835,7 +4929,9 @@ export const FUNN: Funn[] = [
     subcategory: "Datasenter",
     item_type: "finding",
     title: "Green Horizon «Vidar», Kvernaland",
-    description: "Anlegg på 8 MW, klassifisert som Tier 3.",
+    description:
+      "Oppført som Green Horizon-anlegg på Plogfabrikkvegen 8 på Kvernaland, ca. 1 km fra Heimdal. " +
+      "Ingen kilde viser drift eller konkret plan; oppføringen bygger på DataCenterMap.",
     municipality: "Klepp",
     address: "Plogfabrikkvegen 8",
     postal_code: "4353",
@@ -4843,14 +4939,16 @@ export const FUNN: Funn[] = [
     latitude: 58.78333,
     longitude: 5.70576,
     verification_status: "partially_verified",
-    operational_status: "active",
+    operational_status: "unknown",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "low",
     interest_level: "medium",
     why_interesting:
       "Et mellomstort anlegg på Jæren, i samme område som Green Horizons større campus.",
     notes:
-      "Adressen er geokodet til Klepp, ikke Time, som markedsnavnet «Bryne» ville antydet.",
+      "Runde 3 (2026-09-30): status satt til ukjent. Kan være Green Horizons Norway 2 (8 MW " +
+      "reservert ved Fagrafjell på selskapsnivå), men koblingen er ikke dokumentert. Ikke samme " +
+      "anlegg som Heimdal.",
     kilder: [
       {
         source_name: "DataCenterMap: Green Horizon «Vidar», Kvernaland",
@@ -4858,7 +4956,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør Green Horizon, adresse Plogfabrikkvegen 8, 4353 Kvernaland.",
       },
@@ -4868,6 +4965,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
       },
@@ -4877,23 +4975,32 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
-    title: "Green Horizon Norway 1, Dysjaland",
+    tidligere_titler: ["Green Horizon Norway 1, Dysjaland"],
+    title: "Green Horizon Norway 1, Kviamarka",
     description:
-      "Campus på 36 MW med to bygg. Tre katalogoppføringer — campus, DC1 og DC2 — er ett anlegg.",
-    municipality: "Sola",
+      "Planlagt datasenter på 36 MW i Kviamarka næringsområde mellom Nærbø og Varhaug i Hå, i " +
+      "kjelleren på Miljøgartneriets utvidelse. Prosjektselskapet er Green Horizon Kviamarka AS. " +
+      "Reguleringen ble godkjent i juni 2026, og drift er varslet i andre halvår 2027.",
+    municipality: "Hå",
     address: "Næringsvegen 20",
     postal_code: "4365",
-    city: "Dysjaland",
+    city: "Nærbø",
+    latitude: 58.63831,
+    longitude: 5.6252,
     verification_status: "partially_verified",
-    operational_status: "active",
+    operational_status: "planned",
     sensitivity: "internal_only",
     confidence: "medium",
     interest_level: "medium",
     why_interesting:
-      "Et av de større anleggene i Rogaland, i næringsområdet ved Sola.",
+      "Et datasenter koblet til et gartneri, der overskuddsvarmen kan brukes i veksthus – i et " +
+      "landbruksområde på Jæren.",
     notes:
-      "Uten koordinat: Næringsvegen 20 med postnummer 4365 lot seg ikke geokode sikkert mot " +
-      "Kartverket. Ingen omtrentlig koordinat er satt.",
+      "Runde 3 (2026-09-30): ny tittel og kommune; anlegget lå feil som «Dysjaland» i Sola. " +
+      "Koordinaten er omtrentlig (adressepunktet til Miljøgartneriet, Næringsvegen 13), fordi " +
+      "Næringsvegen 20 ikke finnes i Kartverket. Statnett-reservasjonen på 36 MW ved Bjerkreim står " +
+      "på Green Horizon AS, ikke anlegget, og er ikke ført som sikret kraft. «Bjerkreim» er " +
+      "transformatorstasjonen, ikke et eget anlegg.",
     kilder: [
       {
         source_name: "DataCenterMap: Green Horizon Norway 1, Dysjaland",
@@ -4901,7 +5008,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør Green Horizon, adresse Næringsvegen 20, 4365 Dysjaland.",
       },
@@ -5099,11 +5205,120 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
-    title: "Bluefjords og Compute Nordic, Gaupne",
+    title: "Gaupne Datapark, Gaupnegrandane",
     description:
-      "Datasenter i Gaupne med to operatøroppføringer på samme adresse: Bluefjords AS, som tilbyr " +
-      "rack, colocation og whitespace «powered by glacier», og Compute Nordic DC1. Bluefjords er " +
-      "Nkom-registrert med 14 % kryptoutvinning.",
+      "Planlagt datasenter på Gaupnegrandane i Gaupne, utviklet av Sognekraft gjennom Sogn " +
+      "Utvikling og prosjektselskapet Gaupne Datapark AS. Tomta er over 55 mål, og Sognekraft " +
+      "oppgir mulig kapasitet på opptil 120 MW. Kommunens reguleringsplan for området er ute på " +
+      "andre gangs høring.",
+    municipality: "Luster",
+    city: "Gaupne",
+    latitude: 61.40031,
+    longitude: 7.29575,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Et kraftselskap som selv utvikler datasenter i egen kraftkommune, i samme dalføre som " +
+      "Kitebrook Leirdøla og Bluefjords.",
+    notes:
+      "Opprettet i runde 3 (2026-09-30). Statnett har 120 MW reservert ved Leirdøla TRA med " +
+      "sluttkunde «Gaupne Utvikling AS». At dette er Gaupne Datapark AS er ikke verifisert i " +
+      "Brønnøysund, så tallet er ikke ført som sikret kraft. Koordinaten er Kartverkets " +
+      "stedsnavnpunkt for Gaupnegrandane, ikke tomta.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Statnett: liste over reservasjoner (forbruk)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/#reservasjoner",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak 24/01783 (ELB2930): Leirdøla (LEX) TRA, kunde Sygnir AS, sluttkunde Gaupne Utvikling " +
+          "AS, datasenter, 120 MW, planlagt 30.12.2028. Samme stasjon: 23/01051 Kitebrook " +
+          "Infrastructure AS 100 MW.",
+      },
+      {
+        source_name: "Sogn Utvikling: 120 MW hyperscale datasenter i Gaupne",
+        source_url: "https://www.sognutvikling.no/gaupnegrandane-prosjektside",
+        publisher: "Sogn Utvikling AS (Sognekraft)",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Gaupnegrandane: regulert og opparbeidd industritomt på over 55 mål, opptil 120 MW. Teknisk " +
+          "forprosjekt er gjennomført og detaljplan pågår. Nettilknytning er søkt, med " +
+          "tilknytningspunkt i Fondøla.",
+      },
+      {
+        source_name: "Hyperscale datasenter i Gaupne?",
+        source_url: "https://www.sognutvikling.no/nyheiter/datasenter-gaupne",
+        publisher: "Sogn Utvikling AS (Sognekraft)",
+        source_type: "web",
+        source_date: "2026-03-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Konsernsjef Terje Bakke Nævdal la fram foreløpige planer for om lag 55 mål på " +
+          "Gaupnegrandane. 120 MW nettkapasitet er reservert. Dialog med flere mulige brukere. " +
+          "Investeringer på flere titalls milliarder. Tidlig fase.",
+      },
+      {
+        source_name: "Sogn Utvikling: datasenter",
+        source_url: "https://www.sognutvikling.no/datasenter",
+        publisher: "Sogn Utvikling AS (Sognekraft)",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Prosjektoversikt: 120 MW datasenter i Gaupne og 210 MW på Vangsnes (kraft fra 2032).",
+      },
+      {
+        source_name: "Enhetsregisteret: Gaupne Datapark AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/927936526",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "927936526, Vik, stiftet 01.09.2021, adresse Røysavegen 1 (Sognekraft). Formål er " +
+          "næringsutvikling på egne eiendommer. Styreleder Terje Bakke Nævdal, daglig leder Bjørn Ole " +
+          "Ellertsen.",
+      },
+      {
+        source_name: "Reguleringsplan Gaupnegrandane",
+        source_url: "https://www.luster.kommune.no/nyheiter/reguleringsplan-gaupnegrandane.12643.aspx",
+        publisher: "Luster kommune",
+        source_type: "regulation",
+        source_date: "2025-10-28",
+        primary_source: true,
+        excerpt_or_summary:
+          "Detaljregulering Gaupnegrandane (planID 2021005) lagt ut på 2. gangs høring av plan- og " +
+          "forvaltningsutvalget 28.10.2025, med frist 09.03.2026. Formålet er nye næringsarealer.",
+      },
+      {
+        source_name: "Kartverket stedsnavn: Gaupnegrandane",
+        source_url: "https://ws.geonorge.no/stedsnavn/v1/navn",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stedsnavnet Gaupnegrandane (industriområde) har punktet 61.40031, 7.29575 (EUREF89).",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    tidligere_titler: ["Bluefjords og Compute Nordic, Gaupne"],
+    title: "Bluefjords Gaupne",
+    description:
+      "Datasenter i Gaupne drevet av Bluefjords AS siden 2015, med colocation og kryptoutvinning. " +
+      "Compute Nordic markedsfører kapasitet på samme adresse. Bluefjords la i april 2026 fram " +
+      "planinitiativ for et nytt bygg på felt BN2 i samme planområde.",
     municipality: "Luster",
     address: "Jostedalsvegen 530",
     postal_code: "6868",
@@ -5119,8 +5334,10 @@ export const FUNN: Funn[] = [
       "Løser et av de ustedfestede kryptoanleggene, og viser samtidig mønsteret: anleggene ligger i " +
       "kraftkommuner med breekjøling, ikke i byene.",
     notes:
-      "Aliaser: BlueFjords AS, Compute Nordic DC1. Kryptoandelen på 14 % gjelder operatøren " +
-      "Bluefjords, ikke nødvendigvis hele anlegget.",
+      "Runde 3 (2026-09-30): ny tittel; tidligere «Bluefjords og Compute Nordic, Gaupne». Compute " +
+      "Nordic har ikke eget bygg eller norsk selskap og er ikke strukturert som part. Kryptoandelen " +
+      "oppgis ulikt: 14 % (Nkom-data i basen), 30 % (Altinget) og «opp mot ein tredjedel» (NRK). 15 " +
+      "MW i drift kommer fra presse.",
     kilder: [
       {
         source_name: "DataCenterMap: Bluefjords og Compute Nordic, Gaupne",
@@ -5128,7 +5345,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør Bluefjords / Compute Nordic, adresse Jostedalsvegen 530, 6868 Gaupne.",
       },
@@ -5198,24 +5414,25 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Kitebrook Børdalen",
     description:
-      "Planlagt campus på 100 MW for AI og HPC på vannkraft, med avansert kjøling.",
-    municipality: "Kvam",
-    address: "Fv133",
+      "Planlagt datasentercampus i Børdalen i Samnanger, utviklet av Kitebrook gjennom " +
+      "prosjektselskapet KB DC Børdalen AS. Kitebrook oppgir 100 MW anleggslast og ca. 82,5 MW IT i " +
+      "modulære haller. Reguleringen ble vedtatt i 2019, og 100 MW står i Statnetts kø.",
+    municipality: "Samnanger",
     postal_code: "5650",
-    city: "Børdalen",
-    latitude: 60.38,
-    longitude: 5.9,
+    city: "Tysse",
+    latitude: 60.40302,
+    longitude: 5.842,
     verification_status: "partially_verified",
     operational_status: "planned",
     sensitivity: "internal_only",
-    confidence: "low",
+    confidence: "medium",
     interest_level: "medium",
     why_interesting:
       "Enda en 100 MW AI-campus fra samme aktør, i et lite tettsted på Vestlandet.",
     notes:
-      "Koordinaten er grov og satt fra stedsnavnet Børdalen, ikke fra en verifisert adresse — «Fv133» " +
-      "er en fylkesveg uten husnummer. DataCenterMap fører anlegget under markedet «Bergen», men " +
-      "Børdalen ligger ikke i Bergen kommune. Begge deler gjør funnet svakt stedfestet.",
+      "Runde 3 (2026-09-30): kommunen er rettet fra Kvam til Samnanger (postnummer 5650 Tysse). " +
+      "Koordinaten er omtrentlig, ca. 600 m nord for Samnanger transformatorstasjon; tomta er ikke " +
+      "stedfestet. 100 MW i kø er ikke ført som sikret kraft.",
     kilder: [
       {
         source_name: "DataCenterMap: Kitebrook Børdalen",
@@ -5223,7 +5440,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør Kitebrook, adresse Fv133, 5650 Børdalen.",
       },
@@ -5315,7 +5531,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør Datafjellet AS, adresse Gullstølsstien 258, 5153 Bønes.",
       },
@@ -5408,7 +5623,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør ITsjefen AS, adresse Brattørkaia 17B, 7010 Trondheim.",
       },
@@ -5448,7 +5662,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Markedene Oslo (34), Stavanger (10), Bergen (8), Bryne (6), Aksdal (6), Trondheim (4), Gaupne (3), Fauske (1), Billingstad (1) og Namsskogan (1) er åpnet og gjennomgått oppføring for oppføring. Gjenstår: Kristiansand (4), Skien (4), Sandefjord (3), Halden (2), Husnes (2) og rundt 20 markeder med ett anlegg hver.",
       },
@@ -5774,6 +5987,74 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
+    title: "Bjorstaddalen datasentertomt, Skien",
+    description:
+      "Kommunal tomt på ca. 500 mål i Bjorstaddalen ved Bolvik, ved Statnetts Grenland " +
+      "transformatorstasjon. Formannskapet i Skien behandlet i juni 2026 en opsjonsavtale om salg " +
+      "til Løvenskiold-selskapet Grenland Data Center AS, med Nscale omtalt som partner. Tomta er " +
+      "ikke regulert, og avtalen forutsetter regulering og krafttilgang.",
+    municipality: "Skien",
+    city: "Skien",
+    latitude: 59.12628,
+    longitude: 9.48198,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "medium",
+    why_interesting:
+      "Et mulig stort datasenterprosjekt i Grenland, i tillegg til Google og Nscale på Gromstul. " +
+      "Aktørene oppgir å ha søkt 576 MW, men ingenting er reservert.",
+    notes:
+      "Opprettet i runde 3 (2026-09-30) med lav sikkerhet. Grunnlag: opsjonen er registrert i " +
+      "Skien kommunes postliste (sak 2026/21855) og omtalt i E24; Nscale er bare sitert i presse. " +
+      "576 MW er søkt effekt, ikke kø eller reservasjon, og er ikke strukturert. Koordinaten er " +
+      "representasjonspunktet for teig 235/57, som er større enn opsjonsarealet.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Skien kommune postjournal: innsynskrav om opsjonsavtale Bjorstaddalen/Nscale (sak 2026/21855)",
+        source_url: "https://innsynpluss.onacos.no/skien/sok/#/?searchTerm=opsjonsavtale",
+        publisher: "Skien kommune",
+        source_type: "register",
+        source_date: "2026-09-21",
+        primary_source: true,
+        excerpt_or_summary:
+          "Journalført innsynssak 2026/21855 med tittel «opsjonsavtale for salg av kommunalt areal " +
+          "ved Bjorstaddalen til Nscale, behandlet i formannskapet 22. juni 2026». Tittelen er " +
+          "innsynskrevers formulering; selve saksframlegget er ikke publisert. Journalen har også " +
+          "notat 2026/110418 fra Kilebygda lokalutvalg om tomtesalg og ny næring i Bjorstaddalen, som " +
+          "ikke er publisert.",
+      },
+      {
+        source_name: "Enhetsregisteret: GRENLAND DATA CENTER AS (937692145)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/937692145",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-07-06",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 28.04.2026, historisk navn NFH 260404 AS (til 06.07.2026). Formål: utvikle, bygge " +
+          "og drifte datasentre. Fossumvegen 51, Skien. Daglig leder/styreleder Leopold Axel " +
+          "Løvenskiold.",
+      },
+      {
+        source_name: "Kartverket eiendom-API: teig 4003-235/57",
+        source_url: "https://ws.geonorge.no/eiendom/v1/geokoding?kommunenummer=4003&gardsnummer=235&bruksnummer=57&utkoordsys=4258",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2025-03-14",
+        primary_source: true,
+        excerpt_or_summary:
+          "Teigen 235/57 i Skien har representasjonspunkt 59,12628 N / 9,48198 Ø. Teigen strekker seg " +
+          "omtrent fra 59,123 til 59,152 N, så den er langt større enn opsjonsarealet på 500 mål.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
     title: "Tonstad DataPark, Sirdal",
     description:
       "Datasentercampus i Sirdal, overtatt av GreenScale. Oppgitt til 420 000 m² tomt og 300 MW " +
@@ -5867,8 +6148,9 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Terakraft Sauda I, Hellandsbygd",
     description:
-      "Datasenter på 10 MW i et ombygd vannkraftverk fra 1919, nedlagt i 2008. Terakrafts " +
-      "flaggskipanlegg.",
+      "Datasenter i et ombygd vannkraftverk fra 1919 i Hellandsbygd, drevet av Terakraft AS. " +
+      "Anlegget oppgis til 10 MW etter rehabilitering, med mulig utvidelse på inntil 60 MW i " +
+      "nærheten.",
     municipality: "Sauda",
     address: "Handelandsvegen 140",
     postal_code: "4200",
@@ -5883,7 +6165,10 @@ export const FUNN: Funn[] = [
     why_interesting:
       "Et 100 år gammelt kraftverk gjort om til datasenter — det tydeligste eksempelet på at " +
       "bransjen følger gammel kraftinfrastruktur.",
-    notes: "10 MW er oppgitt som dagens kapasitet.",
+    notes:
+      "Runde 3 (2026-09-30): Terakrafts nettside sier «10 MW available now», mens investoren Vesper " +
+      "sier at 10 MW kommer etter rehabilitering – status er derfor usikker. Terakraft står ikke i " +
+      "Statnetts lister. Magnoras køplass ved Sauda TRA er et annet prosjekt.",
     kilder: [
       {
         source_name: "DataCenterMap: Terakraft Sauda I, Hellandsbygd",
@@ -5891,7 +6176,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør Terakraft, adresse Handelandsvegen 140, 4200 Hellandsbygd.",
       },
@@ -5933,7 +6217,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør Green Mountain, adresse Svaddevegen 161, 3660 Rjukan.",
       },
@@ -5993,6 +6276,68 @@ export const FUNN: Funn[] = [
         primary_source: true,
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Lefdal Moskog, Sunnfjord næringspark",
+    description:
+      "Planlagt datasenter på en tomt på ca. 40 mål i Sunnfjord næringspark på Moskog øst for " +
+      "Førde, der detaljreguleringen åpner for datasenter. Prosjektet ble utviklet av Titan Group " +
+      "AS, som Lefdal Mine Datacenter kjøpte i september 2026. Lefdal oppgir om lag ni milliarder " +
+      "kroner i investeringer over tre år.",
+    municipality: "Sunnfjord",
+    city: "Førde",
+    latitude: 61.44122,
+    longitude: 5.98715,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Lefdal Mines første anlegg utenfor gruva i Nordfjord. Flere datasenterprosjekter står i kø " +
+      "ved Moskog transformatorstasjon.",
+    notes:
+      "Opprettet i runde 3 (2026-09-30). 80 MW står i Statnetts kø ved Moskog TRA og er ikke ført " +
+      "som sikret kraft. Koordinaten er omtrentlig (stedsnavnet Moskogen); tomta er ikke " +
+      "stedfestet. Ikke samme anlegg som Lefdal Mine Datacenter i Kjølsdalen.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Statnett – kapasitetskø forbruk (Power BI)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/#kapasitetsko",
+        publisher: "Statnett SF",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak 25/02600 (ELB689), Moskog TRA, BKK AS, sluttkunde TITAN GROUP AS, datasenter, 80 MW i " +
+          "kø, moden bestilling 26.11.2025, ønsket 01.10.2026. Ellers ved Moskog: ARCEM DC 16 AS 40 " +
+          "MW og MAGNORA ASA 50 MW.",
+      },
+      {
+        source_name: "Sunnfjord kommune: Detaljreguleringsplan Sunnfjord næringspark aust på høyring",
+        source_url: "https://sunnfjord.kommune.no/aktuelt-fra-kommunen/detaljreguleringsplan-sunnfjord-naringspark-aust-til-hoyring-og-offentleg-ettersyn.36012.aspx",
+        publisher: "Sunnfjord kommune",
+        source_type: "regulation",
+        source_date: "2025-12-16",
+        primary_source: true,
+        excerpt_or_summary:
+          "Plan 22/6350 omfatter ca. 466 daa på Moskog, ca. 1 mil øst for Førde sentrum. Formål " +
+          "inkluderer datasenter og/eller transformatorstasjon. Høringsfrist var 08.02.2026.",
+      },
+      {
+        source_name: "Brønnøysundregistrene: Titan Group AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/931481258",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Org.nr. 931481258, stiftet 2023 (tidl. NFH 230550 AS), forretningsadresse Nordfjordvegen " +
+          "7300, Kjølsdalen (Stad).",
       },
     ],
   },
@@ -6145,6 +6490,155 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
+    title: "Bulk Ausenfjell, Frogner",
+    description:
+      "Planlagt datasenter i Bulks næringsområde Ausenfjellet II ved Frogner i Lillestrøm. " +
+      "Kommunen endret reguleringen i 2026 slik at datasenter tillates i feltene KBA2–4, med Bulk " +
+      "Ausenfjell AS som forslagsstiller. Planbeskrivelsen oppgir 12 MW reservert hos Elvia og " +
+      "ytterligere kapasitet i kø. Tomteopparbeidelse pågår; byggesøknad for datasenteret er ikke " +
+      "kjent.",
+    municipality: "Lillestrøm",
+    city: "Frogner",
+    latitude: 60.0026,
+    longitude: 11.13628,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Et nytt datasenterområde nær Frogner transformatorstasjon i Oslos nordøstlige randsone. " +
+      "Kravet om å levere overskuddsvarme til fjernvarme ble tatt ut av planen i september 2026.",
+    notes:
+      "Opprettet i runde 3 (2026-09-30). Aliaser: Bulk Park Ausenfjell, Ausenfjellet II. Bulk har " +
+      "søkt 100 MW (12 reservert + 88 i kø); bare de 12 MW som planbeskrivelsen knytter til " +
+      "Ausenfjell er ført som sikret kraft. Koordinaten er omtrentlig, midt i teig 271/48.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Planbeskrivelse Ausenfjellet II næringsområde – endring etter enklere prosess",
+        source_url: "https://www.lillestrom.kommune.no/contentassets/9e12800244c245069680705777f15ef4/planbeskrivelse.pdf",
+        publisher: "Multiconsult for Bulk Ausenfjell AS / Lillestrøm kommune",
+        source_type: "regulation",
+        source_date: "2026-02-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Endrer formålet slik at datasenter tillates i KBA2–4. Byggeområdene ligger på 271/48 " +
+          "(grunneier Bulk Eiendom Farex AS). Bulk Data Centers AS har søkt 100 MW: Elvia har " +
+          "reservert 12 MW og 88 MW står i kø.",
+      },
+      {
+        source_name: "Planinitiativ Ausenfjellet II",
+        source_url: "https://www.lillestrom.kommune.no/contentassets/9e12800244c245069680705777f15ef4/planinitiativ.pdf",
+        publisher: "Multiconsult for Bulk Ausenfjell AS / Lillestrøm kommune",
+        source_type: "regulation",
+        primary_source: true,
+        excerpt_or_summary:
+          "Planinitiativet ber om å legge datasenter til formålet i BKB1–4. Oppgir feltstørrelser " +
+          "(26,5/53,8/54,4/65,0 daa), igangsettingstillatelse for tomtearbeid og arealoverføring til " +
+          "271/48.",
+      },
+      {
+        source_name: "Lillestrøm kommune: Har du innspill til endring av planen for Ausenfjellet?",
+        source_url: "https://www.lillestrom.kommune.no/samfunnsutvikling/si-din-mening/offentlig-ettersyn-av-arealplaner/2026/har-du-innspill-til-endring-av-planen-for-ausenfjellet/",
+        publisher: "Lillestrøm kommune",
+        source_type: "regulation",
+        source_date: "2026-02-27",
+        primary_source: true,
+        excerpt_or_summary:
+          "Offentlig ettersyn av plan 10261750-03 / PLAN-25/01930 med frist 27.03.2026. " +
+          "Forslagsstiller er Bulk Ausenfjell AS og plankonsulent Multiconsult. Formålet er " +
+          "datasenter i KBA2–4.",
+      },
+      {
+        source_name: "Lillestrøm kommune: Planen for Ausenfjellet II er vedtatt endret",
+        source_url: "https://www.lillestrom.kommune.no/samfunnsutvikling/si-din-mening/vedtatte-arealplaner/2026/planen-for-ausenfjellet-ii-er-vedtatt-endret/",
+        publisher: "Lillestrøm kommune",
+        source_type: "regulation",
+        source_date: "2026-06-05",
+        primary_source: true,
+        excerpt_or_summary:
+          "Hovedutvalg for miljø og samfunn vedtok 27.05.2026 at planen endres for å legge til rette " +
+          "for datasenter i tillegg til lager og industri. Klagefrist var 25.06.",
+      },
+      {
+        source_name: "Lillestrøm kommune: Deler av planen for Ausenfjellet II er endret",
+        source_url: "https://www.lillestrom.kommune.no/samfunnsutvikling/si-din-mening/vedtatte-arealplaner/2026/deler-av-planen-for-ausenfjellet-ii-er-endret/",
+        publisher: "Lillestrøm kommune",
+        source_type: "regulation",
+        source_date: "2026-09-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kravet om at overskuddsvarme fra et framtidig datasenter skal inn i fjernvarmenettet er " +
+          "fjernet (fvl. § 35). Planen ble vedtatt 27.05.2026, og endringen ble vedtatt 16.09.2026.",
+      },
+      {
+        source_name: "Saksfremlegg: Omgjøring av vedtak – Reguleringsplan for Ausenfjellet II",
+        source_url: "https://www.lillestrom.kommune.no/contentassets/ff8973fcb26e43528cb57be610a3de87/saksfremlegg---omgjoring-av-vedtak-reguleringsplan-for-ausenfjellet-ii.pdf",
+        publisher: "Lillestrøm kommune",
+        source_type: "regulation",
+        source_date: "2026-08-31",
+        primary_source: true,
+        excerpt_or_summary:
+          "Fjernvarmepunktet var ugyldig fordi området ligger utenfor konsesjonsområdet. Vedtaket ble " +
+          "kunngjort 05.06.2026 uten klager, og forslagsstiller har begynt å innrette seg etter det.",
+      },
+      {
+        source_name: "Statnett: kapasitetsreservasjoner forbruk (Frogner TRA, sak 23/00821)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/#reservasjoner",
+        publisher: "Statnett",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Frogner TRA, Elvia AS som Statnetts kunde, sluttkunde Bulk Infrastructure Group AS, " +
+          "datasenter, 12 MW reservert 28.04.2025, planlagt tilknytning 29.06.2029.",
+      },
+      {
+        source_name: "Statnett: kapasitetskø forbruk (Frogner TRA, sak 25/01983)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/#kapasitetsko",
+        publisher: "Statnett",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Frogner TRA via Elvia AS, sluttkunde Bulk Infrastructure Group AS, datasenter, 88 MW i kø, " +
+          "moden bestilling 19.12.2024, ønsket tilknytning 29.09.2028.",
+      },
+      {
+        source_name: "Bulk Infrastructure: Bulk Park Ausenfjell",
+        source_url: "https://bulkinfrastructure.com/no/industrial-real-estate/bulk-park-ausenfjell",
+        publisher: "Bulk Infrastructure",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bulks side om næringsparken ved Frogner trafostasjon: tomt på opptil ca. 75 daa for " +
+          "industri og logistikk, med datasenter og gjenbruk av overskuddsvarme nevnt som mulighet.",
+      },
+      {
+        source_name: "Enhetsregisteret: Bulk Ausenfjell AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/990427410",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Org.nr. 990427410, stiftet 2006, næringskode 68.200 (utleie av fast eiendom), " +
+          "forretningsadresse Karenslyst allé 53, Oslo.",
+      },
+      {
+        source_name: "Kartverket eiendom-API: teig 271/48, Lillestrøm",
+        source_url: "https://ws.geonorge.no/eiendom/v1/geokoding?kommunenummer=3205&gardsnummer=271&bruksnummer=48&omrade=true&utkoordsys=4258",
+        publisher: "Kartverket",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Teigpolygon for gnr/bnr 271/48 i Lillestrøm (3205) ved Tretjerndalsveien på Frogner, brukt " +
+          "til omtrentlig tomtepunkt.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
     title: "Gigahost, Søndre Kullerød i Sandefjord",
     description:
       "Tre datasenteroppføringer — DC1, DC2 og DC3 — på samme adresse i Sandefjord. Gigahost AS er " +
@@ -6171,7 +6665,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør Gigahost AS, adresse Søndre Kullerød 2, 3241 Sandefjord.",
       },
@@ -6286,10 +6779,13 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
-    title: "Green Mountain Halden, Saugbrug",
+    tidligere_titler: ["Green Mountain Halden, Saugbrug"],
+    title: "Saugbrugs datasenterprosjekt, Halden",
     description:
-      "Mulig datasenterutvikling på Norske Skog Saugbrugs industriområde, som et samarbeid mellom " +
-      "Green Mountain og Norske Skog.",
+      "Mulig datasenterutvikling på Norske Skog Saugbrugs industriområde i Halden. Norske Skog og " +
+      "Green Mountain har en intensjonsavtale fra februar 2026, og Norske Skog skal velge mellom " +
+      "datasenter og ny produksjonslinje (PM6) i andre halvår 2026. Det finnes ingen plansak, " +
+      "kraftreservasjon eller kapasitetstall.",
     municipality: "Halden",
     address: "Saugbrug industriområde",
     postal_code: "1772",
@@ -6299,14 +6795,15 @@ export const FUNN: Funn[] = [
     verification_status: "partially_verified",
     operational_status: "planned",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "low",
     interest_level: "medium",
     why_interesting:
       "Enda et tilfelle av datasenter på en eksisterende industritomt med kraft og nett fra før.",
     notes:
-      "Beskrevet som «potential development» — ikke bekreftet prosjekt. Koordinaten er rettet: den " +
-      "pekte tidligere på Violgata 8 (Halden DC01 sin adresse), og er nå satt til Saugbrugs eget " +
-      "registrerte anleggspunkt fra Miljødirektoratets utslippsregister.",
+      "Runde 3 (2026-09-30): ny tittel fordi Green Mountain bare er part i en intensjonsavtale, " +
+      "ikke utvikler eller operatør. Kommunestyret ble ikke enige om initiativet 17.06.2026. Tall " +
+      "på 80–200 MW finnes bare i leserinnlegg. Koordinaten er Saugbrugs registrerte anleggspunkt " +
+      "(Miljødirektoratet), ikke en datasentertomt.",
     kilder: [
       {
         source_name: "DataCenterMap: Green Mountain Halden, Saugbrug",
@@ -6359,7 +6856,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør Storespeed AS, adresse Violgata 8, 1776 Halden.",
       },
@@ -6403,7 +6899,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør Polar Data Centers, adresse Fjordgata 48, 3936 Porsgrunn.",
       },

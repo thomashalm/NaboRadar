@@ -2468,6 +2468,11 @@ Nscale 32,5 + 97,5 = 130 MW for de to første byggene. Feltet er 130 MW og peker
 tildelingen (NVE-søknaden), mens 230 MW står i notatet med Statnett som kilde. At 230 MW samtidig er
 Nscales planlagte første fase er en annen påstand, og hører hjemme i `planned_capacity_mw`.
 
+Det samme gjelder en reservasjon som står på morselskapet og ikke på prosjektselskapet eller
+anlegget. Green Mountain AS har 18,5 MW ved Ringerike, og Green Horizon AS har 36 MW ved
+Bjerkreim. Reservasjonene står i notatet til anleggene de trolig gjelder (Kilemoen og Norway 1),
+men ikke i feltet. Koblingen er utledet av sted og MW-tall, ikke dokumentert.
+
 Datakvalitetsrunden 2026-09-30 fjernet tre tall på denne regelen: Googles 840 MW (søkt/kø), Arcem
 Husnes' 40 MW (kø hos Statnett) og Fauskes 13 MW (bare presse). Narvik ble rettet fra 230 til 130
 MW i en egen korreksjon samme dag.
