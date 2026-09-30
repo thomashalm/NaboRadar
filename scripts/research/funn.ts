@@ -1352,7 +1352,10 @@ export const FUNN: Funn[] = [
       "bare hvor.",
     notes:
       "Oppgradert i runde 4: bransjeoversikter bekrefter anlegget på adressen, og Blix har tre " +
-      "Oslo-sites — BDC på Lindeberg, CJH i sentrum og NR5 på Rommen.",
+      "Oslo-sites — BDC på Lindeberg, CJH i sentrum og NR5 på Rommen. Datakvalitet 2026-09-30: Blix " +
+      "Data Center AS (913675630) har sin eneste underenhet her. Blix Data Center AS står med 10 MW " +
+      "i Statnetts kø ved Furuset TRA; det er uavklart om køplassen gjelder BDC eller AI-delen på " +
+      "Nedre Rommen 5, og den er ikke sikret kraft.",
     tidligere_titler: [
       "Blix Solutions — registrert datasenteroperatør på Lindeberg",
     ],
@@ -3091,7 +3094,10 @@ export const FUNN: Funn[] = [
       "endring i effektbruk og kjølebehov, og den typen anlegg som nå får eget arealformål i plan.",
     notes:
       "Aliaser: Blix NR5, Magnora Oslo. Bygget er 6 050 m² fra 1988, eid av Bruun Eiendom. " +
-      "Effekttallene kommer fra bransjeomtale, ikke fra en myndighetskilde.",
+      "Effekttallene kommer fra bransjeomtale, ikke fra en myndighetskilde. Runde 4: Magnora " +
+      "skriver at søknaden om mer effekt står i kø hos netteier; Blix Data Center AS har 10 MW i " +
+      "Statnetts kø ved Furuset TRA, men det er uavklart om den gjelder dette bygget eller Blix " +
+      "BDC.",
     public_candidate: true,
     public_candidate_note:
       "Bekreftet fysisk anlegg med to operatøroppføringer. Effekttallene er fra bransjekilde og skal ikke gjengis som fakta.",
@@ -4308,21 +4314,28 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Troll Housing, Hustadvika",
     description:
-      "Datasenter i Hustadvika utenfor Molde med 97 % av forbruket til kryptoutvinning — den " +
-      "høyeste andelen blant de norske anleggene av denne størrelsen. Samme eierskap som " +
-      "Tydal Data Center.",
+      "Kryptodatasenter i Hustadvika utenfor Molde, eid og drevet av Troll Housing AS i " +
+      "Bitdeer-konsernet. Bitdeer oppgir 84 MW i drift for kryptoutvinning; ombygging til AI er på " +
+      "et tidlig vurderingsstadium. Samme eierskap som Tydal Data Center.",
     municipality: "Hustadvika",
+    address: "Klempertåsvegen 104",
+    postal_code: "6440",
+    city: "Elnesvågen",
+    latitude: 62.86224,
+    longitude: 7.10885,
     verification_status: "partially_verified",
     operational_status: "active",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "high",
     interest_level: "medium",
     why_interesting:
       "Et av landets største kryptoanlegg, og halvparten av et eierskap som samlet " +
       "disponerer rundt 247 MW norsk kraft.",
     notes:
-      "Uten koordinat: ingen kilde oppgir anleggets adresse, bare kommunen. Må stedfestes før " +
-      "det kan brukes til noe.",
+      "Runde 4 (2026-09-30): koordinaten er driftsenhetens adresse i Brønnøysund (Klempertåsvegen " +
+      "104, 20 ansatte), ikke et byggpunkt fra plan eller byggesak. Statnett oppgir 63,6 MW " +
+      "tilknyttet og 15 MW reservert ved Fræna TRA (78,6 MW), mot Bitdeers 84 MW i drift. NODC 100 " +
+      "AS har 50 MW i kø ved samme TRA og er ikke knyttet til Troll Housing.",
     kilder: [
       {
         source_name: "Nkom: Troll Housing AS er registrert datasenteroperatør",
@@ -4359,13 +4372,14 @@ export const FUNN: Funn[] = [
     municipality: "Tromsø",
     city: "Tromsdalen",
     verification_status: "partially_verified",
-    operational_status: "active",
+    operational_status: "unknown",
     sensitivity: "internal_only",
     confidence: "low",
     interest_level: "medium",
     notes:
-      "Uten koordinat: bare bydelen er kjent, ikke adressen. Å sette et punkt på Tromsdalen som " +
-      "helhet ville vært å late som vi vet hvor anlegget står.",
+      "Runde 4 (2026-09-30): status satt til ukjent. Grunnlaget er bare en Nkom-registrering og et " +
+      "lite selskap. Adressene spriker (Nkom: Tromsdalen, Brønnøysund: Kvaløyvegen 168), " +
+      "thermaltech.no er parkert, og det finnes ingen Statnett-relasjon. Uten koordinat med vilje.",
     kilder: [
       {
         source_name: "Nkom: Thermaltech AS er registrert datasenteroperatør",
@@ -5468,7 +5482,9 @@ export const FUNN: Funn[] = [
     notes:
       "Runde 3 (2026-09-30): kommunen er rettet fra Kvam til Samnanger (postnummer 5650 Tysse). " +
       "Koordinaten er omtrentlig, ca. 600 m nord for Samnanger transformatorstasjon; tomta er ikke " +
-      "stedfestet. 100 MW i kø er ikke ført som sikret kraft.",
+      "stedfestet. 100 MW i kø er ikke ført som sikret kraft. Runde 4: Krefter AS (927511983, nå " +
+      "Ugna Properties AS) hadde et eget planinitiativ nord for Samnanger transformatorstasjon i " +
+      "2022, som ble frarådet. Det er et annet selskap og ingen del av dette prosjektet.",
     kilder: [
       {
         source_name: "DataCenterMap: Kitebrook Børdalen",
@@ -6237,7 +6253,10 @@ export const FUNN: Funn[] = [
     subcategory: "Datasenter",
     item_type: "finding",
     title: "Green Mountain RJU1-Rjukan",
-    description: "Green Mountains anlegg på Rjukan, wholesale colocation.",
+    description:
+      "Green Mountains datasenter på Rjukan, i drift siden 2014, med wholesale colocation. Statnett " +
+      "oppgir 33 MW tilknyttet og 33 MW reservert ved Rjukan transformatorstasjon for Green " +
+      "Mountain AS, som driver anlegget gjennom avdeling Rjukan.",
     municipality: "Tinn",
     address: "Svaddevegen 161",
     postal_code: "3660",
@@ -6247,15 +6266,15 @@ export const FUNN: Funn[] = [
     verification_status: "partially_verified",
     operational_status: "active",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "high",
     interest_level: "medium",
     why_interesting:
       "Rjukan er selve symbolet på norsk vannkraftindustri, og anlegget viderefører den bruken.",
     notes:
-      "Primærkilde-runde 2026-09-30: drift siden 2014 er bekreftet av Green Mountain, Brønnøysund " +
-      "(avdeling Rjukan) og Nkom. Statnett viser 33 MW tilknyttet og 33 MW reservert ved Rjukan TRA " +
-      "med Green Mountain AS som sluttkunde, og 112,5 MW i kø. MW er ikke strukturert i denne " +
-      "runden.",
+      "Runde 4 (2026-09-30): 66 MW er ført som sikret kraft fordi sluttkunden Green Mountain AS " +
+      "selv er driftsenheten og har bare dette anlegget ved Rjukan TRA. 112,5 MW i kø er ikke " +
+      "sikret. Driftskapasitet er ikke strukturert fordi operatørens 2×10 MW nettforsyning og " +
+      "Statnetts 33 MW tilknyttet ikke stemmer overens.",
     kilder: [
       {
         source_name: "DataCenterMap: Green Mountain RJU1-Rjukan",
@@ -6338,8 +6357,8 @@ export const FUNN: Funn[] = [
       "kroner i investeringer over tre år.",
     municipality: "Sunnfjord",
     city: "Førde",
-    latitude: 61.44122,
-    longitude: 5.98715,
+    latitude: 61.443,
+    longitude: 6.0245,
     verification_status: "partially_verified",
     operational_status: "planned",
     sensitivity: "internal_only",
@@ -6350,8 +6369,9 @@ export const FUNN: Funn[] = [
       "ved Moskog transformatorstasjon.",
     notes:
       "Opprettet i runde 3 (2026-09-30). 80 MW står i Statnetts kø ved Moskog TRA og er ikke ført " +
-      "som sikret kraft. Koordinaten er omtrentlig (stedsnavnet Moskogen); tomta er ikke " +
-      "stedfestet. Ikke samme anlegg som Lefdal Mine Datacenter i Kjølsdalen.",
+      "som sikret kraft. Runde 4: koordinaten er flyttet til felt K3 (KBA1/KBA2) etter kommunens " +
+      "planomtale; punktet er omtrentlig. Arcem har nabofeltet K2 (eget anlegg). Ikke samme anlegg " +
+      "som Lefdal Mine Datacenter i Kjølsdalen, og heller ikke Magnoras eget Moskog-prosjekt.",
     public_candidate: false,
     kilder: [
       {
@@ -6385,6 +6405,130 @@ export const FUNN: Funn[] = [
         excerpt_or_summary:
           "Org.nr. 931481258, stiftet 2023 (tidl. NFH 230550 AS), forretningsadresse Nordfjordvegen " +
           "7300, Kjølsdalen (Stad).",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Arcem Sunnfjord, Sunnfjord næringspark",
+    description:
+      "Planlagt datasenter på felt K2 i Sunnfjord næringspark på Moskog, sør for Moskog " +
+      "transformatorstasjon og om lag 13 km øst for Førde. Arcem har intensjonsavtale om tomt i " +
+      "K2 gjennom prosjektselskapet DC Sunnfjord AS (tidligere Arcem DC 16 AS). " +
+      "Detaljreguleringen for K2–K4 åpner for datasenter.",
+    municipality: "Sunnfjord",
+    city: "Førde",
+    latitude: 61.4411,
+    longitude: 6.0194,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Det andre datasenterprosjektet i Sunnfjord næringspark, ved siden av Lefdals tomt i K3. " +
+      "Flere datasenterprosjekter står i kø ved Moskog transformatorstasjon.",
+    notes:
+      "Opprettet i runde 4 (2026-09-30) fra leadet «Arcem DC16». Alias: Arcem DC 16. 40 MW står i " +
+      "Statnetts kø og er ikke sikret kraft. Tomtekontrollen er en intensjonsavtale, så ingen " +
+      "operatør er satt. Koordinaten er omtrentlig, midt i felt K2 etter planomtalens kart.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Sunnfjord næringspark – Om næringsparken (K2–K4)",
+        source_url: "https://www.sunnfjordnaringspark.no/",
+        publisher: "Sunnfjord kommune / Sunnfjord Tomteselskap",
+        source_type: "web",
+        source_date: "2026-09-16",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kommunens parkside: K3 er solgt til Sunnfjord Miljøverk og Titan Group (ca. 40 dekar, " +
+          "datasenter). For K2 og K4 er det inngått intensjonsavtaler med Arcem (K2) og Fazenda (K4). " +
+          "Neste byggetrinn skal være klart høsten 2027, med infrastrukturarbeid fra september 2026.",
+      },
+      {
+        source_name: "Planomtale: Detaljregulering Sunnfjord næringspark aust (K2, K3, K4)",
+        source_url: "https://sunnfjord.kommune.no/api/presentation/v2/nye-innsyn/filer/v-aba08a8e__580c__4b67__bc21__70eed223f3db-2151986_1_A!d-2022306690!neDXiQ?pid=1",
+        publisher: "Sunnfjord kommune / Asplan Viak AS",
+        source_type: "regulation",
+        source_date: "2026-04-27",
+        primary_source: true,
+        excerpt_or_summary:
+          "Planområdet er ca. 466 daa ved Moskog. K2 = KBA3/KBA4 og K3 = KBA1/KBA2. Formålene åpner " +
+          "for blant annet datasenter og/eller transformatorstasjon. Kart i figur 3 viser K2 " +
+          "sør/sørøst for Moskog trafostasjon. Revidert 23.04.2026.",
+      },
+      {
+        source_name: "Sunnfjord kommune: Detaljreguleringsplan Sunnfjord næringspark aust på høyring",
+        source_url: "https://sunnfjord.kommune.no/aktuelt-fra-kommunen/detaljreguleringsplan-sunnfjord-naringspark-aust-til-hoyring-og-offentleg-ettersyn.36012.aspx",
+        publisher: "Sunnfjord kommune",
+        source_type: "regulation",
+        source_date: "2025-12-16",
+        primary_source: true,
+        excerpt_or_summary:
+          "Formannskapet la planen ut på høring 11.12.2025, med høringsfrist 08.02.2026. Datasenter " +
+          "er blant tillatte formål i K2–K4.",
+      },
+      {
+        source_name: "Sunnfjord kommune: Sunnfjord Næringspark – finansiering og budsjett for felta K2, K3 og K4",
+        source_url: "https://sunnfjord.kommune.no/aktuelt-fra-kommunen/sunnfjord-naringspark-finansiering-og-budsjett-for-felta-k2-k3-og-k4.36276.aspx",
+        publisher: "Sunnfjord kommune",
+        source_type: "web",
+        source_date: "2026-09-28",
+        primary_source: true,
+        excerpt_or_summary:
+          "To firma som vil etablere datasenter har opsjon på to tomter på 30 og 40 dekar i K3 og K2. " +
+          "Ytterligere 4–5 datasenteraktører vil etablere seg på Moskog. Byggelån på opptil 200 mill. " +
+          "kr i 2026. Firmaene er ikke navngitt.",
+      },
+      {
+        source_name: "Enhetsregisteret: DC Sunnfjord AS (tidl. Arcem DC 16 AS)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/835366502",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "835366502, stiftet 31.03.2025, Inkognitogata 8 i Oslo. Het ARCEM DC 16 AS til 20.07.2026. " +
+          "Formål: utvikling, eie og drift av datasentre og fast eiendom. Bekrefter selskap og navn, " +
+          "ikke tomt eller anlegg.",
+      },
+      {
+        source_name: "Enhetsregisteret: roller DC Sunnfjord AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/835366502/roller",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Styreleder er Anders Bakken Eriksen, som er CEO i Arcem. Knytter prosjektselskapet til " +
+          "Arcem-ledelsen.",
+      },
+      {
+        source_name: "Statnett: kapasitetskø (forbruk)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/#kapasitetsko",
+        publisher: "Statnett SF",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak 25/02605 (ELB731): Moskog TRA, kunde BKK AS, sluttkunde ARCEM DC 16 AS, datasenter, 40 " +
+          "MW i kø, moden bestilling 19.03.2026, ønsket tilknytning 01.10.2029. Står ikke i " +
+          "reservasjonslisten.",
+      },
+      {
+        source_name: "NVE nettanlegg – transformatorstasjoner (Moskog)",
+        source_url: "https://kart.nve.no/enterprise/rest/services/Nettanlegg4/MapServer/5",
+        publisher: "NVE",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Statnett Moskog 420 kV ligger på 61.44563, 6.01600, BKK Moskog 132 kV på 61.44620, " +
+          "6.01377, og Stakaldefossen på 61.44561, 6.00990. Brukt som referansepunkter for å " +
+          "georeferere K2 i planomtalens kart.",
       },
     ],
   },
@@ -6752,7 +6896,9 @@ export const FUNN: Funn[] = [
     notes:
       "Kvalitetsrunde 2026-09-30: koordinaten er flyttet fra Husnes sentrum til et punkt i " +
       "næringsparken. Arcems egen tomt er ikke stedfestet. 40 MW er ikke ført som sikret kraft, " +
-      "fordi prosjektet står i kø hos Statnett. 60 000 m² tomt er ikke bekreftet i primærkilde.",
+      "fordi prosjektet står i kø hos Statnett. 60 000 m² tomt er ikke bekreftet i primærkilde. " +
+      "Runde 4: Statnett-sluttkunden ved Husnes TRA er ARCEM GO-DC2 AS (917510784), trolig " +
+      "prosjektselskapet; ikke strukturert som eier ennå.",
     kilder: [
       {
         source_name: "DataCenterMap: Arcem Husnes, Grøn Næringspark",
@@ -6928,10 +7074,10 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "PolarDC HER01, Herøya",
     description:
-      "Planlagt AI-datasenter fra Polar Data Centers i Herøya industripark i Porsgrunn, med ca. 40 " +
-      "MW startkapasitet. Polar meldte i mai 2026 at prosjektet er klart for bygging, og " +
-      "reguleringsendringen for Fjordgata 48 var på høring i februar 2026. Statnett har reservert " +
-      "15 MW til prosjektselskapet POLARDC HER AS.",
+      "Planlagt AI-datasenter fra Polar Data Centers i et eksisterende industribygg i Fjordgata 48 " +
+      "i Herøya industripark, med ca. 40 MW startkapasitet. Reguleringsendringen ble vedtatt " +
+      "17.03.2026, og Porsgrunn kommune ga byggetillatelse til POLARDC HER AS 27.03.2026. Statnett " +
+      "har reservert 15 MW til prosjektselskapet.",
     municipality: "Porsgrunn",
     address: "Fjordgata 48",
     postal_code: "3936",
@@ -6941,15 +7087,15 @@ export const FUNN: Funn[] = [
     verification_status: "partially_verified",
     operational_status: "planned",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "high",
     interest_level: "medium",
     why_interesting:
       "Herøya er Norges største industripark, med kraft og infrastruktur fra før.",
     notes:
-      "Primærkilde-runde 2026-09-30: status rettet fra aktiv til planlagt etter Polars egen " +
-      "melding. Planlagt tilknytning for Statnett-reservasjonen er 30.12.2028. MW er ikke " +
-      "strukturert i denne runden. DataCenterMap fører anlegget under markedet «Skien», men det " +
-      "ligger i Porsgrunn.",
+      "Runde 4 (2026-09-30): byggetillatelse gitt, men byggestart er ikke dokumentert, så status er " +
+      "fortsatt planlagt. I byggesaken pekte HIP på kraftmangel og festevilkår, og Yara krevde " +
+      "brann- og eksplosjonsvurderinger. Planlagt tilknytning for Statnett-reservasjonen er " +
+      "30.12.2028. DataCenterMap fører anlegget under markedet «Skien», men det ligger i Porsgrunn.",
     kilder: [
       {
         source_name: "DataCenterMap: PolarDC HER01, Herøya",
@@ -6969,6 +7115,92 @@ export const FUNN: Funn[] = [
         primary_source: true,
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Bifrost Edge Vinje, ved Vinje kraftverk",
+    description:
+      "Planlagt datasenter fra Bifrost Edge AS ved Statkrafts Vinje kraftverk, trolig på " +
+      "kommunens datasentertomt Vesaastippen (gnr/bnr 63/5). Statnett har reservert 40 MW ved " +
+      "Vinje kraftstasjon til Bifrost Edge AS. Planen er å hente strøm direkte fra kraftverket, " +
+      "og avklaringen av dette hindret byggestart per juli 2026.",
+    municipality: "Vinje",
+    city: "Vinje",
+    latitude: 59.62419,
+    longitude: 7.85512,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Et av få norske datasenterprosjekter med kraft reservert hos Statnett og en kommunal tomt " +
+      "tilrettelagt for datasenter. Direkte tilknytning til kraftverket er uvanlig.",
+    notes:
+      "Opprettet i runde 4 (2026-09-30). At Bifrost skal bygge på akkurat 63/5 er utledet: det er " +
+      "kommunens eneste datasentertomt ved kraftverket. Koordinaten er omtrentlig, sentroiden av " +
+      "største teig på 63/5. 40 MW er ført som sikret kraft fordi Bifrost Edge AS er sluttkunde " +
+      "og har bare denne saken ved Vinje; Bifrost Edge er ikke et eget prosjektselskap. Ikke " +
+      "samme prosjekt som Bifrost Edges Arendal-lead (Longum nord).",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Statnett – reservasjoner forbruk (Power BI)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/#reservasjoner",
+        publisher: "Statnett SF",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak 25/02292 (ELB1423): Vinje KRA, NO2, Statnetts kunde Statkraft Energi AS, sluttkunde " +
+          "Bifrost Edge AS, datasenter, 40 MW reservert 14.12.2025, planlagt tilknytning 14.12.2026.",
+      },
+      {
+        source_name: "Møtebok Plan- og miljøutvalet Vinje 09.06.2021 (PS 21/77)",
+        source_url: "https://prep.statsforvalteren.no/contentassets/18e860e2757c42ebb82ea7ac546c716c/4-vurdering-etter-plan--og-bygningsloven.pdf",
+        publisher: "Vinje kommune (publisert på statsforvalteren.no)",
+        source_type: "regulation",
+        source_date: "2021-06-09",
+        primary_source: true,
+        excerpt_or_summary:
+          "Vedtak om å legge ut planprogram for detaljregulering for 63/5 Vesaastippen på høring og å " +
+          "varsle oppstart av planarbeid (pbl §§ 4-1, 11-13, 12-8). Enstemmig vedtatt.",
+      },
+      {
+        source_name: "Kartverket eiendom: 4036-63/5",
+        source_url: "https://ws.geonorge.no/eiendom/v1/geokoding?kommunenummer=4036&gardsnummer=63&bruksnummer=5&utkoordsys=4258&omrade=true",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Teiggeometri for gnr/bnr 63/5 i Vinje: to teiger nord for Vinje kraftverk (ca. 12 og 39 " +
+          "mål). Bekrefter eiendommen, ikke anlegget.",
+      },
+      {
+        source_name: "Enhetsregisteret: Bifrost Edge AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/935435005",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "935435005, stiftet 09.04.2025, Kinn (c/o Localhost AS, Måløy), formål " +
+          "datasentervirksomhet. Daglig leder Sindre Kvalheim, styreleder Tom Einar Jensen. Bekrefter " +
+          "selskapet, ikke anlegget.",
+      },
+      {
+        source_name: "Bifrost Edge AS – nettside",
+        source_url: "https://bifrostedge.ai/",
+        publisher: "Bifrost Edge AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Selskapet beskriver seg som en vertikalt integrert nordisk datasenterplattform for AI/HPC. " +
+          "Ingen prosjekter eller lokasjoner er listet.",
       },
     ],
   },
