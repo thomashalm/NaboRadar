@@ -3181,9 +3181,9 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Skygard OSL1, Østre Aker vei 24C",
     description:
-      "Datasenter i Hovinbyen på 20 MW over 25 000 m², bygget for 2,4 milliarder kroner og satt i " +
-      "drift første halvår 2025. Eid av Telenor, Hafslund og HitecVision med 31,7 % hver, og " +
-      "Analysys Mason med 5 %. Overskuddsvarmen leveres til fjernvarmenettet. Det klart største " +
+      "Datasenter i Hovinbyen på 20 MW over 25 000 m², bygget for 2,4 milliarder kroner. Byggetrinn 1 " +
+      "ble overlevert i april 2026, og trinn 2 (12 MW) skal stå ferdig i 2027. Eid av Telenor, " +
+      "Hafslund og HitecVision med 31,7 % hver, og Analysys Mason med 5 %. Overskuddsvarmen leveres til fjernvarmenettet. Det klart største " +
       "dokumenterte datasenteret i Oslo kommune.",
     municipality: "Oslo",
     address: "Østre Aker vei 24C",
@@ -3200,7 +3200,9 @@ export const FUNN: Funn[] = [
       "Et nytt datasenter midt i Hovinbyen, Oslos største transformasjonsområde, der det ellers " +
       "planlegges tett bolig. Effektbehov og kjøling er relevant for hele nabolaget.",
     notes:
-      "Løst i oppfølgingsrunden: 20 MW, i drift fra første halvår 2025. Skygard kjøpte to datasentre " +
+      "Løst i oppfølgingsrunden: 20 MW. Rettet i datasenter-enrichment runde 1 (2026-09-30): " +
+      "første halvår 2025 var opprinnelig plan; Sentias børsmelding 16.06.2026 sier at trinn 1 ble " +
+      "overlevert i april 2026. Skygard kjøpte to datasentre " +
       "av Orange i Oslo — det forklarer «Orange OSL5» som alias på OSL3. Registrert hos Nkom, med " +
       "kontoradresse Karenslyst allé 10.",
     public_candidate: true,
@@ -4483,6 +4485,103 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
+    title: "Green Mountain OSL2-Hamar, Heggvin",
+    description:
+      "Datasentercampus på Heggvin Næringspark, bygget og driftet av Green Mountain Innlandet AS. " +
+      "Planlagt for fem bygg à 30 MW. Tre bygg (90 MW) er i drift siden april 2025 og brukes i sin " +
+      "helhet av TikTok som del av Project Clover. TikTok har opsjon på de to siste byggene. " +
+      "Green Mountain oppgir ca. 9,7 milliarder kroner investert i de tre første byggene. " +
+      "Anlegget er underlagt sikkerhetsloven.",
+    municipality: "Hamar",
+    address: "Stabekkvegen 130",
+    postal_code: "2324",
+    city: "Vang på Hedmarken",
+    latitude: 60.8424,
+    longitude: 11.2667,
+    verification_status: "verified_public_source",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Norges største datasenteranlegg i drift, med én navngitt kunde. 60 MW i opsjon har vært " +
+      "omtalt som begrenset av strømtilgang, og nettilknytningen krevde ny 132 kV-trafostasjon.",
+    notes:
+      "Lagt inn i datasenter-enrichment runde 1 (2026-09-30). Omtales i presse som «TikToks datasenter», " +
+      "men TikTok er leietaker, ikke eier. Eier og operatør er Green Mountain Innlandet AS (829283352), " +
+      "58,8 % eid av Green Mountain AS, som eies av Azrieli Group Ltd. (Israel) gjennom Green Data AS og " +
+      "Green Mountain Global Limited. Resterende 41,2 % (B-aksjer) står på «Azirell Data Centers Llc» i " +
+      "aksjonærregisteret — trolig Azrieli-selskap, ikke verifisert. Anlegget ligger i Hamar kommune " +
+      "(Kartverket), selv om næringsparken strekker seg inn i Løten. Nordavinds «Heggvin» er en egen, " +
+      "ledig nabotomt. «OSL-TIK» brukes ikke i noen kilde; Green Mountain kaller anlegget OSL2-Hamar.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Green Mountain signs data center deal with TikTok for new site in Norway",
+        source_url: "https://greenmountain.no/data-center-tiktok/",
+        publisher: "Green Mountain AS",
+        source_type: "web",
+        source_date: "2023-03-08",
+        primary_source: true,
+        excerpt_or_summary: "Green Mountain signerer avtale med TikTok om OSL2-Hamar: 5 bygg à 30 MW = 150 MW. TikTok første kontrakt 3 bygg/90 MW, mulighet for utvidelse til 150 MW innen 2025. Første bygg ferdig nov. 2023.",
+      },
+      {
+        source_name: "OSL-Hamar – Green Mountain Data Center (anleggsside)",
+        source_url: "https://greenmountain.no/data-center/osl-hamar/",
+        publisher: "Green Mountain AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary: "150 MW total IT-kapasitet, 5 bygg à 30 MW, potensiell campus 280 000 m². Tre bygg ferdige og i drift, én leietaker (TikTok) som bruker 90 MW med opsjon på full 150 MW. 200+ ansatte.",
+      },
+      {
+        source_name: "Project Clover update: Enhanced data security with Norwegian data centre fully online",
+        source_url: "https://newsroom.tiktok.com/en-eu/project-clover-update-enhanced-data-security-with-norwegian-data-centre-fully-online",
+        publisher: "TikTok Newsroom",
+        source_type: "web",
+        source_date: "2025-04-03",
+        primary_source: true,
+        excerpt_or_summary: "TikTok: alle tre bygg i det norske datasenteret i Hamar (levert av Green Mountain) er nå online; ca. 200 arbeidsplasser.",
+      },
+      {
+        source_name: "Nettilknytning av Heggvin datasenter (konsesjonssak)",
+        source_url: "https://www.nve.no/konsesjon/konsesjonssaker/konsesjonssak?id=16200&type=A",
+        publisher: "NVE",
+        source_type: "regulation",
+        source_date: "2025-05-23",
+        primary_source: true,
+        excerpt_or_summary: "Søker/konsesjonær Green Mountain Innlandet AS. Heggvin transformatorstasjon i Hamar kommune forsynt med to 132 kV jordkabler fra Vang transformatorstasjon (oppgraderes av Elvia/Statnett). Konsesjon gitt.",
+      },
+      {
+        source_name: "Green Mountain vert underlagt sikkerheitslova og får etablere datasenter i Innlandet",
+        source_url: "https://www.regjeringen.no/no/aktuelt/green-mountain-vert-underlagt-sikkerheitslova-og-far-etablere-datasenter-i-innlandet/id2989926/",
+        publisher: "Justis- og beredskapsdepartementet",
+        source_type: "regulation",
+        source_date: "2023-07-17",
+        primary_source: true,
+        excerpt_or_summary: "Etter helhetsvurdering får Green Mountain Innlandet AS etablere datasenteret i Innlandet som planlagt med TikTok som eneste kunde; selskapet underlegges sikkerhetsloven. (Siden ga 403 ved henting; innhold via søkeresultat/NRK/digi.)",
+      },
+      {
+        source_name: "GREEN MOUNTAIN INNLANDET AS – aksjonærer",
+        source_url: "https://www.proff.no/aksjon%C3%A6rer/bedrift/green-mountain-innlandet-as/829283352",
+        publisher: "Proff (basert på aksjonærregisteret)",
+        source_type: "register",
+        excerpt_or_summary: "Org.nr 829 283 352, stiftet 01.06.2022. Aksjonærer: Green Mountain AS 58,806 % (A-aksjer), 'Azirell Data Centers Llc' 41,194 % (B-aksjer).",
+      },
+      {
+        source_name: "Kartverket adresse-API (punktsøk) og kommuneinfo",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok?lat=60.8420&lon=11.2670&radius=400",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary: "Offisielle adresser på selve anlegget: Stabekkvegen 120, 130 og 140, 2324 Vang på Hedmarken, gnr/bnr 161/4, Hamar kommune (3403). Kommuneinfo bekrefter at byggene ligger i Hamar, ikke Løten.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
     title: "AQ Compute / hscale OSL1, Hønefoss",
     description:
       "Kolokasjonsanlegg på Follum i Hønefoss, oppgitt som AQ Computes første colocation-datasenter.",
@@ -4656,8 +4755,9 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Green Mountain Gismarvik",
     description:
-      "Planlagt anlegg på 300 MW med 100 000 m² campus i Haugaland Business Park, på fornybar " +
-      "vannkraft. Ligger i samme næringspark som atNorths NOR01.",
+      "Green Mountain signerte i april 2021 en opsjon på 50 dekar i Haugaland Business Park, i samme " +
+      "næringspark som atNorths NOR01. Ingen byggestart er dokumentert, og anlegget står ikke på Green " +
+      "Mountains egen anleggsliste. 300 MW og 100 000 m² finnes bare i bransjekataloger.",
     municipality: "Tysvær",
     address: "Havnavegen 73",
     postal_code: "5570",
@@ -4665,16 +4765,18 @@ export const FUNN: Funn[] = [
     latitude: 59.3154,
     longitude: 5.42391,
     verification_status: "partially_verified",
-    operational_status: "planned",
+    operational_status: "unknown",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "low",
     interest_level: "high",
     why_interesting:
-      "Sammen med atNorth gir dette 650 MW planlagt effekt i én næringspark i Tysvær — det tyngste " +
-      "kraftuttaket som planlegges noe sted i dette datasettet.",
+      "En opsjon på datasentertomt i samme næringspark som atNorths 120–350 MW-prosjekt. Blir den utløst, " +
+      "samles to store kraftuttak i én park i Tysvær.",
     notes:
       "Eget anlegg, ikke samme campus som atNorth, men samme næringspark. Koordinaten er parkens " +
-      "adresse; anleggenes egne tomter er ikke stedfestet hver for seg.",
+      "adresse; anleggenes egne tomter er ikke stedfestet hver for seg. Status satt til ukjent i " +
+      "datasenter-enrichment runde 1 (2026-09-30): eneste dokumenterte steg er opsjonsavtalen fra 2021, " +
+      "og næringsparken omtaler atNorth som første store etablering (juni 2026).",
     kilder: [
       {
         source_name: "DataCenterMap: Green Mountain Gismarvik",
@@ -4921,8 +5023,8 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Microsoft Sandnes",
     description:
-      "Datasenter på 25 MW under utvikling, oppgitt som utvidelse av Microsofts europeiske " +
-      "infrastruktur.",
+      "Planlagt datasenter på 25 MW på Kvål i Ganddal. Microsoft Datacenter Norway AS kjøpte tomta " +
+      "(64 mål) i 2026 og bygger selv. Ingen byggestart eller åpningsdato er oppgitt.",
     municipality: "Sandnes",
     address: "Kvålkroken",
     postal_code: "4323",
@@ -4930,7 +5032,7 @@ export const FUNN: Funn[] = [
     latitude: 58.81713,
     longitude: 5.72007,
     verification_status: "partially_verified",
-    operational_status: "under_construction",
+    operational_status: "planned",
     sensitivity: "internal_only",
     confidence: "medium",
     interest_level: "high",
@@ -4938,7 +5040,10 @@ export const FUNN: Funn[] = [
       "En hyperskala-aktør som bygger fysisk i Norge. Microsofts norske kontoradresse i Oslo er ikke " +
       "et anlegg — dette er det.",
     notes:
-      "Effekttallet kommer fra bransjekatalog. Ikke bekreftet mot Microsoft selv eller mot byggesak.",
+      "25 MW kommer fra reguleringsplanen (plan-ID 202311), gjentatt i presse. Microsofts pressemelding " +
+      "30.06.2026 bekrefter anlegget, men ikke byggestart — status satt til planlagt i datasenter-" +
+      "enrichment runde 1 (2026-09-30). Ikke samme anlegg som Azure-regionen Norway West hos Green " +
+      "Mountain på Rennesøy.",
     kilder: [
       {
         source_name: "DataCenterMap: Microsoft Sandnes",
@@ -5062,8 +5167,9 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Nscale Fauske",
     description:
-      "AI-datasenter på 13 MW under utvikling i Fauske, med planlagt åpning i 2027. Oppgitt til rundt " +
-      "1 000 arbeidsplasser i byggefasen og 100–150 varige. Nscale Drift AS er Nkom-registrert.",
+      "Planlagt AI-datasenter på den gamle travbanetomta i Fauske, kjøpt av Aker Nscale i 2025. Tomta har " +
+      "13 MW nettilknytning; mer krever ny kapasitet fra Statnett. Mål om åpning i 2027, men ingen " +
+      "dokumentert byggestart. Oppgitt til rundt 1 000 arbeidsplasser i byggefasen og 100–150 varige.",
     municipality: "Fauske",
     address: "Follaveien",
     postal_code: "8200",
@@ -5071,7 +5177,7 @@ export const FUNN: Funn[] = [
     latitude: 67.25948,
     longitude: 15.39275,
     verification_status: "partially_verified",
-    operational_status: "under_construction",
+    operational_status: "planned",
     sensitivity: "internal_only",
     confidence: "medium",
     interest_level: "high",
@@ -5080,7 +5186,9 @@ export const FUNN: Funn[] = [
       "innbyggere. Byggefasen alene er en stor lokal sak.",
     notes:
       "Bluebite GmbH har også Fauske-adresse i Nkom-registeret, men er et annet selskap og er ikke " +
-      "stedfestet. Ikke bland dem.",
+      "stedfestet. Ikke bland dem. Nscale Drift AS er Nkom-registrert, men driver Glomfjord-anlegget i " +
+      "Meløy — ikke knyttet til Fauske. Status satt til planlagt i datasenter-enrichment runde 1 " +
+      "(2026-09-30): ingen kilde dokumenterer byggestart.",
     kilder: [
       {
         source_name: "DataCenterMap: Nscale Fauske",
@@ -5519,7 +5627,6 @@ export const FUNN: Funn[] = [
         publisher: "DataCenterMap",
         source_type: "web",
         source_date: "2026-09-26",
-        primary_source: true,
         excerpt_or_summary:
           "Oppført med operatør BW Velora, adresse Frier Vest næringspark, 3960 Stathelle.",
       },

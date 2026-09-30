@@ -2532,9 +2532,21 @@ Kortene er sammenslått til to linjer. Roller, alle fem MW-tall, utvidelse og ki
 MW-tall med semantikk, om kunde-terskelen holder, køen og at ingen andre kategorier har vært innom
 en datasenter-kø. Den skriver ikke.
 
-**Bulk N01 er eksempelet som viser disiplinen.** Bulks egen pressemelding bekrefter €410 mill. og
-Vennesla, men oppgir **ingen MW og ingen kunder**. Sekundærkilder sier 400 MW innen 2026, 600 MW i
-en bransjekatalog og 2 GW som langsiktig ambisjon — tre tall som betyr tre forskjellige ting.
-Derfor står operatør og type som strukturerte felt, mens MW er ført som notat med kildene og
-fortsatt teller som «mangler kapasitet». CoreWeave omtales i bransjepressen som bruker, men står
-ikke i Bulks egen kommunikasjon og er ikke ført som kunde.
+**Bulk N01 er eksempelet som viser disiplinen.** Bulks pressemelding om lånet på €410 mill.
+bekrefter Vennesla, men oppgir **ingen MW og ingen kunder**. Sekundærkilder sa 400 MW innen 2026,
+600 MW i en bransjekatalog og 2 GW som langsiktig ambisjon — tre tall som betyr tre forskjellige
+ting. Derfor sto først bare operatør og type som strukturerte felt.
+
+Enrichment runde 1 (2026-09-30) viste hvordan feltene fylles når kildene kommer. 700 MW er
+`secured_power_mw`: 100 MW tilknyttet og 2 × 300 MW reservert for N01 Utilities AS i Statnetts
+lister, ikke 700 MW i drift. 1 GW er `campus_potential_mw`, og kapasitet i drift er fortsatt
+ukjent. CoreWeave er nå kunde, fordi Bulks egen pressemelding (mars 2025) navngir N01 i Vennesla.
+Terskelen er den samme — det var kilden som kom på plass.
+
+Runde 1 dekket 13 anlegg fra køen pluss Green Mountain OSL2-Hamar, TikTok-anlegget. Der er TikTok
+kunde, Green Mountain Innlandet AS eier og operatør, og Azrieli Group Ltd. ultimat eier. Resten av
+køen ble markert `skipped` med «utsatt til runde 2», slik at kjøringen lukkes og ikke blokkerer
+neste. `research:seed --review` passer ikke for slike runder: det skriver en review for alle
+funn i fila, også de som ikke ble kontrollert. Statusendringer registreres derfor gjennom
+`record_research_review_unchecked` med `new_status` og `research_run_id`, og speiles i
+`funn.ts` før seeden kjøres.
