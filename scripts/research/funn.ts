@@ -3355,8 +3355,10 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "GlobalConnect Nydalen, Sandakerveien 121",
     description:
-      "Datasenter i Nydalen, nybygget og i drift fra 2014, med 500 m² gulvflate. V-Hosting er " +
-      "oppført på samme adresse — sannsynligvis en operatør i samme bygg.",
+      "Datahall bygget av Availo i Schibsteds trykkeri i Sandakerveien 121 og åpnet i oktober 2012, " +
+      "planlagt til ca. 2000 m², med Schibsted IT som ankerkunde på en tiårsavtale. Anlegget ble " +
+      "senere en del av GlobalConnect. Schibsted har forlatt bygget, og tomta er omregulert til " +
+      "boliger. Om datasenteret fortsatt er i drift, er ukjent.",
     municipality: "Oslo",
     address: "Sandakerveien 121",
     postal_code: "0484",
@@ -3364,17 +3366,19 @@ export const FUNN: Funn[] = [
     latitude: 59.94931,
     longitude: 10.7701,
     verification_status: "verified_public_source",
-    operational_status: "active",
+    operational_status: "unknown",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "low",
     interest_level: "medium",
     why_interesting:
       "Et datasenter midt i Nydalen, et område som ellers er kontor, bolig og høyskole.",
     notes:
-      "Aliaser: V-Hosting Data Center, Availo. Primærkilde-runde 2026-09-30: ingen operatørkilde " +
-      "bekrefter datasenteret. Oslo kommune og OBOS viser at eiendommen ble omregulert fra trykkeri " +
-      "til ca. 700 boliger (vedtatt 27.08.2025). Sikkerhet senket til middels; status bør " +
-      "verifiseres manuelt. V-Hosting AS er registrert på Drammensveien 288.",
+      "Aliaser: V-Hosting Data Center, Availo. Cleanup 2026-09-30: status satt til ukjent. " +
+      "Trykkeriet er demontert, og tomta ble omregulert til ca. 700 boliger 27.08.2025 (PBE " +
+      "2025/06863); hallene skal bygges om, med mulig byggestart i 2026. Ingen primærkilde " +
+      "bekrefter drift eller nedleggelse av datasenteret, og GlobalConnect navngir ikke Nydalen på " +
+      "egne sider. Tidligere beskrivelse («i drift fra 2014, 500 m²») var feil. Neste steg: " +
+      "byggesaksinnsyn for sak 2025/06863 eller spørsmål til GlobalConnect.",
     public_candidate: true,
     public_candidate_note:
       "Bekreftet fysisk anlegg i drift siden 2014, verifisert adresse.",
@@ -3662,17 +3666,18 @@ export const FUNN: Funn[] = [
     latitude: 59.92657,
     longitude: 10.80009,
     verification_status: "partially_verified",
-    operational_status: "active",
+    operational_status: "unknown",
     sensitivity: "internal_only",
     confidence: "low",
     interest_level: "medium",
     why_interesting:
       "Nok et anlegg i Økern-klyngen, i et område med tung boligutbygging.",
     notes:
-      "Primærkilde-runde 2026-09-30: primærkilde søkt, ikke funnet. Vault AS finnes i Brønnøysund " +
-      "med datasenterformål, men med forretningsadresse Frydenbergveien 46B. DataCenterMap merker " +
-      "selv oppføringen som ikke lenger aktiv, og bygget markedsføres som kontorbygg. Sikkerhet " +
-      "senket til lav; status bør vurderes manuelt. Ikke samme anlegg som Vaultica OSL01.",
+      "Cleanup 2026-09-30: status satt til ukjent. Vault AS (998547369) er formelt aktivt i " +
+      "Brønnøysund og har fortsatt en underenhet på Økernveien 121, men står ikke i Nkoms register " +
+      "over kommersielle datasenteroperatører, og regnskapet for 2025 viser 15 000 kr i " +
+      "driftsinntekter. Det tyder på at det ikke drives colocation, men ingen primærkilde " +
+      "dokumenterer nedleggelse eller bruksendring. Ikke samme anlegg som Vaultica OSL01.",
     kilder: [
       {
         source_name: "DataCenterMap: OSL1",

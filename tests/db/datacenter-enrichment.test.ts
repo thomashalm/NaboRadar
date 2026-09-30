@@ -448,6 +448,35 @@ describe("datasenter-enrichment", { timeout: 90_000 }, () => {
       );
       expect(detalj[0]!.datacenter_detail).not.toBeNull();
     });
+
+    it("notater teller aldri som datasenter, men leads gjør", async () => {
+      // Et metanotat om datasentre («Nasjonalt bilde», negative søk i plandata) er research, ikke
+      // et anlegg. Det skal ikke telle i totalen eller havne i køen. Et lead er et mulig anlegg og
+      // skal fortsatt være med.
+      const lagFunn = async (tittel: string, type: string) =>
+        (
+          await drift<{ id: string }>(
+            `insert into admin_research_items (item_type, category, subcategory, title, operational_status)
+             values ($1, 'Datasenter / industri / tekniske anlegg', 'Datasenter', $2, 'active')
+             returning id`,
+            [type, tittel],
+          )
+        )[0]!.id;
+      const notat = await lagFunn("Nasjonalt bilde over datasentre", "note");
+      const lead = await lagFunn("Registrert operatør uten stedfestet anlegg", "lead");
+
+      const liste = (await drift<{ id: string }>(`select id from datacenter_items()`)).map((r) => r.id);
+      expect(liste).not.toContain(notat);
+      expect(liste).toContain(lead);
+
+      for (const modus of ["review_due", "full"]) {
+        const kø = (await drift<{ id: string }>(`select id from datacenter_refresh_candidates($1)`, [modus])).map(
+          (r) => r.id,
+        );
+        expect(kø).not.toContain(notat);
+        expect(kø).toContain(lead);
+      }
+    });
   });
 
   // -------------------------------------------------------------------------

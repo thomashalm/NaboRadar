@@ -1785,6 +1785,7 @@ bort.
 | Lokale saker (støyklager, bydelsvedtak) | Ikke implementert | Bygges først hvis en strukturert kilde finnes. Kurert datasett er alternativet |
 | AI-sammendrag | Ikke implementert | Kun typer i `lib/ai/` |
 | NaboRadar Pro | Ikke implementert | Ingen kodebeslutninger tatt for dette |
+| Hva en research-kilde bekrefter | Ikke implementert | `primary_source` sier om kilden er primær, ikke *hva* den bekrefter. Kartverket bekrefter adressen og Brønnøysund selskapet, men ingen av dem at det ligger et datasenter der. Dekning av «anlegget er primærbekreftet» kan derfor ikke telles uten skjønn: i primærkilde-runden 2026-09-30 ga automatisk telling 19/20 og streng vurdering 11/20. Mulig løsning: et kontrollert `confirms`-felt på kilden (`facility`, `address`, `company`, `power`, `status`). Hack ikke skillet inn på utgivernavn |
 
 Neste datalag som er vurdert, men ikke besluttet: flomsoner, skredaktsomhet, radon, ÅDT. Se
 [docs/area-facts-discovery.md](area-facts-discovery.md).
@@ -2493,6 +2494,12 @@ det kanoniske funnet, og den gamle tittelen legges i `tidligere_titler`. Funnet 
 utelater avviste og arkiverte funn (migrasjon 20261016000000), slik refresh-kandidatene og kartet
 allerede gjorde. Første sak var Odin Green DC: selskapets eneste formål er datasenteret i
 Hønefoss, så leadet er slått sammen med hscale OSL1.
+
+**Notater er ikke anlegg.** Metanotater med underkategori Datasenter (`item_type = 'note'`), som
+«Nasjonalt bilde» eller negative søk i plandata, er research om datasentre. Siden migrasjon
+20261017000000 utelater både `datacenter_items()` og `datacenter_refresh_candidates()` dem, så de
+verken teller i totalen, står i lista eller havner i køen. Da regelen kom, falt totalen fra 73 til
+65 (åtte notater). Leads (`lead`) er fortsatt med: de er mulige anlegg som skal verifiseres.
 
 **3. Påstand og kilde.** `admin_research_datacenter_field_sources` knytter et strukturert felt til
 kilden som bærer det. Ikke full event sourcing — det ville kostet mer enn det smaker på 67 funn —
