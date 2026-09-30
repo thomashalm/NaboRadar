@@ -4604,6 +4604,107 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
+    title: "Arcem Elverum, Sperre-tomta",
+    description:
+      "Planlagt datasenter på den tidligere Sperre Støperi-tomta i Industrigata 22 på Vestad i " +
+      "Elverum, der det nedlagte støperiet skal gjøres om. Prosjektselskapet Industrigata 22 AS " +
+      "står i Statnetts kø med 99 MW ved Vang transformatorstasjon. Planinitiativ for " +
+      "detaljregulering er levert, og Arcem venter reguleringsvedtak i 2028 og mulig drift fra " +
+      "2032.",
+    municipality: "Elverum",
+    address: "Industrigata 22",
+    postal_code: "2406",
+    city: "Elverum",
+    latitude: 60.87225,
+    longitude: 11.54301,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Et stort datasenter på en eksisterende industritomt i Elverum. Tilknytningen krever " +
+      "forsterket regionalnett, så kraftsporet er langt.",
+    notes:
+      "Opprettet i runde 6 (2026-09-30). Aliaser: Industrigata 22, Sperre-tomta. Koordinaten er " +
+      "Kartverkets adressepunkt for Industrigata 22 (tomt, ikke bygg). 99 MW er køplass (sak " +
+      "24/01769), ikke sikret kraft; tallet er ført som planlagt fordi Arcem oppgir det for " +
+      "prosjektet. Industrigata 22 AS eies av Bonum Eiendom AS; Arcem er utvikler.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Statnett – kapasitetskø forbruk (Power BI)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/#kapasitetsko",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak 24/01769 (ELB155): Vang TRA, Innlandet, NO1, Elvia, sluttkunde Industrigata 22 AS, " +
+          "datasenter, 99 MW i kø, moden bestilling 06.09.2024, ønsket tilknytning 30.03.2026. " +
+          "Bekrefter køplass, ikke reservasjon eller anlegg.",
+      },
+      {
+        source_name: "Enhetsregisteret: INDUSTRIGATA 22 AS (912535401)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/912535401",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 1968, tidl. SPERRE STØPERI AS, formål investering i fast eiendom, adresse " +
+          "Inkognitogata 8 Oslo, styreleder Anders Bakken Eriksen. Bekrefter selskap, ikke anlegg.",
+      },
+      {
+        source_name: "Arcem – Projects",
+        source_url: "https://arcem.no/projects",
+        publisher: "Arcem",
+        source_type: "web",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Elverum: 99 MW, «In capacity queue». Nedlagt metallstøperi som blir datasenter; regulering " +
+          "pågår, vedtak ventet 2028.",
+      },
+      {
+        source_name: "Planned Elverum Data Center Could Transform Former Industrial Site…",
+        source_url: "https://media.arcem.no/planned-elverum-data-center-could-transform-former-industrial-site-into-future-oriented-business-hub/",
+        publisher: "Arcem (media.arcem.no)",
+        source_type: "web",
+        source_date: "2026-03-29",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sperre Støperi-tomta, Industrigata 22. Søkt 99 MW, i kø. Krever forsterket regionalnett " +
+          "Hamar–Elverum og ny transformatorstasjon. Bonum-prosjektleder Bjørn Wikan, Rambøll " +
+          "plankonsulent, 40–150 jobber, mulig drift 2032.",
+      },
+      {
+        source_name: "Kartverket adresse-API: Industrigata 22, Elverum",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?sok=Industrigata%2022&kommunenavn=Elverum",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Vegadresse Industrigata 22, 2406 Elverum, gnr 13 bnr 357, punkt 60.87225/11.54301. " +
+          "Bekrefter adresse og matrikkel, ikke anlegg.",
+      },
+      {
+        source_name: "Kommuneinfo: Industrigata 22-punktet",
+        source_url: "https://ws.geonorge.no/kommuneinfo/v1/punkt?nord=60.87225&ost=11.54301&koordsys=4258",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Punktet ligger i Elverum kommune (3420), Innlandet. Bekrefter kommune, ikke anlegg.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
     tidligere_titler: [
       "AQ Compute / hscale OSL1, Hønefoss",
       "Odin Green DC — registrert datasenteroperatør med c/o-adresse i Asker",
@@ -6694,10 +6795,10 @@ export const FUNN: Funn[] = [
     title: "Bifrost Edge Arendal, Longum nord",
     description:
       "Planlagt datasenter fra Bifrost Edge AS på de private arealene på Longum nord i Eyde " +
-      "Material Park, nordøst for Arendal sentrum. Ifølge kommunens oppstartsreferat (februar " +
-      "2026) har Bifrost avtale om å kjøpe arealene på Longum nord unntatt den kommunale tomta, " +
-      "som er solgt til Bulk. En reguleringsendring som åpner for datasenter er på høring til " +
-      "19.10.2026. Bifrost står i Statnetts kø med 285 MW.",
+      "Material Park, nordøst for Arendal sentrum. Ifølge kommunens oppstartsreferat (februar 2026) " +
+      "har Bifrost avtale om å erverve arealene fra grunneier Otra Holding AS, unntatt den " +
+      "kommunale tomta som er solgt til Bulk. En reguleringsendring som åpner for datasenter er på " +
+      "høring til 19.10.2026. Bifrost står i Statnetts kø med 285 MW.",
     municipality: "Arendal",
     city: "Arendal",
     latitude: 58.5124,
@@ -6711,11 +6812,12 @@ export const FUNN: Funn[] = [
       "Et av de største datasenterprosjektene i kø på Sørlandet, på naboarealet til Bulk Arendal " +
       "i samme plan.",
     notes:
-      "Opprettet i runde 5 (2026-09-30). Grunneier er Otra Holding AS, som er forslagsstiller for " +
-      "planendringen (planID 42032022-10). Kjøpsavtalen er dokumentert i kommunens referat, men " +
-      "ikke i grunnbok. 285 MW er køplass (sak 25/02293), ikke sikret kraft. Koordinaten er " +
-      "omtrentlig, sentroiden av teig 26/2; felt KBA3 er ikke stedfestet. Ikke samme anlegg som " +
-      "Bulk Arendal (teig 25/121) eller Bifrost Edge Vinje.",
+      "Opprettet i runde 5 (2026-09-30). Runde 6: grunneier er fortsatt Otra Holding AS " +
+      "(planbeskrivelse aug. 2026). Bifrost har en avtalt ervervsrett; om det er kjøp eller opsjon, " +
+      "og om det er gjennomført, er ikke dokumentert. Hjemmelshaver i grunnbok er ikke kontrollert " +
+      "(krever innlogging). Arealet 26/2 + 25/1 er ca. 548 daa, mot 800–820 mål i presse. 285 MW er " +
+      "køplass (sak 25/02293), ikke sikret kraft. Koordinaten ligger på 26/2, men felt KBA3 er ikke " +
+      "stedfestet.",
     public_candidate: false,
     kilder: [
       {
@@ -6975,10 +7077,11 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
-    title: "Gigahost, Søndre Kullerød i Sandefjord",
+    tidligere_titler: ["Gigahost, Søndre Kullerød i Sandefjord"],
+    title: "Gigahost Sandefjord (DC1–DC3)",
     description:
-      "Tre datasenteroppføringer — DC1, DC2 og DC3 — på samme adresse i Sandefjord. Gigahost AS er " +
-      "Nkom-registrert.",
+      "Gigahosts datasentercampus i Sandefjord: DC1 (2010) og DC2 (2018) i samme bygg, og DC3 " +
+      "(2023) i et eget bygg. Gigahost AS eier og driver anleggene og er Nkom-registrert.",
     municipality: "Sandefjord",
     address: "Søndre Kullerød 2",
     postal_code: "3241",
@@ -6992,8 +7095,11 @@ export const FUNN: Funn[] = [
     interest_level: "medium",
     why_interesting: "Den største colocation-aktøren i Vestfold.",
     notes:
-      "Tre katalogoppføringer, én adresse. Om det er tre separate haller i samme bygg eller tre " +
-      "oppføringer av samme anlegg, går ikke fram av kilden.",
+      "Runde 6 (2026-09-30): ny tittel; tidligere «Gigahost, Søndre Kullerød i Sandefjord». " +
+      "Adressekonflikt: Gigahost sier DC1 ligger på Klinestadmoen (Brønnøysund: Klinestadmoen 9), " +
+      "mens PeeringDB, som Gigahost selv vedlikeholder, oppgir Søndre Kullerød 2 – ca. 450 m unna. " +
+      "Koordinaten er uendret. Gigahost står ikke i Statnetts lister. Et planlagt DC4 (5 MW, 2027) " +
+      "har ukjent tomt og er ikke lagt inn.",
     kilder: [
       {
         source_name: "DataCenterMap: Gigahost, Søndre Kullerød i Sandefjord",
@@ -7182,15 +7288,15 @@ export const FUNN: Funn[] = [
     verification_status: "partially_verified",
     operational_status: "active",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "high",
     interest_level: "low",
     why_interesting:
       "Et lite, men reelt anlegg med kjent eier, og en av Magnoras datasenterinvesteringer.",
     notes:
-      "Primærkilde-runde 2026-09-30: 250 kW er ledig kapasitet, ikke anleggets størrelse " +
-      "(Storespeed). Magnoras børsmelding 06.10.2025 oppgir ca. 1 MW installert og 5 MW potensial. " +
-      "Storespeed har 5 MW i Statnetts kø, som ikke er sikret kraft. MW er ikke strukturert i denne " +
-      "runden.",
+      "Primærkilde-runde 2026-09-30: 250 kW er ledig kapasitet, ikke anleggets størrelse. Runde 6: " +
+      "anlegget er bekreftet i Magnora-rapportene (1 MW i drift, utvidelsesmulighet til 5 MW). " +
+      "Magnora Data Center ASA eier 75 % av Storespeed AS; Blix Group 5 %. Storespeeds 5 MW i " +
+      "Statnetts kø er ikke sikret kraft.",
     kilder: [
       {
         source_name: "DataCenterMap: Halden DC01",
@@ -7262,6 +7368,202 @@ export const FUNN: Funn[] = [
         primary_source: true,
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "PolarDC DRA-OSL, Varpet i Tørdal",
+    description:
+      "AI-datasenter fra Polar Data Centers på Varpet industriområde i Tørdal i Drangedal. Første " +
+      "trinn (DRA01, 12 MW IT) ble etablert i 2025, og Statnett oppgir 15 MW tilknyttet fra " +
+      "desember 2025 og ytterligere 55 MW reservert. Statsforvalteren ga i september 2026 samlet " +
+      "tillatelse for DRA1 og DRA2. Crusoe er leietaker for Crusoe Cloud.",
+    municipality: "Drangedal",
+    city: "Tørdal",
+    latitude: 59.14649,
+    longitude: 8.77174,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et AI-datasenter i drift i en liten innlandskommune, med et andre byggetrinn på gang og " +
+      "mer kraft reservert.",
+    notes:
+      "Opprettet i runde 6 (2026-09-30) fra leadet «Polar DRA01». Aliaser: DRA01, DRA02, DRA-OSL, " +
+      "Polar DC Drangedal, Crusoe Tørdal. Prosjektselskapet POLARDC DRA AS het tidligere " +
+      "Klingstone AS. Anlegget er bekreftet av Statsforvalterens tillatelse (sak 2024/10650). " +
+      "CBRE er Polars driftsleverandør, ikke eier. Koordinaten er omtrentlig (stedsnavnpunktet " +
+      "Varpet); byggets teig er ikke bekreftet. Ikke samme anlegg som PolarDC HER01 på Herøya.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Statsforvalteren: Tillatelse etter forurensningsloven – PolarDC DRA AS – Datasenter DRA-OSL – Varpet – Drangedal (sak 2024/10650)",
+        source_url: "https://www.statsforvalteren.no/siteassets/vestfold-og-telemark/miljo-og-klima/forurensing/dokumenter/2026/tillatelser/polar-dc/tillatelse---polardc-dra-as.pdf",
+        publisher: "Statsforvalteren i Vestfold og Telemark",
+        source_type: "regulation",
+        source_date: "2026-09-14",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tillatelse til PolarDC DRA AS for DRA-OSL (DRA1 og DRA2) på Varpet industriområde i " +
+          "Drangedal. Klingstone AS etablerte DRA1 i 2025 (<50 MW, ikke tillatelsespliktig da). " +
+          "Søknad 09.01.2026 om trinn 2. Aggregater >50 MW termisk, HVO. Varpet-planen (planID 2020 " +
+          "0001), felt BI1 datasenter. Bekrefter anlegget.",
+      },
+      {
+        source_name: "Statsforvalteren: Vilkår – PolarDC DRA AS",
+        source_url: "https://www.statsforvalteren.no/siteassets/vestfold-og-telemark/miljo-og-klima/forurensing/dokumenter/2026/tillatelser/polar-dc/vilkar---polardc-dra-as.pdf",
+        publisher: "Statsforvalteren i Vestfold og Telemark",
+        source_type: "regulation",
+        source_date: "2026-09-14",
+        primary_source: true,
+        excerpt_or_summary:
+          "Vilkår for DRA-OSL: driftsansvarlig PolarDC DRA AS, kontinuerlig drift, testkjøring av " +
+          "nødstrømsaggregater maks 450 t/år, støygrenser, støysonekart innen 3 mnd. etter oppstart.",
+      },
+      {
+        source_name: "Statsforvalteren: Tillatelse til virksomhet etter forurensningsloven for PolarDC DRA AS for datasenter i Drangedal",
+        source_url: "https://www.statsforvalteren.no/nb/vestfold-og-telemark/naringorganisasjon/tillatelse-til-a-forurense/nyheter/2026/09/tillatelse-til-virksomhet-etter-forurensningsloven-for-polardc-dra-as-for-datasenter-i-drangedal",
+        publisher: "Statsforvalteren i Vestfold og Telemark",
+        source_type: "web",
+        source_date: "2026-09-14",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nyhetssak om vedtaket 14.09.2026 for datasenter DRA-OSL på Varpet i Drangedal; klagefrist " +
+          "06.10.2026.",
+      },
+      {
+        source_name: "Statnett: Statistikk om tilknytningssaker (Grenland TRA, Klingstone AS)",
+        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Grenland TRA, netteier Lede AS, sluttkunde Klingstone AS (datasenter): 15 MW tilknyttet " +
+          "(21/00165, 21.12.2025) og 55 MW reservert (24/01660, reservert 28.10.2024, planlagt " +
+          "tilknytning 30.12.2026). Lest via GitHub-speil.",
+      },
+      {
+        source_name: "Polar announces new AI-ready data center powered by 100% renewable energy in Norway",
+        source_url: "https://www.polardc.com/post/polar-announces-new-ai-ready-data-center-powered-by-100-renewable-energy-in-norway",
+        publisher: "Polar Data Centers",
+        source_type: "web",
+        source_date: "2025-03-06",
+        primary_source: true,
+        excerpt_or_summary:
+          "Polar kunngjør flerfase AI-datasenter i Tørdal; første fase DRA01 12 MW, drift 2. halvår " +
+          "2025, Tier III, væskekjøling, 100 % vannkraft.",
+      },
+      {
+        source_name: "Polar appoints CBRE to operate flagship AI-ready data center in Norway (DRA01)",
+        source_url: "https://www.polardc.com/post/polar-appoints-cbre-to-operate-flagship-ai-ready-data-center-in-norway",
+        publisher: "Polar Data Centers",
+        source_type: "web",
+        source_date: "2025-07-23",
+        primary_source: true,
+        excerpt_or_summary:
+          "CBRE får 24/7 drift, vedlikehold og sikkerhet ved DRA01 i Tørdal; 12 MW IT i fase 1; drift " +
+          "2. halvår 2025. CBRE er driftsleverandør, ikke eier.",
+      },
+      {
+        source_name: "Polar supports Crusoe's AI growth with new high-performance data center",
+        source_url: "https://www.polardc.com/post/polar-supports-crusoe-s-ai-growth-with-new-high-performance-data-center",
+        publisher: "Polar Data Centers",
+        source_type: "web",
+        source_date: "2025-06-17",
+        primary_source: true,
+        excerpt_or_summary:
+          "Crusoe er kunde i DRA01 (12 MW, mulighet for 52 MW), drift senere i 2025.",
+      },
+      {
+        source_name: "Crusoe enters Europe with first Norway data center",
+        source_url: "https://www.crusoe.ai/resources/newsroom/crusoe-announces-strategic-european-expansion-with-first-data-center-in",
+        publisher: "Crusoe",
+        source_type: "web",
+        source_date: "2025-06-11",
+        primary_source: true,
+        excerpt_or_summary:
+          "Crusoe har kontrakt på et 12 MW-anlegg i Norge med Polar for Crusoe Cloud, kan utvides til " +
+          "52 MW. Stedsnavn ikke oppgitt; koblet til DRA01 via Polars melding.",
+      },
+      {
+        source_name: "Brønnøysundregistrene: POLARDC DRA AS (928431096)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/928431096",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 01.12.2021; historiske navn NFH 211234 AS og KLINGSTONE AS (til 12.01.2026). " +
+          "Styreleder Andrew James Hayes. Bekrefter selskap og navnebytte, ikke anlegget.",
+      },
+      {
+        source_name: "Brønnøysundregistrene: POLARDC DRA LAND AS (927295938)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/927295938",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tidl. EXAGREEN AS (til 04.12.2025), stiftet 14.05.2021, samme styre som Polar-selskapene. " +
+          "Bekrefter selskap, ikke eierskap til grunn.",
+      },
+      {
+        source_name: "Brønnøysundregistrene: POLARDC DRA01 AS (934891538)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/934891538",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tidl. POLAR - DRA01 AS; stiftet 07.01.2025; samme styre. Rolle i anlegget ikke " +
+          "dokumentert.",
+      },
+      {
+        source_name: "Brønnøysundregistrene: POLARDC DRA02 AS (936106536)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/936106536",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 26.08.2025, datasenterformål, samme styre. Rolle i trinn 2 ikke dokumentert.",
+      },
+      {
+        source_name: "Kartverket stedsnavn: Varpet (Drangedal)",
+        source_url: "https://ws.geonorge.no/stedsnavn/v1/navn?sok=Varpet&kommunenavn=Drangedal&utkoordsys=4258",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stedsnavnpunkt Varpet 59.14649, 8.77174. Bekrefter stedets plassering, ikke anlegget.",
+      },
+      {
+        source_name: "Kartverket kommuneinfo: punkt Varpet",
+        source_url: "https://ws.geonorge.no/kommuneinfo/v1/punkt?nord=59.14649&ost=8.77174&koordsys=4258",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Punktet ligger i Drangedal kommune (4016), Telemark.",
+      },
+      {
+        source_name: "Kartverket eiendom: teiger ved Varpet",
+        source_url: "https://ws.geonorge.no/eiendom/v1/punkt?nord=59.14649&ost=8.77174&koordsys=4258&radius=500",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Punktet ligger på 48/141; 48/135 og 48/140 innen ca. 20 m. Bekrefter matrikkel, ikke " +
+          "hvilken teig bygget står på.",
       },
     ],
   },
