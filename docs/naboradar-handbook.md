@@ -2456,13 +2456,21 @@ forsvare, og en test håndhever at kolonnen ikke dukker opp igjen. `mwTekst()` s
 tallet aldri vises uten hvilket tall det er — «700 MW sikret kraft», aldri bare «700 MW».
 
 **Hva som regnes som sikret.** `secured_power_mw` er kapasitet som er *tilknyttet* eller
-*reservert/avtalt* hos Statnett eller netteier: reservasjon, anleggsbidragsavtale eller
-tilknytningsavtale. Søkt kapasitet, køplass og «ønsket tilknytning» er ikke sikret, og står i
-notatet, ikke i feltet. Statnett-tallene leses fra Statnetts egne lister (tilknyttet, reservert og
-kø), som skiller nøyaktig disse tre. Er en reservasjon gitt til netteieren og ikke til anlegget, som
-i Kvandal, står den i feltet med forklaring om hvem som har den og hvor mye som er videretildelt.
+*reservert/avtalt* for det konkrete anlegget eller prosjektselskapet: reservasjon,
+anleggsbidragsavtale eller tilknytningsavtale. Søkt kapasitet, køplass og «ønsket tilknytning» er
+ikke sikret, og står i notatet, ikke i feltet. Statnett-tallene leses fra Statnetts egne lister
+(tilknyttet, reservert og kø), som skiller nøyaktig disse tre.
+
+En reservasjon gitt til et nettselskap er heller ikke sikret kraft for anlegget, selv om den er
+tatt ut for datasenter. Det som teller er hva nettselskapet har tildelt videre. Kvandal er
+eksempelet: Statnett har reservert 230 MW til Nordkraft Industrinett, og Nordkraft har tildelt
+Nscale 32,5 + 97,5 = 130 MW for de to første byggene. Feltet er 130 MW og peker på kilden for
+tildelingen (NVE-søknaden), mens 230 MW står i notatet med Statnett som kilde. At 230 MW samtidig er
+Nscales planlagte første fase er en annen påstand, og hører hjemme i `planned_capacity_mw`.
+
 Datakvalitetsrunden 2026-09-30 fjernet tre tall på denne regelen: Googles 840 MW (søkt/kø), Arcem
-Husnes' 40 MW (kø hos Statnett) og Fauskes 13 MW (bare presse).
+Husnes' 40 MW (kø hos Statnett) og Fauskes 13 MW (bare presse). Narvik ble rettet fra 230 til 130
+MW i en egen korreksjon samme dag.
 
 **3. Påstand og kilde.** `admin_research_datacenter_field_sources` knytter et strukturert felt til
 kilden som bærer det. Ikke full event sourcing — det ville kostet mer enn det smaker på 67 funn —
