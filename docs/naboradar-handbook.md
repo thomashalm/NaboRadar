@@ -2482,7 +2482,13 @@ Nscales planlagte første fase er en annen påstand, og hører hjemme i `planned
 Det samme gjelder en reservasjon som står på morselskapet og ikke på prosjektselskapet eller
 anlegget. Green Mountain AS har 18,5 MW ved Ringerike, og Green Horizon AS har 36 MW ved
 Bjerkreim. Reservasjonene står i notatet til anleggene de trolig gjelder (Kilemoen og Norway 1),
-men ikke i feltet. Koblingen er utledet av sted og MW-tall, ikke dokumentert.
+men ikke i feltet. Koblingen er utledet av sted og MW-tall, ikke dokumentert. Det gjelder også
+når pressen knytter reservasjonen til ett anlegg: Kitebrook Matres 30 MW ved Haugsvær står på
+«Regn / Kitebrook», ikke på KB IFS Matre AS, og er ikke ført som sikret (runde 7).
+
+Motsatt eksempel: Bredsand datasenter i Moss har 50 MW sikret, fordi Statnetts sluttkunde er
+prosjektselskapet Larkollveien 4 AS selv, som også er forslagsstiller for reguleringen og bare har
+denne ene saken.
 
 Datakvalitetsrunden 2026-09-30 fjernet tre tall på denne regelen: Googles 840 MW (søkt/kø), Arcem
 Husnes' 40 MW (kø hos Statnett) og Fauskes 13 MW (bare presse). Narvik ble rettet fra 230 til 130

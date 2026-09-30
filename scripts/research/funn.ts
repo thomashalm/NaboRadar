@@ -4383,9 +4383,12 @@ export const FUNN: Funn[] = [
     confidence: "low",
     interest_level: "medium",
     notes:
-      "Runde 4 (2026-09-30): status satt til ukjent. Grunnlaget er bare en Nkom-registrering og et " +
-      "lite selskap. Adressene spriker (Nkom: Tromsdalen, Brønnøysund: Kvaløyvegen 168), " +
-      "thermaltech.no er parkert, og det finnes ingen Statnett-relasjon. Uten koordinat med vilje.",
+      "Runde 4 (2026-09-30): status satt til ukjent. Grunnlaget er bare en Nkom-registrering og " +
+      "et lite selskap. Adressene spriker (Nkom: Tromsdalen, Brønnøysund: Kvaløyvegen 168), " +
+      "thermaltech.no er parkert, og det finnes ingen Statnett-relasjon. Uten koordinat med " +
+      "vilje. Runde 7 (2026-10-01): Nkom-listen fra 28.04.2026 og Miljødirektoratets innhenting " +
+      "av opplysninger bekrefter en aktiv operatør, men ikke hvor anlegget ligger. Omsetningen " +
+      "falt fra 20,3 til 4,4 mill. kr fra 2024 til 2025.",
     kilder: [
       {
         source_name: "Nkom: Thermaltech AS er registrert datasenteroperatør",
@@ -4796,7 +4799,10 @@ export const FUNN: Funn[] = [
       "Ringerike TRA og har 145 MW i kø; reservasjonen står på selskapet, ikke på " +
       "prosjektselskapet eller anlegget, og er derfor ikke ført som sikret kraft. Koordinaten er " +
       "Kartverkets stedsnavnpunkt for Kilemoen industriområde, ikke tomta. Ikke samme anlegg som " +
-      "hscale OSL1 (Odin Green DC AS).",
+      "hscale OSL1 (Odin Green DC AS). Runde 7 (2026-10-01): Green Mountain Hønefoss AS er satt " +
+      "som eier med lav sikkerhet, fordi hjemmelshaver til tomta ikke er dokumentert. Type " +
+      "colocation bygger på Green Mountains forretningsmodell. Kapasitetstallene spriker (20/50 " +
+      "MW i 2023, 163,5 MW i Statnett), så planlagt kapasitet er ikke satt.",
     public_candidate: false,
     kilder: [
       {
@@ -5005,12 +5011,14 @@ export const FUNN: Funn[] = [
       "En opsjon på datasentertomt i samme næringspark som atNorths 120–350 MW-prosjekt. Blir den utløst, " +
       "samles to store kraftuttak i én park i Tysvær.",
     notes:
-      "Kvalitetsrunde 2026-09-30: undersøkt, ikke bekreftet. Eneste dokumenterte steg er en opsjon " +
-      "på 50 dekar fra april 2021. Gismarvik mangler på Green Mountains anleggsliste og i " +
+      "Kvalitetsrunde 2026-09-30: undersøkt, ikke bekreftet. Eneste dokumenterte steg er en " +
+      "opsjon på 50 dekar fra april 2021. Gismarvik mangler på Green Mountains anleggsliste og i " +
       "pressearkivet 2023–2026, og har ikke eget selskap i Brønnøysund. Næringsparken omtaler " +
-      "atNorth som første store etablering, og parkens kart har bare én datasentersone. Opsjonen er " +
-      "trolig sovende eller bortfalt. Koordinaten er et referansepunkt i næringsparken, ikke en " +
-      "tomt.",
+      "atNorth som første store etablering, og parkens kart har bare én datasentersone. Opsjonen " +
+      "er trolig sovende eller bortfalt. Koordinaten er et referansepunkt i næringsparken, ikke " +
+      "en tomt. Runde 7 (2026-10-01): Siste omtale som aktiv lokasjon er fra november 2023 (Radio " +
+      "Rjukan: 300 MW, oppstart 12 MW). Ingen senere kilde. Status er fortsatt ukjent; opsjonen " +
+      "er ikke satt som bortfalt uten bekreftelse.",
     kilder: [
       {
         source_name: "DataCenterMap: Green Mountain Gismarvik",
@@ -5087,8 +5095,10 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Green Horizon «Vidar», Kvernaland",
     description:
-      "Oppført som Green Horizon-anlegg på Plogfabrikkvegen 8 på Kvernaland, ca. 1 km fra Heimdal. " +
-      "Ingen kilde viser drift eller konkret plan; oppføringen bygger på DataCenterMap.",
+      "Planlagt Green Horizon-anlegg oppført på Plogfabrikkvegen 8 på Kvernaland i Klepp, ca. 1 " +
+      "km fra Heimdal. Green Horizons egen portefølje viser et eget anlegg på 8 MW med " +
+      "tilgjengelighet fra andre kvartal 2028, og Statnett har en egen reservasjon på 8 MW ved " +
+      "Fagrafjell på selskapet. Adressen bygger bare på DataCenterMap.",
     municipality: "Klepp",
     address: "Plogfabrikkvegen 8",
     postal_code: "4353",
@@ -5096,7 +5106,7 @@ export const FUNN: Funn[] = [
     latitude: 58.78333,
     longitude: 5.70576,
     verification_status: "partially_verified",
-    operational_status: "unknown",
+    operational_status: "planned",
     sensitivity: "internal_only",
     confidence: "low",
     interest_level: "medium",
@@ -5105,7 +5115,11 @@ export const FUNN: Funn[] = [
     notes:
       "Runde 3 (2026-09-30): status satt til ukjent. Kan være Green Horizons Norway 2 (8 MW " +
       "reservert ved Fagrafjell på selskapsnivå), men koblingen er ikke dokumentert. Ikke samme " +
-      "anlegg som Heimdal.",
+      "anlegg som Heimdal. Runde 7 (2026-10-01): status ukjent → planlagt. Green Horizons " +
+      "portefølje (greenbox.no) viser et anlegg på 8 MW og et på 48 MW som separate anlegg, og " +
+      "Statnett har to separate saker (24/01601, 8 MW, og 24/01503, 48 MW), begge på Green " +
+      "Horizon AS. At «Vidar» er 8 MW-anlegget er utledet av MW-tallene. Reservasjonen står på " +
+      "selskapet og er ikke ført som sikret kraft. Koordinaten er omtrentlig.",
     kilder: [
       {
         source_name: "DataCenterMap: Green Horizon «Vidar», Kvernaland",
@@ -5617,6 +5631,125 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
+    title: "Kitebrook Matre, Masfjorden",
+    description:
+      "Planlagt KI- og HPC-datasenter på regulert industriareal i Matre i Masfjorden, utviklet av " +
+      "Kitebrook. Første fase er 30 MW, og full utbygging er 100 MW med om lag 82,5 MW IT-last i " +
+      "tre datahaller. Områdeplanen for Matre endres for å gi plass til trafo- og pumpestasjon, " +
+      "med Kitebrook som tiltakshaver. Prosjektselskapet KB IFS Matre AS står i Statnetts kø med " +
+      "70 MW ved Haugsvær.",
+    municipality: "Masfjorden",
+    city: "Matre",
+    latitude: 60.8745,
+    longitude: 5.5825,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Kitebrook kaller Matre flaggskipet sitt: et campus på 100 MW ved kraftverksklyngen i " +
+      "Matre, med aktiv plansak og kjøling med fjordvann.",
+    notes:
+      "Opprettet i runde 7 (2026-10-01) fra Mongstad-/Nordhordland-researchen. Anlegget er " +
+      "bekreftet av Masfjorden kommunes plandokumenter (ROS for endring av Områdeplan for Matre, " +
+      "planID 463420200001). Koordinaten er omtrentlig, et punkt i Matre innenfor planområdet " +
+      "(ca. 161 daa); bygg og tomt er ikke stedfestet nærmere. Statnett-reservasjonen på 30 MW " +
+      "(21/00206) står på «Regn / Kitebrook», ikke på prosjektselskapet, og er derfor ikke ført " +
+      "som sikret kraft. Kitebrook er utvikler; operatøren er ikke dokumentert. Eget anlegg, ikke " +
+      "Kitebrook Børdalen eller Leirdøla.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Masfjorden kommune: ROS-analyse, reguleringsendring Områdeplan for Matre",
+        source_url: "https://aimblob.blob.core.windows.net/aimfiles/fbe14975-258f-4cbd-af75-a15fd467fdd0.pdf",
+        publisher: "Masfjorden kommune (plankonsulent ABO Plan & Arkitektur)",
+        source_type: "regulation",
+        source_date: "2026-04-29",
+        primary_source: true,
+        excerpt_or_summary:
+          "Planendring for Områdeplan for Matre (planID 463420200001, saksnr. 20/234) med Kitebrook " +
+          "som tiltakshavar. Endringa skal gje plass til datasenter med trafostasjon og pumpestasjon " +
+          "for kjøling. Planområdet er om lag 161 daa. Stadfestar at det er planlagt eit datasenter " +
+          "på tomta.",
+      },
+      {
+        source_name: "Kost-nytteanalyse: Overskuddsvarme fra datasenter i Matre",
+        source_url: "https://aimblob.blob.core.windows.net/aimfiles/486e8dbd-968c-4574-b3da-0de54e0e291d.pdf",
+        publisher: "Masfjorden kommune (dokumentarkiv)",
+        source_type: "document",
+        source_date: "2026-04-21",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tiltakshavar er Kitebrook Energy Norway. Planen er tre datahallar på tidlegare " +
+          "industriområde i Matre og fjordvatn frå Matresvågen til kjøling. IT-effekten er 27,5, 55 " +
+          "og 82,5 MW, og tilført effekt aukar frå om lag 40 til om lag 100 MVA. " +
+          "Havforskingsinstituttet er vurdert som mottakar av varme.",
+      },
+      {
+        source_name: "Kitebrook: Matre Data Center Campus",
+        source_url: "https://www.kitebrook.com/kitebrook-infra/matre/",
+        publisher: "Kitebrook",
+        source_type: "web",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kitebrook oppgjev 100 MW ved full utbygging, om lag 82,5 MW IT og første fase på 30 MW. " +
+          "Første straum kjem mid-2027. Anlegget ligg ved ein 300/132/22 kV-stasjon med fjordkjøling " +
+          "og GBUS utan generatorar, og er retta mot KI og HPC.",
+      },
+      {
+        source_name: "Statnett: statistikk om tilknytningssaker (Haugsvær TRA)",
+        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Reservasjon 21/00206 (ELB737): Haugsvær TRA, BKK, Regn / Kitebrook, datasenter, 30 MW, " +
+          "ønskt 2027-03-31. Kø 25/02560 (ELB517): KB IFS Matre AS, datasenter, 70 MW, moden " +
+          "2026-05-06, ønskt 2027-07-01.",
+      },
+      {
+        source_name: "Brønnøysundregistra: KB IFS Matre AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/925012602",
+        publisher: "Brønnøysundregistra",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stifta 02.03.2020 og registrert i Bergen. Føremålet er databehandling og datalagring. " +
+          "Registeret stadfestar selskapet, ikkje anlegget.",
+      },
+      {
+        source_name: "Kartverket adressesøk: Matre, Masfjorden",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?kommunenummer=4634&sok=Matre",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Adressepunkt «Matre» i kommune 4634 Masfjorden, rundt 60.872–60.877 N og 5.570–5.585 Ø. " +
+          "Punkta er brukte til å plassere eit omtrentleg punkt. Kjelda stadfestar ikkje anlegget.",
+      },
+      {
+        source_name: "Masfjorden kommune: Arbeid på Matre",
+        source_url: "https://masfjorden.aim.prokom.no/nyhet/arbeid-paa-matre",
+        publisher: "Masfjorden kommune",
+        source_type: "web",
+        source_date: "2025-05-05",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kommunen varsla at Kitebrook AS skulle gjere grunnundersøkingar i det regulerte " +
+          "industriområdet i Matre 5. mai–4. juli 2025. Innhaldet er lese via søkjeutdrag, fordi sida " +
+          "ikkje vart attgjeven fullt ut. Datoen er startdatoen for arbeidet.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
     title: "ASP Dalekvam",
     description:
       "Asp Data Center planlegger AI-rettet datasenter i den tidligere Dale-fabrikken i Dalekvam. " +
@@ -6071,6 +6204,134 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
+    title: "Bredsand datasenter, Larkollveien 4",
+    description:
+      "Planlagt colocation-datasenter i et tidligere fabrikkbygg i Larkollveien 4 på " +
+      "Bredsand/Dilling i Moss. Prosjektselskapet Larkollveien 4 AS, som eies av Bonum Eiendom, " +
+      "er forslagsstiller for detaljreguleringen Plan 501, der oppstart ble kunngjort i juni " +
+      "2026. Statnett har reservert 50 MW ved Tegneby til prosjektselskapet, og Arcem oppgir to " +
+      "faser på 29 og 21 MW.",
+    municipality: "Moss",
+    address: "Larkollveien 4",
+    postal_code: "1570",
+    city: "Dilling",
+    latitude: 59.40631,
+    longitude: 10.69487,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et nytt datasenter i Østfold med Statnett-reservasjon på selve prosjektselskapet, tett på " +
+      "et boligområde der planene har møtt sterk lokal kritikk.",
+    notes:
+      "Opprettet i runde 7 (2026-10-01) fra leadet «Arcem Moss / Larkollveien 4». Aliaser: Arcem " +
+      "Moss, Plan 501. Anlegget er bekreftet av Moss kommunes kunngjøring av Plan 501. " +
+      "Koordinaten er Kartverkets adressepunkt for Larkollveien 4 (gnr 167/100): tomt og " +
+      "eksisterende bygg, ikke et prosjektert datasenterbygg. Arcem er utvikler og er ikke satt " +
+      "som eier eller operatør. Ingen operatør eller kunde er kjent.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Kunngjøring: Oppstart av Plan 501 – detaljregulering for Bredsand datasenter",
+        source_url: "https://www.moss.kommune.no/horinger-og-kunngjoringer/kunngjoring-oppstart-av-plan-501-detaljregulering-for-bredsand-datasenter.22062.aspx",
+        publisher: "Moss kommune",
+        source_type: "regulation",
+        source_date: "2026-06-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel om oppstart av detaljregulering for datasenter i Larkollveien 4 (Bredsand/Dilling), " +
+          "ca. 53,8 daa. Forslagsstiller er Larkollveien 4 AS, plankonsulent Bonum Prosjekt AS. " +
+          "Gjeldende plan M157 (industri) foreslås opphevet, KU er ikke påkrevd, merknadsfrist " +
+          "17.08.2026.",
+      },
+      {
+        source_name: "Statnett – statistikk om tilknytningssaker (reservasjonsliste forbruk, lastet 30.09.2026)",
+        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak 24/01770 (ELB156) ved Tegneby TRA. Kunde Elvia AS, sluttkunde Larkollveien 4 AS, " +
+          "datasenter. Reservert 28.08.2025, planlagt tilknytning 29.09.2027, 50 MW. Kølisten har " +
+          "også 25/02068 (Bonum Prosjekt 113 AS, Tveiten TRA, 25 MW) og 25/02032 (Acrem DC 10 AS, " +
+          "Ringerike TRA, 60 MW).",
+      },
+      {
+        source_name: "Arcem – Projects (Moss)",
+        source_url: "https://arcem.no/projects",
+        publisher: "Arcem",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Arcem oppgir for Moss: 50 MW reservert kapasitet i to faser (29 MW + 21 MW), et tidligere " +
+          "fabrikkbygg som bygges om til colocation-datasenter, og at prosjektet er i " +
+          "reguleringsprosess. Galleriet viser også illustrasjoner fra blant annet Hvittingfoss, Gol " +
+          "og Austrheim.",
+      },
+      {
+        source_name: "Bonum Plans Billion-Kroner Data Center Investment in Moss",
+        source_url: "https://media.arcem.no/bonum-plans-billion-kroner-data-center-investment-in-moss/",
+        publisher: "Arcem",
+        source_type: "web",
+        source_date: "2026-02-27",
+        primary_source: true,
+        excerpt_or_summary:
+          "Arcem gjengir en sak fra Estate Nyheter om at Bonum vil gjøre en milliardinvestering i " +
+          "datasenter i Moss. Eiendommen ble kjøpt i 2019, og både bolig- og logistikkplaner førte " +
+          "ikke fram.",
+      },
+      {
+        source_name: "Bonum vil gjøre milliardinvestering i nytt datasenter",
+        source_url: "https://media.bonum.no/bonum-vil-gjore-milliardinvestering-i-nytt-datasenter/",
+        publisher: "Bonum",
+        source_type: "web",
+        source_date: "2026-02-27",
+        excerpt_or_summary:
+          "Bonum har industrieiendommen Larkollveien 4 (ca. 32 mål), kjøpt i 2019. Boligplaner ble " +
+          "avvist av kommunen og logistikk fant ikke interesse. Nå planlegges datasenter.",
+      },
+      {
+        source_name: "Enhetsregisteret: Larkollveien 4 AS (995317818)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/995317818",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bekrefter selskapet Larkollveien 4 AS: stiftet 2010, formål investering i fast eiendom, " +
+          "næringskode utleie av egen eiendom, adresse Inkognitogata 8 i Oslo, ingen navnehistorikk. " +
+          "Bekrefter ikke anlegget.",
+      },
+      {
+        source_name: "Kartverket adresse-API: Larkollveien 4, Moss",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?sok=Larkollveien%204&kommunenummer=3103",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bekrefter adressen Larkollveien 4, 1570 Dilling, Moss (3103), gnr 167 bnr 100, med " +
+          "adressepunkt 59,40631 N / 10,69487 Ø. Bekrefter ikke anlegget.",
+      },
+      {
+        source_name: "Kartverket kommuneinfo: punkt Larkollveien 4",
+        source_url: "https://ws.geonorge.no/kommuneinfo/v1/punkt?nord=59.40631&ost=10.69487&koordsys=4258",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Punktet 59,40631/10,69487 ligger i Moss kommune (3103), Østfold.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
     title: "BW Frier Vest, Bamble",
     description:
       "Planlagt datasenter i Frier Vest industriområde, utviklet av BW Velora (BW Group). Inntil " +
@@ -6174,7 +6435,10 @@ export const FUNN: Funn[] = [
       "Opprettet i runde 3 (2026-09-30) med lav sikkerhet. Grunnlag: opsjonen er registrert i " +
       "Skien kommunes postliste (sak 2026/21855) og omtalt i E24; Nscale er bare sitert i presse. " +
       "576 MW er søkt effekt, ikke kø eller reservasjon, og er ikke strukturert. Koordinaten er " +
-      "representasjonspunktet for teig 235/57, som er større enn opsjonsarealet.",
+      "representasjonspunktet for teig 235/57, som er større enn opsjonsarealet. Runde 7 " +
+      "(2026-10-01): Skien kommune fører arealet «N26 Bolvik v/ Bjorstaddalen» som ikke avklart i " +
+      "kommuneplanen, og Statnett har ingen sak for prosjektet ved Grenland TRA. Eget anlegg, " +
+      "ikke Nscale Skien (Gromstul, ca. 16 km unna, Rød TRA).",
     public_candidate: false,
     kilder: [
       {
@@ -7097,9 +7361,13 @@ export const FUNN: Funn[] = [
     notes:
       "Runde 6 (2026-09-30): ny tittel; tidligere «Gigahost, Søndre Kullerød i Sandefjord». " +
       "Adressekonflikt: Gigahost sier DC1 ligger på Klinestadmoen (Brønnøysund: Klinestadmoen 9), " +
-      "mens PeeringDB, som Gigahost selv vedlikeholder, oppgir Søndre Kullerød 2 – ca. 450 m unna. " +
-      "Koordinaten er uendret. Gigahost står ikke i Statnetts lister. Et planlagt DC4 (5 MW, 2027) " +
-      "har ukjent tomt og er ikke lagt inn.",
+      "mens PeeringDB, som Gigahost selv vedlikeholder, oppgir Søndre Kullerød 2 – ca. 450 m " +
+      "unna. Koordinaten er uendret. Gigahost står ikke i Statnetts lister. Et planlagt DC4 (5 " +
+      "MW, 2027) har ukjent tomt og er ikke lagt inn. Runde 7 (2026-10-01): DC1 og DC2 ligger " +
+      "trolig i Klinestadmoen 9, som eies av et eget eiendomsselskap, og DC3 trolig i Søndre " +
+      "Kullerød 2 (bare sekundærkilder). Gigahost oppgir at DC4 er under bygging (inntil 5 MW, " +
+      "2027), men tomta er ikke kjent. DC4 er derfor beholdt som lead og verken slått sammen med " +
+      "campus eller lagt inn som eget anlegg.",
     kilder: [
       {
         source_name: "DataCenterMap: Gigahost, Søndre Kullerød i Sandefjord",
@@ -7248,7 +7516,9 @@ export const FUNN: Funn[] = [
       "Runde 3 (2026-09-30): ny tittel fordi Green Mountain bare er part i en intensjonsavtale, " +
       "ikke utvikler eller operatør. Kommunestyret ble ikke enige om initiativet 17.06.2026. Tall " +
       "på 80–200 MW finnes bare i leserinnlegg. Koordinaten er Saugbrugs registrerte anleggspunkt " +
-      "(Miljødirektoratet), ikke en datasentertomt.",
+      "(Miljødirektoratet), ikke en datasentertomt. Runde 7 (2026-10-01): Statnett har ingen sak " +
+      "for prosjektet ved Halden TRA. Oppstartsmøte om regulering 24.09.2025 er bare omtalt i et " +
+      "leserinnlegg. Eget prosjekt, ikke Halden DC01.",
     kilder: [
       {
         source_name: "DataCenterMap: Green Mountain Halden, Saugbrug",
