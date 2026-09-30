@@ -19,6 +19,7 @@ import {
   type Kartfilter,
 } from "@/lib/admin/research-map-filters";
 import type { Kartpunkt, Kartresultat } from "@/lib/admin/research-map-query";
+import { ANLEGGSTYPE_LABEL, mwTekst } from "@/lib/admin/datacenter-types";
 import {
   LEVELS,
   LEVEL_LABEL,
@@ -107,8 +108,21 @@ export function ResearchKart({
           ]
             .filter(Boolean)
             .join(" · "),
+          // Datasentre får én linje til: operatør/eier, kapasitet og type. Ikke mer — popupen
+          // skal peke videre, ikke være kortet.
+          p.datasenter
+            ? [
+                p.datasenter.operators ?? p.datasenter.owners,
+                mwTekst(p.datasenter.mw),
+                p.datasenter.facility_type && p.datasenter.facility_type !== "unknown"
+                  ? ANLEGGSTYPE_LABEL[p.datasenter.facility_type]
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")
+            : null,
           "INTERN",
-        ],
+        ].filter((l): l is string => Boolean(l)),
         href: `/admin/research/${p.id}`,
         linkLabel: "Åpne funnet",
         minZoom: 13,
@@ -567,6 +581,19 @@ function Liste({
                 <p className="text-[12px] text-muted [overflow-wrap:anywhere]">
                   {[p.subcategory ?? p.category, p.municipality].filter(Boolean).join(" · ")}
                 </p>
+                {p.datasenter && (
+                  <p className="text-[12px] text-muted [overflow-wrap:anywhere]">
+                    {[
+                      p.datasenter.operators ?? p.datasenter.owners,
+                      mwTekst(p.datasenter.mw),
+                      p.datasenter.facility_type && p.datasenter.facility_type !== "unknown"
+                        ? ANLEGGSTYPE_LABEL[p.datasenter.facility_type]
+                        : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ") || "ingen enrichment ennå"}
+                  </p>
+                )}
                 <p className="mt-1 flex flex-wrap gap-1">
                   <Merke>{LEVEL_LABEL[p.interest_level]} interesse</Merke>
                   <Merke>{LEVEL_LABEL[p.confidence]} sikkerhet</Merke>

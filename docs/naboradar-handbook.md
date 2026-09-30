@@ -2403,3 +2403,138 @@ npm run research:seed -- --review="National VA and mineral extraction discovery 
 Backfillen setter `last_verified_at` fra nyeste kildedato og gir prioritetsklassene en første
 review fordelt over tre uker, de høyest prioriterte først. Den hevder ikke at noen har gjort en
 review: `last_reviewed_at` står urørt, og funnene beholder grunnen «aldri kontrollert».
+
+---
+
+## 37. Datasenter-enrichment og refresh
+
+Datasentre er den mest dynamiske kategorien i researchbasen, og den der fritekst svikter først.
+«Bulk driver anlegget, TikTok er kunde, 700 MW» er tre påstander om tre ulike ting, og i et
+`description`-felt kan de ikke filtreres, sammenlignes eller etterprøves. Derfor har datasentre
+egne tabeller og en egen refresh-flyt.
+
+### Egne tabeller, ikke flere kolonner
+
+`admin_research_items` er felles for gruver, forsvar, avløp og datasentre. Legger vi
+`secured_power_mw` der, har vi gjort fellestabellen til en datasentertabell, og neste kategori
+gjør det samme. Detaljene ligger derfor i `admin_research_datacenter_details`, 1:1 og bare for de
+funnene som faktisk er datasentre. Definisjonen står ett sted, `is_datacenter_item()`:
+underkategori `Datasenter`, ikke kategorien — kategorien rommer også pukkverk og prosessindustri.
+
+### Tre ting modellen nekter å slå sammen
+
+**1. Roller.** Eier, operatør, kunde, investor, morselskap og grunneier er ulike påstander om
+ulike juridiske enheter, og de ligger som rader i `admin_research_datacenter_parties` med
+`role`. Samme selskap kan ha flere roller, og flere selskaper kan ha samme rolle. En
+`owner`-kolonne ville tvunget fram et valg, og valget ville blitt usynlig etterpå.
+
+**Kunde har høyere terskel enn de andre, og terskelen står i databasen:**
+
+```sql
+constraint kunde_krever_dokumentasjon
+  check (role <> 'customer' or (confidence = 'high' and source_id is not null))
+```
+
+At en avis kaller noe «TikToks datasenter», at bransjen tror det, eller at anlegget teknisk
+passer kunden, er ikke dokumentasjon. Er det uklart, hører det hjemme i `notes` på funnet.
+Regelen ligger i databasen og ikke bare i en instruks, fordi den ellers ryker første gang noen
+har dårlig tid.
+
+**2. MW.** Fem felt, fordi «700 MW sikret kraft» og «700 MW i drift» ikke er samme opplysning, og
+forskjellen er hele saken for en nabo:
+
+| Felt | Spørsmål |
+|---|---|
+| `it_load_mw` | Hva trekker anlegget nå? |
+| `operational_capacity_mw` | Hvor mye kapasitet står der i dag? |
+| `secured_power_mw` | Hvor mye nettkapasitet er tildelt? |
+| `planned_capacity_mw` | Hva er planlagt for dette prosjektet? |
+| `campus_potential_mw` | Hva blir campus hvis alt bygges ut? |
+
+**Det finnes bevisst ingen generisk `capacity_mw`.** Et tall uten semantikk er et tall vi ikke kan
+forsvare, og en test håndhever at kolonnen ikke dukker opp igjen. `mwTekst()` sørger for at
+tallet aldri vises uten hvilket tall det er — «700 MW sikret kraft», aldri bare «700 MW».
+
+**3. Påstand og kilde.** `admin_research_datacenter_field_sources` knytter et strukturert felt til
+kilden som bærer det. Ikke full event sourcing — det ville kostet mer enn det smaker på 67 funn —
+men nok til at et MW-tall kan spores til noe. Roller bærer sin egen `source_id` inline.
+
+### Anleggstype
+
+Kontrollert vokabular: `colocation`, `hyperscale`, `ai_hpc`, `enterprise`, `crypto`,
+`network_pop`, `mixed`, `unknown`. Fritekstsynonymer ville gjort filtrering umulig etter tjue
+funn. **`unknown` er en gyldig verdi og skal brukes framfor å gjette** — et felt som er undersøkt
+uten å finnes, settes til ukjent og forsvinner fra «mangler».
+
+### Refresh-flyten
+
+Egen kø, helt uavhengig av provider-sync. Den rører ikke DSB, NVE, Udir, planer eller resten av
+researchbasen, og kan kjøres uten deploy og uten at noe annet synkes. To modi:
+
+| Modus | Tar med |
+|---|---|
+| **Det som trenger review** | forfalt eller forfallende review · under bygging · planlagt · høy interesse med lav/middels sikkerhet · mangler viktige felt |
+| **Full datasenter-refresh** | alt som er aktivt, planlagt, under bygging eller ukjent. Bevisst tyngre, og skal velges |
+
+Køen er prioritert: under bygging først, så planlagt, så etter hvor mange felt som mangler.
+Hver linje bærer `queued_reasons` — hvorfor den kom i køen — slik at køen er etterprøvbar i
+ettertid.
+
+**Jobben gjør ikke researchen.** Den lager køen, en søkeplan per anlegg og sporer framdrift.
+Selve arbeidet er DISCOVERY → DEDUP → VERIFISERING → AKTIV OPPFØLGING → KLASSIFISERING, og det
+gjøres mot køen. En HTTP-request som skulle kontrollert 67 anlegg mot operatørsider, kommunale
+saker og presse ville enten timet ut eller levert påstander ingen har verifisert.
+
+`datacenter_search_plan()` bygger søkene av det vi allerede vet — navn, kommune, kjente roller —
+og ikke av en fast liste, fordi «Bulk» og «Vennesla» gir treff der «datasenter» ikke gjør det.
+
+**Tellerne er utledet, ikke lagret.** `admin_datacenter_refresh_status` regner ut status og
+framdrift av køen, så det finnes ingen teller som kan bli stående feil. Samme valg som for
+`review_state`. Én kjøring om gangen: to parallelle køer over samme funn ville gitt to sannheter
+om hva som er kontrollert.
+
+### Historikk
+
+`save_datacenter_details()` sammenligner mot det som står, finner hvilke felt som faktisk endret
+seg, og skriver en review gjennom den eksisterende review-historikken. Et felt som går 20 → 40 MW,
+en operatør som byttes eller en rolle som fjernes etterlater spor. En lagring som ikke endrer noe,
+gir ingen review — ellers ville historikken druknet i støy.
+
+Freshness bruker den eksisterende policyen i `research_review_interval()`, ikke et parallelt
+system. Den gir allerede 30 dager for under bygging, 45–60 for planlagt og 90/180/365 for aktivt
+etter interesse. Refresh-køen er mer aggressiv enn review-planen med vilje: den tar også med det
+som mangler felt, uavhengig av når neste review er.
+
+### Eierskap er fakta, ikke vurdering
+
+Vi viser juridisk eier, morselskap, investorstruktur og land når det er dokumentert.
+Vi lager ikke «bra» eller «dårlig» eier, politiske vurderinger eller rangering etter nasjonalitet.
+`country` finnes for å kunne si «eid av et selskap registrert i X», ikke for å sortere etter det.
+
+Sier en artikkel at «TikToks datasenter utenfor Hamar er eid fra Israel», er jobben å finne hvilken
+juridisk enhet som faktisk eier anlegget før et strukturert felt settes — ikke å gjengi setningen.
+
+### Flatene
+
+`/admin/datasenter` har refresh-knappen, jobbstatus, hva som mangler og alle anleggene.
+Research-kartet viser en ekstra linje for datasentre — operatør eller eier, kapasitet med
+semantikk, og type — både i lista og i popupen. Kartet henter et lite sammendrag gjennom
+`hentDatasentersammendrag()` og bare når resultatet faktisk inneholder datasentre; `research_map`
+vet ingenting om MW.
+
+Kortene er sammenslått til to linjer. Roller, alle fem MW-tall, utvidelse og kilder ligger bak
+`<details>`, og kilder og historikk hentes først gjennom `datacenter_detail()` når et anlegg
+åpnes. Lista skal tåle 500+ anlegg.
+
+### QA
+
+`npm run qa:datasenter` leser basen og rapporterer dekning, roller på faste kontrollpunkter,
+MW-tall med semantikk, om kunde-terskelen holder, køen og at ingen andre kategorier har vært innom
+en datasenter-kø. Den skriver ikke.
+
+**Bulk N01 er eksempelet som viser disiplinen.** Bulks egen pressemelding bekrefter €410 mill. og
+Vennesla, men oppgir **ingen MW og ingen kunder**. Sekundærkilder sier 400 MW innen 2026, 600 MW i
+en bransjekatalog og 2 GW som langsiktig ambisjon — tre tall som betyr tre forskjellige ting.
+Derfor står operatør og type som strukturerte felt, mens MW er ført som notat med kildene og
+fortsatt teller som «mangler kapasitet». CoreWeave omtales i bransjepressen som bruker, men står
+ikke i Bulks egen kommunikasjon og er ikke ført som kunde.

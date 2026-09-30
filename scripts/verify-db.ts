@@ -46,6 +46,9 @@ async function main() {
   // Review-laget. record_research_review_unchecked står med vilje *ikke* her: den er kjernen som
   // bare eieren skal kunne kalle, og skal derfor ikke ha grant til authenticated heller.
   const REVIEW = ["research_review_queue", "research_review_metrics", "research_reviews", "research_review_status", "research_review_interval", "research_review_interval_for", "record_research_review", "set_research_review_plan"];
+  // Datasenter-enrichment. Egen kø og egne felt, samme regel som resten av research: aldri anon,
+  // og is_admin() inne i hver funksjon er det som faktisk stenger.
+  const DATACENTER = ["datacenter_items", "datacenter_detail", "datacenter_search_plan", "datacenter_refresh_candidates", "datacenter_refresh_runs", "datacenter_refresh_queue", "start_datacenter_refresh", "cancel_datacenter_refresh", "record_datacenter_refresh_item", "save_datacenter_details", "save_datacenter_party", "delete_datacenter_party", "set_datacenter_field_source", "is_datacenter_item"];
   // recent_sync_requests er historikken bak «Kjør sync nå» — admin-only, som provider_health.
   const AUTH_OK = new Set([
     ...ANON_OK,
@@ -57,6 +60,7 @@ async function main() {
     "scheduler_status",
     ...RESEARCH,
     ...REVIEW,
+    ...DATACENTER,
   ]);
 
   const grants = await q<{ proname: string; anon: boolean; auth: boolean; service: boolean }>(

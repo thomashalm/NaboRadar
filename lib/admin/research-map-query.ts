@@ -2,6 +2,8 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { FRESHNESS_STATES, gruppeFor, type Kartfilter } from "./research-map-filters";
 import type { Level, OperationalStatus, VerificationStatus } from "./research-types";
+import { hentDatasentersammendrag } from "./datacenter";
+import type { Datasentersammendrag } from "./datacenter-types";
 
 /**
  * Datauttrekket bak research-kartet.
@@ -31,6 +33,8 @@ export interface Kartpunkt {
   updated_at: string;
   review_state: string;
   next_review_at: string | null;
+  /** Bare satt for datasentre. Slås på av et eget, lite kall — se hentKartpunkter. */
+  datasenter?: Datasentersammendrag | null;
 }
 
 export interface Kartresultat {
@@ -75,7 +79,15 @@ export async function hentKartpunkter(client: SupabaseClient, filter: Kartfilter
   });
   if (error) return { ...TOMT, feil: error.message };
 
-  const alle = ((data ?? []) as Kartpunkt[]).map((p) => ({ ...p, source_count: Number(p.source_count) }));
+  let alle = ((data ?? []) as Kartpunkt[]).map((p) => ({ ...p, source_count: Number(p.source_count) }));
+
+  // Datasentre bærer egne felt. Sammendraget hentes bare når resultatet faktisk inneholder noen,
+  // slik at et søk på gruver ikke betaler for et datasenterkall.
+  if (alle.some((p) => p.subcategory === "Datasenter")) {
+    const dc = await hentDatasentersammendrag(client);
+    alle = alle.map((p) => (p.subcategory === "Datasenter" ? { ...p, datasenter: dc.get(p.id) ?? null } : p));
+  }
+
   const medPunkt = alle.filter((p) => p.latitude !== null && p.longitude !== null);
 
   return {
