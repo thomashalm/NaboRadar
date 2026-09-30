@@ -3559,7 +3559,7 @@ export const FUNN: Funn[] = [
     city: "Oslo",
     latitude: 59.91135,
     longitude: 10.81132,
-    verification_status: "partially_verified",
+    verification_status: "rejected",
     operational_status: "active",
     sensitivity: "internal_only",
     confidence: "low",
@@ -3567,10 +3567,10 @@ export const FUNN: Funn[] = [
     why_interesting:
       "Et datasenter i et kontorområde på Bryn som er under transformasjon til bolig.",
     notes:
-      "Nedgradert i runde 5: det eneste nettverket i fasiliteten er Fujitsus eget, samme mønster " +
-      "som Sognsveien 75. Trolig et internt teknisk rom. Primærkilde-runde 2026-09-30: primærkilde " +
-      "søkt, ikke funnet. Det finnes ikke noe aktivt Fujitsu Norway AS i Brønnøysund, og Fujitsu " +
-      "står ikke i Nkoms register.",
+      "Avvist i runde 5 (2026-09-30): Østensjøveien 32 er et kontorbygg der Fujitsu leide ca. 2 500 " +
+      "m² som hovedkontor fra 2010. PeeringDB viser bare Fujitsus eget nett, altså et internt " +
+      "serverrom. Fujitsu Norway AS ble omdøpt i 2022 og slettet i 2023, og Fujitsu står ikke i " +
+      "Nkoms register.",
     kilder: [
       {
         source_name: "PeeringDB: nettverk til stede i fasiliteten",
@@ -3609,7 +3609,9 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Rent a Rack, Ulvenveien 87",
     description:
-      "Colocation-anlegg drevet av Webhuset, på Ulven — samme kvartal som OSL01.",
+      "Tidligere datasenter på Ulvenveien 87, drevet av Rent a Rack AS, som Webhuset kjøpte i 2012. " +
+      "Selskapet er senere omdøpt og flyttet, og det er andre leietakere i bygget i dag. Om " +
+      "datasenteret fortsatt er i drift, er ukjent.",
     municipality: "Oslo",
     address: "Ulvenveien 87",
     postal_code: "0581",
@@ -3617,14 +3619,18 @@ export const FUNN: Funn[] = [
     latitude: 59.92474,
     longitude: 10.81292,
     verification_status: "partially_verified",
-    operational_status: "active",
+    operational_status: "unknown",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "low",
     interest_level: "low",
     why_interesting:
       "Enda et anlegg i Ulven-klyngen; samlet gjør de området til Oslos tetteste ansamling av " +
       "datasentre.",
-    notes: "Kun én kilde.",
+    notes:
+      "Runde 5 (2026-09-30): status satt til ukjent. Rent a Rack AS (993903558) ble omdøpt til " +
+      "Serverbite AS i 2022 og har nå adresse på Stord. rentarack.no viser i dag Nexthop AS, som " +
+      "selger plass i DigiPlex Ulven (Vaultica OSL01) – et annet anlegg ca. 230 m unna. Webhuset " +
+      "oppgir fortsatt å eie datasentre i Oslo, uten adresse. Nedleggelse er ikke dokumentert.",
     kilder: [
       {
         source_name: "PeeringDB: nettverk til stede i fasiliteten",
@@ -6206,9 +6212,10 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Terakraft Sauda I, Hellandsbygd",
     description:
-      "Datasenter i et ombygd vannkraftverk fra 1919 i Hellandsbygd, drevet av Terakraft AS. " +
-      "Anlegget oppgis til 10 MW etter rehabilitering, med mulig utvidelse på inntil 60 MW i " +
-      "nærheten.",
+      "Datasenter under bygging i det gamle Sauda I-kraftverket (Storlivatn kraftverk) i " +
+      "Hellandsbygd. Byggherre og eier er prosjektselskapet YFOSS AS, og Terakraft AS står bak " +
+      "merkevaren. Byggestart var november 2025, og selskapet oppgir 10 MW etter rehabilitering, " +
+      "med mulig utvidelse på inntil 60 MW i nærheten.",
     municipality: "Sauda",
     address: "Handelandsvegen 140",
     postal_code: "4200",
@@ -6216,17 +6223,19 @@ export const FUNN: Funn[] = [
     latitude: 59.68485,
     longitude: 6.51957,
     verification_status: "partially_verified",
-    operational_status: "active",
+    operational_status: "under_construction",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "high",
     interest_level: "high",
     why_interesting:
       "Et 100 år gammelt kraftverk gjort om til datasenter — det tydeligste eksempelet på at " +
       "bransjen følger gammel kraftinfrastruktur.",
     notes:
-      "Runde 3 (2026-09-30): Terakrafts nettside sier «10 MW available now», mens investoren Vesper " +
-      "sier at 10 MW kommer etter rehabilitering – status er derfor usikker. Terakraft står ikke i " +
-      "Statnetts lister. Magnoras køplass ved Sauda TRA er et annet prosjekt.",
+      "Aliaser: YFOSS AS, Terakraft AI Sauda, NO-SAU1, Storlivatn kraftverk datasenter. Runde 5 " +
+      "(2026-09-30): leadet «YFOSS / Hellandsbygd» er samme anlegg (samme bygg og adresse, " +
+      "Handelandsvegen 140). Status endret fra aktiv til under bygging. Vesper-fondet blir " +
+      "majoritetseier av YFOSS; gjennomføring er ikke bekreftet i primærkilde. En mulig leietaker " +
+      "er omtalt i presse, men ikke bekreftet. Magnoras køplass ved Sauda TRA er et annet prosjekt.",
     kilder: [
       {
         source_name: "DataCenterMap: Terakraft Sauda I, Hellandsbygd",
@@ -6243,6 +6252,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet med postnummer som krav.",
       },
@@ -6681,6 +6691,141 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
+    title: "Bifrost Edge Arendal, Longum nord",
+    description:
+      "Planlagt datasenter fra Bifrost Edge AS på de private arealene på Longum nord i Eyde " +
+      "Material Park, nordøst for Arendal sentrum. Ifølge kommunens oppstartsreferat (februar " +
+      "2026) har Bifrost avtale om å kjøpe arealene på Longum nord unntatt den kommunale tomta, " +
+      "som er solgt til Bulk. En reguleringsendring som åpner for datasenter er på høring til " +
+      "19.10.2026. Bifrost står i Statnetts kø med 285 MW.",
+    municipality: "Arendal",
+    city: "Arendal",
+    latitude: 58.5124,
+    longitude: 8.78654,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "Et av de største datasenterprosjektene i kø på Sørlandet, på naboarealet til Bulk Arendal " +
+      "i samme plan.",
+    notes:
+      "Opprettet i runde 5 (2026-09-30). Grunneier er Otra Holding AS, som er forslagsstiller for " +
+      "planendringen (planID 42032022-10). Kjøpsavtalen er dokumentert i kommunens referat, men " +
+      "ikke i grunnbok. 285 MW er køplass (sak 25/02293), ikke sikret kraft. Koordinaten er " +
+      "omtrentlig, sentroiden av teig 26/2; felt KBA3 er ikke stedfestet. Ikke samme anlegg som " +
+      "Bulk Arendal (teig 25/121) eller Bifrost Edge Vinje.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Arendal kommune: Referat oppstartsmøte – planendring Eyde Material Park Longum Nord (06.02.2026)",
+        source_url: "https://karttjenester.ikt-agder.no/planinnsyn_arendal/api/plandocument?documentId=57959",
+        publisher: "Arendal kommune",
+        source_type: "regulation",
+        source_date: "2026-02-06",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kommunen skriver at Bifrost har kjøpt Otra Holding og eier alt på Longum nord unntatt den " +
+          "kommunale tomta RA1. Forslagsstiller skriver at Bifrost Edge AS har avtale om å erverve " +
+          "arealene, og at Bifrost vil betale anleggsbidrag for kraft fra Bøylefoss.",
+      },
+      {
+        source_name: "Varsel om oppstart av planarbeid – Eyde Material Park Longum Nord (05.03.2026)",
+        source_url: "https://karttjenester.ikt-agder.no/planinnsyn_arendal/api/plandocument?documentId=57957",
+        publisher: "Dagfin Skaar AS for Otra Holding AS (kommunens planinnsyn)",
+        source_type: "regulation",
+        source_date: "2026-03-05",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varselet om endring av planID 42032022-10 kommer fra Otra Holding AS. RA1 omreguleres til " +
+          "KBA5, og datasenter åpnes som underformål i KBA3 og KBA5.",
+      },
+      {
+        source_name: "Planbeskrivelse Eyde Material Park – Longum Nord, rev. 11.08.2026",
+        source_url: "https://karttjenester.ikt-agder.no/planinnsyn_arendal/api/plandocument?documentId=59226",
+        publisher: "Dagfin Skaar AS for Otra Holding AS (kommunens planinnsyn)",
+        source_type: "regulation",
+        source_date: "2026-08-11",
+        primary_source: true,
+        excerpt_or_summary:
+          "Grunneiertabell: 25/1 og 26/2 tilhører Ola Olsbu/Otra Holding AS, 22/1 Are Venemyr og " +
+          "510/6 Arendal kommune. RA1 (161,7 daa) blir KBA5. Datasenter tillates i KBA3 og KBA5, og " +
+          "KBA3 kan bygges ut tidlig sammen med transformatorstasjonen i I/L1.",
+      },
+      {
+        source_name: "Arendal kommune: Saksprotokoll KPU 27.08.2026 sak 26/68 – forslag til endringer",
+        source_url: "https://karttjenester.ikt-agder.no/planinnsyn_arendal/api/plandocument?documentId=59227",
+        publisher: "Arendal kommune",
+        source_type: "regulation",
+        source_date: "2026-08-27",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kommuneplanutvalget la endringsforslaget ut på høring enstemmig (sak 25/35750). Forslaget " +
+          "er fremmet for Otra Holding og åpner for datasenter i to felt. Protokollen viser til " +
+          "bystyrevedtak 26.02.2026 som er positivt til datasenter, med forbud mot kryptoutvinning.",
+      },
+      {
+        source_name: "Reguleringsbestemmelser Eyde Material Park – Longum Nord (datert 11.08.2026)",
+        source_url: "https://karttjenester.ikt-agder.no/planinnsyn_arendal/api/plandocument?documentId=59228",
+        publisher: "Arendal kommune",
+        source_type: "regulation",
+        source_date: "2026-08-11",
+        primary_source: true,
+        excerpt_or_summary:
+          "KBA3 og KBA5 tillater datasenter med tekniske anlegg, men ikke kryptoutvinning. Minste " +
+          "tomt er 10 daa. KBA2 kan tas i bruk hvis en aktør trenger mer areal enn KBA3.",
+      },
+      {
+        source_name: "Statnett – kapasitetskø forbruk (Power BI)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/#kapasitetsko",
+        publisher: "Statnett SF",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak 25/02293 (ELB672): Arendal TRA, Glitre Nett AS, sluttkunde Bifrost Edge AS, " +
+          "datasenter, moden bestilling 08.03.2026, ønsket tilknytning 30.06.2027, 285 MW i kø. " +
+          "Køplass, ikke reservasjon. Lest via GitHub-speilet.",
+      },
+      {
+        source_name: "Enhetsregisteret: Bifrost Edge AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/935435005",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "935435005, stiftet 09.04.2025 i Kinn, formål datasentervirksomhet. Daglig leder er Sindre " +
+          "Kvalheim og styreleder Tom Einar Jensen. Bekrefter selskapet, ikke anlegget.",
+      },
+      {
+        source_name: "Enhetsregisteret: Otra Holding AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/911767899",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "911767899, Kristiansand, eiendomsutvikling. Styreleder er Lars Gunnar Andersen. Styret " +
+          "viser ingen Bifrost-personer, så et oppkjøp er ikke synlig i registeret.",
+      },
+      {
+        source_name: "Kartverket eiendom: 4203-26/2",
+        source_url: "https://ws.geonorge.no/eiendom/v1/geokoding?kommunenummer=4203&gardsnummer=26&bruksnummer=2&utkoordsys=4258&omrade=true",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Teiggeometrien for 26/2 (Longum Øvre) i Arendal, hovedteig lokalid 233582993, er brukt til " +
+          "det omtrentlige punktet. Bekrefter eiendommen, ikke anlegget eller KBA3.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
     title: "Bulk Ausenfjell, Frogner",
     description:
       "Planlagt datasenter i Bulks næringsområde Ausenfjellet II ved Frogner i Lillestrøm. " +
@@ -6896,9 +7041,9 @@ export const FUNN: Funn[] = [
     notes:
       "Kvalitetsrunde 2026-09-30: koordinaten er flyttet fra Husnes sentrum til et punkt i " +
       "næringsparken. Arcems egen tomt er ikke stedfestet. 40 MW er ikke ført som sikret kraft, " +
-      "fordi prosjektet står i kø hos Statnett. 60 000 m² tomt er ikke bekreftet i primærkilde. " +
-      "Runde 4: Statnett-sluttkunden ved Husnes TRA er ARCEM GO-DC2 AS (917510784), trolig " +
-      "prosjektselskapet; ikke strukturert som eier ennå.",
+      "fordi prosjektet står i kø hos Statnett (sak 25/02545). Runde 5: prosjektselskapet er ARCEM " +
+      "GO-DC2 AS (917510784, tidligere Bonum Prosjekt 9 AS / NXT AI AS), heleid av Arcem AS. Alias: " +
+      "Arcem GO-DC2.",
     kilder: [
       {
         source_name: "DataCenterMap: Arcem Husnes, Grøn Næringspark",
@@ -7093,9 +7238,11 @@ export const FUNN: Funn[] = [
       "Herøya er Norges største industripark, med kraft og infrastruktur fra før.",
     notes:
       "Runde 4 (2026-09-30): byggetillatelse gitt, men byggestart er ikke dokumentert, så status er " +
-      "fortsatt planlagt. I byggesaken pekte HIP på kraftmangel og festevilkår, og Yara krevde " +
-      "brann- og eksplosjonsvurderinger. Planlagt tilknytning for Statnett-reservasjonen er " +
-      "30.12.2028. DataCenterMap fører anlegget under markedet «Skien», men det ligger i Porsgrunn.",
+      "fortsatt planlagt. Planlagt tilknytning for Statnett-reservasjonen er 30.12.2028. Runde 5: " +
+      "bygget er det tidligere REC Wafer-bygget, eid av Siva Herøya AS, som fester tomta av HIP. " +
+      "Leadet om et CBRE-initiativ i tidligere REC-bygg gjelder dette anlegget: CBRE er " +
+      "driftsleverandør for Polar, ikke egen prosjektpart. DataCenterMap fører anlegget under " +
+      "markedet «Skien», men det ligger i Porsgrunn.",
     kilder: [
       {
         source_name: "DataCenterMap: PolarDC HER01, Herøya",
