@@ -1403,7 +1403,7 @@ export const FUNN: Funn[] = [
     address: "Nesveien 19",
     postal_code: "1344",
     city: "Haslum",
-    verification_status: "unverified",
+    verification_status: "archived",
     operational_status: "unknown",
     sensitivity: "internal_only",
     confidence: "low",
@@ -1412,8 +1412,13 @@ export const FUNN: Funn[] = [
       "Hvis det faktisk finnes et registrert datasenter i Bærum, er det verdt å vite hvor. " +
       "Registreringsplikten gjelder anlegg over 0,5 MW, så det er ikke en serverskap i en kjeller.",
     notes:
-      "Bevisst uten koordinat: adressen ligger i et boligstrøk, og et anlegg på over 0,5 MW er lite " +
-      "sannsynlig der. Selskapsadresse skal ikke settes som anleggslokasjon.",
+      "Bevisst uten koordinat: adressen ligger i et boligstrøk, og et anlegg på over 0,5 MW er " +
+      "lite sannsynlig der. Selskapsadresse skal ikke settes som anleggslokasjon. Runde 8 " +
+      "(2026-10-01): arkivert. AKVATECHNIC AS (936306225) er stiftet i 2025 for design og " +
+      "prototyping av oppdrettsteknologi, har ingen ansatte, og eneste underenhet er en " +
+      "boligadresse. Nkom-oppføringen er en selskapsregistrering; registreringsplikten for " +
+      "kommersielle operatører har ingen MW-terskel, så den sier ingenting om anlegg eller " +
+      "størrelse. Ingen kilde bekrefter et datasenter.",
     kilder: [
       {
         source_name: "PeeringDB og DataCenterMap, søk på Bærum",
@@ -1444,6 +1449,7 @@ export const FUNN: Funn[] = [
         publisher: "Brønnøysundregistrene",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Beliggenhetsadresse Nesveien 19, 1344 Haslum, Bærum. " +
           "Registrert hos Nkom som kommersiell datasenteroperatør. Adressen er den eneste i Bærum i " +
@@ -3630,7 +3636,11 @@ export const FUNN: Funn[] = [
       "Runde 5 (2026-09-30): status satt til ukjent. Rent a Rack AS (993903558) ble omdøpt til " +
       "Serverbite AS i 2022 og har nå adresse på Stord. rentarack.no viser i dag Nexthop AS, som " +
       "selger plass i DigiPlex Ulven (Vaultica OSL01) – et annet anlegg ca. 230 m unna. Webhuset " +
-      "oppgir fortsatt å eie datasentre i Oslo, uten adresse. Nedleggelse er ikke dokumentert.",
+      "oppgir fortsatt å eie datasentre i Oslo, uten adresse. Nedleggelse er ikke dokumentert. " +
+      "Runde 8 (2026-10-01): uavklart. Anlegget er bare bekreftet historisk (Webhusets " +
+      "pressemelding 2012). PeeringDB-oppføringen er fortsatt aktiv og ble oppdatert i 2025, men " +
+      "ingen underenhet er registrert på Ulvenveien 87, og ingen av selskapene står i Nkoms " +
+      "register. Serverbite AS er tidligere Rent a Rack AS.",
     kilder: [
       {
         source_name: "PeeringDB: nettverk til stede i fasiliteten",
@@ -3982,26 +3992,32 @@ export const FUNN: Funn[] = [
   {
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
-    item_type: "finding",
-    title: "Nordavind DC Sites: tolv anlegg i Innlandet",
+    item_type: "note",
+    tidligere_titler: [
+      "Markedsbildet: hvem har flest fysiske anlegg i Norge",
+      "Nordavind DC Sites: tolv anlegg i Innlandet",
+    ],
+    title: "Nordavind Energy Sites: tomteportefølje for datasentre i Innlandet",
     description:
-      "Den operatøren i Norge med flest registrerte fasiliteter: tolv anlegg, alle i Innlandet og " +
-      "Trøndelag-randen. Kommunene er løst fra postnummer: Alvdal, Elverum (to anlegg), Hamar " +
-      "(Heggvin), Grue (Kirkenær), Vågå (Lalm), Østre Toten (Krabyskogen), Ringsaker (Rudshøgda), " +
-      "Sør-Odal (Slomarka og Tronbøl), Tynset (Tylldalen) og Rendalen (Åkrestrømmen). " +
-      "Til sammenligning har Green Mountain fem, GlobalConnect fem, Vaultica fire og Bulk to.",
-    municipality: null,
+      "Nordavind Energy Sites AS (tidl. Nordavind DC Sites AS) er et kommunalt eid " +
+      "tilretteleggingsselskap som markedsfører en portefølje av byggeklare datasentertomter i " +
+      "Innlandet og Trøndelag-randen, blant annet i Alvdal, Elverum, Hamar (Heggvin), Grue, Vågå " +
+      "(Lalm), Østre Toten, Ringsaker (Rudshøgda), Sør-Odal, Tynset og Rendalen. Selskapet driver " +
+      "ingen anlegg; PeeringDB-oppføringene er tomter, ikke datasentre.",
     verification_status: "verified_public_source",
-    operational_status: "active",
+    operational_status: "unknown",
     sensitivity: "internal_only",
     confidence: "medium",
     interest_level: "medium",
     notes:
-      "Ett funn for hele nettverket, ikke tolv: adressene i PeeringDB er stedsnavn uten husnummer, " +
-      "så ingen av dem lar seg geokode presist. Kommunene er sikre (fra postnummer), koordinatene " +
-      "er det ikke. Effekt og areal er ikke oppgitt for noen av anleggene. Dekker samtidig " +
-      "DataCenterMap-markedene Elverum, Harpefoss og Bismo, som ikke lot seg åpne.",
-    tidligere_titler: ["Markedsbildet: hvem har flest fysiske anlegg i Norge"],
+      "Ett funn for hele nettverket, ikke tolv: adressene i PeeringDB er stedsnavn uten " +
+      "husnummer, så ingen av dem lar seg geokode presist. Kommunene er sikre (fra postnummer), " +
+      "koordinatene er det ikke. Effekt og areal er ikke oppgitt for noen av anleggene. Dekker " +
+      "samtidig DataCenterMap-markedene Elverum, Harpefoss og Bismo, som ikke lot seg åpne. Runde " +
+      "8 (2026-10-01): gjort om fra funn til notat og tatt ut av anleggslisten – tomteportefølje, " +
+      "ikke tolv datasentre. Heggvin er Green Mountain OSL2-Hamar. Tomter med datasenteraktør " +
+      "(Grundsetmoen i Elverum – Green Mountain 2022; Lalm i Vågå – Krefter/Ugna; Rudshøgda – " +
+      "opsjon til Eidsiva) er leads til runde 9.",
     kilder: [
       {
         source_name:
@@ -4423,7 +4439,6 @@ export const FUNN: Funn[] = [
       "Fire av de ni Nkom-operatørene med kryptoutvinning er fortsatt ikke stedfestet: Bluebite " +
       "(Fauske), Currency Edge (Kvænangen), Arctic Flux (Horten) og Nordic Blocks (Søndre Land). " +
       "Bluefjords er løst — anlegget ligger i Jostedalsvegen 530 i Gaupne.",
-    municipality: null,
     verification_status: "investigated_not_confirmed",
     operational_status: "unknown",
     sensitivity: "internal_only",
@@ -4768,6 +4783,152 @@ export const FUNN: Funn[] = [
         primary_source: true,
         excerpt_or_summary:
           "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "STACK Årbogen datasenter, Treklyngen vest",
+    description:
+      "Planlagt datasenter på Årbogen/Treklyngen vest nord for Hønefoss, der STACK Infrastructure " +
+      "er forslagsstiller for detaljregulering 518. Planområdet var ca. 316 daa ved oppstart i " +
+      "desember 2024 og er utvidet to ganger i 2026. Planprogrammet ble fastsatt i april 2025; " +
+      "planforslaget er ennå ikke på høring. STACK kjøpte tomt i Treklyngen i 2021.",
+    municipality: "Ringerike",
+    city: "Hønefoss",
+    latitude: 60.1985,
+    longitude: 10.25617,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et stort, KU-pliktig datasenterprosjekt i Kilemoen/Follum-klyngen, der flere aktører til " +
+      "sammen har flere hundre MW reservert eller i kø ved Ringerike transformatorstasjon.",
+    notes:
+      "Opprettet i runde 8 (2026-10-01) fra Ringerike TRA-gjennomgangen. Anlegget er bekreftet av " +
+      "Ringerike kommunes plansak 518 «Årbogen datasenter». Koordinaten er midtpunktet av teigene " +
+      "87/588–590 i plansakens tittel (Kartverket), ikke et byggepunkt. Statnett har 100 MW " +
+      "reservert (24/01774) til «Stack AS», men det finnes ikke noe slikt STACK-selskap i " +
+      "Brønnøysund, så tallet er ikke ført som sikret kraft. Prosjektselskap og hjemmelshaver er " +
+      "ikke dokumentert; SI OSL 06 AS (c/o STACK) er en mulig kandidat. Eget anlegg, ikke hscale " +
+      "OSL1 eller Green Mountain Kilemoen (ca. 1,3 km unna).",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Ringerike kommune: plan 518 Årbogen datasenter – innspill ved varsel om oppstart",
+        source_url: "https://www.ringerike.kommune.no/globalassets/bilder-blokker-og-filarkiv/bilder-og-dokumenter/samfunn/areal-og-byplan/pagaende-planprosesser/518-arbogen-datasenter_innspill-ved-varsel-om-oppstart.pdf",
+        publisher: "Ringerike kommune",
+        source_type: "regulation",
+        source_date: "2025-02-05",
+        primary_source: true,
+        excerpt_or_summary:
+          "Innspill til oppstart av detaljregulering (varslet 11.12.2024, frist 05.02.2025). " +
+          "Bekrefter at Stack Infrastructure AS er forslagsstiller og COWI plankonsulent, et " +
+          "planområde på ca. 316 daa på begge sider av E16, KU-plikt (over 15 000 m² BRA) og " +
+          "datasenter som hovedformål.",
+      },
+      {
+        source_name: "eInnsyn: Vedtak om fastsatt planprogram – 518 Årbogen datasenter",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01jsy9cmjdfz5bsdhqtkg5phma",
+        publisher: "eInnsyn",
+        source_type: "register",
+        source_date: "2025-04-28",
+        primary_source: true,
+        excerpt_or_summary:
+          "Journalpost som viser at planprogrammet for plan 518 ble fastsatt i april 2025.",
+      },
+      {
+        source_name: "eInnsyn: Varsel om oppstart – utvidelse av planområde, Årbogen datasenter",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01kgjr5nejefdtthd4fg843vs3",
+        publisher: "eInnsyn (NVE)",
+        source_type: "register",
+        source_date: "2026-01-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Første varsel om utvidet planområde for plan 518 (januar 2026).",
+      },
+      {
+        source_name: "eInnsyn: Varsel om utvidet planområde – Årbogen datasenter, gnr. 87 bnr. 588, 589 mfl.",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01m0dx25z2ecrrbd62c2ww73j8",
+        publisher: "eInnsyn (NVE)",
+        source_type: "register",
+        source_date: "2026-08-11",
+        primary_source: true,
+        excerpt_or_summary:
+          "Andre varsel om utvidet planområde (august 2026). Bekrefter gnr 87/588, 589 m.fl. og at " +
+          "plansaken er aktiv. Innspill ble journalført fram til 17.09.2026.",
+      },
+      {
+        source_name: "STACK: STACK acquires land for data center outside of Oslo",
+        source_url: "https://www.stackinfra.com/about/news-press/press-releases/stack-acquires-land-for-data-center-outside-of-oslo/",
+        publisher: "STACK Infrastructure",
+        source_type: "web",
+        source_date: "2021-01-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "STACK kjøpte 60 000 m² med opsjon på 100 000 m² til i Treklyngen industripark (Ringerike) " +
+          "av Follum Eiendom. Pressemeldingen viser til en kraftavtale med Ringerikskraft og har " +
+          "ingen byggestartdato.",
+      },
+      {
+        source_name: "Statnett: statistikk om tilknytningssaker (reservasjoner forbruk)",
+        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak 24/01774 (ELB1057): Ringerike TRA, Glitre Nett, sluttkunde «Stack AS», Datasenter, 100 " +
+          "MW reservert 20.03.2025, planlagt 30.12.2027.",
+      },
+      {
+        source_name: "Kartverket eiendom-API: gnr 87/588–590 Ringerike",
+        source_url: "https://ws.geonorge.no/eiendom/v1/geokoding?kommunenummer=3305&gardsnummer=87&bruksnummer=588&omrade=true&utkoordsys=4258",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-01",
+        primary_source: true,
+        excerpt_or_summary:
+          "Teigpunkter og utstrekning for 87/588, 87/589 og 87/590 i Ringerike. Bekrefter " +
+          "beliggenhet, men ikke at det står et anlegg der.",
+      },
+      {
+        source_name: "Brønnøysundregistrene: STACK AS (928103765)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/928103765",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-01",
+        primary_source: true,
+        excerpt_or_summary:
+          "STACK AS er et byggefirma i Bergen (stiftet 2021, næring oppføring av bygninger) og er " +
+          "ikke en STACK Infrastructure-enhet. Statnetts «Stack AS» kan derfor ikke kobles til denne " +
+          "enheten.",
+      },
+      {
+        source_name: "Brønnøysundregistrene: STACK INFRASTRUCTURE NORWAY OPCO AS (932597187)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/932597187",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-01",
+        primary_source: true,
+        excerpt_or_summary:
+          "Norsk STACK-driftsselskap, tidligere STACK Infrastructure Norway AS (nytt navn " +
+          "14.09.2026), Ulvenveien 82E i Oslo, 45 ansatte. Bekrefter bare selskapet.",
+      },
+      {
+        source_name: "Brønnøysundregistrene: SI OSL 06 AS (926807617)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/926807617",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-01",
+        primary_source: true,
+        excerpt_or_summary:
+          "Datasenterselskap c/o STACK med navnet DIGIPLEX BUSKERUD AS fra 2021 til 2022. Det er " +
+          "mulig, men ikke dokumentert, at det er prosjektselskap for Ringerike.",
       },
     ],
   },
@@ -5188,6 +5349,121 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
+    title: "GreenBox-datasenter ved Wiig Gartneri, Orre",
+    description:
+      "Planlagt lite datasenter på rundt 1 500 m² ved Wiig Gartneri på Orre i Klepp, med ca. 4 MW " +
+      "i første fase. Overskuddsvarmen skal brukes i veksthusene. Utbygger er Green Horizon AS " +
+      "(GreenBox). Klepp kommune ga dispensasjon og rammetillatelse i november 2023; byggestart " +
+      "eller drift er ikke dokumentert.",
+    municipality: "Klepp",
+    postal_code: "4343",
+    city: "Orre",
+    latitude: 58.71912,
+    longitude: 5.54218,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Et datasenter i jordbruksområde ved et av landets største gartnerier, med varmegjenbruk. " +
+      "Kommunen ga dispensasjon mot skepsis fra Statsforvalteren og fylkeskommunen.",
+    notes:
+      "Opprettet i runde 8 (2026-10-01) fra leadet «GreenBox Orre / Wiig Gartneri». Alias: Green " +
+      "Horizon Odin (katalog). Anlegget er bekreftet av Statsforvalterens dispensasjonssak " +
+      "2023/8656 (Klepp 39/59, «datalagringssenter tilknyttet Wiig Gartneri») med Klepp kommunes " +
+      "vedtak 17.11.2023. Koordinaten er Kartverkets punkt for teig 39/59 (tomt). Vikvegen 147 er " +
+      "gartneriets adresse og er ikke brukt. En rammetillatelse faller bort etter tre år hvis " +
+      "arbeidet ikke er satt i gang, altså rundt november 2026. Eget anlegg, ikke Vidar, Heimdal " +
+      "eller Norway 1 (Kviamarka, ca. 10 km unna).",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "eInnsyn: Statsforvaltaren i Rogaland sak 2023/8656 – Dispensasjon Klepp 39/59 Vikvegen 147, datalagringssenter tilknyttet Wiig Gartneri",
+        source_url: "https://api.einnsyn.no/saksmappe/sm_01j76hpedbepfrs5yttjmm36bx",
+        publisher: "Statsforvaltaren i Rogaland (via eInnsyn)",
+        source_type: "regulation",
+        source_date: "2023-11-17",
+        primary_source: true,
+        excerpt_or_summary:
+          "Saksmappe 2023/8656: dispensasjon for oppføring av datalagringssenter tilknyttet Wiig " +
+          "Gartneri, Klepp 39/59, Vikvegen 147. Høring juli–aug. 2023. Kopi av melding om vedtak fra " +
+          "Klepp kommune 2023-11-17. Bekrefter godkjent prosjekt og tomt, ikke at bygget er reist.",
+      },
+      {
+        source_name: "Kartverket eiendom-API: Klepp 39/59",
+        source_url: "https://api.kartverket.no/eiendom/v1/geokoding?kommunenummer=1120&gardsnummer=39&bruksnummer=59&omrade=false",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-01",
+        primary_source: true,
+        excerpt_or_summary:
+          "Matrikkelenhet 1120-39/59 har hovedteig med punkt 58.71912, 5.54218 og en mindre teig ved " +
+          "58.71867, 5.53496. Vikvegen 147 ligger på 39/16. Bekrefter eiendom og kommune (Klepp), " +
+          "ikke anlegget.",
+      },
+      {
+        source_name: "NTB Kommunikasjon: Et av landets største gartneri går sammen med nytt datasenterselskap",
+        source_url: "https://kommunikasjon.ntb.no/pressemelding/17973375/et-av-landets-storste-gartneri-gar-sammen-med-nytt-datasenterselskap-for-gjenbruk-av-energi-og-reduksjon-av-c02?publisherId=17848550&lang=no",
+        publisher: "Wiig Gartneri / Green Horizon",
+        source_type: "web",
+        source_date: "2023-06-12",
+        primary_source: true,
+        excerpt_or_summary:
+          "Pressemelding: Green Horizon planlegger å bygge et GreenBox-datasenter ved Wiig Gartneri " +
+          "på Orre. Overskuddsvarmen går til veksthuset, med et mål om å kutte 3 000 tonn CO2. " +
+          "Byggestart høsten 2023, ferdig høsten 2024. Ingen MW oppgitt.",
+      },
+      {
+        source_name: "Enhetsregisteret: Hå Datasenter Eiendom AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/935495504",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-01",
+        primary_source: true,
+        excerpt_or_summary:
+          "Org.nr 935495504, stiftet 2025-05-02 (tidl. NFH 250521 AS), eiendomsutvikling, Vikvegen " +
+          "147, 4343 Orre (Klepp). Bekrefter bare selskapet. Ingen kobling til Green Horizon eller " +
+          "til noe anlegg.",
+      },
+      {
+        source_name: "Enhetsregisteret: Wiig Gartneri AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/980414795",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-01",
+        primary_source: true,
+        excerpt_or_summary:
+          "Wiig Gartneri AS, org.nr 980414795, Vikvegen 147, Klepp. Bekrefter selskap og adresse, " +
+          "ikke datasenteret.",
+      },
+      {
+        source_name: "Green Horizon: Data Centers in Southwestern Norway",
+        source_url: "https://greenhorizon.no/data-centers/",
+        publisher: "Green Horizon AS",
+        source_type: "web",
+        source_date: "2026-10-01",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nettstedet (2026) viser Norway 1 36 MW, Norway 2 12 MW (4 MW i konseptdesign + 8 MW fra " +
+          "2028) og Norway 3 48 MW. Orre/Wiig nevnes ikke, og det er ingen adresser.",
+      },
+      {
+        source_name: "Green Horizon (greenbox.no): Data Centers",
+        source_url: "https://greenbox.no/data-centers/",
+        publisher: "Green Horizon AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Porteføljen viser DC1 4 MW Tier 3, tilgjengelig Q3 2026, uten sted. Den kan være " +
+          "Orre-anlegget, men det er ikke dokumentert. Siden er udatert.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
     title: "Green Mountain SVG1-Rennesøy",
     description:
       "Fjellanlegg ved fjorden på Rennesøy, Green Mountains eldste anlegg, markedsført som et av " +
@@ -5583,6 +5859,186 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
+    title: "Nscale Glomfjord",
+    description:
+      "AI- og GPU-datasenter i Glomfjord industripark, drevet av Nscale. Anlegget startet som " +
+      "Hydrokrafts kryptoutvinningssenter i 2021, ble kjøpt av Arkon Energy i 2022 og fikk " +
+      "Nscale-navn i 2023. Nscale oppgir 30 MW i drift og utvidelse til 60 MW. Bygge- og " +
+      "anleggsarbeid er meldt til Arbeidstilsynet fram til mars 2027.",
+    municipality: "Meløy",
+    address: "Sam Eydes vei 47",
+    postal_code: "8160",
+    city: "Glomfjord",
+    latitude: 66.81369,
+    longitude: 13.93316,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et av få AI-datasentre i drift i Nord-Norge, med 40 MW tilknyttet hos Statnett og en " +
+      "utvidelse under arbeid.",
+    notes:
+      "Opprettet i runde 8 (2026-10-01) etter spor fra Miljødirektoratets sak 2025/969. Aliaser: " +
+      "Hydrokraft Glomfjord, Arkon Energy Glomfjord. Anlegget er bekreftet av Nscales egen side " +
+      "og Statsforvalteren i Nordlands sak 2025/452 om datasenter i Glomfjord. Koordinaten er " +
+      "Kartverkets adressepunkt for Sam Eydes vei 47 (46/4, festenr. 10), som er både selskaps- " +
+      "og anleggsadresse. Den tidligere Norwegian Crystals-bygningen skal også tas i bruk, men er " +
+      "ikke stedfestet. Eget anlegg, ikke Nscale Fauske eller Narvik.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Glomfjord AI Data Centre",
+        source_url: "https://www.nscale.com/product/glomfjord",
+        publisher: "Nscale",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nscale beskriver AI-datasenteret i Glomfjord: 30 MW i drift, utvidbart til 60 MW, fornybar " +
+          "vannkraft, adiabatisk kjøling, overskuddsvarme til lokalt svømmebasseng.",
+      },
+      {
+        source_name: "Nscale and InfraPartners announce partnership to build 60MW AI data centre in Glomfjord, Norway",
+        source_url: "https://www.nscale.com/press-releases/nscale-and-infrapartners-announce-partnership-to-build-60mw-ai-data-centre-in-glomfjord-norway",
+        publisher: "Nscale",
+        source_type: "web",
+        source_date: "2025-03-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nscale og InfraPartners utvider eksisterende 30 MW-anlegg i Glomfjord industripark til 60 " +
+          "MW med prefabrikkerte, væskekjølte moduler. Mål: i drift Q2 2025.",
+      },
+      {
+        source_name: "Statnett – statistikk om tilknytningssaker (tilknyttet og reservert)",
+        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Svartisen KRA/TRA, Arva AS, sluttkunde «Nscale», Datasenter: tilknyttet 30 MW (21/00179, " +
+          "2022-06-26) og 10 MW (22/00665, 2025-01-29); reservert 30 MW (22/00665/ELB2208, " +
+          "2025-10-02, planlagt 2027-06-29).",
+      },
+      {
+        source_name: "Enhetsregisteret – Nscale Glomfjord AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/924469188",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Org.nr 924469188, Sam Eydes vei 47, Meløy. Formål datasentervirksomhet og utleie av fast " +
+          "eiendom. Tidligere navn: Hydrokraft Eiendom AS og Hydrokraft Glomfjord AS (til " +
+          "22.09.2023). Bekrefter selskapet, ikke anlegget.",
+      },
+      {
+        source_name: "Enhetsregisteret – Nscale Drift AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/828605062",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Org.nr 828605062, tidl. Hydrokraft Drift AS. Formål salg av datasentertjenester, 70 " +
+          "ansatte, underenhet avd. Glomfjord på Sam Eydes vei 47. Bekrefter selskapet, ikke " +
+          "anlegget.",
+      },
+      {
+        source_name: "Enhetsregisteret – Nscale AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/921760310",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Org.nr 921760310, tidl. Hydrokraft AS (2018–2023). Formål drift og service av datasenter, " +
+          "eiendomsutleie og krafthandel. Bekrefter selskapshistorikken, ikke anlegget.",
+      },
+      {
+        source_name: "Enhetsregisteret – Nscale Glomfjord II AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/937180217",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Org.nr 937180217, stiftet februar 2026 (tidl. NFH 260210 AS), Sam Eydes vei 47. Formål " +
+          "datavirksomhet og eiendomsutleie. Kobling til en konkret utbyggingsfase er ikke " +
+          "dokumentert.",
+      },
+      {
+        source_name: "Kartverket adressesøk – Sam Eydes vei 47, Meløy",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?sok=Sam%20Eydes%20vei%2047&kommunenummer=1837&utkoordsys=4258",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2023-03-01",
+        primary_source: true,
+        excerpt_or_summary:
+          "Adressepunkt 66,81369 N / 13,93316 Ø, gnr/bnr 46/4, festenr. 10, 8160 Glomfjord; " +
+          "stedfesting ikke verifisert. Bekrefter adressen, ikke anlegget.",
+      },
+      {
+        source_name: "Statsforvalteren i Nordland – sak 2025/452 Utslipp – Meløy – datasenter i Glomfjord – Nscale Glomfjord AS",
+        source_url: "https://api.einnsyn.no/saksmappe/sm_01jhszhfexfmm847kcvd1mcwrt",
+        publisher: "Statsforvalteren i Nordland (eInnsyn)",
+        source_type: "regulation",
+        source_date: "2025-01-15",
+        primary_source: true,
+        excerpt_or_summary:
+          "Forurensningssak for datasenteret: vurdering av søknadsplikt for utslipp av oppvarmet " +
+          "sjøvann fra kjøleanlegg (2025), vannforsyning fra Hydrodammen og vurdering av " +
+          "utslippstillatelse (juli 2026).",
+      },
+      {
+        source_name: "Miljødirektoratet – sak 2025/969 Vurdering av kvoteplikt – datasenter i Glomfjord",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01kkwhpdm8ep4a55exq57x89xk",
+        publisher: "Miljødirektoratet (eInnsyn)",
+        source_type: "regulation",
+        source_date: "2026-03-10",
+        primary_source: true,
+        excerpt_or_summary:
+          "Inngående dokument fra Nscale Drift AS i samlesaken «Vurdering av kvoteplikt for anlegg». " +
+          "Innholdet er skjermet; bekrefter bare at kvoteplikt for datasenteret i Glomfjord vurderes.",
+      },
+      {
+        source_name: "Arbeidstilsynet – forhåndsmelding bygge-/anleggsarbeid Sam Eydes vei 47",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01m21ks5hkefx9shc9kxvhp2cf",
+        publisher: "Arbeidstilsynet (eInnsyn)",
+        source_type: "regulation",
+        source_date: "2026-09-03",
+        primary_source: true,
+        excerpt_or_summary:
+          "Forhåndsmelding fra Nscale Glomfjord AS om bygge-/anleggsarbeid på Sam Eydes vei 47 for " +
+          "03.09.2026–01.03.2027 (tidligere melding for 24.03–08.10.2026). Viser pågående " +
+          "byggearbeid.",
+      },
+      {
+        source_name: "DSB – nytt høyspenningsanlegg Nscale Glomfjord AS",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01kcj4ky64efmrk48xmsgd31p2",
+        publisher: "DSB (eInnsyn)",
+        source_type: "regulation",
+        source_date: "2025-11-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Melding fra Nscale Glomfjord AS om nytt høyspenningsanlegg (DSB-sak 2025/13115). Tidligere " +
+          "overtok Hydrokraft Glomfjord AS driftsansvar for høyspenningsanlegg i 2023.",
+      },
+      {
+        source_name: "Energiklagenemnda – klage over vedtak om brudd på tilknytningsplikten og nøytralitetskravene (Yara Norge)",
+        source_url: "https://www.klagenemndssekretariatet.no/energiklagenemnda/energiklagenemnda-har-behandlet-klage-over-vedtak-om-brudd-pa-tilknytningsplikten-og-kravene-til-noytral-og-ikke-diskriminerende-opptreden-etter-nem-forskriften",
+        publisher: "Klagenemndssekretariatet",
+        source_type: "regulation",
+        source_date: "2024-07-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Hydrokraft Glomfjord (nå Nscale Glomfjord AS) klaget på at Yara som områdekonsesjonær " +
+          "tildelte nettkapasitet til ACDC Glomfjord (15 MW) og Intrahouse (30 MW) i strid med køen. " +
+          "Nemnda opprettholdt i hovedsak RMEs vedtak.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
     title: "Kitebrook Børdalen",
     description:
       "Planlagt datasentercampus i Børdalen i Samnanger, utviklet av Kitebrook gjennom " +
@@ -5842,7 +6298,8 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
-    title: "Arcem Bergen, Haukeland",
+    tidligere_titler: ["Arcem Bergen, Haukeland"],
+    title: "Arcem Bergen, Langedalen",
     description:
       "Planlagt datasenter i Langedalen ved Arna transformatorstasjon i søndre Arna, utviklet av " +
       "Arcem gjennom Arcem Langedalen AS. Arcem søker inntil 130 MW nettkapasitet, men ingenting er " +
@@ -5864,7 +6321,10 @@ export const FUNN: Funn[] = [
     notes:
       "Kvalitetsrunde 2026-09-30: koordinaten er omtrentlig, satt ved Arna transformatorstasjon " +
       "fordi tomta ikke er stedfestet i noen kilde. Tittelen «Haukeland» er beholdt for " +
-      "gjenkjenning; prosjektet omtales som Langedalen/Arnatippen. 130 MW er søkt, ikke tildelt.",
+      "gjenkjenning; prosjektet omtales som Langedalen/Arnatippen. 130 MW er søkt, ikke tildelt. " +
+      "Runde 8 (2026-10-01): tittel endret fra «Arcem Bergen, Haukeland» til «Arcem Bergen, " +
+      "Langedalen». Prosjektselskapet heter ARCEM LANGEDALEN AS (tidl. ARCEM DC 12 AS), og " +
+      "planinitiativet gjelder Langedalen/Arnatippen i søndre Arna.",
     kilder: [
       {
         source_name: "DataCenterMap: Arcem Bergen, Haukeland",
@@ -5904,14 +6364,17 @@ export const FUNN: Funn[] = [
     verification_status: "partially_verified",
     operational_status: "active",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "high",
     interest_level: "low",
     why_interesting: "Den største regionale colocation-aktøren i Trøndelag.",
     notes:
       "Primærkilde-runde 2026-09-30: tittelen er rettet fra «NDC1, NDC2 og NDC4» fordi ITsjefens " +
       "egen side lister NDC2, NDC3 og NDC4. NDC1 (Havnegata 9) er ikke nevnt, men heller ikke " +
       "bekreftet nedlagt; Havnegata 9 er forretningsadressen. Adressene per anlegg er ikke " +
-      "primærbekreftet. Koordinaten er Brattørkaia 17B.",
+      "primærbekreftet. Koordinaten er Brattørkaia 17B. Runde 8 (2026-10-01): ITsjefens egen side " +
+      "bekrefter NDC4 i Tungavegen 30 med 2 MW kapasitet på over 600 m². Posten dekker tre bygg, " +
+      "så MW er ikke satt. Anbefalt splitt i en senere runde: NDC2 (Brattørkaia 17B) og NDC4 " +
+      "(Tungavegen 30); NDC3 har ingen offentlig adresse.",
     kilder: [
       {
         source_name: "DataCenterMap: ITsjefen NDC1, NDC2 og NDC4, Trondheim",
@@ -6230,7 +6693,11 @@ export const FUNN: Funn[] = [
       "Moss, Plan 501. Anlegget er bekreftet av Moss kommunes kunngjøring av Plan 501. " +
       "Koordinaten er Kartverkets adressepunkt for Larkollveien 4 (gnr 167/100): tomt og " +
       "eksisterende bygg, ikke et prosjektert datasenterbygg. Arcem er utvikler og er ikke satt " +
-      "som eier eller operatør. Ingen operatør eller kunde er kjent.",
+      "som eier eller operatør. Ingen operatør eller kunde er kjent. Runde 8 (2026-10-01): " +
+      "Storespeed markedsførte tidligere «DC 5/DC 6» ved Moss/Rygge, og en sekundær katalog " +
+      "(datacenterHawk, ikke verifisert) knytter Storespeed-anlegget «Crow» til Larkollveien 4. " +
+      "Storespeed er verken part i Plan 501 eller i Statnett-reservasjonen 24/01770, så det er " +
+      "ikke slått sammen. Byggfaktas «Storespeed datacenter, Østfold» er beholdt som lead.",
     public_candidate: false,
     kilder: [
       {
