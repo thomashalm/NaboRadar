@@ -4622,6 +4622,118 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
+    title: "Eidsiva Digital Rudshøgda",
+    description:
+      "Planlagt datasenter på en tomt på 50 mål sør i Rudshøgda næringsområde i Ringsaker. " +
+      "Eidsiva Digital (tidligere Eidsiva Bredbånd) fikk opsjon på tomta i 2023 og inngikk " +
+      "kjøpsavtale med Ringsaker kommune i oktober 2025. Anlegget skal bli selskapets andre " +
+      "datasenter etter Gjøvik. Byggestart er ikke fastsatt.",
+    municipality: "Ringsaker",
+    postal_code: "2360",
+    city: "Rudshøgda",
+    latitude: 60.90498,
+    longitude: 10.82409,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "En offentlig eid datasenteraktør med uttalt mål om nasjonalt, offentlig eierskap for " +
+      "samfunnskritiske data.",
+    notes:
+      "Opprettet i runde 9 (2026-10-02) fra Nordavind-notatet. Anlegget er bekreftet av Eidsivas " +
+      "egen kunngjøring 13.10.2025. Koordinaten er Nordavinds kartpunkt for «Rudshøgda sør» og er " +
+      "omtrentlig; gnr/bnr er ikke kjent. Statnett-reservasjonen på 10 MW ved Vang TRA (24/01619) " +
+      "står på Eidsiva Bredbånd AS uten stedsangivelse; den gjelder trolig Rudshøgda, men er ikke " +
+      "ført som sikret kraft. Eidsiva sier selv at det ikke bygges før kundene er på plass.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Eidsiva: Eidsiva planlegger nytt datasenter",
+        source_url: "https://www.eidsiva.no/artikler/eidsiva-digital-planlegger-nytt-datasenter/",
+        publisher: "Eidsiva",
+        source_type: "web",
+        source_date: "2025-10-13",
+        primary_source: true,
+        excerpt_or_summary:
+          "Eidsiva Digital har inngått avtale med Ringsaker kommune om kjøp av 50 mål på Rudshøgda " +
+          "for sitt andre datasenter. Bygges i takt med etterspørsel; ingen effekt eller dato. " +
+          "Bekrefter prosjekt og tomtekjøp.",
+      },
+      {
+        source_name: "Nordavind – Rudshøgda sør (tomteside)",
+        source_url: "https://sites.nordavind.com/dcsites/rudshogda-sor/",
+        publisher: "Nordavind Energy Sites AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Rudshøgda næringsområde, 60°54'17.91\"N 10°49'26.73\"E, 50 000 m², 66 kV, 9 MW kort sikt / " +
+          "40 MW 18–60 mnd, regulert industri, eid av Ringsaker kommune, opsjonsavtale. Bekrefter " +
+          "tomt, ikke anlegg.",
+      },
+      {
+        source_name: "Statnett – liste over reservasjoner (forbruk), 30.09.2026",
+        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak 24/01619 (ELB100): Vang TRA, kunde Elvia AS, sluttkunde Eidsiva Bredbånd AS, " +
+          "datasenter, 10 MW reservert 22.01.2026, planlagt tilknytning 30.12.2035. Stedsnavn ikke " +
+          "oppgitt. Køliste: Eidsiva Bredbånd Gjøvik 4 MW, Vardal TRA (25/01992).",
+      },
+      {
+        source_name: "Enhetsregisteret: EIDSIVA DIGITAL AS (880258222)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/880258222",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Vormstuguvegen 40, Lillehammer; bredbåndsvirksomhet, 177 ansatte; avdelinger i " +
+          "Lillehammer, Gjøvik og Oslo. Bekrefter selskapet, ikke anlegg på Rudshøgda.",
+      },
+      {
+        source_name: "Kartverket: punktsøk ved Nordavinds Rudshøgda-koordinat",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok?lat=60.90498&lon=10.82409&radius=800&koordsys=4258",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nærmeste adresse Kinnlimarka 28 (gnr 222/19), 2360 Rudshøgda, Ringsaker. Bekrefter " +
+          "adresseområde/kommune, ikke tomtegrense eller anlegg.",
+      },
+      {
+        source_name: "Eidsiva: Datasenter (produktside)",
+        source_url: "https://www.eidsiva.no/bedrift/produkter-og-tjenester/datasenter/",
+        publisher: "Eidsiva",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Eidsiva tilbyr colocation-datasentertjenester med døgnbemannet SOC og 100 % nasjonalt, " +
+          "offentlig eierskap. Oppgir ikke lokasjoner eller effekt.",
+      },
+      {
+        source_name: "Eidsiva: Eidsiva kjøper datasenter på Gjøvik",
+        source_url: "https://www.eidsiva.no/artikler/eidsiva-kjoper-etablert-datasenter/",
+        publisher: "Eidsiva",
+        source_type: "web",
+        source_date: "2024-01-15",
+        primary_source: true,
+        excerpt_or_summary:
+          "Eidsiva (Eidsiva Energi AS, datterselskap Eidsiva Bredbånd) kjøper etablert 6 MW " +
+          "datasenter i Gjøvik og ser på muligheter for flere datasentre. Brukt her for " +
+          "konsernforhold.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
     title: "Arcem Elverum, Sperre-tomta",
     description:
       "Planlagt datasenter på den tidligere Sperre Støperi-tomta i Industrigata 22 på Vestad i " +
@@ -4723,6 +4835,118 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
+    title: "Ugna Lalm (tidl. Krefter), Kolbotn industriområde",
+    description:
+      "Datasenterprosjekt på Kolbotn industriområde på Lalm, startet av Krefter AS i 2021–2022 og " +
+      "videreført av Ugna-gruppen. Et bygg med containere og trafoer ble satt opp i 2022, men " +
+      "anlegget har aldri fått strøm og har ikke vært i drift. Statnett reserverte 10 MW ved " +
+      "Vågåmo til Ugna Properties AS i september 2026. Lokalpressen skrev i 2025 at " +
+      "datasenterplanene var lagt på is.",
+    municipality: "Vågå",
+    postal_code: "2682",
+    city: "Lalm",
+    latitude: 61.80933,
+    longitude: 9.29978,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "medium",
+    why_interesting:
+      "Et omstridt prosjekt med stoppordre i 2022 og mistanke om kryptoutvinning. En fersk " +
+      "Statnett-reservasjon kan bety at prosjektet tas opp igjen.",
+    notes:
+      "Opprettet i runde 9 (2026-10-02) fra Nordavind-notatet. Koordinaten er Nordavinds " +
+      "kartpunkt for tomta (ved Kvennbergvegen) og er ikke bekreftet som selve bygget. Status er " +
+      "usikker: bygget står, men uten strøm og drift, og en ny reguleringsplan for «grønn " +
+      "industri» er sendt inn. Statnett-reservasjonen på 10 MW (22/00654) står på Ugna Properties " +
+      "AS, men navngir ikke Lalm, og selskapet har hatt forespørsler flere steder i Vågå og Sel; " +
+      "den er derfor ikke ført som sikret kraft. Type er ukjent: selskapet sier datalagring, mens " +
+      "kommunen og NRK beskriver kryptocontainere. Ikke samme prosjekt som Kitebrook Børdalen.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Statnett – liste over reservasjoner (forbruk), 30.09.2026",
+        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak 22/00654 (ELB3954): Vågåmo TRA, kunde Fjellnett AS, sluttkunde Ugna Properties AS, " +
+          "datasenter, 10 MW reservert 07.09.2026, uten planlagt tilknytningsdato. Bekrefter " +
+          "kraftreservasjon til prosjektselskapet.",
+      },
+      {
+        source_name: "Nordavind – Lalm (tomteside)",
+        source_url: "https://sites.nordavind.com/dcsites/lalm/",
+        publisher: "Nordavind Energy Sites AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kolbotn industriområde, Vågå, 61°48'33.6\"N 9°17'59.2\"E, 1 927 + 10 350 m², 66 kV, " +
+          "10/25/100 MW på kort/mellomlang/lang sikt. Tomta er solgt. Bekrefter tomt og salg, ikke " +
+          "drift.",
+      },
+      {
+        source_name: "Enhetsregisteret: UGNA PROPERTIES AS (927511983)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/927511983",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 06.07.2021, Dronning Eufemias gate 20 Oslo; formål investering i teknologi, KI og " +
+          "datalagring. Bekrefter selskapet, ikke anlegget.",
+      },
+      {
+        source_name: "Enhetsregisteret: UGNA AS (931571559)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/931571559",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Holdingselskap stiftet 22.05.2023, samme adresse i Oslo. Bekrefter selskapet.",
+      },
+      {
+        source_name: "Enhetsregisteret: KREFTER SOLUTIONS AS (928128105)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/928128105",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Datterselskap med adresse Kvennbergvegen 27, 2682 Lalm; elektriske anlegg, bygg og fiber. " +
+          "Bekrefter selskap og adresse på industriområdet, ikke datasenter.",
+      },
+      {
+        source_name: "Kartverket: punktsøk ved Nordavinds Lalm-koordinat",
+        source_url: "https://ws.geonorge.no/adresser/v1/punktsok?lat=61.80933&lon=9.29978&radius=400&koordsys=4258",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nærmeste adresser er Kvennbergvegen 31 (gnr 1/51, ca. 60 m) og 27 (gnr 1/52, ca. 170 m), " +
+          "2682 Lalm, Vågå. Bekrefter adresse/kommune, ikke anlegg.",
+      },
+      {
+        source_name: "Historien om Nordavind",
+        source_url: "https://nordavind.com/historien-om-nordavind/",
+        publisher: "Nordavind Energy Sites AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tomta på Kolbotn industriområde på Lalm ble solgt til Krefter/Grand Technik for etablering " +
+          "av et 10 MW datasenter.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
     tidligere_titler: [
       "AQ Compute / hscale OSL1, Hønefoss",
       "Odin Green DC — registrert datasenteroperatør med c/o-adresse i Asker",
@@ -4748,10 +4972,14 @@ export const FUNN: Funn[] = [
       "Et av de større anleggene i Oslos randsone, på et tidligere industriområde.",
     notes:
       "Runde 2 (2026-09-30): nytt navn etter at AQ Compute ble hscale. Eier er Odin Green DC AS, " +
-      "som har som eneste formål å utvikle, eie og drive dette datasenteret. Selskapet lå tidligere " +
-      "som et eget lead fra Nkom-registeret med c/o-adresse i Asker; det er slått sammen hit og " +
-      "arkivert (dedup 2026-09-30). TikTok Norway AS og Bulk i Statnetts kø ved Ringerike er ikke " +
-      "dette anlegget.",
+      "som har som eneste formål å utvikle, eie og drive dette datasenteret. Selskapet lå " +
+      "tidligere som et eget lead fra Nkom-registeret med c/o-adresse i Asker; det er slått " +
+      "sammen hit og arkivert (dedup 2026-09-30). TikTok Norway AS og Bulk i Statnetts kø ved " +
+      "Ringerike er ikke dette anlegget. Runde 9 (2026-10-02): Nscale Drift AS har en avdeling " +
+      "(underenhet, 17 ansatte, fra mars 2025) registrert på Follummoveien 94, som er hscale " +
+      "OSL1s adresse og teig (51/55). Nscale fører selv «Oslo» som partnerdrevet datasenter i " +
+      "drift. Det er en driftsavdeling i dette anlegget, ikke et eget anlegg. Ingen kilde navngir " +
+      "hscale som vert eller oppgir MW, så Nscale er ikke ført som kunde.",
     kilder: [
       {
         source_name: "Nkom: Odin Green DC AS registrert som datasenteroperatør",
@@ -5885,7 +6113,12 @@ export const FUNN: Funn[] = [
       "og Statsforvalteren i Nordlands sak 2025/452 om datasenter i Glomfjord. Koordinaten er " +
       "Kartverkets adressepunkt for Sam Eydes vei 47 (46/4, festenr. 10), som er både selskaps- " +
       "og anleggsadresse. Den tidligere Norwegian Crystals-bygningen skal også tas i bruk, men er " +
-      "ikke stedfestet. Eget anlegg, ikke Nscale Fauske eller Narvik.",
+      "ikke stedfestet. Eget anlegg, ikke Nscale Fauske eller Narvik. Runde 9 (2026-10-02): " +
+      "rettelse – i Yaras kø var det Intrahouse Data Centers AS som fikk 15 MW (tildelt på " +
+      "vilkår) og ACDC Glomfjord AS som hadde 30 MW (bare betinget reservert); runde 8 hadde " +
+      "byttet om tallene. Intrahouse/ACDC gjaldt et eget bygg (Likeretterbygget) og er ikke del " +
+      "av dette anlegget. Begge selskapene ble tvangsoppløst 09.06.2026, bygget er ikke " +
+      "stedfestet, og de er beholdt som lead og avvist, ikke opprettet som egne punkter.",
     public_candidate: false,
     kilder: [
       {
@@ -6030,8 +6263,8 @@ export const FUNN: Funn[] = [
         primary_source: true,
         excerpt_or_summary:
           "Hydrokraft Glomfjord (nå Nscale Glomfjord AS) klaget på at Yara som områdekonsesjonær " +
-          "tildelte nettkapasitet til ACDC Glomfjord (15 MW) og Intrahouse (30 MW) i strid med køen. " +
-          "Nemnda opprettholdt i hovedsak RMEs vedtak.",
+          "tildelte 15 MW på vilkår til Intrahouse Data Centers og reserverte 30 MW til ACDC " +
+          "Glomfjord i strid med køen. Nemnda opprettholdt i hovedsak RMEs vedtak.",
       },
     ],
   },
@@ -6253,6 +6486,150 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
+    title: "ASP K11, Kanalvegen 11 (Forus)",
+    description:
+      "Colocation-datasenter på Forus, eid og drevet av Forus Industry Arena AS i Asp Data " +
+      "Center-gruppen. Anlegget hadde 5 MW i drift ved utgangen av 2025 og er utsolgt. Nscale " +
+      "Drift AS kjøper datasentertjenester her. En ny avtale på 6 MW har levering i tredje " +
+      "kvartal 2027.",
+    municipality: "Sola",
+    address: "Kanalvegen 11",
+    postal_code: "4033",
+    city: "Stavanger",
+    latitude: 58.89775,
+    longitude: 5.68636,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Nscales GPU-kapasitet i Stavanger-regionen står i et leid anlegg midt i Forus " +
+      "næringsområde, og anlegget utvides.",
+    notes:
+      "Opprettet i runde 9 (2026-10-02) fra leadet «Nscale Drift, avdeling Sola». Aliaser: Asp " +
+      "K11, Forus Industry Arena, Nscale Stavanger. Anlegget er bekreftet av Asp Data Centers " +
+      "prospekt (09.07.2025) og kvartalsrapport. Postadressen er 4033 Stavanger, men bygget " +
+      "ligger i Sola kommune (gnr 35 bnr 360). Koordinaten er Kartverkets adressepunkt. Statnett " +
+      "har 3 + 8 MW reservert til ASP Eiendom AS og 8 MW i kø for ASP Data Center AS ved Bærheim " +
+      "TRA; gruppen har to anlegg i området (K11 og M12), så tallene er ikke ført som sikret " +
+      "kraft. Eget anlegg, ikke ASP Dalekvam.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Asp Data Center AS: Base Prospectus 09.07.2025",
+        source_url: "https://cdn.prod.website-files.com/662f5637963f1693e3306556/686e32e3d5523d438b00de8f_Base%20Prospectus%2009072025%20-%20Asp%20Data%20Center%20AS%20-%20Final%20with%20Annexes.pdf",
+        publisher: "Asp Data Center AS",
+        source_type: "document",
+        source_date: "2025-07-09",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bekrefter anlegget: Forus Industry Arena AS eier og driver datasenter på 5 MW (utsolgt) på " +
+          "Kanalvegen 11. Risikoavsnitt 1.1.11 bekrefter avtale der Nscale Drift AS kjøper " +
+          "datasentertjenester fra Forus Industry Arena AS.",
+      },
+      {
+        source_name: "Asp Data Center: Q4 2025 financial statements and review",
+        source_url: "https://live.euronext.com/sites/default/files/company_press_releases/attachments_oslo/2026/02/28/667191_ASP%20Data%20Center%202025%20fourth%20quarter%20financial%20statements%20and%20review.pdf",
+        publisher: "Asp Data Center AS (Euronext Oslo)",
+        source_type: "document",
+        source_date: "2026-02-28",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bekrefter at K11-utvidelsen ble fullført og driftsklar i Q4 2025, med 5 MW installert og " +
+          "kontraktsfestet IT-last. Gruppen består av Forus Industry Arena AS og Midtgårdveien 12 AS, " +
+          "eid av Asp Eiendom AS.",
+      },
+      {
+        source_name: "Asp Data Center: signs 6 MW agreement at K11",
+        source_url: "https://www.aspdatacenter.no/news/asp-data-center-signs-6-mw-agreement-at-k11",
+        publisher: "Asp Data Center AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Ny avtale om 6 MW IT-kapasitet ved K11 med et ikke navngitt internasjonalt selskap, " +
+          "levering Q3 2027. Ordrereserve nær NOK 2 mrd.",
+      },
+      {
+        source_name: "Asp Data Center – nettside",
+        source_url: "https://www.aspdatacenter.no/",
+        publisher: "Asp Data Center AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "K11 og M12 står som «in operation – fully occupied»; utviklingsprosjekter i Dale, Suldal " +
+          "og Pori.",
+      },
+      {
+        source_name: "Brønnøysundregistrene: Nscale Drift AS avd Stavanger (underenhet 935214238)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/underenheter/935214238",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2025-03-15",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bekrefter Nscale-avdeling med 6 ansatte på Kanalvegen 11 (Sola) fra 13.03.2025. Bekrefter " +
+          "ikke anlegget i seg selv.",
+      },
+      {
+        source_name: "Brønnøysundregistrene: Forus Industry Arena AS (985557098)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/985557098",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bekrefter selskapet: formål investering i datasentervirksomhet, c/o Asp DC AS. Bekrefter " +
+          "ikke anlegget.",
+      },
+      {
+        source_name: "Brønnøysundregistrene: Asp Data Center AS (931764225)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/931764225",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bekrefter morselskapet (stiftet 2023, formål investering i datasentervirksomhet).",
+      },
+      {
+        source_name: "Kartverket adresse-API: Kanalvegen 11, Sola",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?sok=Kanalvegen%2011&kommunenummer=1124",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bekrefter adressepunktet (58.89775, 5.68636), Sola kommune, gnr/bnr 35/360. Bekrefter ikke " +
+          "anlegget.",
+      },
+      {
+        source_name: "Nscale: AI Infrastructure (datasenteroversikt)",
+        source_url: "https://www.nscale.com/ai-infrastructure",
+        publisher: "Nscale",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nscale fører «Stavanger, Norway» som partnerdrevet datasenter i drift for AI-trening og " +
+          "inferens, uten adresse eller MW.",
+      },
+      {
+        source_name: "Statnett – statistikk om tilknytningssaker (Bærheim TRA)",
+        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Reservert 3 MW (24/01501) og 8 MW (24/01721) til ASP Eiendom AS og 8 MW i kø (24/01798) " +
+          "for ASP Data Center AS ved Bærheim TRA via Lnett. Konsernnivå, ikke koblet til K11.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
     title: "Datafjellet, Bønes",
     description:
       "Datasenter i fjellhall på Bønes i Bergen, med private, spesialbygde datarom. Datafjellet AS er " +
@@ -6350,11 +6727,15 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
-    tidligere_titler: ["ITsjefen NDC1, NDC2 og NDC4, Trondheim"],
-    title: "ITsjefen NDC2, NDC3 og NDC4, Trondheim",
+    tidligere_titler: [
+      "ITsjefen NDC1, NDC2 og NDC4, Trondheim",
+      "ITsjefen NDC2, NDC3 og NDC4, Trondheim",
+    ],
+    title: "ITsjefen NDC2, Brattørkaia 17B",
     description:
-      "Tre datasentre i Trondheim drevet av ITsjefen AS (del av ECIT), som operatøren selv kaller " +
-      "NDC2, NDC3 og NDC4. Tre separate bygg, én operatør. Nkom-registrert.",
+      "Colocation-datasenter drevet av ITsjefen AS (del av ECIT) i kontorbygget Brattørkaia 17B " +
+      "på Brattøra i Trondheim. Operatøren oppgir drift siden 2008. Anlegget har primærkjøling i " +
+      "lukket krets mot Trondheimsfjorden. Effekt og areal er ikke oppgitt.",
     municipality: "Trondheim",
     address: "Brattørkaia 17B",
     postal_code: "7010",
@@ -6366,7 +6747,9 @@ export const FUNN: Funn[] = [
     sensitivity: "internal_only",
     confidence: "high",
     interest_level: "low",
-    why_interesting: "Den største regionale colocation-aktøren i Trøndelag.",
+    why_interesting:
+      "Ett av tre aktive datasentre hos den største regionale colocation-aktøren i Trøndelag, " +
+      "sjøvannskjølt og midt i Trondheim sentrum.",
     notes:
       "Primærkilde-runde 2026-09-30: tittelen er rettet fra «NDC1, NDC2 og NDC4» fordi ITsjefens " +
       "egen side lister NDC2, NDC3 og NDC4. NDC1 (Havnegata 9) er ikke nevnt, men heller ikke " +
@@ -6374,7 +6757,13 @@ export const FUNN: Funn[] = [
       "primærbekreftet. Koordinaten er Brattørkaia 17B. Runde 8 (2026-10-01): ITsjefens egen side " +
       "bekrefter NDC4 i Tungavegen 30 med 2 MW kapasitet på over 600 m². Posten dekker tre bygg, " +
       "så MW er ikke satt. Anbefalt splitt i en senere runde: NDC2 (Brattørkaia 17B) og NDC4 " +
-      "(Tungavegen 30); NDC3 har ingen offentlig adresse.",
+      "(Tungavegen 30); NDC3 har ingen offentlig adresse. Runde 9 (2026-10-02): samleposten er " +
+      "splittet. Denne posten er nå NDC2 (Brattørkaia 17B); NDC4 i Tungavegen 30 er eget anlegg. " +
+      "NDC står for «nethome datacenter», ITsjefens eget produktnavn. Operatøren skriver selv " +
+      "«Brattørkaia 17»; bokstaven B kommer fra PeeringDB og DataCenterMap. NDC3 er et eget, " +
+      "EMP-sikret anlegg uten offentlig adresse (ifølge operatøren over 5 km fra NDC1/NDC2) og er " +
+      "beholdt som lead uten punkt. NDC1 i Pirsenteret (Havnegata 9, åpnet 2006) er borte fra " +
+      "operatørens sider etter 2019; nedleggelse er ikke dokumentert, og det er beholdt som lead.",
     kilder: [
       {
         source_name: "DataCenterMap: ITsjefen NDC1, NDC2 og NDC4, Trondheim",
@@ -6394,6 +6783,148 @@ export const FUNN: Funn[] = [
         primary_source: true,
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "ITsjefen NDC4, Tungavegen 30",
+    description:
+      "Colocation-datasenter drevet av ITsjefen AS (del av ECIT) i 2. underetasje i næringsbygget " +
+      "Tungavegen 30 på Tunga i Trondheim. Det er operatørens største anlegg, med over 600 m² og " +
+      "oppgitt kapasitet på 2 MW. Anlegget ble tatt i bruk i 2016.",
+    municipality: "Trondheim",
+    address: "Tungavegen 30",
+    postal_code: "7047",
+    city: "Trondheim",
+    latitude: 63.42597,
+    longitude: 10.46837,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "low",
+    why_interesting:
+      "Det største datasenteret til den største regionale colocation-aktøren i Trøndelag, og det " +
+      "eneste av ITsjefens anlegg med offentlig oppgitt effekt.",
+    notes:
+      "Splittet ut fra samleposten «ITsjefen NDC2, NDC3 og NDC4, Trondheim» i runde 9 " +
+      "(2026-10-02). Eget bygg ca. 3,7 km øst for NDC2 på Brattørkaia. Anlegget er bekreftet av " +
+      "ITsjefens egen side for NDC4. Åpningsåret 2016 er utledet av arkiverte operatørsider. " +
+      "Operatøren skriver Tungaveien 30; offisiell adresse er Tungavegen 30 (gnr 15 bnr 19). " +
+      "Bygget eies av Tunga Næringsbygg AS. NDC3 (uten offentlig adresse) er ikke dokumentert å " +
+      "ligge her.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "ITsjefen (arkiv 2016): NDC4 – nyeste og største datasenter",
+        source_url: "https://web.archive.org/web/20160927013910/http://www.itsjefen.no:80/datasenter-i-trondheim/datasenter-4-ndc4",
+        publisher: "ITsjefen AS (via Internet Archive)",
+        source_type: "web",
+        source_date: "2016-09-27",
+        primary_source: true,
+        excerpt_or_summary:
+          "September 2016: NDC4 omtalt som «vårt nyeste og største datasenter», Tungaveien 30, 2. " +
+          "underetasje, ca. 450 m², to eksterne trafostasjoner eid av TrønderEnergi Nett. I januar " +
+          "2016 var NDC3 fortsatt «det nyeste».",
+      },
+      {
+        source_name: "ITsjefen (arkiv 2019): NDC4 – 600 m² datasenter",
+        source_url: "https://web.archive.org/web/20190820014657/https://itsjefen.no/index.php/datasenter-ndc4",
+        publisher: "ITsjefen AS (via Internet Archive)",
+        source_type: "web",
+        source_date: "2019-08-20",
+        primary_source: true,
+        excerpt_or_summary:
+          "August 2019: NDC4 omtalt som 600 m² datasenter i Tungaveien 30, sertifisert TIA-942-A og " +
+          "EN50600 i 2016. Viser utvidelse fra ca. 450 m² (2016) til 600 m².",
+      },
+      {
+        source_name: "Koteng Eiendom: Tungavegen 30",
+        source_url: "https://koteng.no/eiendommer/tungavegen-30/",
+        publisher: "Koteng Eiendom AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Forvalterens side: Tungavegen 30 eies av Tunga Næringsbygg AS (931 154 141), kontorbygg " +
+          "fra 1983 på 6 572 m², ny fasade 2022. Leietakerlisten nevner ikke ITsjefen eller " +
+          "datasenter.",
+      },
+      {
+        source_name: "Brønnøysund: TUNGA NÆRINGSBYGG AS (931154141)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/931154141",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "TUNGA NÆRINGSBYGG AS, stiftet 2023-03-17, næringskode 68.200 utleie av egen fast eiendom, " +
+          "forretningsadresse Travbanevegen 2, Trondheim. Bekrefter selskapet, ikke anlegget.",
+      },
+      {
+        source_name: "ITsjefen: Datasenter",
+        source_url: "https://itsjefen.no/datasenter/",
+        publisher: "ITsjefen AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Operatørens oversikt: tre datasentre i Trondheimsregionen, NDC4 er 600 m², flomsikkert med " +
+          "kundesoner.",
+      },
+      {
+        source_name: "Brønnøysund: ITSJEFEN AS (828105442)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/828105442",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "ITSJEFEN AS, org.nr 828105442, aktiv, forretningsadresse Havnegata 9, Trondheim. Bekrefter " +
+          "selskapet, ikke anlegget.",
+      },
+      {
+        source_name: "ECIT: ITsjefen AS",
+        source_url: "https://www.ecit.com/no/kontorer/itsjefen-as/",
+        publisher: "ECIT",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "ITsjefen er en del av ECIT. Nevner ikke enkeltdatasentre.",
+      },
+      {
+        source_name: "Nkom, registrerte kommersielle datasenteroperatører",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "ITSJEFEN AS registrert som kommersiell datasenteroperatør. Registeret oppgir ikke " +
+          "anleggsadresser.",
+      },
+      {
+        source_name: "ITsjefen: NDC4",
+        source_url: "https://itsjefen.no/datasenter/ndc4/",
+        publisher: "ITsjefen AS",
+        source_type: "web",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "NDC4: Tungaveien 30, 2. underetasje, 50 moh, utenfor flom-/rasområder. 600+ m², «2MW " +
+          "kapasitet», Tier III/TIA-942A/ISO27001. Ytre/indre sone og kundesoner, " +
+          "Telenor/Telia/GlobalConnect og TRDIX.",
+      },
+      {
+        source_name: "Kartverket: Tungavegen 30, Trondheim",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?sok=Tungavegen%2030&kommunenummer=5001",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tungavegen 30, 7047 Trondheim, gnr 15 bnr 19, punkt 63.42597, 10.46837. Bekrefter " +
+          "adressen, ikke anlegget.",
       },
     ],
   },

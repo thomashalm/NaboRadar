@@ -2494,6 +2494,16 @@ Datakvalitetsrunden 2026-09-30 fjernet tre tall på denne regelen: Googles 840 M
 Husnes' 40 MW (kø hos Statnett) og Fauskes 13 MW (bare presse). Narvik ble rettet fra 230 til 130
 MW i en egen korreksjon samme dag.
 
+**En avdeling i Brønnøysund er ikke et anlegg.** En underenhet viser hvor et selskap har ansatte,
+ikke at det eier eller driver et datasenter der. I runde 9 lå Nscale Drifts avdeling på Hønefoss
+på adressen til hscale OSL1 (samme anlegg, ikke nytt), og avdelingen på Sola lå i ASP K11, som
+ble opprettet med Asp som eier og Nscale som kunde.
+
+**En samlepost splittes bare når byggene er dokumentert adskilt.** ITsjefens NDC2 (Brattørkaia
+17B) og NDC4 (Tungavegen 30) er to bygg med hver sin adresse og ble to anlegg; samleposten ble
+NDC2 og beholdt historikken, med gammel tittel som alias. NDC3 har ingen offentlig adresse og er
+et lead uten punkt. Tre produktnavn i samme bygg er ikke grunn til å splitte.
+
 **En post i Statnetts lister er et lead, ikke et anlegg.** Statnetts reservasjons- og kølister er
 den beste discovery-kilden vi har for store datasenterprosjekter, men et navn i køen er ikke et
 prosjekt. Et nytt funn opprettes først når prosjektet er offentlig bekreftet (kommunevedtak,
