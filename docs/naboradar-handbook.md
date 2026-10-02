@@ -8,7 +8,11 @@ koden, er koden fasit, og dokumentasjonen skal rettes.
 er source of truth for dataprioritering: hvilke kategorier som er hygiene og hvilke som er moat,
 hva som er vurdert og forkastet, og beslutningsregelen nye datakategorier måles mot.
 
-Sist kryssjekket mot repoet: **2026-09-25**.
+**Hvordan data lagres, synkes og publiseres — og hvordan modellen skal tåle millioner av romlige
+objekter — står i [dataarkitekturen](data-architecture.md).** Les den før et nytt datasett tas inn.
+
+Sist kryssjekket mot repoet: **2026-09-25**. Databasekapitlene (6, 7, 12, 27) ble oppdatert
+2026-10-02 etter gjennomgangen av dataarkitekturen.
 
 > ## Vedlikehold av dokumentet
 >
@@ -42,7 +46,8 @@ Sist kryssjekket mot repoet: **2026-09-25**.
 [33. Milepæler](#33-milepæler) · [34. Synlighet og indeksering](#34-synlighet-og-indeksering) ·
 [35. Privat research](#35-privat-research) ·
 [36. Research lifecycle](#36-research-lifecycle-freshness-og-review-kø) ·
-[Data-roadmap (eget dokument)](data-roadmap.md)
+[37. Datasenter-enrichment](#37-datasenter-enrichment-og-refresh) ·
+[Data-roadmap (eget dokument)](data-roadmap.md) · [Dataarkitektur (eget dokument)](data-architecture.md)
 
 ---
 
@@ -218,12 +223,17 @@ hver kjøring, så en migrasjon som ikke kan spilles av på nytt, brekker testen
 | `providers` | Én rad per datakilde: status, lisens, synkeintervall, stale-grense, siste kjøring | Ja (seedes i migrasjon) |
 | `events` | Plansaker fra DiBK. Polygon/multipolygon, generert `centroid` og `computed_area_m2` | **Ja** — full sync fra DiBK |
 | `event_documents` | Tillatte plandokumenter. CHECK på type, tittel og mime-type | **Ja** |
-| `area_features` | Alle synkede områdefakta, ~37 000 rader. Inkluderer kategorien `skolekrets`, som er den eneste som besvarer «ligger punktet inne i?» og derfor står utenfor `AREA_SECTIONS` | **Ja** |
+| `area_features` | Alle synkede områdefakta, ~38 000 rader. Inkluderer kategorien `skolekrets`, som er den eneste som besvarer «ligger punktet inne i?» og derfor står utenfor `AREA_SECTIONS` | **Ja** |
+| `area_feature_categories` | Kategoriregisteret: domene, etikett og `is_public`. `area_features.category` er en fremmednøkkel hit. En kategori som ikke er publisert, returneres ikke av lese-RPC-ene | Ja (seedes i migrasjon) |
 | `sync_runs` | Én rad per kjøring: modus, tellere, advarsler, feil | Nei, men kun drifthistorikk |
 | `sync_requests` | Kø for «Kjør sync nå» fra `/admin` | Nei, men flyktig |
 | `admin_users` | E-poster som slipper inn på `/admin` | **UNIK — må sikres** |
 | `watched_areas` | Overvåkede områder per bruker. Tabellen finnes, funksjonen er ikke bygget (0 rader) | **UNIK når den tas i bruk** |
 | `notifications` | Varsler knyttet til `watched_areas`. Ikke i bruk (0 rader) | Samme |
+| `admin_research_*` | Researchbasen: funn, kilder, reviews, runder og datasenterdetaljer. Se [35](#35-privat-research)–[37](#37-datasenter-enrichment-og-refresh) | **UNIK — må sikres** |
+
+Full oversikt med radantall, indekser og risiko ved skala står i
+[dataarkitekturen](data-architecture.md#3-inventar).
 
 ### Geometri
 
@@ -249,7 +259,8 @@ kvikkleiresone har over 100 000 hjørner, og ville ellers sprengt svaret.
 | `is_admin`, `is_privileged`, `request_claims`, `request_role`, `request_email` | Interne hjelpefunksjoner |
 | `trigger_sync_workflow` | Scheduler. Kun `postgres` og `service_role` |
 
-Det finnes ingen views og ingen materialiserte views.
+Det finnes tre views, alle interne for admin-funksjonene (`admin_research_review_status`,
+`admin_datacenter_overview`, `admin_datacenter_refresh_status`), og ingen materialiserte views.
 
 ---
 
@@ -285,7 +296,7 @@ Tilgangen er en **positiv, uttømmende liste**, ikke en opprydding i enkelttilfe
 | Rolle | Kan kalle |
 |---|---|
 | `anon` | `features_near`, `features_count_near`, `events_within`, `get_event`, `data_status` |
-| `authenticated` | det samme, pluss `is_admin`, `provider_health`, `recent_sync_runs`, `request_sync`, `scheduler_status` |
+| `authenticated` | det samme, pluss `is_admin`, `provider_health`, `recent_sync_runs`, `recent_sync_requests`, `request_sync`, `scheduler_status` og research-, review- og datasenterfunksjonene — som alle sjekker `is_admin()` selv |
 | `service_role` | alt — sync-workeren |
 | `postgres` | alt — migrasjoner og pg_cron |
 
@@ -295,18 +306,31 @@ Alt annet er stengt. Spesielt:
 - `scheduler_status()` — admin-only i praksis: grantet til `authenticated`, men returnerer ingen
   rader med mindre `is_admin()` eller service_role
 - `is_privileged()`, `request_claims()`, `request_role()`, `request_email()` — lukket for begge
+- `datacenter_search_plan()`, `research_review_interval_for()` — `security definer` uten egen
+  tilgangssjekk, og derfor lukket for begge. De kalles bare fra andre funksjoner
+
+**Registrering er åpen i Supabase Auth.** `authenticated` betyr derfor «hvem som helst med en
+bekreftet e-post», ikke «admin». En `security definer`-funksjon som er kjørbar av
+`authenticated`, må sjekke `is_admin()` selv.
 
 ### Tabellrettigheter
 
-Appen går utelukkende gjennom RPC-er og rører ingen tabell direkte. `anon` og `authenticated` har
-derfor bare SELECT, og bare der en RLS-policy allerede slipper dem til. Ubrukt
-INSERT/UPDATE/DELETE/TRUNCATE er fjernet — RLS stoppet skrivingen fra før, men da var RLS eneste
-forsvarslinje i stedet for andre.
+Appen går utelukkende gjennom RPC-er og rører ingen tabell direkte. **`anon` har derfor ingen
+tabellrettigheter i det hele tatt**, og `authenticated` bare SELECT på admin-tabellene, bak
+`is_admin()`.
+
+Fram til 2026-10-02 hadde begge rollene SELECT på `providers`, `events`, `event_documents` og
+`area_features`. Appen brukte det ikke, men REST-API-et gjorde: hvem som helst med den
+publiserbare nøkkelen kunne lese hele tabellene side for side, uten grensene RPC-ene har på
+radius og antall — også `events.raw_data` og `providers.last_error`. Lukket i
+`20261018000000_public_read_surface.sql`: de fire lese-RPC-ene er nå `security definer` (fast
+`search_path`, harde grenser i kroppen), og tabellgrantene og «offentlig lesing»-policyene er
+fjernet.
 
 | Tabell | `anon` | `authenticated` |
 |---|---|---|
-| `providers`, `events`, `event_documents`, `area_features` | SELECT (policy `using (true)`) | SELECT |
-| `admin_users`, `sync_runs`, `sync_requests` | ingen | SELECT bak `is_admin()` |
+| `providers`, `events`, `event_documents`, `area_features`, `area_feature_categories` | ingen | ingen |
+| `admin_users`, `sync_runs`, `sync_requests`, `admin_research_*` | ingen | SELECT bak `is_admin()` |
 | `watched_areas` | ingen | eget innhold, `user_id = auth.uid()` |
 | `notifications` | ingen | via eierskap til `watched_areas` |
 
@@ -332,8 +356,10 @@ gjennom våre egne funksjoner, og der gjelder to regler:
 
 ### `db:verify` håndhever dette
 
-`npm run db:verify` sammenligner den faktiske tilgangsflaten mot listen over, leter etter `net.` i
-alle funksjonskropper i `public`, og **avslutter med exit 1 ved avvik**. Det er det som hindrer at
+`npm run db:verify` sammenligner den faktiske tilgangsflaten mot listen over — funksjoner **og
+tabeller** — sjekker at alle tabeller har RLS, leter etter `net.` i alle funksjonskropper i
+`public`, og **avslutter med exit 1 ved avvik**. Supabase gir ALL på hver nye tabell til `anon` og
+`authenticated` som standard, så en ny tabell uten eksplisitt `revoke` stopper kjøringen. Det er det som hindrer at
 neste funksjon åpner seg selv i det stille. Kjør den etter hver migrasjon som rører funksjoner.
 
 Statement timeout er `3s` for `anon` og `8s` for `authenticated` — Supabase-standarder vi er glade
@@ -679,7 +705,10 @@ Bare DiBK støtter inkrementell sync (`supports_incremental`). Inkrementell bruk
 `oppdateringsdato` med ett døgns overlapp, og må hente hele `arealplan`-gruppen for berørte planer —
 ellers mister vi polygoner.
 
-Områdefakta synkes alltid fullt. Intervallene ligger i `providers`-tabellen:
+Områdefakta synkes alltid fullt. **En full sync skriver i dag om hver rad, også de uendrede**
+(`synced_at` oppdateres, og kolonnen står i en indeks). Det er uproblematisk for dagens 38 000
+rader og må legges om før første datasett over 100 000 rader — se
+[dataarkitekturen](data-architecture.md#13-sync). Intervallene ligger i `providers`-tabellen:
 
 | Kilde | Synkeintervall | Full sync | Stale etter |
 |---|---|---|---|
@@ -1605,6 +1634,12 @@ Sett en kalenderpåminnelse to uker før 90-dagersfristen.
 | `admin_users` | **Nei — unikt** | Én rad i dag. Kan gjenopprettes manuelt |
 | Supabase Auth-brukere | **Nei — unikt** | Én bruker i dag. Kan opprettes på nytt |
 | `watched_areas`, `notifications` | **Nei — unikt når de tas i bruk** | Tomme i dag |
+| `admin_research_*` | **Nei — unikt, og det mest verdifulle i basen** | `scripts/research/funn.ts` gjenskaper funnene og primærkildene med `research:seed`, men ikke reviews, runder, datasenterdetaljer, roller, feltkilder eller sekundærkilder |
+
+**Researchbasen har ingen backup utenfor Supabase.** En jevnlig `pg_dump --data-only` av
+`admin_research_*` og `admin_users` til et annet sted er noen megabyte og er det eneste som ikke
+kan bygges opp igjen fra offentlige kilder. Se
+[dataarkitekturen](data-architecture.md#20-backup-og-gjenoppretting).
 
 **Full gjenoppretting fra tomt prosjekt** i dag: opprett Supabase-prosjekt → `npm run db:push` →
 opprett auth-bruker og rad i `admin_users` → `npm run sync:worker` → legg PAT i Vault → verifiser
@@ -1739,6 +1774,23 @@ cron-job.org; begge ville lagt til en leverandør for noe Supabase allerede kan.
 Det ville latt oss revokere `anon` fra lesefunksjonene og dekke hele flaten med Netlifys rate
 limiting. Prisen er en hemmelighet i web-runtime og at RLS omgås for all lesing. Vi valgte det bort
 fordi hullet det tetter allerede er avgrenset av harde SQL-tak og en 3-sekunders timeout.
+
+**Hvorfor offentlig lesing bare går gjennom RPC, og hvorfor kategorier har et publiseringsflagg**
+Før basen fylles med store og delvis lisensbelagte datasett, må «lagret» og «publisert» være to
+forskjellige ting. Med direkte tabelltilgang var de det ikke: en rad var offentlig i det
+øyeblikket synken skrev den. Nå er det eneste offentlige det lese-RPC-ene returnerer, og
+`features_near` returnerer bare kategorier med `is_public = true` i `area_feature_categories`.
+Et datasett kan dermed importeres, kontrolleres i admin og publiseres etterpå. Registeret
+erstatter også CHECK-listen på `area_features.category`, som måtte skrives om for hver ny
+kategori. Se [dataarkitekturen](data-architecture.md#17-offentlig-leseflate-og-sikkerhet).
+
+**Hvorfor bulk-geometri ikke skal i `area_features`**
+Tabellen er laget for steder med identitet: uuid, hash, generert midtpunkt og en sync som går
+rad for rad. Målt på 10 millioner syntetiske rader holder lesespørringene, men synken gjør det
+ikke — den skriver om hver uendret rad. Myr, stier og innsjøflater får egne tabeller per datasett,
+lastes som hele versjoner, og leveres til kartet som forhåndsgenererte fliser. Et datasett over
+100 000 rader er et bulk-lag til det motsatte er begrunnet. Se
+[dataarkitekturen](data-architecture.md#5-kanoniske-enheter-eller-bulk-lag).
 
 **Hvorfor direkte Supabase-RPC aksepteres midlertidig**
 Se over. Beslutningen bør revurderes hvis trafikken vokser, eller når Supabase Pro gir

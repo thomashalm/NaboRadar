@@ -6,7 +6,11 @@ import type { LineString, MultiLineString, MultiPolygon, Point, Polygon } from "
  * og ligger derfor i egen tabell med egen spørring.
  */
 
-/** Kategorien en rad lagres med i databasen. Endringer her krever migrasjon av area_features. */
+/**
+ * Kategoriene appen leser. Databasen har sitt eget register, `area_feature_categories`, og en
+ * kategori må stå der (og være publisert) før lese-RPC-ene returnerer den — se
+ * docs/data-architecture.md. En ny kategori legges inn begge steder.
+ */
 export const AREA_CATEGORIES = [
   "grunnforhold",
   "stoy",

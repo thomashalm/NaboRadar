@@ -298,6 +298,12 @@ For hver ny kategori avgjøres **først** hvilken av tre modeller den hører til
 | **Provider** | God nasjonal strukturert kilde med stabil identitet | synkes regelmessig, lever i `area_features` eller `events` |
 | **Research** | Ingen strukturert sannhet finnes. Krever websøk, planer, PDF-er, lokalaviser, operatørsider | lever i `admin_research_items` med kilder, confidence og review |
 | **Hybrid** | Strukturert discovery finnes, men sier ikke det brukeren trenger å vite | provider gir kandidater, research gir størrelse, status og verifisering |
+| **Bulk-lag** | Store nasjonale geodatasett der enkeltobjektene ikke har identitet noen bryr seg om: myr, stier, innsjøflater | egen tabell per datasett, lastet som hele versjoner; levert til kartet som forhåndsgenererte fliser. Aldri i `area_features`, aldri i review-køen |
+
+Et datasett med over 100 000 rader er et bulk-lag til det motsatte er begrunnet. Hvordan hver
+modell lagres, synkes og publiseres står i [dataarkitekturen](data-architecture.md); sjekklisten
+i [kapittel 22](data-architecture.md#22-sjekkliste-før-et-nytt-datasett) gjelder før et nytt
+datasett tas inn.
 
 **Ikke press research-problemer inn i provider-arkitekturen.** Et datasett som svarer på «hvem har
 tillatelse» er ikke et datasett som svarer på «hva ligger her og hvor stort er det». Forsøk på å
@@ -410,7 +416,41 @@ begrunnelsen — så slipper vi å vurdere samme idé på nytt om et halvår.
 
 ---
 
-## 12. Neste byggepakke
+## 12. Planlagt modul: «Friluftsliv der du bor»
+
+Besluttet som retning 02.10.2026. **Ingenting er importert eller bygget.** Fundamentet er
+gjennomgått først — se [dataarkitekturen](data-architecture.md).
+
+**Åpent punkt som må avgjøres før noe bygges:** «Lekeplasser, parker, turstier, badeplasser» står
+i [ikke verdt det nå](#ikke-verdt-det-nå), med begrunnelsen at vi ville vedlikeholdt et dårligere
+Google Maps. Modulen er en beslutning om at premisset er endret for friluftsliv. Hva vi tilfører
+utover kart og turapper, må skrives inn her — kategori for kategori, som hygiene eller moat — før
+første import. Til det er gjort, står begge deler i dokumentet, og det er med vilje.
+
+Arkitekturmodell per planlagt kategori:
+
+| Kategori | Modell | Merknad |
+|---|---|---|
+| DNT-hytter, andre åpne hytter og koier, Statskog-/fjellstyre-/kommunale hytter | Provider (sted) | Flere kilder for samme hytte er et dedup-problem; kanonisk kobling først når to kilder overlapper |
+| Badeplasser, gapahuker, rasteplasser, turmål | Provider (sted) | Punkt med kodede egenskaper |
+| Fiskevann og fiskearter | Provider (sted) + bulk-lag for flatene | Arter er en egenskap ved et navngitt vann; innsjøflaten er kartdata |
+| Besøksgårder, dyregårder, 4H-gårder, familieaktiviteter | Research eller hybrid | Ingen nasjonal kilde; åpningstid og status må verifiseres og reviewes |
+| Natur- og friluftssentre | Provider hvis kilden finnes, ellers research | |
+| Turstier | Bulk-lag | Segmenter har ikke identitet. Ruter er steder |
+| Myr (grunnlag for et senere «MulteRadar») | Bulk-lag | Et modellert lag bygges oppå, ikke i samme tabell |
+
+Forutsetninger som gjelder uansett hvilken kategori som kommer først:
+
+1. Kategorien registreres **upublisert** i `area_feature_categories` og publiseres etter kontroll.
+2. Kildekravene i [kapittel 8](#8-kildekrav), inkludert at ekstern ID er bevist stabil.
+3. Lisensen må tillate vår bruk — avklares per kilde, særlig for turdata.
+4. Databaseplanen oppgraderes før første datasett som ikke er noen tusen punkter. Basen er
+   132 MB av 500 MB på Supabase Free.
+5. Sync legges om før første datasett over 100 000 rader, og bulk-lag lastes ikke gjennom den.
+
+---
+
+## 13. Neste byggepakke
 
 I rekkefølge:
 

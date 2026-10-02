@@ -45,10 +45,10 @@ async function main() {
   const RESEARCH = ["research_items", "research_sources", "research_near", "save_research_item", "add_research_source", "delete_research_source", "research_runs", "research_map"];
   // Review-laget. record_research_review_unchecked står med vilje *ikke* her: den er kjernen som
   // bare eieren skal kunne kalle, og skal derfor ikke ha grant til authenticated heller.
-  const REVIEW = ["research_review_queue", "research_review_metrics", "research_reviews", "research_review_status", "research_review_interval", "research_review_interval_for", "record_research_review", "set_research_review_plan"];
+  const REVIEW = ["research_review_queue", "research_review_metrics", "research_reviews", "research_review_status", "research_review_interval", "record_research_review", "set_research_review_plan"];
   // Datasenter-enrichment. Egen kø og egne felt, samme regel som resten av research: aldri anon,
   // og is_admin() inne i hver funksjon er det som faktisk stenger.
-  const DATACENTER = ["datacenter_items", "datacenter_detail", "datacenter_search_plan", "datacenter_refresh_candidates", "datacenter_refresh_runs", "datacenter_refresh_queue", "start_datacenter_refresh", "cancel_datacenter_refresh", "record_datacenter_refresh_item", "save_datacenter_details", "save_datacenter_party", "delete_datacenter_party", "set_datacenter_field_source", "is_datacenter_item"];
+  const DATACENTER = ["datacenter_items", "datacenter_detail", "datacenter_refresh_candidates", "datacenter_refresh_runs", "datacenter_refresh_queue", "start_datacenter_refresh", "cancel_datacenter_refresh", "record_datacenter_refresh_item", "save_datacenter_details", "save_datacenter_party", "delete_datacenter_party", "set_datacenter_field_source", "is_datacenter_item"];
   // recent_sync_requests er historikken bak «Kjør sync nå» — admin-only, som provider_health.
   const AUTH_OK = new Set([
     ...ANON_OK,
@@ -104,6 +104,45 @@ async function main() {
     if (!f.sender && f.anon) avvik.push(`${f.proname} leser net.* og er kjørbar av anon`);
   }
   console.log(`net.*-brukere:  ${netBrukere.map((f) => `${f.proname}${f.sender ? " (sender)" : " (leser)"}`).join(", ") || "ingen"}`);
+
+  // Tabelltilgang. Offentlig lesing går bare gjennom RPC-ene (migrasjon 20261018000000):
+  // anon skal ikke ha ett eneste tabellprivilegium i public, og authenticated bare det som står
+  // her. Supabase gir ALL på hver nye tabell til begge rollene som standard, så en ny tabell
+  // — staging, rådata, research — åpner seg selv på REST-API-et hvis ingen sier noe annet.
+  const ADMIN_LES = [
+    "admin_users", "sync_runs", "sync_requests", "notifications",
+    "admin_research_items", "admin_research_sources", "admin_research_runs", "admin_research_reviews",
+    "admin_research_datacenter_details", "admin_research_datacenter_parties", "admin_research_datacenter_field_sources",
+    "admin_research_datacenter_refresh_runs", "admin_research_datacenter_refresh_items",
+  ];
+  const AUTH_TABELL: Record<string, string> = {
+    ...Object.fromEntries(ADMIN_LES.map((t) => [t, "SELECT"])),
+    watched_areas: "DELETE,INSERT,SELECT,UPDATE",
+  };
+  const tabellGrants = await q<{ relname: string; grantee: string; privs: string }>(
+    `select c.relname, r.rolname as grantee,
+            string_agg(p.priv, ',' order by p.priv) as privs
+     from pg_class c
+     join pg_namespace n on n.oid = c.relnamespace
+     cross join (values ('anon'), ('authenticated')) r(rolname)
+     cross join (values ('SELECT'), ('INSERT'), ('UPDATE'), ('DELETE'), ('TRUNCATE'), ('REFERENCES'), ('TRIGGER')) p(priv)
+     where n.nspname = 'public' and c.relkind in ('r', 'v', 'm', 'p')
+       and has_table_privilege(r.rolname, c.oid, p.priv)
+     group by 1, 2 order by 1, 2`,
+  );
+  for (const g of tabellGrants) {
+    const skal = g.grantee === "authenticated" ? AUTH_TABELL[g.relname] : undefined;
+    if (g.privs !== skal) avvik.push(`${g.relname}: ${g.grantee} har ${g.privs}, skal ha ${skal ?? "ingenting"}`);
+  }
+  for (const [tabell, privs] of Object.entries(AUTH_TABELL)) {
+    if (!tabellGrants.some((g) => g.relname === tabell && g.grantee === "authenticated")) {
+      avvik.push(`${tabell}: authenticated mangler ${privs}`);
+    }
+  }
+  console.log(`Tabelltilgang:  anon ${tabellGrants.filter((g) => g.grantee === "anon").length} tabeller, authenticated ${tabellGrants.filter((g) => g.grantee === "authenticated").length} tabeller`);
+
+  // Uten RLS er en tabell bare beskyttet av grants. Alle tabeller i public skal ha RLS på.
+  for (const t of tables) if (!t.rls) avvik.push(`${t.relname}: RLS er ikke slått på`);
 
   const [counts] = await q<{ events: string; active: string; removed: string; documents: string; runs: string }>(
     `select (select count(*) from events) events,
