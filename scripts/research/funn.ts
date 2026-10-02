@@ -3952,7 +3952,11 @@ export const FUNN: Funn[] = [
       "→ nedlagt, sikkerhet medium. Plan- og bygningsetatens saker 201311822, 201600777 og " +
       "201609720 bekrefter en datasentral i underetasjen, med Rent A Rack AS som tiltakshaver i " +
       "2016. Nedleggelsen er utledet av sakstittelen «Tiltak fjernet»; selve bekreftelsen ligger " +
-      "ikke i innsynet. Om bygget er revet er uavklart. Punktet beholdes som historisk.",
+      "ikke i innsynet. Om bygget er revet er uavklart. Punktet beholdes som historisk. Runde 13 " +
+      "(2026-10-02): Webhusets Oslo-datasenter var dette anlegget: selskapets egne sider førte " +
+      "Ulvenveien 87 som første PoP i Oslo (2016, 2019) og skrev i 2019 at datasenteret lå ved " +
+      "ring 3 på Ulven. Webhuset oppgir i 2026 fortsatt å eie datasenter i Oslo, men uten " +
+      "adresse; hvor utstyret står etter nedleggelsen er ikke dokumentert. Alias: Webhuset Oslo.",
     kilder: [
       {
         source_name: "PeeringDB: nettverk til stede i fasiliteten",
@@ -4655,6 +4659,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
       },
@@ -4686,8 +4691,12 @@ export const FUNN: Funn[] = [
     notes:
       "Runde 4 (2026-09-30): koordinaten er driftsenhetens adresse i Brønnøysund (Klempertåsvegen " +
       "104, 20 ansatte), ikke et byggpunkt fra plan eller byggesak. Statnett oppgir 63,6 MW " +
-      "tilknyttet og 15 MW reservert ved Fræna TRA (78,6 MW), mot Bitdeers 84 MW i drift. NODC 100 " +
-      "AS har 50 MW i kø ved samme TRA og er ikke knyttet til Troll Housing.",
+      "tilknyttet og 15 MW reservert ved Fræna TRA (78,6 MW), mot Bitdeers 84 MW i drift. NODC " +
+      "100 AS har 50 MW i kø ved samme TRA og er ikke knyttet til Troll Housing. Runde 13 " +
+      "(2026-10-02): MW-revisjon uten feltendring. 84 MW i drift er eierens tall (Bitdeer fører " +
+      "anlegget med 84 MW «Online» i børsmelding 21.07.2026), mens Statnett har 63,6 MW " +
+      "tilknyttet; avviket er ikke forklart. Et planinitiativ fra 2026 for «Ås datasenter» på " +
+      "nabotomta gjelder en KI-utvidelse; de 15 MW reservert hører trolig til den.",
     kilder: [
       {
         source_name: "Nkom: Troll Housing AS er registrert datasenteroperatør",
@@ -4733,8 +4742,12 @@ export const FUNN: Funn[] = [
       "et lite selskap. Adressene spriker (Nkom: Tromsdalen, Brønnøysund: Kvaløyvegen 168), " +
       "thermaltech.no er parkert, og det finnes ingen Statnett-relasjon. Uten koordinat med " +
       "vilje. Runde 7 (2026-10-01): Nkom-listen fra 28.04.2026 og Miljødirektoratets innhenting " +
-      "av opplysninger bekrefter en aktiv operatør, men ikke hvor anlegget ligger. Omsetningen " +
-      "falt fra 20,3 til 4,4 mill. kr fra 2024 til 2025.",
+      "av opplysninger bekrefter en aktiv operatør, men ikke hvor anlegget ligger. Runde 13 " +
+      "(2026-10-02): rettelse av omsetningstallene. Regnskapsregisteret viser 1,45 mill. kr i " +
+      "2024 og 4,40 mill. kr i 2025; tallet 20,3 mill. kr fra en katalogkilde var feil. Selskapet " +
+      "står på Nkom-listen 02.10.2026 med 100 % krypto. En arkivert nettside beskriver servere " +
+      "plassert hos varmekunder, altså trolig flere små installasjoner og ikke ett anlegg. " +
+      "Beholdt som lead uten punkt.",
     kilder: [
       {
         source_name: "Nkom: Thermaltech AS er registrert datasenteroperatør",
@@ -4764,11 +4777,16 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "lead",
-    title: "Fire kryptooperatører uten stedfestet anlegg",
+    tidligere_titler: [
+      "Fem kryptooperatører uten stedfestet anlegg",
+      "Fire kryptooperatører uten stedfestet anlegg",
+    ],
+    title: "To kryptooperatører uten stedfestet anlegg (Currency Edge, Arctic Flux)",
     description:
-      "Fire av de ni Nkom-operatørene med kryptoutvinning er fortsatt ikke stedfestet: Bluebite " +
-      "(Fauske), Currency Edge (Kvænangen), Arctic Flux (Horten) og Nordic Blocks (Søndre Land). " +
-      "Bluefjords er løst — anlegget ligger i Jostedalsvegen 530 i Gaupne.",
+      "To Nkom-registrerte operatører med kryptoutvinning er fortsatt ikke stedfestet: Currency " +
+      "Edge (Kvænangen) og Arctic Flux (Horten). Currency Edge hadde ifølge daglig leder ikke " +
+      "begynt å bygge i desember 2025. BlueBite i Sulitjelma og Nordic Blocks i Hov er skilt ut " +
+      "som egne anlegg.",
     verification_status: "investigated_not_confirmed",
     operational_status: "unknown",
     sensitivity: "internal_only",
@@ -4776,9 +4794,16 @@ export const FUNN: Funn[] = [
     interest_level: "medium",
     notes:
       "Websøk og katalogsøk ga ingen treff. Merk at Nscale bygger et AI-datasenter i Fauske, men " +
-      "det er et annet selskap enn Bluebite — de skal ikke blandes. Neste innganger er lokalpresse " +
-      "i de fire kommunene og nettselskapenes tilknytningssaker. Undersøkt 2026-09-26.",
-    tidligere_titler: ["Fem kryptooperatører uten stedfestet anlegg"],
+      "det er et annet selskap enn Bluebite — de skal ikke blandes. Neste innganger er " +
+      "lokalpresse i de fire kommunene og nettselskapenes tilknytningssaker. Undersøkt " +
+      "2026-09-26. Runde 13 (2026-10-02): splittet. Currency Edge AS (933453898): Moen 8, " +
+      "Burfjord er selskapsadresse (gnr 11 bnr 11). Daglig leder sa til Dagbladet Børsen " +
+      "17.12.2025 at spaden ikke var satt i jorda, at det planlegges 100 m² «datalagring» med tre " +
+      "arbeidsplasser, og at krypto er registrert for å ha muligheten. Omsetning 0,3 mill. kr i " +
+      "2025. Arctic Flux AS (935798973): stiftet juni 2025, Langmyra 2, Skoppum (gnr 48 bnr 32, " +
+      "Langmyra industriområde) er selskaps- og underenhetsadresse; oppgir 95 % krypto; omsetning " +
+      "4,9 mill. kr og anleggsmidler 2,2 mill. kr i 2025, som tyder på reell drift et sted, men " +
+      "ingen kilde sier hvor. Selskapsadresser er ikke brukt som anleggspunkt.",
     kilder: [
       {
         source_name:
@@ -5331,6 +5356,100 @@ export const FUNN: Funn[] = [
         excerpt_or_summary:
           "Colocation-datasentertjenester med døgnbemannet SOC og nasjonalt, offentlig eierskap. " +
           "Oppgir ikke lokasjon eller effekt.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Nordic Blocks Hov, Industrivegen 3",
+    description:
+      "Datasenter i tidligere industrilokaler i Hov, drevet av Nordic Blocks AS siden 2018. " +
+      "Startet som bitcoin-gruve; selskapet markedsfører nå lokalene som ledig kapasitet for KI " +
+      "og tungregning og oppgir 1 % krypto til Nkom. Hvor mye som faktisk er i drift i dag, er " +
+      "ikke dokumentert.",
+    municipality: "Søndre Land",
+    address: "Industrivegen 3",
+    postal_code: "2860",
+    city: "Hov",
+    latitude: 60.7028,
+    longitude: 10.33891,
+    verification_status: "partially_verified",
+    operational_status: "unknown",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "medium",
+    why_interesting:
+      "Et tidligere kryptoanlegg som forsøker å gå over til KI-drift. Selskapet reklamerer med 3 " +
+      "MW ledig nå og 6–9 MW nettkapasitet, mens regnskapet viser nesten ingen aktivitet i 2025.",
+    notes:
+      "Opprettet i runde 13 (2026-10-02), skilt ut fra «Fire kryptooperatører uten stedfestet " +
+      "anlegg». Koordinaten er Kartverkets adressepunkt for Industrivegen 3 (gnr 60 bnr 284), " +
+      "adressen operatøren selv oppgir for anlegget. Alle MW-tall (3 MW «powered shell», 6–9 MW " +
+      "nett, 6 × 1 MW trafoer, 80 MW utvidelse) er operatørens markedsføring av tilgjengelig " +
+      "effekt og er ikke ført som kapasitet. Omsetningen falt fra 5,8 mill. kr (2023) til 0,7 " +
+      "mill. kr (2025), og selskapet hadde nesten ingen eiendeler ved utgangen av 2025. Hvem som " +
+      "eier bygget er ikke dokumentert.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Nordic Blocks AS – AI Data Center Campus, Hov",
+        source_url: "https://nordicblocks.no/",
+        publisher: "Nordic Blocks AS",
+        source_type: "web",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Operatørens side: anlegg i Industrivegen 3, Hov, med hall på 2 000 m² og bygg på 1 000 m²; " +
+          "«immediate 3 MW powered-shell», 6–9 MW nettkapasitet, 80 MW utvidelse. Bekrefter anlegg og " +
+          "adresse. MW-tallene er markedsført tilgjengelig effekt, ikke drift.",
+      },
+      {
+        source_name: "Nkom: registrerte datasenteroperatører (oppdatert 02.10.2026)",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "NORDIC BLOCKS AS, 920653766, kryptoutvinning «Ja (1% av forbruk)». Bekrefter " +
+          "operatørregistreringen, ikke sted eller størrelse.",
+      },
+      {
+        source_name: "Enhetsregisteret: NORDIC BLOCKS AS (920653766)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/920653766",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 20.02.2018, NACE 63.100, Industrivegen 3, 2860 Hov. Aktivitet: drift av " +
+          "datasenter, planer om overskuddsvarme til slamtørking. Ikke konkurs eller under avvikling. " +
+          "Bekrefter selskapet, ikke anlegget.",
+      },
+      {
+        source_name: "Regnskapsregisteret: NORDIC BLOCKS AS (920653766)",
+        source_url: "https://data.brreg.no/regnskapsregisteret/regnskap/920653766",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Driftsinntekter 5,76 mill. (2023), 3,95 mill. (2024) og 0,72 mill. kr (2025). Sum " +
+          "eiendeler 2 963 kr og negativ egenkapital ved utgangen av 2025. Tyder på svært lav " +
+          "aktivitet.",
+      },
+      {
+        source_name: "Kartverket: Industrivegen 3, 2860 Hov",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?sok=Industrivegen%203%20Hov",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Vegadresse i Søndre Land, gnr 60 bnr 284, 60,70280 N 10,33891 Ø. Bekrefter adressen, ikke " +
+          "anlegget.",
       },
     ],
   },
@@ -5964,7 +6083,10 @@ export const FUNN: Funn[] = [
       "Kvalitetsrunde 2026-09-30: koordinaten er omtrentlig — midtpunktet av matrikkelenhet 3/45 " +
       "(ca. 373 daa) i parkens datasentersone. At dette er atNorths tomt er utledet, ikke " +
       "dokumentert. Tidligere stod anlegget på parkens adresse, Havnavegen 73, sammen med Green " +
-      "Mountain Gismarvik. Bygg 1–4 er lagret som struktur på dette funnet, ikke som egne anlegg.",
+      "Mountain Gismarvik. Bygg 1–4 er lagret som struktur på dette funnet, ikke som egne anlegg. " +
+      "Runde 13 (2026-10-02): Green Mountain hadde fra april 2021 en opsjon på 50 dekar i samme " +
+      "næringspark (tidligere ført som «Green Mountain Gismarvik», nå arkivert). Det er ikke " +
+      "dokumentert om opsjonsarealet er det samme som atNorths tomt.",
     kilder: [
       {
         source_name: "DataCenterMap: atNorth NOR01, Haugaland Business Park",
@@ -5998,9 +6120,7 @@ export const FUNN: Funn[] = [
     municipality: "Tysvær",
     postal_code: "5570",
     city: "Aksdal",
-    latitude: 59.3154,
-    longitude: 5.42391,
-    verification_status: "investigated_not_confirmed",
+    verification_status: "archived",
     operational_status: "unknown",
     sensitivity: "internal_only",
     confidence: "low",
@@ -6016,7 +6136,12 @@ export const FUNN: Funn[] = [
       "er trolig sovende eller bortfalt. Koordinaten er et referansepunkt i næringsparken, ikke " +
       "en tomt. Runde 7 (2026-10-01): Siste omtale som aktiv lokasjon er fra november 2023 (Radio " +
       "Rjukan: 300 MW, oppstart 12 MW). Ingen senere kilde. Status er fortsatt ukjent; opsjonen " +
-      "er ikke satt som bortfalt uten bekreftelse.",
+      "er ikke satt som bortfalt uten bekreftelse. Runde 13 (2026-10-02): arkivert, og " +
+      "referansepunktet er fjernet. Posten har aldri vært mer enn en tomteopsjon på 50 dekar fra " +
+      "april 2021. Etter fem år finnes verken stedfestet tomt, plan- eller byggesak, " +
+      "prosjektselskap, kraftsak eller omtale hos Green Mountain eller næringsparken, og parkens " +
+      "datasenterareal ble solgt til atNorth i juni 2026. Ingen kilde dokumenterer at opsjonen er " +
+      "bortfalt; arkiveringen bygger på at det ikke finnes noe anlegg.",
     kilder: [
       {
         source_name: "DataCenterMap: Green Mountain Gismarvik",
@@ -6351,6 +6476,198 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
+    title: "EMP Secure Vats (DC1–DC2), Åmsosen",
+    description:
+      "EMP-skjermet datasenter i fjellhall ved Hatteland-gruppens hovedsete i Åmsosen i Nedre " +
+      "Vats, med et andre datasenter (DC2) i eget bygg ca. 200 meter unna. Hallene ble sprengt ut " +
+      "rundt 2002 og drives av EMP Secure AS, tidligere Jakob Hatteland Solutions. Selskapet " +
+      "selger colocation og leverer egne drifts- og skytjenester herfra.",
+    municipality: "Vindafjord",
+    address: "Stokkastrandvegen 110",
+    postal_code: "5578",
+    city: "Nedre Vats",
+    latitude: 59.47617,
+    longitude: 5.74027,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Et av få norske datasentre som er bygget med skjerming mot elektromagnetisk puls, og det " +
+      "ligger i en bygd med noen hundre innbyggere. Operatøren har tatt navn etter skjermingen.",
+    notes:
+      "Opprettet i runde 13 (2026-10-02) fra bifunnet «Vats DC1» i runde 12. DC1 og DC2 er ført " +
+      "som ett anlegg (campus). Aliaser: Vats DC1, EMP Secure DC1, Fjellhallen (Nedre Vats), " +
+      "Hatteland datasenter. Samme operatør som Fjellhallen Bergen, men et annet anlegg; ikke " +
+      "knyttet til Green Mountain. Punktet er Kartverkets adressepunkt for Stokkastrandvegen 110 " +
+      "(gnr/bnr 108/51), som operatørens PeeringDB-oppføring oppgir for DC1; hallen ligger i " +
+      "fjellet og utstrekningen er ikke kjent. ISO-sertifikatet bruker selskapsadressen " +
+      "Stokkastrandvegen 85. DC2 ligger i Stokkastrandvegen 88B (gnr/bnr 108/100), ca. 200 m " +
+      "unna. Ingen MW-tall fra primærkilde; katalogen Inflect oppgir 2 MW uten definisjon.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "EMP Secure – Colocation",
+        source_url: "https://empsecure.com/it-losninger/colocation",
+        publisher: "EMP Secure AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Colocation selges i «vårt avanserte datasenter, Vats DC1»; sted oppgitt som Nedre Vats, " +
+          "Åmsosen. Redundant strøm og kjøling, døgnovervåking. Ingen MW, ingen gateadresse. " +
+          "Bekrefter anlegget og navnet.",
+      },
+      {
+        source_name: "Kiwa: ISO/IEC 27001-sertifikat nr. 3309, EMP Secure AS (utstedt 12.03.2026)",
+        source_url: "https://cdn.prod.website-files.com/690c977fc27d4dd8a0d8368a/69b2eea2e97b4c5ea3a921d8_Sertifikat%20EMP%20Secure%2027001.pdf",
+        publisher: "Kiwa AS / EMP Secure AS",
+        source_type: "document",
+        source_date: "2026-03-12",
+        primary_source: true,
+        excerpt_or_summary:
+          "Flerlokasjonssertifikat: «EMP Secure AS, Nedre Vats, Stokkastrandvegen 85 – Datasenter " +
+          "drift – Kritisk site for ISMS». Øvrige lokasjoner (Haugesund, Bergen, Stavanger, Oslo) er " +
+          "administrasjon/produksjon. Bekrefter datasenterdrift i Nedre Vats i 2026; adressen er " +
+          "selskapsadressen.",
+      },
+      {
+        source_name: "EMP Secure – Sustainability Report 2025",
+        source_url: "https://cdn.prod.website-files.com/690c977fc27d4dd8a0d8368a/6a27b7ec93429174f029ae5b_EMP%20Sustainability%20report%202025.pdf",
+        publisher: "EMP Secure AS",
+        source_type: "document",
+        primary_source: true,
+        excerpt_or_summary:
+          "Mål om å «optimalisere PUE i begge datasentre»; PUE-målingene fra «datasenter 1» skal " +
+          "videreutvikles i 2026. Strømtallet 295 405 kWh gjelder kontoret på Raglamyr, ikke " +
+          "datasentrene. Ingen MW og ikke stedsnavn på datasentrene.",
+      },
+      {
+        source_name: "EMP Secure – Sustainability Report 2024",
+        source_url: "https://cdn.prod.website-files.com/690c977fc27d4dd8a0d8368a/692d967cd7c379b6f297b064_EMP%20-%20Sustainability%20report%202024%20-%20NOR.pdf",
+        publisher: "EMP Secure AS",
+        source_type: "document",
+        primary_source: true,
+        excerpt_or_summary:
+          "«PUE etablert for datasenter 2» i 2024; PUE-måling for «datasenter 1» planlagt 2025. " +
+          "Vaktbil «tilhørende lokasjon Vats». Bekrefter to datasentre i drift, uten adresser eller " +
+          "effekt.",
+      },
+      {
+        source_name: "Hatteland – Datasenter (arkivert 11.02.2013)",
+        source_url: "https://web.archive.org/web/20130211024602/http://hatteland.com:80/produkt/datasenter/",
+        publisher: "Jakob Hatteland Solutions AS (via Internet Archive)",
+        source_type: "web",
+        source_date: "2013-02-11",
+        primary_source: true,
+        excerpt_or_summary:
+          "«Hatteland Solutions har bygget og drifter sitt eget datasenter i Nedre Vats»; " +
+          "hoveddatasenteret er «innkapslet i et EMP skjold»; mer enn 10 års kontinuerlig drift; " +
+          "utleie av areal i rack, kube eller avlåst celle. Ingen adresse eller MW.",
+      },
+      {
+        source_name: "Brønnøysund: EMP SECURE AS (968504436)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/968504436",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "EMP SECURE AS, Stokkastrandvegen 85, Nedre Vats; næring 63.100; formål bl.a. «IT-drift og " +
+          "datasenter». Tidligere navn: Kommunikasjonshuset AS (til 2004), Jakob Hatteland Solutions " +
+          "AS (2004–22.06.2021). Bekrefter selskapet, ikke anlegget.",
+      },
+      {
+        source_name: "Brønnøysund: EMP SECURE AS AVD NEDRE VATS (972374881)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/underenheter/972374881",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Underenhet på Stokkastrandvegen 85, oppstart 01.11.1993, næring 63.100. En avdeling er " +
+          "ikke et anlegg; bekrefter bare virksomhet på stedet.",
+      },
+      {
+        source_name: "Brønnøysund: EMP SECURE HOLDING AS (926286773)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/926286773",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 08.09.2020, Stokkastrandvegen 85; tidligere Jakob Hatteland Solutions Holding AS " +
+          "(til 12.04.2023). Formål: investering i aksjer. Registeret viser ikke eierandeler.",
+      },
+      {
+        source_name: "Kartverket adresse-API: Stokkastrandvegen 110",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?sok=Stokkastrandvegen%20110&kommunenummer=1160",
+        publisher: "Kartverket",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stokkastrandvegen 110, 5578 Nedre Vats, gnr/bnr 108/51, Vindafjord (1160). Punkt 59.47617, " +
+          "5.74027. Bekrefter adressen, ikke anlegget.",
+      },
+      {
+        source_name: "Kartverket adresse-API: Stokkastrandvegen 88B",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?sok=Stokkastrandvegen%2088B&kommunenummer=1160",
+        publisher: "Kartverket",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stokkastrandvegen 88B, 5578 Nedre Vats, gnr/bnr 108/100. Punkt 59.47701, 5.73719 – ca. 200 " +
+          "m fra nr. 110. Bekrefter adressen, ikke anlegget.",
+      },
+      {
+        source_name: "eInnsyn: Nkom sak 2026/7622 «Sektoravgift datasenter 2026»",
+        source_url: "https://einnsyn.no/saksmappe/sm_01kwy03bcaehybb0e6hcf34cnk",
+        publisher: "Nasjonal kommunikasjonsmyndighet (eInnsyn)",
+        source_type: "register",
+        source_date: "2026-07-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nkom sendte 02.07.2026 «Varsel om sektoravgift 2026 – EMP SECURE AS» i saken om " +
+          "sektoravgift for datasenter; tilsvarende vedtak for 2025 (19.11.2025). Bekrefter at " +
+          "selskapet er registrert datasenteroperatør, ikke hvilket anlegg. Dokumentene er ikke lest.",
+      },
+      {
+        source_name: "Statnett: statistikk om tilknytningssaker (lister lastet ned 30.09.2026)",
+        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Ingen rader for Hatteland, EMP Secure, Vats eller Vindafjord i kø, reservasjoner, " +
+          "tilknyttet eller tilbaketrukket. Anlegget er for lite til å gå via transmisjonsnettet.",
+      },
+      {
+        source_name: "EMP Secure: SEAM forlenger avtalen med EMP Secure",
+        source_url: "https://www.empsecure.com/blogg/seam-forlenger-avtalen-med-emp-secure",
+        publisher: "EMP Secure AS",
+        source_type: "web",
+        source_date: "2025-03-10",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kundesak: tjenestene til SEAM omfatter serverhosting, beskrevet som drift av kritiske " +
+          "systemer i det EMP-sikrede datasenteret i Vats. Viser at datasenteret leverer hosting i " +
+          "2025. Kundens juridiske enhet er ikke oppgitt.",
+      },
+      {
+        source_name: "EMP Secure – Om oss",
+        source_url: "https://empsecure.com/om-oss",
+        publisher: "EMP Secure AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Selskapet startet som intern løsning hos Hatteland og er del av Hatteland-gruppen. Navnet " +
+          "kommer av at eget datasenter er beskyttet mot elektromagnetisk puls. Hovedsete Nedre Vats, " +
+          "Åmsosen.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
     title: "Green Mountain Jørpeland",
     description:
       "Green Mountain planla datasenter på det tidligere stålverksområdet på Jørpeland, men skrinla " +
@@ -6372,7 +6689,10 @@ export const FUNN: Funn[] = [
     notes:
       "Runde 2 (2026-09-30): status satt til historisk etter at Green Mountain skrinla planene " +
       "13.03.2026 (NRK). 30 MW for første bygg og 40 MW Lnett-reservasjon er historiske tall og " +
-      "ikke strukturert. Kommunen er Strand, ikke Stavanger, som markedsnavnet antyder.",
+      "ikke strukturert. Kommunen er Strand, ikke Stavanger, som markedsnavnet antyder. Runde 13 " +
+      "(2026-10-02): historisk status bekreftet. Det ble aldri bygget noe anlegg: planinitiativ i " +
+      "2023, planprogram 06.11.2024 og skrinlegging 13.03.2026. Green Mountain AS er ført som " +
+      "historisk forslagsstiller. Type er ikke satt.",
     kilder: [
       {
         source_name: "DataCenterMap: Green Mountain Jørpeland",
@@ -6449,11 +6769,13 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Kitebrook Leirdøla, Gaupne",
     description:
-      "Planlagt campus på 100 MW for AI og HPC i Gaupne, på vannkraft og oppgitt som " +
-      "aggregatfri — driftssikkerheten skal komme fra kraftnettet, ikke fra dieselaggregater.",
+      "Planlagt campus på 100 MW for AI og HPC ved Hausamoen i Gaupne, i planområdet " +
+      "Fonndøla–Hausamoen, på vannkraft og oppgitt som aggregatfri. Statnett reserverte 100 MW " +
+      "ved Leirdøla til Kitebrook Infrastructure AS i mai 2026.",
     municipality: "Luster",
-    latitude: 61.47056,
-    longitude: 7.25171,
+    city: "Gaupne",
+    latitude: 61.44208,
+    longitude: 7.25439,
     verification_status: "partially_verified",
     operational_status: "planned",
     sensitivity: "internal_only",
@@ -6464,9 +6786,16 @@ export const FUNN: Funn[] = [
       "forutsetter svært god nettkapasitet.",
     notes:
       "Runde 2 (2026-09-30): koordinaten er flyttet fra Bluefjords' adresse (Jostedalsvegen 530) " +
-      "til et omtrentlig punkt ved Leirdøla bru, ved kraftstasjonen og transformatorstasjonen tomta " +
-      "grenser til. Bluefjords/Compute Nordic er et eget prosjekt. Netteier er Sygnir AS, ikke " +
-      "Luster Energi.",
+      "til et omtrentlig punkt ved Leirdøla bru, ved kraftstasjonen og transformatorstasjonen " +
+      "tomta grenser til. Bluefjords/Compute Nordic er et eget prosjekt. Netteier er Sygnir AS, " +
+      "ikke Luster Energi. Runde 13 (2026-10-02): punktet er flyttet 3 170 m sørover, fra et " +
+      "omtrentlig punkt ved Leirdøla bru til Hausamoen. Luster kommune skriver i en plansak fra " +
+      "mai 2026 at både Bluefjords og Kitebrook utvikler datasenter i planområdet " +
+      "Fonndøla–Hausamoen (planID 2020011), og ved Leirdøla bru finnes ingen reguleringsplan. " +
+      "Punktet er et områdepunkt i planområdet, ikke en tomt: at Kitebrook har nettopp " +
+      "industrifeltet på Hausamoen er en slutning, og tomtas gnr/bnr er ikke kjent. Bluefjords " +
+      "Gaupne ligger ca. 260 m unna i samme planområde og er et eget anlegg; Gaupne Datapark " +
+      "ligger ca. 5 km unna.",
     kilder: [
       {
         source_name: "DataCenterMap: Kitebrook Leirdøla, Gaupne",
@@ -6697,6 +7026,120 @@ export const FUNN: Funn[] = [
         primary_source: true,
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "BlueBite Sulitjelma",
+    description:
+      "Datasenter i et eldre industribygg i Sulitjelma, drevet av tyske BlueBite GmbH siden 2021. " +
+      "Selskapet oppgir til Nkom at 55 % av strømforbruket går til kryptoutvinning; resten er " +
+      "annen regnekraft. NVE førte tilsyn med anlegget i 2025. Størrelse i MW er ikke offentlig " +
+      "dokumentert.",
+    municipality: "Fauske",
+    postal_code: "8230",
+    city: "Sulitjelma",
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Et av få stedfestede kryptoanlegg i Nord-Norge, i et tidligere gruvesamfunn der ordføreren " +
+      "har bedt om nasjonalt forbud mot kryptofabrikker. NVE åpnet tilsynssak etter tips om drift " +
+      "uten konsesjon.",
+    notes:
+      "Opprettet i runde 13 (2026-10-02), skilt ut fra «Fire kryptooperatører uten stedfestet " +
+      "anlegg». Uten kartpunkt: bygget er ikke identifisert med adresse i noen kilde, og " +
+      "koblingen til Industriparken er en slutning fra utleiers adresse. High North News " +
+      "beskriver et mekanisk verksted på 650 m² fra 1972 i det gamle industriområdet, leid via " +
+      "Sulitjelma Industripark fra Arctic Sapphire (som er registrert i Industriparken 3). " +
+      "Sjøgata 86 i Fauske og Postboks 23 i Sulitjelma er selskapsadresser, ikke anlegget. Ikke " +
+      "bland med Nscale Fauske, som ligger ca. 35 km unna og er et annet selskap. 4 MW (2022) er " +
+      "et eldre bransjetall og ikke ført som kapasitet.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "eInnsyn: NVE sak 2025/370 – Bluebite GmbH – Miljøtilsyn – datasenter i Sulitjelma – Fauske kommune",
+        source_url: "https://api.einnsyn.no/saksmappe/sm_01jh93hmgvf2sbstc00ce1fft8",
+        publisher: "NVE (via eInnsyn)",
+        source_type: "register",
+        source_date: "2025-01-10",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tilsynssak hos NVE (seksjon for miljøtilsyn energianlegg) som navngir BlueBite GmbHs " +
+          "datasenter i Sulitjelma. Bekrefter at anlegget finnes og hvem som driver det. Dokumentene " +
+          "er ikke publisert; adresse og effekt framgår ikke av journalen.",
+      },
+      {
+        source_name: "eInnsyn: NVE – Avslutning av sak, kontroll av de elektriske anleggene tilknyttet BlueBite GmbHs datasenter, Fauske kommune",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01jv89eb8bf6bv7n8ryf3kck0a",
+        publisher: "NVE (via eInnsyn)",
+        source_type: "register",
+        source_date: "2025-05-06",
+        primary_source: true,
+        excerpt_or_summary:
+          "Utgående brev 06.05.2025 som avslutter tilsynssaken. Bekrefter at datasenteret eksisterte " +
+          "og ble kontrollert i 2025. Innholdet er ikke lest.",
+      },
+      {
+        source_name: "Nkom: registrerte datasenteroperatører (oppdatert 02.10.2026)",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "BLUEBITE GMBH, 922053162, kryptoutvinning «Ja (55% av forbruk)». Bekrefter " +
+          "operatørregistreringen i 2026, ikke sted eller størrelse.",
+      },
+      {
+        source_name: "Enhetsregisteret: BLUEBITE GMBH (NUF, 922053162)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/922053162",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "NUF av BlueBite GmbH, Karlsruhe. Forretningsadresse Sjøgata 86, Fauske; postadresse " +
+          "Postboks 23, 8230 Sulitjelma. Aktivitet: høy-tetthets databehandling. Bekrefter selskapet, " +
+          "ikke anlegget.",
+      },
+      {
+        source_name: "Enhetsregisteret: ARCTIC SAPPHIRE AS (922737215)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/922737215",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Forretningsadresse Industriparken 3, 8230 Sulitjelma. Bekrefter hvor utleier (ifølge High " +
+          "North News) holder til – ikke at datasenteret ligger på denne adressen.",
+      },
+      {
+        source_name: "Kartverket: adresser i Industriparken, Sulitjelma",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?adressenavn=Industriparken&kommunenummer=1841",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Industriparken 1–6 (gnr 119) ligger innenfor ca. 67,1309–67,1324 N, 16,079–16,0835 Ø. " +
+          "Brukt til omtrentlig områdepunkt. Bekrefter adressene, ikke anlegget.",
+      },
+      {
+        source_name: "eInnsyn: Miljødirektoratet – Oppfølgning anmodning om opplysninger – Bluebite (13.03.2026)",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01km45fxxme0f9p22mpssvvngc",
+        publisher: "Miljødirektoratet (via eInnsyn)",
+        source_type: "register",
+        source_date: "2026-03-13",
+        primary_source: true,
+        excerpt_or_summary:
+          "Purring i sak 2025/969 om anlegg tilhørende BlueBite GmbH. Viser at myndighetene regner " +
+          "selskapet som aktiv datasenteroperatør i 2026.",
       },
     ],
   },
@@ -7532,7 +7975,11 @@ export const FUNN: Funn[] = [
       "er samme selskap under tidligere navn, ikke en tidligere operatør. First IT AS er et " +
       "tilknyttet driftsselskap med uklar rolle. Havforskningsinstituttet er ført som kunde ut " +
       "fra instituttets postjournal (sak 2025/1719 og 2026/239); bare journaltitlene er lest. " +
-      "Ikke samme anlegg som AVUR Casperkollen eller Fjellhallen Bergen på Nesttun.",
+      "Ikke samme anlegg som AVUR Casperkollen eller Fjellhallen Bergen på Nesttun. Runde 13 " +
+      "(2026-10-02): fortsatt uten punkt. Bergen kommunes saksinnsyn kan ikke søkes på " +
+      "tiltakshaver, og tittelsøk ga ingen treff på Datafjellet, SBT Eiendom eller First IT. " +
+      "First IT brukte 2008–2013 en postboks i Indre Arna; det er et områdehint, ikke en " +
+      "stedfesting.",
     kilder: [
       {
         source_name: "DataCenterMap: Datafjellet, Bønes",
