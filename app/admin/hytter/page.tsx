@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { HytteKontakt, HytteSak } from "@/components/admin/HytteKontroll";
 import { IkkeTilgang } from "@/components/admin/IkkeTilgang";
-import { hentHytteKontakt, hentHytteKø } from "@/lib/admin/huts";
-import { hutAccessKind } from "@/lib/huts/types";
-import { HUT_NEXT_STEP_LABELS, hutNextStep, type HutNextStepKind } from "@/lib/huts/wording";
+import { hentHytteKontakt, hentHytteKø, hentKontaktstatus } from "@/lib/admin/huts";
+import { HUT_NEXT_STEP_LABELS, type HutNextStepKind } from "@/lib/huts/wording";
 import { getAdminSession } from "@/lib/admin/session";
 
 export const metadata: Metadata = { title: "Hytter og koier", robots: { index: false, follow: false } };
@@ -26,20 +25,14 @@ export default async function AdminHutsPage({ searchParams }: { searchParams: Se
 
   const raw = (await searchParams).q;
   const q = (Array.isArray(raw) ? raw[0] : raw)?.trim() ?? "";
-  const [{ saker, feil }, kontakt] = await Promise.all([
+  const [{ saker, feil }, kontakt, status] = await Promise.all([
     hentHytteKø(session.client),
     hentHytteKontakt(session.client, q.length >= 2 ? q : null),
+    hentKontaktstatus(session.client),
   ]);
-  const steg = (hytte: (typeof kontakt.hytter)[number]) =>
-    hutNextStep({
-      access: hutAccessKind(hytte.locked, hytte.access_override),
-      bookingUrl: hytte.booking_url,
-      infoUrl: hytte.info_url,
-      managerName: hytte.manager_name,
-    }).kind;
-  // Tellingen gjelder låste hytter: det er de som lover brukeren noe vi må kunne følge opp.
-  const låste = kontakt.hytter.filter((hytte) => hytte.locked);
-  const antall = (kind: HutNextStepKind) => låste.filter((hytte) => steg(hytte) === kind).length;
+  // Tellingen gjelder alle låste hytter som vises, ikke bare dem som får plass i listen under.
+  const antall = (kind: HutNextStepKind) => status[kind] ?? 0;
+  const låste = (["unknown", "manager_only", "info_link", "booking_link"] as const).reduce((sum, kind) => sum + antall(kind), 0);
 
   return (
     <main className="mx-auto max-w-4xl px-5 py-10">
@@ -98,11 +91,11 @@ export default async function AdminHutsPage({ searchParams }: { searchParams: Se
           kontakt.hytter.length === 0 && !kontakt.feil && <p className="mt-3 text-[15px] text-muted">Ingen treff på «{q}».</p>
         ) : (
           <p className="mt-3 text-[13px] text-ink">
-            {låste.length} låste hytter:{" "}
+            {låste} låste hytter:{" "}
             {(["unknown", "manager_only", "info_link", "booking_link"] as const)
               .map((kind) => `${antall(kind)} ${HUT_NEXT_STEP_LABELS[kind].toLowerCase()}`)
               .join(" · ")}
-            . De som mangler mest, står først.
+            . Listen viser de som mangler bestillingsside, høyst 100, med de som mangler mest først. Søk for å finne en bestemt hytte.
           </p>
         )}
         <ul className="mt-4 space-y-3">

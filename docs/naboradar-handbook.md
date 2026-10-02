@@ -258,7 +258,7 @@ kvikkleiresone har over 100 000 hjørner, og ville ellers sprengt svaret.
 | `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search` | Hytter og koier: rundt et punkt (inntil 50 km, nærmest først), i et kartutsnitt, i en kommune, og navnesøk. Svarer bare når kategorien `hytte` er publisert, eller kalleren er admin |
 | `get_hut(ref)` | Én hytte, slått opp på de åtte første tegnene i uuid-en. Til den faste hyttesiden |
 | `refresh_huts()` | Kobler kildeposter til hytter og regner de kanoniske feltene på nytt. Kjøres av synken, kun service_role |
-| `hut_review_queue()`, `review_hut()`, `set_hut_contact()`, `set_hut_overrides()`, `hut_contact_list()` | Kontrollkøen, avgjørelsen (godkjenn, avvis, slå sammen), lenker og forvalter, overstyring av type og tilgang med offentlig merknad, og adminlisten. Kun innlogget admin |
+| `hut_review_queue()`, `review_hut()`, `set_hut_contact()`, `set_hut_overrides()`, `hut_contact_list()`, `hut_contact_summary()` | Kontrollkøen, avgjørelsen (godkjenn, avvis, slå sammen), lenker og forvalter, overstyring av type og tilgang med offentlig merknad, og adminlisten. Kun innlogget admin |
 | `upsert_events`, `upsert_area_features`, `mark_*_removed` | Skriving, kun service_role |
 | `sync_run_start/finish`, `sync_due`, `claim_next_due_sync`, `claim_sync_request`, `finish_sync_request`, `expire_stale_sync_requests`, `provider_baseline`, `set_alert_state` | Sync-koordinering, kun service_role |
 | `provider_health`, `recent_sync_runs`, `request_sync`, `scheduler_status` | `/admin`, kun innlogget admin |
@@ -302,7 +302,7 @@ Tilgangen er en **positiv, uttømmende liste**, ikke en opprydding i enkelttilfe
 | Rolle | Kan kalle |
 |---|---|
 | `anon` | `features_near`, `features_count_near`, `events_within`, `get_event`, `data_status`, `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search`, `get_hut` |
-| `authenticated` | det samme, pluss `hut_review_queue`, `review_hut`, `set_hut_contact`, `set_hut_overrides`, `hut_contact_list`, `is_admin`, `provider_health`, `recent_sync_runs`, `recent_sync_requests`, `request_sync`, `scheduler_status` og research-, review- og datasenterfunksjonene — som alle sjekker `is_admin()` selv |
+| `authenticated` | det samme, pluss `hut_review_queue`, `review_hut`, `set_hut_contact`, `set_hut_overrides`, `hut_contact_list`, `hut_contact_summary`, `is_admin`, `provider_health`, `recent_sync_runs`, `recent_sync_requests`, `request_sync`, `scheduler_status` og research-, review- og datasenterfunksjonene — som alle sjekker `is_admin()` selv |
 | `service_role` | alt — sync-workeren |
 | `postgres` | alt — migrasjoner og pg_cron |
 
@@ -1070,10 +1070,12 @@ ikke alt svarer på. Skal det inn senere, hører det sammen med valgt rad, ikke 
 Første friluftskategori. Retningen står i [data-roadmapen](data-roadmap.md#12-friluft-skjult-lokal-innsikt-ikke-en-turapp),
 modellen i [dataarkitekturen](data-architecture.md#5-kanoniske-enheter-eller-bulk-lag).
 
-**Status: hele landet er importert, upublisert.** 1 675 hytter, 1 481 av dem klare til å vises;
-resten står bare i sekundærkilden og er skjult til de er kontrollert. Oslomarka med omland (58
-hytter) er kvalitetssikret hytte for hytte; resten av landet er kontrollert mot Kartverkets
-egne data, men ikke beriket med forvalter og lenker. Tallene, fylkestabellen og funnene står i
+**Status: hele landet er importert, upublisert.** 1 661 hytter, 1 485 av dem klare til å vises;
+resten står bare i sekundærkilden og er skjult til de er kontrollert. Oslomarka med omland er
+kvalitetssikret hytte for hytte. Resten av landet er kontrollert mot Kartverkets egne data, og
+DNT-hyttene (576) er beriket med forening, bestillingslenke og tilgang fra DNTs egne sider — se
+[research/hytter-dnt-berikelse.md](research/hytter-dnt-berikelse.md). Statskog, fjellstyrene
+og «Andre» er ikke beriket. Tallene, fylkestabellen og funnene står i
 [research/hytter-nasjonal-import.md](research/hytter-nasjonal-import.md). `npm run qa:hytter`
 kjører regelsjekkene (koordinater, dubletter, lekkasje av avviste eller skjulte hytter,
 overstyring uten kilde) og skal være grønn før publisering.
@@ -1188,7 +1190,8 @@ siden, se at den gjelder hytta, lagre. Vi henter ikke DNTs hytteregister, bruker
 bygger ingen adresse etter mønster. Ingen av dagens kilder leverer lenker. Lenkene sjekkes ikke
 automatisk ennå; kontrolltidspunktet står i admin.
 
-`/admin/hytter` viser de låste hyttene med status — «Mangler forvalter», «Mangler
+`/admin/hytter` viser de låste hyttene som mangler bestillingsside (høyst 100; søk finner
+resten), med status — «Mangler forvalter», «Mangler
 booking/info», «Infoside finnes», «Lenke komplett» — de som mangler mest først
 (`hut_contact_list`).
 

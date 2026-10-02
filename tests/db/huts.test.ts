@@ -371,6 +371,7 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
         expect(await flere(email, [`select set_hut_contact('${hytte}', 'https://eksempel.no/bestill', null, null, null)`])).toBe("NEKTET");
         // Adminlisten svarer tomt for andre enn admin, også for en innlogget bruker.
         expect(await flere(email, [`select id from hut_contact_list()`])).toEqual(email ? [] : "NEKTET");
+        expect(await flere(email, [`select kind from hut_contact_summary()`])).toEqual(email ? [] : "NEKTET");
       }
     });
 
@@ -530,14 +531,23 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
             [q],
           )).rows;
         const før = await liste();
-        // Uten søk: bare låste hytter og de som har fått noe lagt inn.
+        // Uten søk: de låste hyttene som mangler bestillingsside — det som trenger arbeid.
         expect([...new Set(før.map((h) => h.name))].sort()).toEqual(["Kobberhaughytta", "Tømtehytta"]);
+        const status = async () =>
+          Object.fromEntries((await db.pg.query<{ kind: string; antall: string }>(`select kind, antall from hut_contact_summary()`)).rows.map((r) => [r.kind, Number(r.antall)]));
+        expect(await status()).toEqual({ unknown: før.length });
+        // Bare forvalter: hytta står fortsatt i listen, men etter dem som ikke har noe.
+        await db.pg.query(`select set_hut_contact($1, '', '', 'Eksempellaget', 'internt notat')`, [låst]);
+        const medForvalter = await liste();
+        expect(medForvalter).toHaveLength(før.length);
+        expect(medForvalter.at(-1)!.name).toBe("Kobberhaughytta");
+        expect(await status()).toEqual({ unknown: før.length - 1, manager_only: 1 });
+        // Med bestillingsside er hytta ferdig, og forlater listen. Tellingen har den fortsatt med.
         await db.pg.query(`select set_hut_contact($1, 'https://eksempel.no/bestill', '', 'Eksempellaget', 'internt notat')`, [låst]);
-        const etter = await liste();
-        expect(etter.find((h) => h.id === låst)).toMatchObject({ booking_url: "https://eksempel.no/bestill", contact_note: "internt notat" });
-        // De som mangler lenke, står før de som har.
-        expect(etter).toHaveLength(før.length);
-        expect(etter.at(-1)!.name).toBe("Kobberhaughytta");
+        expect((await liste()).map((h) => h.id)).not.toContain(låst);
+        expect(await status()).toEqual({ unknown: før.length - 1, booking_link: 1 });
+        // Søk finner den uansett, med det som er lagt inn.
+        expect((await liste("kobberhaug")).find((h) => h.id === låst)).toMatchObject({ booking_url: "https://eksempel.no/bestill", contact_note: "internt notat" });
         // Med søk: treff på navn, også ulåste.
         const ulåst = (await db.pg.query<{ name: string }>(`select name from huts where locked is false and archived_at is null and rejected_at is null order by name limit 1`)).rows[0]!.name;
         expect((await liste(ulåst)).map((h) => h.name)).toContain(ulåst);
@@ -666,7 +676,7 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
           expect(await offentlig(hytte)).toMatchObject({ hut_type: "staffed_hut", locked: true, access_kind: "special_key", overridden: ["type", "access", "note"] });
           // Adminlisten viser begge deler, så avviket kan forklares.
           const admin = (await db.pg.query<{ hut_type: string; type_override: string; override_source_url: string }>(
-            `select hut_type, type_override, override_source_url from hut_contact_list() where id = $1`,
+            `select hut_type, type_override, override_source_url from hut_contact_list('kobberhaug') where id = $1`,
             [hytte],
           )).rows[0]!;
           expect(admin).toEqual({ hut_type: "self_service_hut", type_override: "staffed_hut", override_source_url: KILDE });

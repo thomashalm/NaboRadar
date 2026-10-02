@@ -66,6 +66,7 @@ async function main() {
     "set_hut_contact",
     "set_hut_overrides",
     "hut_contact_list",
+    "hut_contact_summary",
     ...RESEARCH,
     ...REVIEW,
     ...DATACENTER,

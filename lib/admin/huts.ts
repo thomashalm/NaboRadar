@@ -77,8 +77,8 @@ const kontaktSchema = z.object({
 export type HutContactRow = z.infer<typeof kontaktSchema>;
 
 /**
- * Kontaktopplysningene for hytter. Uten søk: låste hytter og de som har fått noe lagt inn
- * (lenke, forvalter eller notat), med
+ * Kontaktopplysningene for hytter. Uten søk: de låste hyttene som mangler bestillingsside
+ * (høyst 100), med
  * de som mangler mest først. Med søk: hyttene som passer navnet.
  */
 export async function hentHytteKontakt(client: SupabaseClient, q: string | null): Promise<{ hytter: HutContactRow[]; feil: string | null }> {
@@ -86,6 +86,14 @@ export async function hentHytteKontakt(client: SupabaseClient, q: string | null)
   if (error) return { hytter: [], feil: error.message };
   const parsed = z.array(kontaktSchema).safeParse(data ?? []);
   return parsed.success ? { hytter: parsed.data, feil: null } : { hytter: [], feil: "Uventet svar fra hut_contact_list" };
+}
+
+/** Låste hytter fordelt på hvor langt vi har kommet med neste steg. Nøklene er `HutNextStepKind`. */
+export async function hentKontaktstatus(client: SupabaseClient): Promise<Record<string, number>> {
+  const { data, error } = await client.rpc("hut_contact_summary");
+  if (error) return {};
+  const parsed = z.array(z.object({ kind: z.string(), antall: z.coerce.number() })).safeParse(data ?? []);
+  return parsed.success ? Object.fromEntries(parsed.data.map((rad) => [rad.kind, rad.antall])) : {};
 }
 
 export const KILDENAVN: Record<string, string> = {

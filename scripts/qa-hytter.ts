@@ -79,6 +79,36 @@ const CHECKS: Check[] = [
     sql: `select h.name from huts h where ${SYNLIG} and h.municipality_number is null and h.last_verified_at is null`,
   },
   {
+    navn: "Kontrollert forvalter uten notat om hvor den ble kontrollert",
+    sql: `select h.name from huts h where h.manager_verified is not null and h.contact_note is null`,
+  },
+  {
+    navn: "Overstyring av type eller tilgang til en verdi utenfor de kontrollerte listene",
+    sql: `select h.name from huts h where (h.access_override is not null and h.access_override not in ('unlocked','dnt_key','code_lock','special_key','code_or_special_key','locked_prebooking'))
+          or (h.type_override is not null and h.type_override not in ('staffed_hut','self_service_hut','unstaffed_hut','rest_cabin','open_cabin','day_trip_hut','emergency_shelter'))`,
+  },
+  {
+    navn: "Offentlig merknad som ser ut som pris, ledighet eller sengetall",
+    sql: `select h.name from huts h where h.public_note ~* '(\\mkr\\M|kroner|,-|ledig|sengeplass|senger\\M)'`,
+  },
+  {
+    navn: "DNT-hytte uten navngitt forening",
+    advarsel: true,
+    sql: `select h.name from huts h where ${SYNLIG} and h.owner_kind = 'dnt' and coalesce(h.manager_verified, h.manager_name) is null`,
+  },
+  {
+    navn: "Låst DNT-hytte uten neste steg (verken forening eller lenke)",
+    advarsel: true,
+    sql: `select h.name from huts h where ${SYNLIG} and h.owner_kind = 'dnt' and h.locked is true
+          and coalesce(h.manager_verified, h.manager_name) is null and h.booking_url is null and h.info_url is null`,
+  },
+  {
+    navn: "Låst hytte uten neste steg, alle eierkategorier",
+    advarsel: true,
+    sql: `select h.name from huts h where ${SYNLIG} and h.locked is true
+          and coalesce(h.manager_verified, h.manager_name) is null and h.booking_url is null and h.info_url is null`,
+  },
+  {
     navn: "Synlige hytter innen 25 m av hverandre (anneks, eller dublett?)",
     advarsel: true,
     sql: `select h.name || ' / ' || o.name as name from huts h join huts o on o.id > h.id and st_dwithin(o.geom::geography, h.geom::geography, 25)
