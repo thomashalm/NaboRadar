@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { SearchBox } from "@/components/search/SearchBox";
 import { DEFAULT_RADIUS_M } from "@/lib/geo/constants";
+import { hutsArePublic } from "@/lib/huts/queries";
 import { SITE_URL } from "./layout";
 
 /**
@@ -46,7 +47,12 @@ const DEKKER = [
   ["Nærområdet", "Skoler, barnehager, sykehus, omsorgstilbud, industri og steder med skjenkebevilling."],
 ] as const;
 
-export default function HomePage() {
+// Lenken til hyttekartet følger publiseringen av kategorien. Siden bygges på nytt høyst hvert
+// femte minutt, så lenken dukker opp kort tid etter at hyttene er lansert.
+export const revalidate = 300;
+
+export default async function HomePage() {
+  const visHytter = await hutsArePublic();
   return (
     <div className="flex min-h-dvh flex-col">
       <script
@@ -72,6 +78,15 @@ export default function HomePage() {
           </div>
 
           <p className="mt-6 text-sm text-muted">Offentlige data. Forklart enkelt.</p>
+
+          {/* En sekundær inngang. Adressesøket over er fortsatt det siden handler om. */}
+          {visHytter && (
+            <p className="mt-3 text-sm">
+              <Link href="/hytter" className="text-accent hover:underline">
+                Se hytter og koier i Norge
+              </Link>
+            </p>
+          )}
 
           <section className="mt-20" aria-labelledby="dekker">
             <h2 id="dekker" className="text-xl font-semibold tracking-[-0.02em]">

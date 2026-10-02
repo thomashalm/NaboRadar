@@ -1,5 +1,8 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
+
+vi.mock("server-only", () => ({}));
 import { createPgliteDb } from "@/lib/db/pglite";
+import { hutsArePublic } from "@/lib/huts/queries";
 import { destinationPoint } from "@/lib/geo/radius";
 
 type Db = Awaited<ReturnType<typeof createPgliteDb>>;
@@ -256,6 +259,18 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
       expect(await som("anon", `select * from huts_search('kobberhaug')`)).toEqual([]);
       // Innlogget, men ikke admin: fortsatt ingenting.
       expect(await som("authenticated", nær, "noen@example.com")).toEqual([]);
+    });
+
+    it("forsiden lenker til hyttekartet først når kategorien er publisert", async () => {
+      expect(await hutsArePublic(db)).toBe(false);
+      await db.pg.exec("begin");
+      try {
+        await db.pg.exec(`update area_feature_categories set is_public = true where category = 'hytte'`);
+        expect(await hutsArePublic(db)).toBe(true);
+      } finally {
+        await db.pg.exec("rollback");
+      }
+      expect(await hutsArePublic(null)).toBe(false);
     });
 
     it("lar admin se hyttene før publisering", async () => {

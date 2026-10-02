@@ -1,11 +1,12 @@
 import "server-only";
 import { z } from "zod";
 import { getDbMode, getReadDb } from "@/lib/db";
-import { DatabaseQueryError } from "@/lib/db/types";
+import { DatabaseQueryError, type Db } from "@/lib/db/types";
 import { elevationAt } from "@/lib/geo/elevation";
 import { municipalityNames } from "@/lib/geo/municipalities";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
+  HUT_BOUNDS,
   HUT_ACCESS_KINDS,
   HUT_ACCESS_STATUSES,
   HUT_OVERNIGHT,
@@ -224,6 +225,23 @@ export async function getHutsInMunicipality(municipalityNumber: string, filters?
   } catch (error) {
     console.error("[hytter] huts_in_municipality feilet:", error instanceof Error ? error.name : "ukjent");
     return { status: "unavailable" };
+  }
+}
+
+/**
+ * Er hyttekategorien publisert for alle? Spør uten innlogging, så svaret er det samme for
+ * alle besøkende: en innlogget admin ser hyttene før lansering, men forsiden skal ikke lenke
+ * til dem før de er offentlige. Feil gir `false` — da vises ingen lenke.
+ */
+export async function hutsArePublic(db?: Db | null): Promise<boolean> {
+  try {
+    const kilde = db === undefined ? await getReadDb() : db;
+    if (!kilde) return false;
+    const { minLng, minLat, maxLng, maxLat } = HUT_BOUNDS;
+    const rows = await kilde.rpc("huts_in_bbox", { min_lng: minLng, min_lat: minLat, max_lng: maxLng, max_lat: maxLat, max_results: 1 });
+    return rows.length > 0;
+  } catch {
+    return false;
   }
 }
 
