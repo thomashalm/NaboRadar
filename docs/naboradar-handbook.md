@@ -1070,7 +1070,7 @@ ikke alt svarer på. Skal det inn senere, hører det sammen med valgt rad, ikke 
 Første friluftskategori. Retningen står i [data-roadmapen](data-roadmap.md#12-friluft-skjult-lokal-innsikt-ikke-en-turapp),
 modellen i [dataarkitekturen](data-architecture.md#5-kanoniske-enheter-eller-bulk-lag).
 
-**Status: hele landet er importert, upublisert.** 1 638 hytter, 1 510 av dem klare til å vises;
+**Status: lansert 2026-10-02.** Hele landet er importert og kategorien `hytte` er offentlig. 1 638 hytter, 1 510 av dem klare til å vises;
 resten står bare i sekundærkilden og er skjult til de er kontrollert. Oslomarka med omland er
 kvalitetssikret hytte for hytte. Resten av landet er kontrollert mot Kartverkets egne data, og
 DNT-hyttene (578) er beriket med forening, bestillingslenke og tilgang fra DNTs egne sider — se
@@ -1092,11 +1092,15 @@ offisiell lenke; 20 låste hytter står uten neste steg. Tallene, fylkestabellen
 kjører regelsjekkene (koordinater, dubletter, lekkasje av avviste eller skjulte hytter,
 overstyring uten kilde) og skal være grønn før publisering.
 
-Kategorien `hytte` står med `is_public = false`, så
-`huts_*`-funksjonene svarer tomt for alle andre enn innlogget admin. En admin ser hyttene på
-`/admin/adresse`, `/omrade` og `/hytter` som om de var publisert, og kan kontrollere dem der.
-Publisering er én linje: `update area_feature_categories set is_public = true where category = 'hytte'`.
-Kategorien `hytte_kilde` (kildepostene) skal aldri publiseres.
+Kategorien `hytte` er publisert (`is_public = true`); `hytte_kilde` er aldri offentlig.
+`huts_*`-funksjonene svarer for alle, men bare med hytter som er godkjent for visning: avviste
+hytter og hytter som bare står i sekundærkilden, er fortsatt skjult. Avpublisering er én linje:
+`update area_feature_categories set is_public = false where category = 'hytte'`. Forsiden
+lenker til hyttekartet så lenge kategorien er offentlig. `/hytter` og hyttesidene er fortsatt
+`noindex`, og hyttesidene står ikke i sitemapen.
+
+Supabase-API-et gir høyst 1 000 rader per kall. Hele-landet-visningen har flere hytter enn det,
+så `getHutsInBbox` henter `huts_in_bbox` side for side.
 
 Tolkningsreglene:
 
