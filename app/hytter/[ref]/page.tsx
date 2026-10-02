@@ -100,7 +100,8 @@ export default async function HutPage({ params }: Props) {
           )}
         </section>
         <div className="relative mx-5 mb-10 h-[50vh] min-h-72 overflow-hidden rounded-2xl border border-line sm:mx-8 lg:sticky lg:top-16 lg:m-0 lg:h-[calc(100dvh-4rem)] lg:rounded-none lg:border-0 lg:border-l">
-          <HutPointMap hut={hut} tiles={getMapTileConfig()} />
+          {/* Samme naboer som i lista over: kartet og lista skal ikke vise to forskjellige sett. */}
+          <HutPointMap hut={hut} neighbours={nearby} tiles={getMapTileConfig()} />
         </div>
       </main>
     </AreaShell>

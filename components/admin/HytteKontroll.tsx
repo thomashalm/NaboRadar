@@ -2,9 +2,10 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { reviewHutAction, setHutContactAction, type HutActionState } from "@/app/admin/hytter/actions";
+import { reviewHutAction, setHutContactAction, setHutOverridesAction, type HutActionState } from "@/app/admin/hytter/actions";
 import { KILDENAVN, type HutContactRow, type HutReviewCase } from "@/lib/admin/huts";
 import { buildHutHref } from "@/lib/huts/href";
+import { HUT_ACCESS_OVERRIDES, HUT_TYPE_OVERRIDES, hutAccessKind } from "@/lib/huts/types";
 import { HUT_NEXT_STEP_LABELS, HUT_OWNER_LABELS, HUT_TYPE_LABELS, hutNextStep, type HutNextStepKind } from "@/lib/huts/wording";
 import type { HutOwnerKind, HutType } from "@/lib/huts/types";
 
@@ -127,7 +128,12 @@ const STATUSFARGE: Record<HutNextStepKind, string> = {
 export function HytteKontakt({ hytte }: { hytte: HutContactRow }) {
   const [state, action, pending] = useActionState(setHutContactAction, initial);
   const felt = "mt-0.5 h-9 w-full rounded-lg border border-line bg-surface px-3 text-[13px]";
-  const steg = hutNextStep({ locked: hytte.locked, bookingUrl: hytte.booking_url, infoUrl: hytte.info_url, managerName: hytte.manager_name });
+  const steg = hutNextStep({
+    access: hutAccessKind(hytte.locked, hytte.access_override),
+    bookingUrl: hytte.booking_url,
+    infoUrl: hytte.info_url,
+    managerName: hytte.manager_name,
+  });
   const kontrollert = hytte.links_verified_at ? new Date(hytte.links_verified_at).toLocaleDateString("nb-NO") : null;
 
   return (
@@ -140,6 +146,12 @@ export function HytteKontakt({ hytte }: { hytte: HutContactRow }) {
         </p>
         <span className={`rounded-full border px-2 py-0.5 text-[12px] font-medium ${STATUSFARGE[steg.kind]}`}>{HUT_NEXT_STEP_LABELS[steg.kind]}</span>
         {hytte.locked && <span className="rounded-full border border-line px-2 py-0.5 text-[12px] text-ink">Låst</span>}
+        {(hytte.type_override || hytte.access_override) && (
+          <span className="rounded-full border border-line px-2 py-0.5 text-[12px] text-ink">Avviker fra Kartverket</span>
+        )}
+        {hytte.access_status === "closed" && (
+          <span className="rounded-full border border-line px-2 py-0.5 text-[12px] text-ink">Midlertidig stengt</span>
+        )}
         {!hytte.is_visible && <span className="text-[12px] text-muted">vises ikke før den er godkjent</span>}
       </div>
       <p className="mt-0.5 text-[13px] text-muted">
@@ -177,6 +189,89 @@ export function HytteKontakt({ hytte }: { hytte: HutContactRow }) {
           <Melding state={state} />
         </div>
       </form>
+      <HytteOverstyring hytte={hytte} />
     </li>
+  );
+}
+
+const TILGANG_VALG: Record<(typeof HUT_ACCESS_OVERRIDES)[number], string> = {
+  unlocked: "Ulåst",
+  dnt_key: "DNT-nøkkel",
+  code_lock: "Kodelås",
+  special_key: "Spesialnøkkel",
+  code_or_special_key: "Kodelås eller spesialnøkkel",
+  locked_prebooking: "Låst – må bestilles på forhånd",
+};
+
+/**
+ * Avvik fra Kartverket for én hytte: type, tilgang, status og en kort offentlig merknad.
+ *
+ * Kildens verdi står til venstre og endres aldri herfra. Det som lagres, ligger oppå — og
+ * krever den offisielle siden som sier det, slik at den som kommer etter kan se hvorfor siden
+ * avviker fra Kartverket.
+ */
+function HytteOverstyring({ hytte }: { hytte: HutContactRow }) {
+  const [state, action, pending] = useActionState(setHutOverridesAction, initial);
+  const felt = "mt-0.5 h-9 w-full rounded-lg border border-line bg-surface px-3 text-[13px]";
+  const aktiv = hytte.override_verified_at !== null;
+  const kontrollert = hytte.override_verified_at ? new Date(hytte.override_verified_at).toLocaleDateString("nb-NO") : null;
+  const kildeTilgang = hytte.locked === null ? "ikke oppgitt" : hytte.locked ? "Låst" : "Ulåst";
+
+  return (
+    <details className="mt-3 border-t border-line pt-2.5" open={aktiv}>
+      <summary className="cursor-pointer text-[13px] font-medium text-ink">
+        Avvik fra Kartverket{aktiv ? ` · kontrollert ${kontrollert}` : ""}
+      </summary>
+      <p className="mt-1.5 text-[13px] text-muted">
+        Kilden sier: {typeNavn(hytte.hut_type).toLowerCase()} · {kildeTilgang.toLowerCase()}. Verdiene under vises i stedet. Tomt
+        valg betyr at kilden gjelder.
+      </p>
+      <form action={action} className="mt-2 grid gap-2 sm:grid-cols-3">
+        <input type="hidden" name="hutId" value={hytte.id} />
+        <label className="text-[13px] text-muted">
+          Type
+          <select name="type" defaultValue={hytte.type_override ?? ""} className={felt}>
+            <option value="">Som kilden ({typeNavn(hytte.hut_type).toLowerCase()})</option>
+            {HUT_TYPE_OVERRIDES.map((type) => (
+              <option key={type} value={type}>
+                {HUT_TYPE_LABELS[type]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="text-[13px] text-muted">
+          Tilgang
+          <select name="access" defaultValue={hytte.access_override ?? ""} className={felt}>
+            <option value="">Som kilden ({kildeTilgang.toLowerCase()})</option>
+            {HUT_ACCESS_OVERRIDES.map((kind) => (
+              <option key={kind} value={kind}>
+                {TILGANG_VALG[kind]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="text-[13px] text-muted">
+          Status
+          <select name="status" defaultValue={hytte.access_status} className={felt}>
+            <option value="unknown">Ikke oppgitt</option>
+            <option value="closed">Midlertidig stengt</option>
+          </select>
+        </label>
+        <label className="text-[13px] text-muted sm:col-span-3">
+          Offentlig merknad — én kort setning brukeren trenger, slik forvalteren oppgir det (vises på hyttesiden)
+          <input name="publicNote" defaultValue={hytte.public_note ?? ""} maxLength={160} className={felt} />
+        </label>
+        <label className="text-[13px] text-muted sm:col-span-3">
+          Kilde: den offisielle siden som sier dette (vises ikke offentlig)
+          <input name="sourceUrl" type="url" defaultValue={hytte.override_source_url ?? ""} placeholder="https://" className={felt} />
+        </label>
+        <div className="flex items-center gap-3 sm:col-span-3">
+          <button type="submit" disabled={pending} className={knapp}>
+            Lagre avvik
+          </button>
+          <Melding state={state} />
+        </div>
+      </form>
+    </details>
   );
 }

@@ -26,8 +26,39 @@ export type HutOwnerKind = (typeof HUT_OWNER_KINDS)[number];
 export const HUT_OVERNIGHT = ["yes", "no", "unknown"] as const;
 export type HutOvernight = (typeof HUT_OVERNIGHT)[number];
 
+/**
+ * Driftsstatus. Ingen kilde leverer den; den settes for hånd når forvalterens side oppgir at
+ * hytta er midlertidig stengt. En hytte som er borte for godt, avvises i stedet.
+ */
 export const HUT_ACCESS_STATUSES = ["open", "seasonal", "closed", "unknown"] as const;
 export type HutAccessStatus = (typeof HUT_ACCESS_STATUSES)[number];
+
+/**
+ * Tilgang: dør og nøkkel. De to første er Kartverkets kodeliste («Låst», «Ulåst»); resten
+ * finnes bare som overstyring, når forvalterens side sier noe mer presist eller noe annet.
+ * Speiler CHECK-listen på `huts.access_override` pluss kildens to verdier.
+ */
+export const HUT_ACCESS_KINDS = [
+  "locked_prebooking",
+  "unlocked_or_dnt_key",
+  "unlocked",
+  "dnt_key",
+  "code_lock",
+  "special_key",
+  "code_or_special_key",
+  "unknown",
+] as const;
+export type HutAccessKind = (typeof HUT_ACCESS_KINDS)[number];
+
+/** Verdiene en overstyring kan ha. Kildens «ulåst eller DNT-nøkkel» er ikke en av dem. */
+export const HUT_ACCESS_OVERRIDES = ["unlocked", "dnt_key", "code_lock", "special_key", "code_or_special_key", "locked_prebooking"] as const;
+export const HUT_TYPE_OVERRIDES = ["staffed_hut", "self_service_hut", "unstaffed_hut", "rest_cabin", "open_cabin", "day_trip_hut", "emergency_shelter"] as const;
+
+/** Tilgangen slik den vises: overstyringen når den finnes, ellers kildens Låst/Ulåst. */
+export function hutAccessKind(locked: boolean | null, override: string | null | undefined): HutAccessKind {
+  if (override && (HUT_ACCESS_KINDS as readonly string[]).includes(override)) return override as HutAccessKind;
+  return locked === true ? "locked_prebooking" : locked === false ? "unlocked_or_dnt_key" : "unknown";
+}
 
 /** Kategorien kildepostene lagres med i `area_features`. Publiseres aldri. */
 export const HUT_SOURCE_CATEGORY = "hytte_kilde" as const;

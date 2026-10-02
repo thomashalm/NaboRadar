@@ -258,7 +258,7 @@ kvikkleiresone har over 100 000 hjørner, og ville ellers sprengt svaret.
 | `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search` | Hytter og koier: rundt et punkt (inntil 50 km, nærmest først), i et kartutsnitt, i en kommune, og navnesøk. Svarer bare når kategorien `hytte` er publisert, eller kalleren er admin |
 | `get_hut(ref)` | Én hytte, slått opp på de åtte første tegnene i uuid-en. Til den faste hyttesiden |
 | `refresh_huts()` | Kobler kildeposter til hytter og regner de kanoniske feltene på nytt. Kjøres av synken, kun service_role |
-| `hut_review_queue()`, `review_hut()`, `set_hut_contact()`, `hut_contact_list()` | Kontrollkøen, avgjørelsen (godkjenn, avvis, slå sammen), og lenker og forvalter med listen over hva låste hytter mangler. Kun innlogget admin |
+| `hut_review_queue()`, `review_hut()`, `set_hut_contact()`, `set_hut_overrides()`, `hut_contact_list()` | Kontrollkøen, avgjørelsen (godkjenn, avvis, slå sammen), lenker og forvalter, overstyring av type og tilgang med offentlig merknad, og adminlisten. Kun innlogget admin |
 | `upsert_events`, `upsert_area_features`, `mark_*_removed` | Skriving, kun service_role |
 | `sync_run_start/finish`, `sync_due`, `claim_next_due_sync`, `claim_sync_request`, `finish_sync_request`, `expire_stale_sync_requests`, `provider_baseline`, `set_alert_state` | Sync-koordinering, kun service_role |
 | `provider_health`, `recent_sync_runs`, `request_sync`, `scheduler_status` | `/admin`, kun innlogget admin |
@@ -302,7 +302,7 @@ Tilgangen er en **positiv, uttømmende liste**, ikke en opprydding i enkelttilfe
 | Rolle | Kan kalle |
 |---|---|
 | `anon` | `features_near`, `features_count_near`, `events_within`, `get_event`, `data_status`, `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search`, `get_hut` |
-| `authenticated` | det samme, pluss `hut_review_queue`, `review_hut`, `set_hut_contact`, `hut_contact_list`, `is_admin`, `provider_health`, `recent_sync_runs`, `recent_sync_requests`, `request_sync`, `scheduler_status` og research-, review- og datasenterfunksjonene — som alle sjekker `is_admin()` selv |
+| `authenticated` | det samme, pluss `hut_review_queue`, `review_hut`, `set_hut_contact`, `set_hut_overrides`, `hut_contact_list`, `is_admin`, `provider_health`, `recent_sync_runs`, `recent_sync_requests`, `request_sync`, `scheduler_status` og research-, review- og datasenterfunksjonene — som alle sjekker `is_admin()` selv |
 | `service_role` | alt — sync-workeren |
 | `postgres` | alt — migrasjoner og pg_cron |
 
@@ -1184,6 +1184,52 @@ automatisk ennå; kontrolltidspunktet står i admin.
 booking/info», «Infoside finnes», «Lenke komplett» — de som mangler mest først
 (`hut_contact_list`).
 
+**Forvalteren kan korrigere Kartverket — felt for felt.** Kartverket er grunnlaget, men ikke
+alltid riktig på feltnivå. Den offentlige verdien følger derfor denne prioriteten, per felt:
+
+| Felt | 1 | 2 | 3 |
+|---|---|---|---|
+| Type | `type_override` (kontrollert mot forvalteren) | N50 | sekundærkilde |
+| Tilgang | `access_override` | N50 (`locked`) | — |
+| Forvalter | `manager_verified` | Turrutebasen | ukjent |
+
+Kildens verdi skrives aldri over. `hut_type`, `locked` og `overnight` er det synken leste, og
+synken oppdaterer dem som før; overstyringen ligger i egne kolonner den ikke rører, og
+`huts_public` legger den oppå. Det går alltid an å se «N50 sa X, forvalteren sier Y» — admin
+viser begge. En overstyring gjelder bare feltet som er kontrollert, aldri hele hytta, og kan
+ikke lagres uten kilde: `override_source_url` og `override_verified_at` kreves av en constraint.
+Kilden returneres ikke offentlig; hyttesiden sier bare «… og kontrollert informasjon fra
+<forvalter>».
+
+Tilgang er en lukket liste (`HUT_ACCESS_KINDS`), ikke fritekst:
+
+| Verdi | Vises som | Kommer fra |
+|---|---|---|
+| `locked_prebooking` | Låst – må bestilles på forhånd | N50 «Låst», eller overstyring |
+| `unlocked_or_dnt_key` | Ulåst, eller åpnes med DNT-nøkkel | N50 «Ulåst» |
+| `unlocked` | Ulåst | bare overstyring |
+| `dnt_key` | DNT-nøkkel | bare overstyring |
+| `code_lock` | Kodelås | bare overstyring |
+| `special_key` | Spesialnøkkel | bare overstyring |
+| `code_or_special_key` | Kodelås eller spesialnøkkel | bare overstyring (DNTs egen merkelapp) |
+
+Overnatting følger typen: en overstyrt type tar med seg sin egen definisjon. Bristol står som
+rastebu i N50, men Jevnaker almenning skriver at koia er åpen og at man kan overnatte én natt.
+Den er overstyrt til «åpen koie», og vises dermed med «Overnatting».
+
+**Offentlig merknad.** `public_note` er én kort, kildebelagt setning brukeren trenger:
+«Lånes ut til skoler og ideelle foreninger, ikke til privatpersoner.» Den vises under «Viktig å
+vite» på hyttesiden, i en rolig boks, og i den åpne raden i hyttekartet. Den er ikke det samme
+som `contact_note`, som er internt og aldri returneres. Høyst 160 tegn, ingen
+markedsføring, og samme kildekrav som overstyringene.
+
+**Midlertidig stengt.** `access_status = 'closed'` settes for hånd når forvalterens side sier
+at hytta er stengt. Hytta vises fortsatt — det er nyttig å vite at den finnes — men med
+«Midlertidig stengt» i lista i hyttekartet og på kortet på områdesiden. En hytte som er borte
+for godt, avvises i stedet. Ingen kilde leverer status, og vi viser aldri «åpen».
+
+Alt dette settes med `set_hut_overrides` fra «Avvik fra Kartverket» på `/admin/hytter`.
+
 **Kontrollen av piloten.** Alle 58 hyttene er slått opp mot forvalterens egen side; matrisen,
 klassene og de åpne sakene står i [research/hytter-pilot-kildekontroll.md](research/hytter-pilot-kildekontroll.md).
 Det viktigste funnet: «Ulåst» betyr ikke fri bruk. DNT Oslo og Omegn krever forhåndsbestilling
@@ -1199,6 +1245,13 @@ like — men lenken til forvalteren gjør at brukeren finner det.
 **Fast adresse.** Hver hytte har siden `/hytter/<navn>-<id>`, der `<id>` er de åtte første
 tegnene i hyttas uuid. Oppslaget (`get_hut`) skjer på ID-en; navnet er pynt, så lenken overlever
 at hytta bytter navn. Siden er `noindex` så lenge datasettet er en pilot.
+
+**Kartet på hyttesiden** viser hytta, tydelig markert, og de samme nabohyttene som står i lista
+«Andre hytter i nærheten» — samme oppslag, så lista og kartet kan ikke vise to forskjellige
+sett. Utsnittet strekker seg etter de tre nærmeste (minst 2,5 km, høyst 10 km). Et trykk på en
+nabo viser navn og type med «Se hyttesiden»; siden byttes ikke før brukeren følger lenken. Den
+markerte hytta tegnes i et eget lag uten klynging (`hutFocusLayer`), både her og i hyttekartet,
+så den aldri forsvinner inn i en klynge.
 
 **Hyttesiden** har fire deler, i fast rekkefølge: fakta (type, eier, forvalter, bruk, tilgang,
 kommune, fylke, høyde, koordinater — bare rader med innhold), offisiell info (lenkene, når vi

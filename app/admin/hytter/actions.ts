@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getAdminSession } from "@/lib/admin/session";
+import { HUT_ACCESS_OVERRIDES, HUT_TYPE_OVERRIDES } from "@/lib/huts/types";
 
 export type HutActionState = { status: "idle" } | { status: "ok"; message: string } | { status: "error"; message: string };
 
@@ -87,4 +88,51 @@ export async function setHutContactAction(_prev: HutActionState, formData: FormD
 
   revalidatePath("/admin/hytter");
   return { status: "ok", message: "Lagret." };
+}
+
+const overstyring = z.object({
+  hutId: z.uuid(),
+  type: z.union([z.literal(""), z.enum(HUT_TYPE_OVERRIDES)]),
+  access: z.union([z.literal(""), z.enum(HUT_ACCESS_OVERRIDES)]),
+  status: z.enum(["unknown", "closed", "seasonal", "open"]),
+  publicNote: z.string().max(160),
+  sourceUrl: z.union([z.literal(""), z.url({ protocol: /^https$/ })]),
+});
+
+/**
+ * Lagrer overstyringer av type og tilgang, status og den offentlige merknaden.
+ *
+ * Kildens verdier røres ikke; dette ligger oppå. En overstyring sier at Kartverket tar feil
+ * på akkurat dette feltet, og krever derfor den offisielle siden som sier det.
+ */
+export async function setHutOverridesAction(_prev: HutActionState, formData: FormData): Promise<HutActionState> {
+  const session = await getAdminSession();
+  if (session.state !== "admin") return { status: "error", message: "Ikke autorisert." };
+
+  const tekst = (navn: string) => String(formData.get(navn) ?? "").trim();
+  const parsed = overstyring.safeParse({
+    hutId: formData.get("hutId"),
+    type: tekst("type"),
+    access: tekst("access"),
+    status: tekst("status") || "unknown",
+    publicNote: tekst("publicNote"),
+    sourceUrl: tekst("sourceUrl"),
+  });
+  if (!parsed.success) return { status: "error", message: "Ugyldig verdi. Merknaden kan være høyst 160 tegn, og kilden må være en https-adresse." };
+  const { hutId, type, access, status, publicNote, sourceUrl } = parsed.data;
+  const noeSatt = type !== "" || access !== "" || status !== "unknown" || publicNote !== "";
+  if (noeSatt && sourceUrl === "") return { status: "error", message: "En overstyring eller merknad krever en kilde: den offisielle siden som sier det." };
+
+  const { error } = await session.client.rpc("set_hut_overrides", {
+    p_hut_id: hutId,
+    p_type: type,
+    p_access: access,
+    p_status: status,
+    p_public_note: publicNote,
+    p_source_url: sourceUrl,
+  });
+  if (error) return { status: "error", message: error.message };
+
+  revalidatePath("/admin/hytter");
+  return { status: "ok", message: noeSatt ? "Lagret." : "Overstyringene er fjernet." };
 }

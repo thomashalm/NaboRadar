@@ -1,6 +1,6 @@
 import { formatDate } from "@/lib/format";
 import type { Hut } from "@/lib/huts/queries";
-import { HUT_ACCESS_NOTE, hutFacts, hutNextStep, type HutLink } from "@/lib/huts/wording";
+import { HUT_ACCESS_NOTE, hutFacts, hutNextStep, hutSourceLine, hutStatusBadge, type HutLink } from "@/lib/huts/wording";
 
 const OVERSKRIFT = "text-xs font-semibold tracking-[0.08em] text-muted uppercase";
 
@@ -53,6 +53,7 @@ export function HutSummary({ hut }: { hut: Hut }) {
   return (
     <div className="space-y-3">
       <Fakta rader={hutFacts(hut, false)} compact />
+      {hut.publicNote && <p className="text-[13px] leading-snug text-ink">{hut.publicNote}</p>}
       <Lenker lenker={steg.links} />
       {steg.links.length === 0 && steg.note && <p className="text-[13px] leading-snug text-muted">{steg.note}</p>}
     </div>
@@ -60,7 +61,8 @@ export function HutSummary({ hut }: { hut: Hut }) {
 }
 
 /**
- * Hyttesiden: fakta, offisiell info og kilde, i den rekkefølgen.
+ * Hyttesiden: fakta, «viktig å vite» når forvalteren har oppgitt noe brukeren trenger,
+ * offisiell info og kilde, i den rekkefølgen.
  *
  * «Offisiell info» er neste steg, i fire tilstander (`hutNextStep`): bestillingslenke,
  * infoside, bare forvalter, eller ingenting kjent. Seksjonen vises ikke når den ikke har noe å
@@ -71,6 +73,7 @@ export function HutDetails({ hut }: { hut: Hut }) {
   const rader = hutFacts(hut, true);
   const steg = hutNextStep(hut);
   const oppdatert = formatDate(hut.sourceUpdatedAt);
+  const status = hutStatusBadge(hut.accessStatus);
 
   return (
     <div className="space-y-7">
@@ -81,8 +84,18 @@ export function HutDetails({ hut }: { hut: Hut }) {
         <div className="mt-2.5">
           <Fakta rader={rader} compact={false} />
         </div>
-        {hut.locked !== null && <p className="mt-2.5 text-[13px] leading-snug text-muted">{HUT_ACCESS_NOTE}</p>}
+        {hut.access !== "unknown" && <p className="mt-2.5 text-[13px] leading-snug text-muted">{HUT_ACCESS_NOTE}</p>}
       </section>
+
+      {(hut.publicNote || status) && (
+        // Rolig boks: dette er noe brukeren bør vite, ikke en advarsel.
+        <section aria-labelledby="hytte-merknad" className="rounded-2xl border border-line bg-surface px-4 py-3.5">
+          <h2 id="hytte-merknad" className={OVERSKRIFT}>
+            Viktig å vite
+          </h2>
+          <p className="mt-1.5 text-[15px] leading-snug text-ink">{hut.publicNote ?? `${status}.`}</p>
+        </section>
+      )}
 
       {(steg.links.length > 0 || steg.note) && (
         <section aria-labelledby="hytte-info">
@@ -104,7 +117,7 @@ export function HutDetails({ hut }: { hut: Hut }) {
           Kilde
         </h2>
         <p className="mt-2.5 text-[13px] leading-snug text-muted">
-          Kartverket, N50 Kartdata{oppdatert ? ` · oppdatert ${oppdatert}` : ""}.
+          {hutSourceLine(hut, oppdatert)}
           {hut.elevationM != null && " Høyden er terrenghøyden i kartpunktet, fra Kartverkets høydemodell."}
         </p>
       </section>

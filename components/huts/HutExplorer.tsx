@@ -10,10 +10,10 @@ import { distanceMeters, radiusBounds } from "@/lib/geo/radius";
 import { buildHutHref } from "@/lib/huts/href";
 import type { Hut } from "@/lib/huts/queries";
 import type { HutOwnerKind, HutType } from "@/lib/huts/types";
-import { HUT_ATTRIBUTION, HUT_OWNER_FILTERS, HUT_SOURCE_NOTE, HUT_TYPE_FILTERS, hutSummaryLine } from "@/lib/huts/wording";
+import { HUT_ATTRIBUTION, HUT_OWNER_FILTERS, HUT_SOURCE_NOTE, HUT_TYPE_FILTERS, hutStatusBadge, hutSummaryLine } from "@/lib/huts/wording";
 import { HutSummary } from "./HutDetails";
 import type { MapTileConfig } from "@/lib/map/config";
-import { hutsLayer, type HutMapFeature } from "@/lib/map/layers/huts";
+import { hutFocusLayer, hutsLayer, type HutMapFeature } from "@/lib/map/layers/huts";
 import { radiusLayer } from "@/lib/map/layers/radius";
 import { bindLayer } from "@/lib/map/layers/types";
 
@@ -162,9 +162,12 @@ export function HutExplorer({ tiles, center, originName, radiusM, initialHutId }
     () => [
       // Utgangspunktet og radien hyttene ble talt opp i, så «fra Storgata 1» kan ses i kartet.
       ...(origin ? [bindLayer(radiusLayer, { lat: origin.lat, lng: origin.lng, radiusM: radiusM ?? 0 })] : []),
+      // Alle hyttene i utsnittet blir stående når én velges; den valgte tegnes i tillegg øverst,
+      // utenfor klyngingen, så den aldri forsvinner inn i en klynge.
       bindLayer(hutsLayer, features),
+      bindLayer(hutFocusLayer, features.find((hut) => hut.id === selectedId) ?? null),
     ],
-    [features, origin, radiusM],
+    [features, origin, radiusM, selectedId],
   );
 
   /** Popupen i kartet er kort: navn, én linje, og veien til hyttesiden. Resten står i lista. */
@@ -302,6 +305,9 @@ export function HutExplorer({ tiles, center, originName, radiusM, initialHutId }
                   <span className="min-w-0 flex-1">
                     <span className={`block text-[15px] text-ink ${open ? "font-semibold" : "font-medium"}`}>{hut.name}</span>
                     <span className="block text-[13px] text-muted">{hutSummaryLine(hut, originName ?? undefined)}</span>
+                    {hutStatusBadge(hut.accessStatus) && (
+                      <span className="mt-0.5 block text-[13px] font-medium text-ink">{hutStatusBadge(hut.accessStatus)}</span>
+                    )}
                   </span>
                   <Chevron open={open} />
                 </button>

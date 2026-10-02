@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
+import { hutAccessKind } from "@/lib/huts/types";
 import { HUT_NEARBY, HUT_NEIGHBOURS, selectNearbyHuts, selectNeighbourHuts, type Hut } from "@/lib/huts/queries";
 import {
   HUT_ACCESS_LABELS,
@@ -13,6 +14,8 @@ import {
   hutFacts,
   hutOriginName,
   hutPlaceLine,
+  hutSourceLine,
+  hutStatusBadge,
   hutSummaryLine,
 } from "@/lib/huts/wording";
 
@@ -23,7 +26,9 @@ const hytte = (km: number, over: Partial<Hut> = {}): Hut => ({
   ownerKind: "dnt",
   managerName: null,
   accessStatus: "unknown",
-  locked: null,
+  access: "unknown",
+  publicNote: null,
+  overridden: [],
   overnight: "yes",
   beds: null,
   bookingUrl: null,
@@ -107,23 +112,43 @@ describe("ordlyd", () => {
 
   it("sier det Kartverkets kodeliste sier om tilgang — ikke «åpen», og ikke «ingen nøkkel»", () => {
     // Låst = «Låst og krever forhåndsbooking». Ulåst = «Ulåst eller tilgjengelig med DNTs standardnøkkel».
-    expect(hutAccessLine(true)).toBe("Låst – må bestilles på forhånd");
-    expect(hutAccessLine(false)).toBe("Ulåst, eller åpnes med DNT-nøkkel");
-    expect(hutAccessLine(null)).toBeNull();
+    expect(hutAccessLine("locked_prebooking")).toBe("Låst – må bestilles på forhånd");
+    expect(hutAccessLine("unlocked_or_dnt_key")).toBe("Ulåst, eller åpnes med DNT-nøkkel");
+    expect(hutAccessLine("unknown")).toBeNull();
     for (const tekst of Object.values(HUT_ACCESS_LABELS)) {
-      expect(tekst).not.toMatch(/åpen|stengt|ingen nøkkel|ledig/i);
+      if (tekst) expect(tekst).not.toMatch(/åpen|stengt|ingen nøkkel|ledig/i);
     }
-    expect(hutDetailLines({ overnight: "yes", beds: null, locked: false, managerName: null })).toEqual(["Overnatting", "Ulåst eller DNT-nøkkel"]);
-    expect(hutDetailLines({ overnight: "yes", beds: 12, locked: true, managerName: "DNT Oslo og Omegn" })).toEqual([
+    // Forvalterens opplysning, når den er kontrollert, står som den er — uten Kartverkets «eller».
+    expect(hutAccessLine("code_lock")).toBe("Kodelås");
+    expect(hutAccessLine("special_key")).toBe("Spesialnøkkel");
+    expect(hutAccessLine("code_or_special_key")).toBe("Kodelås eller spesialnøkkel");
+    expect(hutAccessLine("dnt_key", "short")).toBe("DNT-nøkkel");
+    // Kildens verdi og overstyringen: overstyringen går foran, og en ukjent verdi ignoreres.
+    expect(hutAccessKind(false, null)).toBe("unlocked_or_dnt_key");
+    expect(hutAccessKind(false, "code_lock")).toBe("code_lock");
+    expect(hutAccessKind(true, "finnes_ikke")).toBe("locked_prebooking");
+    expect(hutAccessKind(null, undefined)).toBe("unknown");
+    // Bare «midlertidig stengt» får plass i lister.
+    expect(hutStatusBadge("closed")).toBe("Midlertidig stengt");
+    expect(hutStatusBadge("seasonal")).toBeNull();
+    expect(hutStatusBadge("unknown")).toBeNull();
+    // Kildelinjen navngir forvalteren når noe er kontrollert mot den.
+    expect(hutSourceLine({ overridden: [], managerName: "DNT Oslo og Omegn" }, "4. januar 2025")).toBe("Kartverket, N50 Kartdata · oppdatert 4. januar 2025.");
+    expect(hutSourceLine({ overridden: ["access"], managerName: "DNT Oslo og Omegn" }, null)).toBe(
+      "Kartverket, N50 Kartdata, og kontrollert informasjon fra DNT Oslo og Omegn.",
+    );
+    expect(hutSourceLine({ overridden: ["note"], managerName: null }, null)).toMatch(/fra forvalteren\.$/);
+    expect(hutDetailLines({ overnight: "yes", beds: null, access: "unlocked_or_dnt_key", managerName: null })).toEqual(["Overnatting", "Ulåst eller DNT-nøkkel"]);
+    expect(hutDetailLines({ overnight: "yes", beds: 12, access: "locked_prebooking", managerName: "DNT Oslo og Omegn" })).toEqual([
       "Overnatting · 12 sengeplasser",
       "Låst, bestilles på forhånd",
       "Forvaltes av DNT Oslo og Omegn",
     ]);
-    expect(hutDetailLines({ overnight: "no", beds: null, locked: null, managerName: null })).toEqual([
+    expect(hutDetailLines({ overnight: "no", beds: null, access: "unknown", managerName: null })).toEqual([
       "Rast og dagsbesøk, ikke beregnet for overnatting",
     ]);
     // Ukjent er ukjent: ingen linje, ingen antakelse.
-    expect(hutDetailLines({ overnight: "unknown", beds: null, locked: null, managerName: null })).toEqual([]);
+    expect(hutDetailLines({ overnight: "unknown", beds: null, access: "unknown", managerName: null })).toEqual([]);
   });
 
   it("viser bare faktarader med innhold", () => {
@@ -133,7 +158,7 @@ describe("ordlyd", () => {
       managerName: null,
       overnight: "yes",
       beds: null,
-      locked: true,
+      access: "locked_prebooking",
       bookingUrl: "https://hyttebestilling.dnt.no/hytte/1",
       lat: 60.0360956,
       lng: 10.6636515,
@@ -160,7 +185,7 @@ describe("ordlyd", () => {
     // Kortversjonen i lista har verken fylke, høyde eller koordinater.
     expect(hutFacts(hut, false).map(([navn]) => navn)).toEqual(["Type", "Eier", "Bruk", "Tilgang", "Kommune"]);
     // En hytte kilden vet lite om, får få rader — ingen tomme, og ingen «ukjent».
-    const tom = { ...hut, type: "unknown", ownerKind: "other", overnight: "unknown", locked: null, municipalityName: null, countyName: null, elevationM: null } as const;
+    const tom = { ...hut, type: "unknown", ownerKind: "other", overnight: "unknown", access: "unknown", municipalityName: null, countyName: null, elevationM: null } as const;
     expect(hutFacts(tom, true)).toEqual([["Koordinater", "60,0361° N, 10,6637° Ø"]]);
     expect(hutFacts(tom, false)).toEqual([]);
   });
@@ -212,7 +237,7 @@ describe("lenker ut fra en hytte", () => {
 });
 
 describe("neste steg for en hytte", () => {
-  const base = { locked: true, bookingUrl: null, infoUrl: null, managerName: null };
+  const base = { access: "locked_prebooking", bookingUrl: null, infoUrl: null, managerName: null } as const;
 
   it("bestillingslenke: knappen er neste steg, uten ekstra tekst", () => {
     const steg = hutNextStep({ ...base, bookingUrl: "https://hyttebestilling.dnt.no/hytte/1", managerName: "DNT Oslo og Omegn" });
@@ -225,6 +250,10 @@ describe("neste steg for en hytte", () => {
     expect(steg.kind).toBe("info_link");
     expect(steg.links.map((l) => l.label)).toEqual(["Se hos Friluftsklubben i Oslo"]);
     expect(steg.note).toBe(HUT_NEXT_STEP_NOTES.info);
+    // En koie som ikke kan reserveres, viser ikke til en bestilling.
+    expect(hutNextStep({ ...base, access: "unlocked_or_dnt_key", infoUrl: "https://jevnaker-almenning.no/hytter/" }).note).toBe(
+      "Oppdatert informasjon finner du hos forvalteren.",
+    );
   });
 
   it("bare forvalter: sier at bestilling kreves, og at vi mangler lenken", () => {
@@ -241,10 +270,10 @@ describe("neste steg for en hytte", () => {
   });
 
   it("ulåst hytte uten lenke får ingen oppfordring", () => {
-    expect(hutNextStep({ ...base, locked: false })).toMatchObject({ kind: "unknown", bookingRequired: false, note: null });
-    expect(hutNextStep({ ...base, locked: null, managerName: "Lunner Almenning" })).toMatchObject({ kind: "manager_only", note: null });
+    expect(hutNextStep({ ...base, access: "unlocked_or_dnt_key" })).toMatchObject({ kind: "unknown", bookingRequired: false, note: null });
+    expect(hutNextStep({ ...base, access: "unknown", managerName: "Lunner Almenning" })).toMatchObject({ kind: "manager_only", note: null });
     // En ulåst hytte kan likevel ha en bestillingslenke.
-    expect(hutNextStep({ ...base, locked: false, bookingUrl: "https://hyttebestilling.dnt.no/hytte/2" })).toMatchObject({
+    expect(hutNextStep({ ...base, access: "unlocked_or_dnt_key", bookingUrl: "https://hyttebestilling.dnt.no/hytte/2" })).toMatchObject({
       kind: "booking_link",
       bookingRequired: false,
     });
@@ -255,12 +284,12 @@ describe("neste steg for en hytte", () => {
   });
 
   it("tilgangsraden lover ikke bestilling når vi ikke vet hvor", () => {
-    const hut = { type: "unstaffed_hut", ownerKind: "other", managerName: null, overnight: "yes", beds: null, locked: true, lat: 60, lng: 10 } as const;
+    const hut = { type: "unstaffed_hut", ownerKind: "other", managerName: null, overnight: "yes", beds: null, access: "locked_prebooking", lat: 60, lng: 10 } as const;
     const tilgang = (h: Parameters<typeof hutFacts>[0]) => hutFacts(h, true).find(([navn]) => navn === "Tilgang")?.[1];
     expect(tilgang(hut)).toBe("Låst");
     expect(tilgang({ ...hut, managerName: "Bondeungdomslaget i Oslo" })).toBe("Låst – må bestilles på forhånd");
     expect(tilgang({ ...hut, bookingUrl: "https://www.bul.no/x" })).toBe("Låst – må bestilles på forhånd");
-    expect(tilgang({ ...hut, locked: false })).toBe("Ulåst, eller åpnes med DNT-nøkkel");
+    expect(tilgang({ ...hut, access: "unlocked_or_dnt_key" })).toBe("Ulåst, eller åpnes med DNT-nøkkel");
   });
 });
 
@@ -293,5 +322,22 @@ describe("lenke til hyttekartet", () => {
 
   it("har ikke med noe sted når det ikke finnes et — da viser kartet ingen avstand", () => {
     expect(buildHutMapHref({ lat: 60, lng: 10.5 })).toBe("/hytter?lat=60.00000&lng=10.50000");
+  });
+});
+
+import { hutMapRadius } from "@/components/huts/HutPointMap";
+
+describe("kartutsnittet på hyttesiden", () => {
+  it("strekker seg etter de tre nærmeste naboene, innenfor faste grenser", () => {
+    const naboer = (...km: number[]) => km.map((k) => ({ distanceM: k * 1000 }));
+    // Tredje nærmeste ligger 5,5 km unna: utsnittet går litt forbi den.
+    expect(hutMapRadius(naboer(4.5, 5.2, 5.5, 5.7, 6.6))).toBeCloseTo(6325);
+    // Naboer tett på: aldri trangere enn at hytta kan plasseres i terrenget.
+    expect(hutMapRadius(naboer(0.1, 0.2, 0.3))).toBe(2500);
+    // Naboer langt unna: aldri så vidt at hytta bare blir et punkt.
+    expect(hutMapRadius(naboer(14, 22, 28))).toBe(10_000);
+    // Færre enn tre naboer, eller ingen.
+    expect(hutMapRadius(naboer(3))).toBeCloseTo(3450);
+    expect(hutMapRadius([])).toBe(2500);
   });
 });

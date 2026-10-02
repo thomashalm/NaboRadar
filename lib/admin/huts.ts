@@ -65,6 +65,13 @@ const kontaktSchema = z.object({
   latitude: z.number(),
   longitude: z.number(),
   is_visible: z.boolean(),
+  // `hut_type` og `locked` over er kildens verdier. Disse ligger oppå, og er det siden viser.
+  type_override: z.string().nullable(),
+  access_override: z.string().nullable(),
+  access_status: z.string(),
+  public_note: z.string().nullable(),
+  override_source_url: z.string().nullable(),
+  override_verified_at: z.string().nullable(),
 });
 
 export type HutContactRow = z.infer<typeof kontaktSchema>;

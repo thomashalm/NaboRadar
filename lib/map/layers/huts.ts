@@ -1,4 +1,4 @@
-import type { ExpressionSpecification, GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
+import type { ExpressionSpecification, GeoJSONSource } from "maplibre-gl";
 import type { MapLayer } from "./types";
 
 /** Det kartlaget trenger om en hytte. Resten hentes fra listen når hytta velges. */
@@ -15,6 +15,9 @@ export const HUT_COLOR = "#2f6b4f";
 export const HUT_REST_COLOR = "#8a6d3b";
 
 const SOURCE = "huts";
+const FOCUS_SOURCE = "hut-focus";
+
+const TYPE_COLOR: ExpressionSpecification = ["match", ["get", "hutType"], "rest_cabin", HUT_REST_COLOR, HUT_COLOR];
 
 /**
  * Hytter og koier som selvstendig kartlag.
@@ -53,20 +56,17 @@ export const hutsLayer: MapLayer<HutMapFeature[]> = {
         "circle-stroke-width": 2,
       },
     });
-    const selected: ExpressionSpecification = ["boolean", ["feature-state", "selected"], false];
     map.addLayer({
       id: "huts-dot",
       type: "circle",
       source: SOURCE,
       filter: ["!", ["has", "point_count"]],
       paint: {
-        "circle-radius": ["case", selected, 10, 7],
-        "circle-color": ["match", ["get", "hutType"], "rest_cabin", HUT_REST_COLOR, HUT_COLOR],
+        "circle-radius": 7,
+        "circle-color": TYPE_COLOR,
         "circle-opacity": 0.95,
-        // Valgt hytte får mørk ring i tillegg til størrelsen, så den kan skilles fra naboene
-        // også når popupen dekker noe av kartet.
-        "circle-stroke-color": ["case", selected, "#15171b", "#ffffff"],
-        "circle-stroke-width": ["case", selected, 3, 2],
+        "circle-stroke-color": "#ffffff",
+        "circle-stroke-width": 2,
       },
     });
   },
@@ -74,10 +74,44 @@ export const hutsLayer: MapLayer<HutMapFeature[]> = {
   update(map, data) {
     (map.getSource(SOURCE) as GeoJSONSource | undefined)?.setData(collection(data));
   },
+};
 
-  setSelected(map, id, previousId) {
-    if (previousId && previousId !== id) setState(map, previousId, false);
-    if (id) setState(map, id, true);
+/**
+ * Den ene hytta kartet handler om: den valgte i hyttekartet, eller hytta på en hytteside.
+ *
+ * Egen kilde uten klynging, tegnet over alt annet. Slik er den alltid synlig som et eget punkt —
+ * også på zoomnivåer der naboene ligger i klynger — og den skiller seg fra dem med størrelse
+ * og mørk ring, ikke bare farge.
+ */
+export const hutFocusLayer: MapLayer<HutMapFeature | null> = {
+  id: "hut-focus",
+  interactiveLayerIds: ["hut-focus-dot"],
+  markerLayerIds: ["hut-focus-dot"],
+  idFromFeature: (properties) => (typeof properties.featureId === "string" ? properties.featureId : null),
+
+  mount(map, data) {
+    map.addSource(FOCUS_SOURCE, { type: "geojson", data: collection(data ? [data] : []) });
+    map.addLayer({
+      id: "hut-focus-halo",
+      type: "circle",
+      source: FOCUS_SOURCE,
+      paint: { "circle-radius": 17, "circle-color": "#ffffff", "circle-opacity": 0.85 },
+    });
+    map.addLayer({
+      id: "hut-focus-dot",
+      type: "circle",
+      source: FOCUS_SOURCE,
+      paint: {
+        "circle-radius": 10,
+        "circle-color": TYPE_COLOR,
+        "circle-stroke-color": "#15171b",
+        "circle-stroke-width": 3,
+      },
+    });
+  },
+
+  update(map, data) {
+    (map.getSource(FOCUS_SOURCE) as GeoJSONSource | undefined)?.setData(collection(data ? [data] : []));
   },
 };
 
@@ -90,8 +124,4 @@ function collection(huts: HutMapFeature[]) {
       geometry: { type: "Point" as const, coordinates: [hut.lng, hut.lat] },
     })),
   };
-}
-
-function setState(map: MapLibreMap, id: string, selected: boolean) {
-  if (map.getSource(SOURCE)) map.setFeatureState({ source: SOURCE, id }, { selected });
 }

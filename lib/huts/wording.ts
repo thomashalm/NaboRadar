@@ -1,4 +1,4 @@
-import type { HutOvernight, HutOwnerKind, HutType } from "./types";
+import type { HutAccessKind, HutAccessStatus, HutOvernight, HutOwnerKind, HutType } from "./types";
 
 /**
  * Ordlyden for hytter og koier. All tekst som beskriver en hytte kommer herfra, slik at kort,
@@ -96,40 +96,58 @@ export function hutUseLine(hut: { overnight: HutOvernight; beds: number | null }
 }
 
 /**
- * Tilgang, etter Kartverkets kodeliste «Tilgjengelighet» (N50, `hytteinformasjon.tilgjengelighet`):
+ * Tilgang: dør og nøkkel.
+ *
+ * Utgangspunktet er Kartverkets kodeliste «Tilgjengelighet» (N50, `hytteinformasjon.tilgjengelighet`):
  *
  *   Låst      «Låst og krever forhåndsbooking.»
  *   Ulåst     «Ulåst eller tilgjengelig med Den Norske Turistforenings standardnøkkel.»
  *   Udefinert «Irrelevant/ikke aktuell.» — lagres som ukjent og vises ikke.
  *
- * «Ulåst» betyr altså ikke at man slipper nøkkel, og ingen av verdiene sier om hytta er åpen
- * i dag. Ordlyden under sier det kodelisten sier, verken mer eller mindre.
+ * «Ulåst» betyr altså ikke at man slipper nøkkel. Når forvalterens egen side sier noe mer
+ * presist eller noe annet — kodelås, spesialnøkkel — går den foran, som en overstyring
+ * (`access_override`). Ingen av verdiene sier om hytta er åpen i dag.
  * https://register.geonorge.no/sosi-kodelister/kartdata/tilgjengelighet
  */
-export const HUT_ACCESS_LABELS = {
-  locked: "Låst – må bestilles på forhånd",
-  unlocked: "Ulåst, eller åpnes med DNT-nøkkel",
-} as const;
+export const HUT_ACCESS_LABELS: Record<HutAccessKind, string | null> = {
+  locked_prebooking: "Låst – må bestilles på forhånd",
+  unlocked_or_dnt_key: "Ulåst, eller åpnes med DNT-nøkkel",
+  unlocked: "Ulåst",
+  dnt_key: "DNT-nøkkel",
+  code_lock: "Kodelås",
+  special_key: "Spesialnøkkel",
+  code_or_special_key: "Kodelås eller spesialnøkkel",
+  unknown: null,
+};
 
 /** Kortformen til kort og lister, der «Tilgang» ikke står foran. */
-const ACCESS_SHORT = { locked: "Låst, bestilles på forhånd", unlocked: "Ulåst eller DNT-nøkkel" } as const;
+const ACCESS_SHORT: Partial<Record<HutAccessKind, string>> = {
+  locked_prebooking: "Låst, bestilles på forhånd",
+  unlocked_or_dnt_key: "Ulåst eller DNT-nøkkel",
+};
 
-export const HUT_ACCESS_NOTE =
-  "Tilgang er Kartverkets opplysning om døra og nøkkelen. Den sier ikke om hytta er åpen eller ledig i dag.";
+export const HUT_ACCESS_NOTE = "Tilgang beskriver dør og nøkkel. Den sier ikke om hytta er åpen eller ledig i dag.";
 
-export function hutAccessLine(locked: boolean | null, form: "full" | "short" = "full"): string | null {
-  if (locked === null) return null;
-  return (form === "full" ? HUT_ACCESS_LABELS : ACCESS_SHORT)[locked ? "locked" : "unlocked"];
+export function hutAccessLine(access: HutAccessKind, form: "full" | "short" = "full"): string | null {
+  return (form === "short" ? ACCESS_SHORT[access] : undefined) ?? HUT_ACCESS_LABELS[access];
+}
+
+/**
+ * Kort status til lister og kort. Bare «midlertidig stengt» vises: det er den ene tingen som
+ * ikke kan vente til hyttesiden. Satt for hånd etter forvalterens side — ingen kilde leverer den.
+ */
+export function hutStatusBadge(status: HutAccessStatus): string | null {
+  return status === "closed" ? "Midlertidig stengt" : null;
 }
 
 /** Bruk, tilgang og forvalter på kortform, til kortene på områdesiden. Tom når kilden tier. */
 export function hutDetailLines(hut: {
   overnight: HutOvernight;
   beds: number | null;
-  locked: boolean | null;
+  access: HutAccessKind;
   managerName: string | null;
 }): string[] {
-  return [hutUseLine(hut), hutAccessLine(hut.locked, "short"), hut.managerName ? `Forvaltes av ${hut.managerName}` : null].filter(
+  return [hutUseLine(hut), hutAccessLine(hut.access, "short"), hut.managerName ? `Forvaltes av ${hut.managerName}` : null].filter(
     (linje): linje is string => linje !== null,
   );
 }
@@ -147,7 +165,7 @@ export interface HutFactsInput {
   managerName: string | null;
   overnight: HutOvernight;
   beds: number | null;
-  locked: boolean | null;
+  access: HutAccessKind;
   lat: number;
   lng: number;
   bookingUrl?: string | null;
@@ -171,7 +189,12 @@ export function hutFacts(hut: HutFactsInput, full: boolean): [label: string, val
     ["Bruk", hutUseLine(hut)],
     // «Må bestilles på forhånd» står i raden bare når vi også kan si hvor eller hos hvem. Vet vi
     // ingen av delene, står det «Låst», og forklaringen står for seg — se `hutNextStep`.
-    ["Tilgang", hut.locked && hutNextStep({ ...hut, bookingUrl: hut.bookingUrl ?? null, infoUrl: hut.infoUrl ?? null }).kind === "unknown" ? "Låst" : hutAccessLine(hut.locked)],
+    [
+      "Tilgang",
+      hut.access === "locked_prebooking" && hutNextStep({ ...hut, bookingUrl: hut.bookingUrl ?? null, infoUrl: hut.infoUrl ?? null }).kind === "unknown"
+        ? "Låst"
+        : hutAccessLine(hut.access),
+    ],
     ["Kommune", hut.municipalityName],
   ];
   if (full) {
@@ -248,7 +271,7 @@ export function hutLinks(hut: { bookingUrl: string | null; infoUrl: string | nul
  *   manager_only  vi vet hvem som driver hytta, men har ingen kontrollert lenke
  *   unknown       vi vet verken hvem som driver den eller hvor man går videre
  *
- * `bookingRequired` er Kartverkets «Låst» («låst og krever forhåndsbooking»). Det er en egen
+ * `bookingRequired` er tilgangen «låst og krever forhåndsbooking» (Kartverkets «Låst»). Det er en egen
  * opplysning: at bestilling kreves, betyr ikke at vi kjenner bestillingskanalen — og ingen av
  * delene sier om hytta er åpen eller ledig.
  */
@@ -265,23 +288,26 @@ export interface HutNextStep {
 
 export const HUT_NEXT_STEP_NOTES = {
   info: "Oppdatert informasjon om tilgang og bestilling finner du hos forvalteren.",
+  /** Infoside for en hytte som ikke må bestilles: da er det ingen bestilling å vise til. */
+  infoOnly: "Oppdatert informasjon finner du hos forvalteren.",
   managerOnly: "Bestilling kreves. NaboRadar har foreløpig ikke en verifisert bestillingslenke.",
   unknown:
     "Kartverket oppgir at hytta krever forhåndsbooking. NaboRadar har foreløpig ikke funnet en verifisert kontakt- eller bestillingsside.",
 } as const;
 
 export function hutNextStep(hut: {
-  locked: boolean | null;
+  access: HutAccessKind;
   bookingUrl: string | null;
   infoUrl: string | null;
   managerName: string | null;
 }): HutNextStep {
-  const bookingRequired = hut.locked === true;
+  // Bare Kartverkets «Låst» sier at bestilling kreves. En kodelås sier det ikke i seg selv.
+  const bookingRequired = hut.access === "locked_prebooking";
   const links = hutLinks(hut);
   const base = { bookingRequired, links, managerName: hut.managerName };
   // Med en bestillingslenke trengs ingen forklaring: knappen er neste steg.
   if (hut.bookingUrl) return { ...base, kind: "booking_link", note: null };
-  if (hut.infoUrl) return { ...base, kind: "info_link", note: HUT_NEXT_STEP_NOTES.info };
+  if (hut.infoUrl) return { ...base, kind: "info_link", note: bookingRequired ? HUT_NEXT_STEP_NOTES.info : HUT_NEXT_STEP_NOTES.infoOnly };
   // Uten lenke er det bare noe å si når hytta må bestilles. En ulåst hytte uten lenke får ingen
   // oppfordring: vi peker ikke brukeren til en aktør vi ikke kan navngi.
   if (hut.managerName) return { ...base, kind: "manager_only", note: bookingRequired ? HUT_NEXT_STEP_NOTES.managerOnly : null };
@@ -301,6 +327,16 @@ export function hutCountLine(count: number, radiusM: number, capped: boolean): s
   const antall = capped ? `Over ${count}` : String(count);
   const ord = count === 1 && !capped ? "hytte eller koie" : "hytter og koier";
   return `${antall} ${ord} innen ${Math.round(radiusM / 1000)} km`;
+}
+
+/**
+ * Kildelinjen på hyttesiden. Når noe er kontrollert mot forvalteren, sier vi det — og hvem —
+ * uten å vise kilden eller det interne notatet.
+ */
+export function hutSourceLine(hut: { overridden: readonly string[]; managerName: string | null }, updated: string | null): string {
+  const kartverket = `Kartverket, N50 Kartdata${updated ? ` · oppdatert ${updated}` : ""}`;
+  if (hut.overridden.length === 0) return `${kartverket}.`;
+  return `${kartverket}, og kontrollert informasjon fra ${hut.managerName ?? "forvalteren"}.`;
 }
 
 /** Står én gang under lista i hyttekartet. Hva som gjelder én hytte, står på hyttesiden. */

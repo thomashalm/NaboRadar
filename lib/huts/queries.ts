@@ -5,7 +5,16 @@ import { DatabaseQueryError } from "@/lib/db/types";
 import { elevationAt } from "@/lib/geo/elevation";
 import { municipalityNames } from "@/lib/geo/municipalities";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { HUT_ACCESS_STATUSES, HUT_OVERNIGHT, HUT_OWNER_KINDS, HUT_TYPES, type HutOwnerKind, type HutType } from "./types";
+import {
+  HUT_ACCESS_KINDS,
+  HUT_ACCESS_STATUSES,
+  HUT_OVERNIGHT,
+  HUT_OWNER_KINDS,
+  HUT_TYPES,
+  type HutAccessKind,
+  type HutOwnerKind,
+  type HutType,
+} from "./types";
 
 /**
  * Lesing av hytter og koier. Alt går gjennom huts_*-funksjonene i databasen.
@@ -34,6 +43,9 @@ const rowSchema = z.object({
   source_updated_at: z.string().nullable(),
   last_seen_at: z.string(),
   sources: z.array(z.string()),
+  access_kind: z.enum(HUT_ACCESS_KINDS),
+  public_note: z.string().nullable(),
+  overridden: z.array(z.string()),
   distance_m: z.number().optional(),
   total: z.coerce.number().optional(),
 });
@@ -45,7 +57,12 @@ export interface Hut {
   ownerKind: HutOwnerKind;
   managerName: string | null;
   accessStatus: (typeof HUT_ACCESS_STATUSES)[number];
-  locked: boolean | null;
+  /** Dør og nøkkel: forvalterens opplysning når den er kontrollert, ellers Kartverkets. */
+  access: HutAccessKind;
+  /** Én kort, kildebelagt setning brukeren trenger. Aldri det interne notatet. */
+  publicNote: string | null;
+  /** Feltene som er kontrollert mot forvalteren og avviker fra, eller utfyller, Kartverket. */
+  overridden: string[];
   overnight: (typeof HUT_OVERNIGHT)[number];
   beds: number | null;
   bookingUrl: string | null;
@@ -71,7 +88,9 @@ function toHut(row: z.infer<typeof rowSchema>): Hut {
     ownerKind: row.owner_kind,
     managerName: row.manager_name,
     accessStatus: row.access_status,
-    locked: row.locked,
+    access: row.access_kind,
+    publicNote: row.public_note,
+    overridden: row.overridden,
     overnight: row.overnight,
     beds: row.beds,
     bookingUrl: row.booking_url,

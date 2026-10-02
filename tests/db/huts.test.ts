@@ -552,6 +552,130 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
       }
     });
 
+    describe("overstyringer: forvalteren kan korrigere Kartverket, felt for felt", () => {
+      const KILDE = "https://eksempel.no/hytta";
+      const somAdmin = () => db.pg.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ role: "authenticated", email: ADMIN })]);
+      const offentlig = async (hytte: string) =>
+        (await db.pg.query<{ hut_type: string; overnight: string; locked: boolean | null; access_kind: string; access_status: string; public_note: string | null; overridden: string[] }>(
+          `select hut_type, overnight, locked, access_kind, access_status, public_note, overridden from get_hut($1)`,
+          [hytte.slice(0, 8)],
+        )).rows[0]!;
+
+      /** Setter hva kildepostene sier om hytta, og lar synken bygge den på nytt. */
+      const kildenSier = async (hytte: string, type: string, locked: boolean) => {
+        await db.pg.query(
+          `update area_features set attributes = attributes || $2::jsonb where id in (select feature_id from hut_sources where hut_id = $1)`,
+          [hytte, JSON.stringify({ hut_type: type, locked })],
+        );
+        await db.pg.exec("select * from refresh_huts()");
+      };
+
+      it("uten overstyring er den offentlige verdien kildens", async () => {
+        const hytte = await id("name = 'Kobberhaughytta'");
+        const kilde = (await db.pg.query<{ hut_type: string; locked: boolean | null }>(`select hut_type, locked from huts where id = $1`, [hytte])).rows[0]!;
+        const ut = await offentlig(hytte);
+        expect(ut.hut_type).toBe(kilde.hut_type);
+        expect(ut.access_kind).toBe(kilde.locked === true ? "locked_prebooking" : kilde.locked === false ? "unlocked_or_dnt_key" : "unknown");
+        expect(ut).toMatchObject({ public_note: null, overridden: [], access_status: "unknown" });
+      });
+
+      it("krever admin og en kilde", async () => {
+        const hytte = await id("name = 'Kobberhaughytta'");
+        for (const email of [null, "noen@example.com"]) {
+          expect(await flere(email, [`select set_hut_overrides('${hytte}', 'staffed_hut', null, null, null, '${KILDE}')`])).toBe("NEKTET");
+        }
+        // Admin uten kilde: nektet. Og ikke-https er ikke en kilde.
+        expect(await flere(ADMIN, [`select set_hut_overrides('${hytte}', null, 'code_lock', null, null, null)`])).toBe("NEKTET");
+        expect(await flere(ADMIN, [`select set_hut_overrides('${hytte}', null, 'code_lock', null, null, 'http://eksempel.no')`])).toBe("NEKTET");
+        // Tilgang og type er lukkede lister, ikke fritekst.
+        expect(await flere(ADMIN, [`select set_hut_overrides('${hytte}', null, 'vipps', null, null, '${KILDE}')`])).toBe("NEKTET");
+        expect(await flere(ADMIN, [`select set_hut_overrides('${hytte}', 'hotell', null, null, null, '${KILDE}')`])).toBe("NEKTET");
+        // Heller ikke rett i tabellen går det uten kilde.
+        await expect(db.pg.query(`update huts set access_override = 'code_lock' where id = $1`, [hytte])).rejects.toThrow(/huts_overstyring_har_kilde/);
+        await expect(db.pg.query(`update huts set public_note = 'Stengt.' where id = $1`, [hytte])).rejects.toThrow(/huts_overstyring_har_kilde/);
+      });
+
+      it("går foran kilden offentlig, uten å endre kildens verdi", async () => {
+        const hytte = await id("name = 'Kobberhaughytta'");
+        await db.pg.exec("begin");
+        try {
+          await somAdmin();
+          await kildenSier(hytte, "unstaffed_hut", false);
+          await db.pg.query(`select set_hut_overrides($1, 'staffed_hut', 'code_lock', 'closed', ' Midlertidig stengt for vedlikehold. ', $2)`, [hytte, KILDE]);
+          expect(await offentlig(hytte)).toEqual({
+            hut_type: "staffed_hut",
+            overnight: "yes",
+            // `locked` er fortsatt kildens. Den offentlige tilgangen er `access_kind`.
+            locked: false,
+            access_kind: "code_lock",
+            access_status: "closed",
+            public_note: "Midlertidig stengt for vedlikehold.",
+            overridden: ["type", "access", "status", "note"],
+          });
+          const rad = (await db.pg.query<{ hut_type: string; locked: boolean; type_override: string; kilde: string; kontrollert: boolean }>(
+            `select hut_type, locked, type_override, override_source_url as kilde, override_verified_at is not null as kontrollert from huts where id = $1`,
+            [hytte],
+          )).rows[0]!;
+          expect(rad).toEqual({ hut_type: "unstaffed_hut", locked: false, type_override: "staffed_hut", kilde: KILDE, kontrollert: true });
+          // Filteret i kartet bruker den offentlige typen.
+          const betjente = (await db.pg.query<{ id: string }>(`select id from huts_near(${ORIGIN.lat}, ${ORIGIN.lng}, 50000, 100, array['staffed_hut'])`)).rows.map((r) => r.id);
+          expect(betjente).toContain(hytte);
+          const ubetjente = (await db.pg.query<{ id: string }>(`select id from huts_near(${ORIGIN.lat}, ${ORIGIN.lng}, 50000, 100, array['unstaffed_hut'])`)).rows.map((r) => r.id);
+          expect(ubetjente).not.toContain(hytte);
+          // Kilden og kontrolltidspunktet returneres aldri offentlig.
+          const kolonner = Object.keys((await db.pg.query<Record<string, unknown>>(`select * from get_hut($1)`, [hytte.slice(0, 8)])).rows[0]!);
+          for (const intern of ["override_source_url", "override_verified_at", "type_override", "access_override", "contact_note"]) expect(kolonner).not.toContain(intern);
+          // En rastebu som forvalteren sier er en åpen koie, er til å overnatte i.
+          await db.pg.query(`select set_hut_overrides($1, 'open_cabin', null, null, 'Overnatting én natt er tillatt.', $2)`, [hytte, KILDE]);
+          expect(await offentlig(hytte)).toMatchObject({ hut_type: "open_cabin", overnight: "yes", access_kind: "unlocked_or_dnt_key", access_status: "unknown" });
+          await db.pg.query(`select set_hut_overrides($1, 'rest_cabin', null, null, null, $2)`, [hytte, KILDE]);
+          expect(await offentlig(hytte)).toMatchObject({ hut_type: "rest_cabin", overnight: "no" });
+          // Tømmes alt, gjelder kilden igjen, og kildefeltene nullstilles.
+          await db.pg.query(`select set_hut_overrides($1, '', '', '', '', '')`, [hytte]);
+          expect(await offentlig(hytte)).toMatchObject({ hut_type: "unstaffed_hut", access_kind: "unlocked_or_dnt_key", overridden: [], public_note: null });
+          expect((await db.pg.query<{ k: string | null }>(`select override_source_url as k from huts where id = $1`, [hytte])).rows[0]!.k).toBeNull();
+        } finally {
+          await db.pg.exec("rollback");
+        }
+      });
+
+      it("synken oppdaterer kildens verdi og rører aldri overstyringen", async () => {
+        const hytte = await id("name = 'Kobberhaughytta'");
+        await db.pg.exec("begin");
+        try {
+          await somAdmin();
+          await kildenSier(hytte, "unstaffed_hut", false);
+          await db.pg.query(`select set_hut_overrides($1, 'staffed_hut', 'special_key', null, 'Bestilles som hel hytte.', $2)`, [hytte, KILDE]);
+          // Kilden sier fortsatt det gamle: en ny sync endrer ingenting offentlig.
+          await db.pg.exec("select * from refresh_huts()");
+          expect(await offentlig(hytte)).toMatchObject({ hut_type: "staffed_hut", access_kind: "special_key", public_note: "Bestilles som hel hytte." });
+          // Kilden endrer seg (ny type, nå låst): kildens felt følger med som normalt …
+          await kildenSier(hytte, "self_service_hut", true);
+          const rad = (await db.pg.query<{ hut_type: string; locked: boolean; type_override: string; access_override: string; public_note: string }>(
+            `select hut_type, locked, type_override, access_override, public_note from huts where id = $1`,
+            [hytte],
+          )).rows[0]!;
+          expect(rad).toEqual({
+            hut_type: "self_service_hut",
+            locked: true,
+            type_override: "staffed_hut",
+            access_override: "special_key",
+            public_note: "Bestilles som hel hytte.",
+          });
+          // … og overstyringen gjelder fortsatt offentlig.
+          expect(await offentlig(hytte)).toMatchObject({ hut_type: "staffed_hut", locked: true, access_kind: "special_key", overridden: ["type", "access", "note"] });
+          // Adminlisten viser begge deler, så avviket kan forklares.
+          const admin = (await db.pg.query<{ hut_type: string; type_override: string; override_source_url: string }>(
+            `select hut_type, type_override, override_source_url from hut_contact_list() where id = $1`,
+            [hytte],
+          )).rows[0]!;
+          expect(admin).toEqual({ hut_type: "self_service_hut", type_override: "staffed_hut", override_source_url: KILDE });
+        } finally {
+          await db.pg.exec("rollback");
+        }
+      });
+    });
+
     it("slår opp én hytte på ID-delen av adressen", async () => {
       const hytte = await id("name = 'Kobberhaughytta'");
       const treff = (await som<{ id: string; name: string }>("anon", `select id, name from get_hut('${hytte.slice(0, 8)}')`)) as { id: string; name: string }[];

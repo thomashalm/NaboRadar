@@ -3,6 +3,7 @@ import Link from "next/link";
 import { HytteKontakt, HytteSak } from "@/components/admin/HytteKontroll";
 import { IkkeTilgang } from "@/components/admin/IkkeTilgang";
 import { hentHytteKontakt, hentHytteKø } from "@/lib/admin/huts";
+import { hutAccessKind } from "@/lib/huts/types";
 import { HUT_NEXT_STEP_LABELS, hutNextStep, type HutNextStepKind } from "@/lib/huts/wording";
 import { getAdminSession } from "@/lib/admin/session";
 
@@ -30,7 +31,12 @@ export default async function AdminHutsPage({ searchParams }: { searchParams: Se
     hentHytteKontakt(session.client, q.length >= 2 ? q : null),
   ]);
   const steg = (hytte: (typeof kontakt.hytter)[number]) =>
-    hutNextStep({ locked: hytte.locked, bookingUrl: hytte.booking_url, infoUrl: hytte.info_url, managerName: hytte.manager_name }).kind;
+    hutNextStep({
+      access: hutAccessKind(hytte.locked, hytte.access_override),
+      bookingUrl: hytte.booking_url,
+      infoUrl: hytte.info_url,
+      managerName: hytte.manager_name,
+    }).kind;
   // Tellingen gjelder låste hytter: det er de som lover brukeren noe vi må kunne følge opp.
   const låste = kontakt.hytter.filter((hytte) => hytte.locked);
   const antall = (kind: HutNextStepKind) => låste.filter((hytte) => steg(hytte) === kind).length;
@@ -72,6 +78,8 @@ export default async function AdminHutsPage({ searchParams }: { searchParams: Se
         <p className="mt-1 max-w-2xl text-[13px] text-muted">
           En låst hytte må bestilles på forhånd, og da skal siden si hvor — eller si at vi ikke vet. Legg bare inn lenker du selv
           har åpnet og sett at gjelder hytta, og forvalteren slik den offisielle siden oppgir. Ingen lenke er bedre enn en gjettet.
+          Under «Avvik fra Kartverket» kan type og tilgang korrigeres når forvalterens egen side sier noe annet; kildens verdi
+          står urørt ved siden av.
         </p>
         <form className="mt-3 flex gap-2" action="/admin/hytter">
           <input

@@ -3,6 +3,7 @@
 > Kontrollert 2026-10-02. Hver hytte er slått opp for seg mot forvalterens egen side. Ingenting
 > er hentet fra UT.no, og ingen registre, kalendre, priser eller sengetall er lagret.
 > Klassene A–D er intern kvalitetssikring, ikke en vurdering som vises offentlig.
+> Klassene og matrisen er fra runde 6; hva som ble gjort med C-sakene i runde 7, står under.
 
 ## Resultat
 
@@ -50,30 +51,41 @@ stedet under betjente hytter, med servering og flere overnattingsenheter.
 Skiforeningen 2–4, Friluftsklubben i Oslo 2. Foreningens områdesider på dnt.no pluss hyttas
 side på hyttebestilling.dnt.no ga forvalter, tilgang og lenke for hver DNT-hytte.
 
-## Åpne saker
+## C-sakene: hva som ble gjort (runde 7)
 
-| Sak | Hva kilden sier | Anbefaling |
-|---|---|---|
-| Breimåsahytta | Ingen offisiell side. Ligger i Gjerdrum statsallmenning. Turlagets årsmelding 2019: leid av turlaget «til arrangementer i regi av turlaget»; i bruk 2023 og 2025. Står ikke blant allmenningens utleiehytter | Avvis. Kartverkets «krever forhåndsbooking» peker til en bestilling som ikke finnes. En e-post til Allmenningsdrift Romerike kan avklare |
-| Sæteren gård | dnt.no: «Stedet eies og drives av DNT Oslo og Omegn», ført under betjente hytter | Følg DNT: betjent. Krever at typen kan overstyres |
-| Bristol | Jevnaker almenning: åpen for allmennheten, kan ikke reserveres, én natt om gangen | Følg forvalteren: åpen koie med overnatting. Krever at typen kan overstyres |
-| Solstua | Friluftsklubben: «stengt for ubestemt tid på grunn av nødvendig vedlikehold» (lest 02.10.2026, udatert) | Skjul til den åpner, eller vis med merknad. Krever et felt vi ikke har |
-| Husbergøya | FRIGO: lånes ut til skoler og organisasjoner, ikke privatpersoner | Vis med merknad, eller skjul. Samme felt |
-| De fem med feil tilgang | Se over | Overstyr tilgang, eller la merknaden bære det |
-| Ringkolltoppen (rastebu) | Ringerike kommune 2023: Skiforeningens lokallag har en grillhytte på toppen | Behold, men gi den et eget navn så den ikke forveksles med DNT-hytta 150 m unna |
-| Fjellsjøkoia | Ingen offisiell side. Lunner Almenning nevner den ikke | Behold som den er |
+Verifisert forvalterinformasjon går nå foran Kartverket på det feltet som er kontrollert
+(`type_override`, `access_override`), med en kort offentlig merknad der brukeren trenger den.
+Kildens verdi er uendret i basen.
 
-## Forslag til modell (ikke bygget)
+| Hytte | Problemet | Viste før | Viser nå | Kilde |
+|---|---|---|---|---|
+| Sæteren gård | Type | Ubetjent hytte · Ulåst, eller åpnes med DNT-nøkkel | Betjent hytte · Kodelås eller spesialnøkkel · «Flere overnattingsenheter som bestilles hver for seg.» | dnt.no/hytter/betjente/seteren-gard |
+| Bristol | Type og bruk | Rastebu · «ikke beregnet for overnatting» | Åpen koie · Overnatting · «Kan ikke reserveres. Overnatting én natt om gangen.» | jevnaker-almenning.no/hytter |
+| Solstua | Stengt | Vanlig hytte | «Midlertidig stengt» i lister · «Stengt inntil videre for vedlikehold.» | friluftsklubben.no/hyttene/Solstua |
+| Husbergøya | Bruk | Ingen merknad | «Lånes ut til skoler og ideelle foreninger, ikke til privatpersoner.» Bare infolenke | frigo.no/husbergoya-booking |
+| Fuglemyrhytta | Tilgang | Ulåst, eller åpnes med DNT-nøkkel | Kodelås · «Hele hytta bestilles samlet. Minst én i følget må være DNT-medlem.» | hyttebestilling.dnt.no/hytte/101209 |
+| Langøyene | Tilgang | Ulåst, eller åpnes med DNT-nøkkel | Kodelås · «Koden sendes etter bestilling. Minst én i følget må være DNT-medlem.» | hyttebestilling.dnt.no/hytte/10825 |
+| Bekkenstein | Tilgang, navn | Ulåst, eller åpnes med DNT-nøkkel | Kodelås · samme merknad. Søkbar som «Bekkensten» | hyttebestilling.dnt.no/hytte/101114463 |
+| Styrbord | Tilgang | Ulåst, eller åpnes med DNT-nøkkel | Spesialnøkkel · «Nøkkelen hentes hos DNT i Oslo før oppholdet. Hytta bestilles som én enhet.» | hyttebestilling.dnt.no/hytte/101024831 |
+| Kobberhaughytta | Tilgang | Ulåst, eller åpnes med DNT-nøkkel | Kodelås eller spesialnøkkel · «Alle gjester må bestille opphold på forhånd.» | hyttebestilling.dnt.no/hytte/10645 |
+| Ringkolltoppen (rastebu) | Identitet | Rastebu med samme navn som DNT-hytta | Skjult. Kommunens rapport bekrefter at Skiforeningen har en grillhytte på toppen, men ingen offisiell kilde plasserer den i N50-punktet | — |
 
-To små felt ville løst de fleste C-sakene, begge satt for hånd med samme kontrollkrav som
-lenkene:
+Breimåsahytta er avvist: den finnes og brukes av det lokale turlaget, men er ikke dokumentert
+som offentlig utleiehytte. Notat og navn er beholdt.
 
-1. **En kort offentlig merknad om bruk** — «Bestilles som hel hytte», «Krever DNT-medlemskap»,
-   «Kun for skoler og organisasjoner», «Stengt for vedlikehold». Vises under «Offisiell info».
-2. **Overstyring av type og tilgang** når forvalterens side tydelig sier noe annet enn
-   Kartverket. Kilden står i notatet; synken rører ikke overstyringen.
+Etter dette: 58 objekter, 54 synlige ved publisering, 4 avvist (Kleivstua, Solheim,
+Breimåsahytta, Ringkolltoppen rastebu), ingen i kontrollkøen.
 
-Uten disse er lenken til forvalteren det som gjør forskjellen forståelig.
+## Det som fortsatt er grovt
+
+- 28 DNT-hytter står med Kartverkets «Ulåst, eller åpnes med DNT-nøkkel». Det er riktig, men
+  DNT krever forhåndsbestilling og medlemskap for nøkkelen. Alle har bestillingslenke. En
+  overstyring til «DNT-nøkkel» med merknad kan legges på i én bolk.
+- Bristol har fortsatt Kartverkets tilgangstekst. Forvalteren sier «åpen for allmennheten»,
+  ikke uttrykkelig «ulåst».
+- Fjellsjøkoia har ingen offisiell side; Vangen har ingen navngitt driver.
+- Punkt som dekker flere enheter (Tømtehytta, Ommen/Veslestua, Spikertjernhytta) lenker til
+  hovedenheten.
 
 ## Matrise
 
