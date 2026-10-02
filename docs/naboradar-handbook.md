@@ -2494,6 +2494,13 @@ Datakvalitetsrunden 2026-09-30 fjernet tre tall på denne regelen: Googles 840 M
 Husnes' 40 MW (kø hos Statnett) og Fauskes 13 MW (bare presse). Narvik ble rettet fra 230 til 130
 MW i en egen korreksjon samme dag.
 
+**Nettinfrastruktur er ikke et datasenter.** Samtrafikkpunkter, nettnoder og telesentraler føres
+ikke som egne anlegg. NIX1, NIX2 og BIX er svitsjer i universitetenes rom eller i andres
+datasentre og er avvist; der verten finnes i basen (Bulk OS-IX, Vaultica OSL01, Green Mountain
+SVG1), står noden som notat på vertsanlegget. Østre Aker vei 18 er Telenors telesentral med en
+Arelion-node og er gjort om til notat, som Sognsveien 75. `network_pop` brukes bare når en
+operatør faktisk selger plass i rommet (Blix CJH), ikke for å redde en post som ikke er et anlegg.
+
 **En avdeling i Brønnøysund er ikke et anlegg.** En underenhet viser hvor et selskap har ansatte,
 ikke at det eier eller driver et datasenter der. I runde 9 lå Nscale Drifts avdeling på Hønefoss
 på adressen til hscale OSL1 (samme anlegg, ikke nytt), og avdelingen på Sola lå i ASP K11, som

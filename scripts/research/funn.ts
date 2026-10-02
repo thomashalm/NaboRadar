@@ -1265,11 +1265,15 @@ export const FUNN: Funn[] = [
       "kjøleanlegg, nødstrømsaggregat, høy effektbruk og lite arbeidsplasser per kvadratmeter " +
       "— relevant både for naboer og for å forstå hva et næringsbygg i området faktisk er.",
     notes:
-      "Aliaser og operatørhistorikk: DigiPlex Oslo Ulven → STACK OSL01 → Vaultica OSL01. PeeringDB " +
-      "fører anlegget på Ulvenveien 89B, DataCenterMap på Selma Ellefsens vei 1 — samme kvartal på " +
-      "Ulven. Koordinaten er Kartverkets punkt for Selma Ellefsens vei 1. De øvrige SI OSL-selskapene i " +
-      "Nkom-registeret (02, 03.1, 03.2, 04) har adresser i Nordre Follo, Lillestrøm og Indre Østfold " +
-      "og faller utenfor dette området.",
+      "Aliaser og operatørhistorikk: DigiPlex Oslo Ulven → STACK OSL01 → Vaultica OSL01. " +
+      "PeeringDB fører anlegget på Ulvenveien 89B, DataCenterMap på Selma Ellefsens vei 1 — samme " +
+      "kvartal på Ulven. Koordinaten er Kartverkets punkt for Selma Ellefsens vei 1. De øvrige SI " +
+      "OSL-selskapene i Nkom-registeret (02, 03.1, 03.2, 04) har adresser i Nordre Follo, " +
+      "Lillestrøm og Indre Østfold og faller utenfor dette området. Runde 12 (2026-10-02): " +
+      "Anlegget (hos NIX omtalt som Digiplex Ulven, Selma Ellefsens vei 1) er ett av tre steder " +
+      "der samtrafikkpunktet NIX1 har svitsjer, i CCR A-rommet. NIX er nettinfrastruktur i " +
+      "anlegget, ikke et eget datasenter. Astrofarm AS oppga 2021–2024 at hoveddatasenteret deres " +
+      "lå hos Digiplex på Ulven; det er ikke ført som kunde.",
     tidligere_titler: [
       "STACK OSL01 datasenter, Ulven",
       "OSL01 datasenter, Selma Ellefsens vei 1 på Ulven",
@@ -1332,9 +1336,9 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Blix BDC, Lindeberg næringsvei 26",
     description:
-      "Bekreftet datasenter på Lindeberg: karriernøytralt anlegg bygget i 2021, med colocation-bur " +
-      "og varmegjenvinning. Kategori E: eksisterende fysisk anlegg. Operatøren står også i Nkoms " +
-      "register, og adressen er beliggenhetsadressen i Enhetsregisteret.",
+      "Blix' eget colocation-datasenter på Lindeberg, åpnet i 2021 i et eldre flerbrukerbygg. " +
+      "Operatøren oppgir 1 MW for servere og kjøling og planlegger levering av overskuddsvarme " +
+      "til fjernvarme. Operatøren står i Nkoms register.",
     municipality: "Oslo",
     address: "Lindeberg næringsvei 26",
     postal_code: "1067",
@@ -1352,10 +1356,14 @@ export const FUNN: Funn[] = [
       "bare hvor.",
     notes:
       "Oppgradert i runde 4: bransjeoversikter bekrefter anlegget på adressen, og Blix har tre " +
-      "Oslo-sites — BDC på Lindeberg, CJH i sentrum og NR5 på Rommen. Datakvalitet 2026-09-30: Blix " +
-      "Data Center AS (913675630) har sin eneste underenhet her. Blix Data Center AS står med 10 MW " +
-      "i Statnetts kø ved Furuset TRA; det er uavklart om køplassen gjelder BDC eller AI-delen på " +
-      "Nedre Rommen 5, og den er ikke sikret kraft.",
+      "Oslo-sites — BDC på Lindeberg, CJH i sentrum og NR5 på Rommen. Datakvalitet 2026-09-30: " +
+      "Blix Data Center AS (913675630) har sin eneste underenhet her. Blix Data Center AS står " +
+      "med 10 MW i Statnetts kø ved Furuset TRA; det er uavklart om køplassen gjelder BDC eller " +
+      "AI-delen på Nedre Rommen 5, og den er ikke sikret kraft. Runde 12 (2026-10-02): bekreftet " +
+      "av Blix' egen anleggsside. Operatør er Blix Solutions AS; eier er ikke ført, fordi det er " +
+      "uklart om Blix Solutions AS eller Blix Data Center AS eier anlegget. 1 MW er operatørens " +
+      "tall for servere og kjøling, ikke IT-last. Anlegget ble åpnet, ikke bygget, i 2021. " +
+      "PeeringDB fører anlegget som NIX1-lokasjon, men NIX lister det ikke selv.",
     tidligere_titler: [
       "Blix Solutions — registrert datasenteroperatør på Lindeberg",
     ],
@@ -2970,7 +2978,10 @@ export const FUNN: Funn[] = [
       "Skøyen sa ingenting om dette.",
     notes:
       "Aliaser: Alfabygget, OS-IX, Oslo Internet Exchange, HMG9. Bulk Infrastructure har " +
-      "forretningsadresse Karenslyst allé 53 på Skøyen — det er kontoret, ikke anlegget.",
+      "forretningsadresse Karenslyst allé 53 på Skøyen — det er kontoret, ikke anlegget. Runde 12 " +
+      "(2026-10-02): Anlegget er ett av tre steder der samtrafikkpunktet NIX1 (drevet av " +
+      "UiO/USIT) har svitsjer, i IFD A-rommet. NIX er nettinfrastruktur i anlegget, ikke en kunde " +
+      "eller et eget datasenter.",
     public_candidate: true,
     public_candidate_note:
       "Bekreftet fysisk anlegg med tre uavhengige oppføringer på samme adresse, verifisert adresse og korrekt status.",
@@ -3571,27 +3582,31 @@ export const FUNN: Funn[] = [
   {
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
-    item_type: "finding",
-    tidligere_titler: ["Østre Aker vei 18 — Telia og Arelion samtrafikkpunkt"],
-    title: "Telenor Økern telesentral, Østre Aker vei 18 — Arelion-PoP (OKR/C)",
+    item_type: "note",
+    tidligere_titler: [
+      "Østre Aker vei 18 — Telia og Arelion samtrafikkpunkt",
+      "Telenor Økern telesentral, Østre Aker vei 18 — Arelion-PoP (OKR/C)",
+    ],
+    title: "Østre Aker vei 18 er Telenors telesentral (Økern), ikke et datasenter",
     description:
-      "Telenors telesentral på Økern, der Arelion (tidligere Telia Carrier) har en nettnode med " +
-      "koden OKR/C. Bygget har vært telesentral siden 1970-årene. Arelion-noden er bare bekreftet " +
-      "av PeeringDB og katalogkilder, ikke av Arelion eller Telenor selv.",
+      "Østre Aker vei 18 er Telenors telesentral på Økern, i bruk som telesentral siden " +
+      "1970-årene. Arelion (tidligere Telia Carrier) har en nettnode der med koden OKR/C, kjent " +
+      "fra PeeringDB og katalogkilder. Det er nettinfrastruktur i et teknisk bygg, ikke et " +
+      "datasenter med kommersiell colocation.",
     municipality: "Oslo",
     address: "Østre Aker vei 18",
     postal_code: "0581",
     city: "Oslo",
     latitude: 59.92822,
     longitude: 10.81206,
-    verification_status: "partially_verified",
-    operational_status: "active",
+    verification_status: "rejected",
+    operational_status: "unknown",
     sensitivity: "internal_only",
     confidence: "medium",
     interest_level: "medium",
     why_interesting:
-      "Et knutepunkt i Ulven/Økern-klyngen. Sammen med Alfabygget og OSL01 viser det at Hovinbyen " +
-      "er Oslos tyngste område for digital infrastruktur.",
+      "Adressen går igjen i datasenterkatalogene. Notatet forklarer hvorfor den ikke er ført som " +
+      "anlegg.",
     notes:
       "Aliaser: OKR/C, TeliaSonera OKR/C. Primærkilde-runde 2026-09-30: primærkilde for anlegget " +
       "søkt, ikke funnet. Adressen er bekreftet i Kartverket (gnr/bnr 122/354). Arelion Norway AS " +
@@ -3600,7 +3615,12 @@ export const FUNN: Funn[] = [
       "Arelion samtrafikkpunkt») og type nettnode. «Telia» og «Arelion» i katalogene er samme " +
       "node: TeliaSonera International Carrier ble Telia Carrier og deretter Arelion. Telia Norge " +
       "AS er ikke dokumentert på adressen. Eiendommen ble solgt i 2021 med leiekontrakt til " +
-      "Telenor. Ikke samme anlegg som Skygard OSL1 i nr. 24C.",
+      "Telenor. Ikke samme anlegg som Skygard OSL1 i nr. 24C. Runde 12 (2026-10-02): gjort om fra " +
+      "funn til notat og tatt ut av anleggslisten. Telenors samlokalisering i sentralene " +
+      "(Telelosji) er innplassering av ekomutstyr for andre ekomaktører, ikke kommersiell " +
+      "colocation. Verken Telenor eller Arelion står i Nkoms datasenterregister for adressen, og " +
+      "det finnes ikke noe vertsanlegg i basen å knytte noden til. Samme behandling som NIX1 og " +
+      "Sognsveien 75.",
     kilder: [
       {
         source_name: "DataCenterMap: TeliaSonera OKR/C",
@@ -3638,12 +3658,13 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
-    title: "GlobalConnect Nydalen, Sandakerveien 121",
+    tidligere_titler: ["GlobalConnect Nydalen, Sandakerveien 121"],
+    title: "GlobalConnect Nydalen (tidl. Availo DC0/S121), Sandakerveien 121",
     description:
-      "Datahall bygget av Availo i Schibsteds trykkeri i Sandakerveien 121 og åpnet i oktober 2012, " +
-      "planlagt til ca. 2000 m², med Schibsted IT som ankerkunde på en tiårsavtale. Anlegget ble " +
-      "senere en del av GlobalConnect. Schibsted har forlatt bygget, og tomta er omregulert til " +
-      "boliger. Om datasenteret fortsatt er i drift, er ukjent.",
+      "Tidligere datasenter i Schibsteds trykkeri i Sandakerveien 121, bygget av Availo, åpnet i " +
+      "oktober 2012 og senere overtatt av IP-Only og GlobalConnect. Anlegget er lagt ned: bygget " +
+      "rives og bygges om til boliger, og Oslo kommune ga igangsettingstillatelse for riving i " +
+      "mars 2026.",
     municipality: "Oslo",
     address: "Sandakerveien 121",
     postal_code: "0484",
@@ -3651,9 +3672,9 @@ export const FUNN: Funn[] = [
     latitude: 59.94931,
     longitude: 10.7701,
     verification_status: "verified_public_source",
-    operational_status: "unknown",
+    operational_status: "closed",
     sensitivity: "internal_only",
-    confidence: "low",
+    confidence: "medium",
     interest_level: "medium",
     why_interesting:
       "Et datasenter midt i Nydalen, et område som ellers er kontor, bolig og høyskole.",
@@ -3661,9 +3682,15 @@ export const FUNN: Funn[] = [
       "Aliaser: V-Hosting Data Center, Availo. Cleanup 2026-09-30: status satt til ukjent. " +
       "Trykkeriet er demontert, og tomta ble omregulert til ca. 700 boliger 27.08.2025 (PBE " +
       "2025/06863); hallene skal bygges om, med mulig byggestart i 2026. Ingen primærkilde " +
-      "bekrefter drift eller nedleggelse av datasenteret, og GlobalConnect navngir ikke Nydalen på " +
-      "egne sider. Tidligere beskrivelse («i drift fra 2014, 500 m²») var feil. Neste steg: " +
-      "byggesaksinnsyn for sak 2025/06863 eller spørsmål til GlobalConnect.",
+      "bekrefter drift eller nedleggelse av datasenteret, og GlobalConnect navngir ikke Nydalen " +
+      "på egne sider. Tidligere beskrivelse («i drift fra 2014, 500 m²») var feil. Neste steg: " +
+      "byggesaksinnsyn for sak 2025/06863 eller spørsmål til GlobalConnect. Runde 12 " +
+      "(2026-10-02): status ukjent → nedlagt, sikkerhet medium, ny tittel. Plan- og " +
+      "bygningsetatens sak 201104198 («Etablering av nytt datasenter», ferdigattest 01.10.2014, " +
+      "Availo AS) bekrefter at anlegget fantes. Sak 2025/07764 gir igangsettingstillatelse for " +
+      "riving 19.03.2026, der strøminntak og trafo fjernes, og sak 2025/07759 lister en egen " +
+      "miljøkartlegging av GlobalConnects arealer. Avviklingsdatoen er ikke dokumentert. Ikke " +
+      "katalogfeil og ikke duplikat av GlobalConnect HMG1. Punktet beholdes som historisk.",
     public_candidate: true,
     public_candidate_note:
       "Bekreftet fysisk anlegg i drift siden 2014, verifisert adresse.",
@@ -3896,9 +3923,9 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Rent a Rack, Ulvenveien 87",
     description:
-      "Tidligere datasenter på Ulvenveien 87, drevet av Rent a Rack AS, som Webhuset kjøpte i 2012. " +
-      "Selskapet er senere omdøpt og flyttet, og det er andre leietakere i bygget i dag. Om " +
-      "datasenteret fortsatt er i drift, er ukjent.",
+      "Tidligere datasenter i underetasjen på Ulvenveien 87, drevet av Rent a Rack AS, som " +
+      "Webhuset kjøpte i 2012. Anlegget er lagt ned: kjøleanlegget hadde midlertidig tillatelse " +
+      "til juli 2022, og byggesaken ble avsluttet i mai 2023 med tittelen «Tiltak fjernet».",
     municipality: "Oslo",
     address: "Ulvenveien 87",
     postal_code: "0581",
@@ -3906,9 +3933,9 @@ export const FUNN: Funn[] = [
     latitude: 59.92474,
     longitude: 10.81292,
     verification_status: "partially_verified",
-    operational_status: "unknown",
+    operational_status: "closed",
     sensitivity: "internal_only",
-    confidence: "low",
+    confidence: "medium",
     interest_level: "low",
     why_interesting:
       "Enda et anlegg i Ulven-klyngen; samlet gjør de området til Oslos tetteste ansamling av " +
@@ -3921,7 +3948,11 @@ export const FUNN: Funn[] = [
       "Runde 8 (2026-10-01): uavklart. Anlegget er bare bekreftet historisk (Webhusets " +
       "pressemelding 2012). PeeringDB-oppføringen er fortsatt aktiv og ble oppdatert i 2025, men " +
       "ingen underenhet er registrert på Ulvenveien 87, og ingen av selskapene står i Nkoms " +
-      "register. Serverbite AS er tidligere Rent a Rack AS.",
+      "register. Serverbite AS er tidligere Rent a Rack AS. Runde 12 (2026-10-02): status ukjent " +
+      "→ nedlagt, sikkerhet medium. Plan- og bygningsetatens saker 201311822, 201600777 og " +
+      "201609720 bekrefter en datasentral i underetasjen, med Rent A Rack AS som tiltakshaver i " +
+      "2016. Nedleggelsen er utledet av sakstittelen «Tiltak fjernet»; selve bekreftelsen ligger " +
+      "ikke i innsynet. Om bygget er revet er uavklart. Punktet beholdes som historisk.",
     kilder: [
       {
         source_name: "PeeringDB: nettverk til stede i fasiliteten",
@@ -3958,10 +3989,12 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
-    title: "Vault OSL1, Økernveien 121",
+    tidligere_titler: ["Vault OSL1, Økernveien 121"],
+    title: "Vault Oslo-1, Økernveien 121",
     description:
-      "Datasenter oppført av Vault AS i Økernveien 121. Kun én bransjekilde; ikke bekreftet " +
-      "mot operatør eller myndighet.",
+      "Datasenter som Vault AS beskrev på egne sider i 2013–2018 som «Oslo-1», ca. 3 000 m² i " +
+      "Økernveien 121. Bygget har hatt teknisk sentral siden rundt 2000. Ingen kilde bekrefter " +
+      "drift i 2025–2026, og ingen dokumenterer nedleggelse.",
     municipality: "Oslo",
     address: "Økernveien 121",
     postal_code: "0579",
@@ -3977,10 +4010,14 @@ export const FUNN: Funn[] = [
       "Nok et anlegg i Økern-klyngen, i et område med tung boligutbygging.",
     notes:
       "Cleanup 2026-09-30: status satt til ukjent. Vault AS (998547369) er formelt aktivt i " +
-      "Brønnøysund og har fortsatt en underenhet på Økernveien 121, men står ikke i Nkoms register " +
-      "over kommersielle datasenteroperatører, og regnskapet for 2025 viser 15 000 kr i " +
+      "Brønnøysund og har fortsatt en underenhet på Økernveien 121, men står ikke i Nkoms " +
+      "register over kommersielle datasenteroperatører, og regnskapet for 2025 viser 15 000 kr i " +
       "driftsinntekter. Det tyder på at det ikke drives colocation, men ingen primærkilde " +
-      "dokumenterer nedleggelse eller bruksendring. Ikke samme anlegg som Vaultica OSL01.",
+      "dokumenterer nedleggelse eller bruksendring. Ikke samme anlegg som Vaultica OSL01. Runde " +
+      "12 (2026-10-02): ny tittel (tidligere «Vault OSL1, Økernveien 121»). Vault AS er en egen " +
+      "norsk aktør fra 2012, ikke Vaultica eller DigiPlex. Byggesak 200011919 viser en " +
+      "bredbåndsentral i underetasjen fra 2000, og Colt har en enhet i bygget i dag. Status er " +
+      "fortsatt ukjent.",
     kilder: [
       {
         source_name: "DataCenterMap: OSL1",
@@ -4086,12 +4123,8 @@ export const FUNN: Funn[] = [
       "oppgitt adresse. Ingen kilde bekrefter drift i 2025–2026, og selskapet står ikke i Nkoms " +
       "register.",
     municipality: "Asker",
-    address: "Nye Vakås vei 8",
-    postal_code: "1395",
     city: "Hvalstad",
-    latitude: 59.85647,
-    longitude: 10.47605,
-    verification_status: "partially_verified",
+    verification_status: "archived",
     operational_status: "unknown",
     sensitivity: "internal_only",
     confidence: "low",
@@ -4107,7 +4140,12 @@ export const FUNN: Funn[] = [
       "datacenters» uten adresse. Primærkilde for selve anlegget søkt, ikke funnet. Runde 10 " +
       "(2026-10-02): status aktiv → ukjent, sikkerhet lav og ny tittel (tidligere «Astrofarm " +
       "Oslo, Nye Vakås vei 8 i Hvalstad»). Operatørens arkiverte side fra 2016 beskriver rommet " +
-      "som «et rom i Astrofarm sitt kontor». Astrofarm eies av BRP Systems AB siden 2022.",
+      "som «et rom i Astrofarm sitt kontor». Astrofarm eies av BRP Systems AB siden 2022. Runde " +
+      "12 (2026-10-02): arkivert, og adresse og kartpunkt er fjernet. Operatørens arkiverte sider " +
+      "(2021–2024) beskriver «Datasenter 2» som et rom i kontoret, brukt til speiling og backup; " +
+      "hoveddatasenteret lå hos Digiplex på Ulven, som finnes i basen som Vaultica OSL01. Siden " +
+      "er fjernet i 2026. Et internt serverrom i et kontorlokale er under terskelen for " +
+      "datasenter.",
     kilder: [
       {
         source_name: "Bedriftsoppslag: Astrofarm AS, orgnr 979 905 173",
@@ -4419,9 +4457,8 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "NTC Billingstad datasenter",
     description:
-      "Colocation-anlegg på Billingstadsletta i Asker, drevet av NTC Services. Anlegget har " +
-      "redundant fiber, 2N UPS og aggregat — teknisk utrustning som skiller et datasenter " +
-      "fra et serverrom. Operatøren står i Nkoms register, så anlegget er over 0,5 MW.",
+      "Colocation-anlegg på Billingstadsletta i Asker, drevet av NTC Services AS. Anlegget har " +
+      "redundant fiber, 2N UPS og aggregat. Bare operatørens egne sider bekrefter anlegget.",
     municipality: "Asker",
     address: "Billingstadsletta 17",
     postal_code: "1396",
@@ -4438,7 +4475,12 @@ export const FUNN: Funn[] = [
       "E18. Aggregat og 2N-strøm betyr reservekraft på stedet.",
     notes:
       "Funnet fordi Billingstad er et eget marked i DataCenterMap og derfor ikke kom med i " +
-      "Oslo-sveipet. Et eksempel på at markedsinndelingen i katalogene skjuler anlegg.",
+      "Oslo-sveipet. Et eksempel på at markedsinndelingen i katalogene skjuler anlegg. Runde 12 " +
+      "(2026-10-02): operatør og eier av anlegget er NTC Services AS (835808092); det tidligere " +
+      "selskapet med samme navn ble slettet i desember 2025, og Nkom fører fortsatt det gamle " +
+      "organisasjonsnummeret. Bygget eies av Billingstadsletta 17 AS; hjemmel er ikke sjekket. " +
+      "Påstanden om at anlegget er over 0,5 MW er strøket: registreringsplikten har ingen slik " +
+      "terskel for kommersielle operatører. MW er ikke satt.",
     public_candidate: true,
     public_candidate_note:
       "Bekreftet fysisk anlegg, verifisert adresse, Nkom-registrert operatør og korrekt status.",
@@ -4470,6 +4512,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
       },
@@ -6278,7 +6321,10 @@ export const FUNN: Funn[] = [
       "fra alt annet.",
     notes:
       "PeeringDB oppgir Hodneveien 240, DataCenterMap 260. Koordinaten er nr. 260, som lot seg " +
-      "geokode. Avviket er ikke oppklart.",
+      "geokode. Avviket er ikke oppklart. Runde 12 (2026-10-02): Det regionale samtrafikkpunktet " +
+      "SIX (Stavanger Internet Exchange, del av NIX) står ifølge NIX hos Green Mountain i " +
+      "Hodneveien 260; det sto tidligere ved Universitetet i Stavanger. SIX er nettinfrastruktur " +
+      "i anlegget, ikke et eget datasenter.",
     kilder: [
       {
         source_name: "DataCenterMap: Green Mountain SVG1-Rennesøy",
@@ -6576,9 +6622,14 @@ export const FUNN: Funn[] = [
       "kraftkommuner med breekjøling, ikke i byene.",
     notes:
       "Runde 3 (2026-09-30): ny tittel; tidligere «Bluefjords og Compute Nordic, Gaupne». Compute " +
-      "Nordic har ikke eget bygg eller norsk selskap og er ikke strukturert som part. Kryptoandelen " +
-      "oppgis ulikt: 14 % (Nkom-data i basen), 30 % (Altinget) og «opp mot ein tredjedel» (NRK). 15 " +
-      "MW i drift kommer fra presse.",
+      "Nordic har ikke eget bygg eller norsk selskap og er ikke strukturert som part. " +
+      "Kryptoandelen oppgis ulikt: 14 % (Nkom-data i basen), 30 % (Altinget) og «opp mot ein " +
+      "tredjedel» (NRK). 15 MW i drift kommer fra presse. Runde 12 (2026-10-02): drift er " +
+      "bekreftet av Nkom-listen og presse i 2026. De 15 MW er tatt ut av feltet for " +
+      "driftskapasitet: Bluefjords skriver selv at det er tilgjengelig effekt på tomta, ikke " +
+      "kapasitet i drift, og det finnes ingen Statnett-rad. Type satt til blandet (colocation og " +
+      "krypto). Eget anlegg, ikke Gaupne Datapark eller Kitebrook Leirdøla. Bluefjords kjøper " +
+      "også Årdal Næringssenter for et KI-datasenter; det er lead uten stedfesting.",
     kilder: [
       {
         source_name: "DataCenterMap: Bluefjords og Compute Nordic, Gaupne",
@@ -7460,8 +7511,9 @@ export const FUNN: Funn[] = [
     title: "Datafjellet, Bergen (fjellhall – adresse ikke offentlig)",
     description:
       "Colocation-datasenter i fjellhall i Bergensområdet, drevet av Datafjellet AS, som er " +
-      "Nkom-registrert. Selskapet holder anleggets adresse hemmelig. Selskapets egen nettside ble " +
-      "oppdatert i 2026.",
+      "Nkom-registrert. Hallen er en grotte fra andre verdenskrig som senere var Forsvarets " +
+      "ammunisjonslager. Selskapet holder adressen hemmelig. Havforskningsinstituttet inngikk i " +
+      "november 2025 avtale med Datafjellet om eksternt serverrom.",
     municipality: "Bergen",
     city: "Bergen",
     verification_status: "partially_verified",
@@ -7475,7 +7527,12 @@ export const FUNN: Funn[] = [
       "Kun katalogkilde pluss Nkom-registrering. Runde 10 (2026-10-02): adressen og kartpunktet " +
       "er fjernet. Det var selskapets forretningsadresse, ikke fjellhallen. Ny tittel (tidligere " +
       "«Datafjellet, Bønes»). Operatør og eier er Datafjellet AS (tidl. SBT Eiendom). Selskapet " +
-      "oppgir to aggregater på 645 kVA; MW er ikke satt.",
+      "oppgir to aggregater på 645 kVA; MW er ikke satt. Runde 12 (2026-10-02): fortsatt uten " +
+      "punkt. Ingen åpen kilde oppgir anleggsnavn, gnr/bnr, selger eller salgsår. SBT Eiendom AS " +
+      "er samme selskap under tidligere navn, ikke en tidligere operatør. First IT AS er et " +
+      "tilknyttet driftsselskap med uklar rolle. Havforskningsinstituttet er ført som kunde ut " +
+      "fra instituttets postjournal (sak 2025/1719 og 2026/239); bare journaltitlene er lest. " +
+      "Ikke samme anlegg som AVUR Casperkollen eller Fjellhallen Bergen på Nesttun.",
     kilder: [
       {
         source_name: "DataCenterMap: Datafjellet, Bønes",
@@ -7687,6 +7744,132 @@ export const FUNN: Funn[] = [
         excerpt_or_summary:
           "Besøksadresse i 2018 var Kokstadvegen 29, 5257 Kokstad. Viser at hovedkontoret flyttet til " +
           "Casperkollen senere; sier ikke hvor datahallen lå i 2018.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Fjellhallen Bergen (Hatteland/EMP Secure), Hardangervegen 48A",
+    description:
+      "Fjellhall på 650 m² under en villa på Nesttun, bygget i 1958 som hemmelig sambandssentral " +
+      "for Forsvaret. Hatteland Solutions kjøpte eiendommen i 2004 og tok hallen i bruk som " +
+      "sekundært datasenter i 2008. Selskapet heter i dag EMP Secure AS og har fortsatt kontor på " +
+      "adressen. Om hallen fortsatt brukes som datasenter, er ikke dokumentert.",
+    municipality: "Bergen",
+    address: "Hardangervegen 48A",
+    postal_code: "5224",
+    city: "Nesttun",
+    latitude: 60.32188,
+    longitude: 5.36888,
+    verification_status: "partially_verified",
+    operational_status: "unknown",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "En hemmelig sambandssentral fra den kalde krigen under en tilsynelatende vanlig enebolig, " +
+      "gjort om til datarom. Bergens andre fjellhall-datasenter, og lett å forveksle med " +
+      "Datafjellet.",
+    notes:
+      "Opprettet i runde 12 (2026-10-02) fra leadet «Fjellhallen Bergen–Hatteland». Opprettet i " +
+      "runde 12 fra katalognavnet «Fjellhallen Bergen–Hatteland». Ikke samme anlegg som " +
+      "Datafjellet (ammunisjonslager fra krigen, annen operatør) og ikke knyttet til Green " +
+      "Mountain. Aliaser: Fjellhallen Bergen, Hatteland Bergen, EMP Secure Bergen. Punktet er " +
+      "Kartverkets adressepunkt for villaen; fjellhallen ligger under bygget. Status ukjent: EMP " +
+      "Secure selger i dag colocation bare i Vats DC1, og ISO-sertifikatet fra 2026 fører Bergen " +
+      "som «Produksjon». DataCenterMap har arkivert oppføringen. På samme eiendom (43/182) ble " +
+      "bruksendring fra kontor til bolig legalisert i 2025–2026.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "EMP Secure – forside/kontakt",
+        source_url: "https://empsecure.com/",
+        publisher: "EMP Secure AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "EMP Secure AS (968 504 436) oppgir kontorer: Nedre Vats (hovedkvarter), Haugesund, Bergen " +
+          "– Hardangerveien 48A, 5224 Nesttun, Stavanger, Oslo. Sier ikke at det er datasenter i " +
+          "Bergen.",
+      },
+      {
+        source_name: "EMP Secure – Colocation",
+        source_url: "https://empsecure.com/it-losninger/colocation",
+        publisher: "EMP Secure AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Colocation selges «i vårt avanserte datasenter, Vats DC1». Bergen nevnes ikke som " +
+          "colocation-anlegg.",
+      },
+      {
+        source_name: "Kiwa: ISO/IEC 27001-sertifikat nr. 3309, EMP Secure AS (utstedt 12.03.2026)",
+        source_url: "https://cdn.prod.website-files.com/690c977fc27d4dd8a0d8368a/69b2eea2e97b4c5ea3a921d8_Sertifikat%20EMP%20Secure%2027001.pdf",
+        publisher: "Kiwa AS / EMP Secure AS",
+        source_type: "document",
+        source_date: "2026-03-12",
+        primary_source: true,
+        excerpt_or_summary:
+          "Flerlokasjonssertifikat: Nedre Vats, Stokkastrandvegen 85 = «Datasenter drift – kritisk " +
+          "site»; Bergen, Hardangerveien 48A = «Produksjon». Bergen er altså ikke sertifisert som " +
+          "datasenterdrift i 2026.",
+      },
+      {
+        source_name: "Brønnøysund: EMP SECURE AS (968504436)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/968504436",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "EMP SECURE AS, stiftet 1993, Nedre Vats; formål bl.a. «IT-drift og datasenter». Tidligere " +
+          "Jakob Hatteland Solutions AS. Bekrefter selskapet, ikke anlegget.",
+      },
+      {
+        source_name: "Brønnøysund: EMP SECURE AS AVD NESTTUN (893602712)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/underenheter/893602712",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Underenhet på Hardangervegen 48A, oppstart 01.01.2009, næring 46.500 (engroshandel " +
+          "IKT-utstyr). En avdeling er ikke et anlegg; bekrefter bare at selskapet fortsatt er på " +
+          "adressen.",
+      },
+      {
+        source_name: "Kartverket adresse-API: Hardangervegen 48A",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?sok=Hardangervegen%2048A&kommunenummer=4601",
+        publisher: "Kartverket",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Hardangervegen 48A og 48B, 5224 Nesttun, gnr/bnr 43/182, Bergen (4601). Punkt 60.32188, " +
+          "5.36888. Bekrefter adressen, ikke anlegget.",
+      },
+      {
+        source_name: "eInnsyn: Statsforvaltaren i Vestland sak 2025/20276 «Dispensasjon – Bergen 43/182 – Hardangervegen 48 – bruksendring m.m.»",
+        source_url: "https://einnsyn.no/saksmappe/sm_01ke9p2wrjeqjrtc67e5nqxhtj",
+        publisher: "Statsforvaltaren i Vestland (eInnsyn)",
+        source_type: "register",
+        source_date: "2026-04-16",
+        primary_source: true,
+        excerpt_or_summary:
+          "Legalisering av bruksendring fra kontor til bolig på gnr. 43 bnr. 182 (nabovarsel " +
+          "07.10.2025, rammetillatelse april 2026). Gjelder bygg på eiendommen; sier ikke noe om " +
+          "fjellhallen. Dokumentene er ikke lest.",
+      },
+      {
+        source_name: "Hatteland – Datasenter (arkivert 11.02.2013)",
+        source_url: "https://web.archive.org/web/20130211024602/http://hatteland.com:80/produkt/datasenter/",
+        publisher: "Jakob Hatteland Solutions AS (via Internet Archive)",
+        source_type: "web",
+        source_date: "2013-02-11",
+        primary_source: true,
+        excerpt_or_summary:
+          "Hoveddatasenteret er EMP-sikret fjellhall i Nedre Vats. «I tillegg til fjellhallen har vi " +
+          "også flere datarom geografisk spredt» for offsite backup, DR og «second site». Bergen " +
+          "nevnes ikke ved navn.",
       },
     ],
   },
