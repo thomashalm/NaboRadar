@@ -65,6 +65,8 @@ async function main() {
     "review_hut",
     "set_hut_contact",
     "set_hut_overrides",
+    "hut_status_queue",
+    "review_hut_status",
     "hut_contact_list",
     "hut_contact_summary",
     ...RESEARCH,

@@ -68,6 +68,8 @@ const TYPE: Record<string, Pick<HutSourceAttributes, "hut_type" | "overnight">> 
   Selvbetjent: { hut_type: "self_service_hut", overnight: "yes" },
   Ubetjent: { hut_type: "unstaffed_hut", overnight: "yes" },
   Rastebu: { hut_type: "rest_cabin", overnight: "no" },
+  // Bare for unntakene i SERVERING_MED_OVERNATTING: betjent sted med overnatting.
+  Serveringshytte: { hut_type: "staffed_hut", overnight: "yes" },
 };
 
 /** Kildens kodeliste «Hytteeier». 2 er «Andre»: uspesifisert, f.eks. et utmarkslag eller en speidergruppe. */
@@ -79,6 +81,18 @@ const EIER: Record<RawHut["hytteeier"], NonNullable<HutSourceAttributes["owner_k
 };
 
 const UTELATT = new Set(["Serveringshytte", "Gapahuk"]);
+
+/**
+ * Serveringshytter som også er overnattingshytter, bekreftet på forvalterens egen side.
+ *
+ * Klassen som helhet er utelatt: av tretten kandidater som en annen kilde førte som
+ * overnattingshytter, var tolv rene serveringssteder. Unntakene står her, ett og ett, med
+ * nøkkelen `<kommunenummer>:<navn>` — ikke som en regel.
+ *
+ *   1506:storlihytta  Molde. DNT Romsdal fører Storlihytta under betjente hytter, og den
+ *                     ubetjente Gamle Storlihytta på samme tun bestilles hos DNT.
+ */
+const SERVERING_MED_OVERNATTING = new Set(["1506:storlihytta"]);
 
 const tag = (xml: string, name: string): string | null => {
   const match = new RegExp(`<app:${name}>([^<]*)</app:${name}>`).exec(xml);
@@ -193,7 +207,8 @@ export class KartverketN50HytterProvider implements AreaFeatureProvider {
       const point = utm33ToWgs84([raw.easting, raw.northing]);
       const key = `${raw.knr}:${slug(navn)}`;
 
-      if (UTELATT.has(raw.betjeningsgrad)) {
+      const unntak = raw.betjeningsgrad === "Serveringshytte" && SERVERING_MED_OVERNATTING.has(key);
+      if (UTELATT.has(raw.betjeningsgrad) && !unntak) {
         skipped.push({ kind: "feature", externalId: key, reason: `${raw.betjeningsgrad} tas ikke inn` });
       } else if (!inHutBounds(point)) {
         skipped.push({ kind: "feature", externalId: key, reason: "koordinat utenfor Norge" });

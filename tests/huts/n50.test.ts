@@ -130,6 +130,30 @@ describe("N50: normalisering", () => {
     ]);
   });
 
+  it("tar inn en serveringshytte bare når den står på listen over bekreftede unntak", () => {
+    const molde = new KartverketN50HytterProvider().normalize({
+      features: parseN50Huts(
+        gml(
+          hytte({ navn: "Storlihytta", grad: "Serveringshytte", pos: "96000 6987000" }),
+          hytte({ navn: "Varden kafé", grad: "Serveringshytte", pos: "96500 6987500" }),
+        ),
+        "1506",
+      ),
+      documents: [],
+    });
+    // Storlihytta har overnatting ifølge DNT Romsdal. Den andre er en serveringshytte som alle andre.
+    expect(molde.records.map((r) => [r.title, r.attributes.hut_type, r.attributes.overnight, r.attributes.kilde_betjeningsgrad])).toEqual([
+      ["Storlihytta", "staffed_hut", "yes", "Serveringshytte"],
+    ]);
+    expect(molde.skipped!.map((s) => s.reason)).toEqual(["Serveringshytte tas ikke inn"]);
+    // Samme navn i en annen kommune er ikke et unntak.
+    const annen = new KartverketN50HytterProvider().normalize({
+      features: parseN50Huts(gml(hytte({ navn: "Storlihytta", grad: "Serveringshytte" })), "0301"),
+      documents: [],
+    });
+    expect(annen.records).toEqual([]);
+  });
+
   it("nekter å synke hele landet fra en feed som mangler de fleste kommunene", async () => {
     const feed = `<link href="https://nedlasting.geonorge.no/geonorge/Basisdata/N50Kartdata/GML/Basisdata_0301_Oslo_25833_N50Kartdata_GML.zip"/>`;
     const landet = new KartverketN50HytterProvider((async () => new Response(feed)) as typeof fetch);

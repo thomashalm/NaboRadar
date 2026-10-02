@@ -258,7 +258,7 @@ kvikkleiresone har over 100 000 hjørner, og ville ellers sprengt svaret.
 | `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search` | Hytter og koier: rundt et punkt (inntil 50 km, nærmest først), i et kartutsnitt, i en kommune, og navnesøk. Svarer bare når kategorien `hytte` er publisert, eller kalleren er admin |
 | `get_hut(ref)` | Én hytte, slått opp på de åtte første tegnene i uuid-en. Til den faste hyttesiden |
 | `refresh_huts()` | Kobler kildeposter til hytter og regner de kanoniske feltene på nytt. Kjøres av synken, kun service_role |
-| `hut_review_queue()`, `review_hut()`, `set_hut_contact()`, `set_hut_overrides()`, `hut_contact_list()`, `hut_contact_summary()` | Kontrollkøen, avgjørelsen (godkjenn, avvis, slå sammen), lenker og forvalter, overstyring av type og tilgang med offentlig merknad, og adminlisten. Kun innlogget admin |
+| `hut_review_queue()`, `review_hut()`, `set_hut_contact()`, `set_hut_overrides()`, `hut_contact_list()`, `hut_contact_summary()`, `hut_status_queue()`, `review_hut_status()` | Kontrollkøen, avgjørelsen (godkjenn, avvis, slå sammen), lenker og forvalter, overstyring av type og tilgang med offentlig merknad, og adminlisten. Kun innlogget admin |
 | `upsert_events`, `upsert_area_features`, `mark_*_removed` | Skriving, kun service_role |
 | `sync_run_start/finish`, `sync_due`, `claim_next_due_sync`, `claim_sync_request`, `finish_sync_request`, `expire_stale_sync_requests`, `provider_baseline`, `set_alert_state` | Sync-koordinering, kun service_role |
 | `provider_health`, `recent_sync_runs`, `request_sync`, `scheduler_status` | `/admin`, kun innlogget admin |
@@ -302,7 +302,7 @@ Tilgangen er en **positiv, uttømmende liste**, ikke en opprydding i enkelttilfe
 | Rolle | Kan kalle |
 |---|---|
 | `anon` | `features_near`, `features_count_near`, `events_within`, `get_event`, `data_status`, `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search`, `get_hut` |
-| `authenticated` | det samme, pluss `hut_review_queue`, `review_hut`, `set_hut_contact`, `set_hut_overrides`, `hut_contact_list`, `hut_contact_summary`, `is_admin`, `provider_health`, `recent_sync_runs`, `recent_sync_requests`, `request_sync`, `scheduler_status` og research-, review- og datasenterfunksjonene — som alle sjekker `is_admin()` selv |
+| `authenticated` | det samme, pluss `hut_review_queue`, `review_hut`, `set_hut_contact`, `set_hut_overrides`, `hut_contact_list`, `hut_contact_summary`, `hut_status_queue`, `review_hut_status`, `is_admin`, `provider_health`, `recent_sync_runs`, `recent_sync_requests`, `request_sync`, `scheduler_status` og research-, review- og datasenterfunksjonene — som alle sjekker `is_admin()` selv |
 | `service_role` | alt — sync-workeren |
 | `postgres` | alt — migrasjoner og pg_cron |
 
@@ -1070,11 +1070,13 @@ ikke alt svarer på. Skal det inn senere, hører det sammen med valgt rad, ikke 
 Første friluftskategori. Retningen står i [data-roadmapen](data-roadmap.md#12-friluft-skjult-lokal-innsikt-ikke-en-turapp),
 modellen i [dataarkitekturen](data-architecture.md#5-kanoniske-enheter-eller-bulk-lag).
 
-**Status: hele landet er importert, upublisert.** 1 661 hytter, 1 485 av dem klare til å vises;
+**Status: hele landet er importert, upublisert.** 1 661 hytter, 1 490 av dem klare til å vises;
 resten står bare i sekundærkilden og er skjult til de er kontrollert. Oslomarka med omland er
 kvalitetssikret hytte for hytte. Resten av landet er kontrollert mot Kartverkets egne data, og
 DNT-hyttene (576) er beriket med forening, bestillingslenke og tilgang fra DNTs egne sider — se
-[research/hytter-dnt-berikelse.md](research/hytter-dnt-berikelse.md). Statskog, fjellstyrene
+[research/hytter-dnt-berikelse.md](research/hytter-dnt-berikelse.md). Hyttene på Statskogs
+egen liste (193) har forvalter, lenke og riktig type og tilgang — se
+[research/hytter-statskog-berikelse.md](research/hytter-statskog-berikelse.md). Fjellstyrene
 og «Andre» er ikke beriket. Tallene, fylkestabellen og funnene står i
 [research/hytter-nasjonal-import.md](research/hytter-nasjonal-import.md). `npm run qa:hytter`
 kjører regelsjekkene (koordinater, dubletter, lekkasje av avviste eller skjulte hytter,
@@ -1125,7 +1127,9 @@ Tolkningsreglene:
 - **Sengeplasser, sesong og booking vises ikke.** De finnes bare hos DNT/UT.no, som vi ikke
   kan hente fra.
 - **Serveringshytter og gapahuker er utelatt.** N50s «Serveringshytte» er markastuer med
-  betjent servering; de teller som `skipped` i synken, ikke som feil.
+  betjent servering; de teller som `skipped` i synken, ikke som feil. Ett unntak er ført
+  for hånd i importen (`SERVERING_MED_OVERNATTING`): Storlihytta i Molde, der DNT Romsdal har en
+  ubetjent hytte på samme tun. Nye unntak krever forvalterens egen side som belegg.
 - **Sekundærkilden alene er ikke nok.** En hytte som bare står i Turrutebasen får `confidence
   = 'low'` og vises ikke før noen har satt `last_verified_at`. Turrutebasen fører blant annet
   hotellet Kleivstua som betjent hytte.
@@ -1238,6 +1242,12 @@ markedsføring, og samme kildekrav som overstyringene.
 at hytta er stengt. Hytta vises fortsatt — det er nyttig å vite at den finnes — men med
 «Midlertidig stengt» i lista i hyttekartet og på kortet på områdesiden. En hytte som er borte
 for godt, avvises i stedet. Ingen kilde leverer status, og vi viser aldri «åpen».
+
+En stengt hytte har alltid en dato for neste kontroll (`status_review_at`): 30, 60 eller 90
+dager fram, 60 som standard. «Status må kontrolleres» på `/admin/hytter` viser de stengte
+hyttene med sist kontrollert, neste kontroll, kilde og knapp til forvalterens side. Admin
+svarer «Fortsatt stengt» (ny dato) eller «Åpnet igjen» (`review_hut_status`). Statusen
+oppheves aldri av seg selv: en forfalt dato betyr at noen må se etter, ikke at hytta er åpen.
 
 Alt dette settes med `set_hut_overrides` fra «Avvik fra Kartverket» på `/admin/hytter`.
 

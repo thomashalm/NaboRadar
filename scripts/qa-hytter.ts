@@ -92,6 +92,35 @@ const CHECKS: Check[] = [
     sql: `select h.name from huts h where h.public_note ~* '(\\mkr\\M|kroner|,-|ledig|sengeplass|senger\\M)'`,
   },
   {
+    navn: "Midlertidig stengt uten dato for ny kontroll",
+    sql: `select h.name from huts h where h.access_status = 'closed' and h.status_review_at is null`,
+  },
+  {
+    navn: "Midlertidig stengt uten kilde",
+    sql: `select h.name from huts h where h.access_status = 'closed' and (h.override_source_url is null or h.override_verified_at is null)`,
+  },
+  {
+    navn: "Midlertidig stengt: kontrollen er forfalt",
+    advarsel: true,
+    sql: `select h.name from huts h where h.archived_at is null and h.rejected_at is null and h.access_status = 'closed' and h.status_review_at <= now()`,
+  },
+  {
+    navn: "Låst Statskog-hytte uten neste steg",
+    advarsel: true,
+    sql: `select h.name from huts h where ${SYNLIG} and h.owner_kind = 'statskog' and h.locked is true
+          and coalesce(h.manager_verified, h.manager_name) is null and h.booking_url is null and h.info_url is null`,
+  },
+  {
+    navn: "Statskog-hytte uten kontrollert forvalter (står ikke i Statskogs egen oversikt)",
+    advarsel: true,
+    sql: `select h.name from huts h where ${SYNLIG} and h.owner_kind = 'statskog' and h.manager_verified is null`,
+  },
+  {
+    navn: "Hytte med Statskog som forvalter uten direkte lenke",
+    advarsel: true,
+    sql: `select h.name from huts h where ${SYNLIG} and h.manager_verified = 'Statskog' and h.booking_url is null and h.info_url is null`,
+  },
+  {
     navn: "DNT-hytte uten navngitt forening",
     advarsel: true,
     sql: `select h.name from huts h where ${SYNLIG} and h.owner_kind = 'dnt' and coalesce(h.manager_verified, h.manager_name) is null`,

@@ -96,6 +96,30 @@ export async function hentKontaktstatus(client: SupabaseClient): Promise<Record<
   return parsed.success ? Object.fromEntries(parsed.data.map((rad) => [rad.kind, rad.antall])) : {};
 }
 
+const statusSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  manager_name: z.string().nullable(),
+  municipality_number: z.string().nullable(),
+  access_status: z.string(),
+  public_note: z.string().nullable(),
+  source_url: z.string().nullable(),
+  verified_at: z.string().nullable(),
+  review_at: z.string(),
+  overdue: z.boolean(),
+  is_visible: z.boolean(),
+});
+
+export type HutStatusRow = z.infer<typeof statusSchema>;
+
+/** Midlertidig stengte hytter, de som skal kontrolleres først. */
+export async function hentStatuskø(client: SupabaseClient): Promise<HutStatusRow[]> {
+  const { data, error } = await client.rpc("hut_status_queue");
+  if (error) return [];
+  const parsed = z.array(statusSchema).safeParse(data ?? []);
+  return parsed.success ? parsed.data : [];
+}
+
 export const KILDENAVN: Record<string, string> = {
   "kartverket-n50-hytter": "N50",
   "kartverket-turrutebasen-hytter": "Turrutebasen",

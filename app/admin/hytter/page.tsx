@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { HytteKontakt, HytteSak } from "@/components/admin/HytteKontroll";
+import { HytteKontakt, HytteSak, HytteStatus } from "@/components/admin/HytteKontroll";
 import { IkkeTilgang } from "@/components/admin/IkkeTilgang";
-import { hentHytteKontakt, hentHytteKø, hentKontaktstatus } from "@/lib/admin/huts";
+import { hentHytteKontakt, hentHytteKø, hentKontaktstatus, hentStatuskø } from "@/lib/admin/huts";
 import { HUT_NEXT_STEP_LABELS, type HutNextStepKind } from "@/lib/huts/wording";
 import { getAdminSession } from "@/lib/admin/session";
 
@@ -25,11 +25,13 @@ export default async function AdminHutsPage({ searchParams }: { searchParams: Se
 
   const raw = (await searchParams).q;
   const q = (Array.isArray(raw) ? raw[0] : raw)?.trim() ?? "";
-  const [{ saker, feil }, kontakt, status] = await Promise.all([
+  const [{ saker, feil }, kontakt, status, stengte] = await Promise.all([
     hentHytteKø(session.client),
     hentHytteKontakt(session.client, q.length >= 2 ? q : null),
     hentKontaktstatus(session.client),
+    hentStatuskø(session.client),
   ]);
+  const forfalt = stengte.filter((hytte) => hytte.overdue).length;
   // Tellingen gjelder alle låste hytter som vises, ikke bare dem som får plass i listen under.
   const antall = (kind: HutNextStepKind) => status[kind] ?? 0;
   const låste = (["unknown", "manager_only", "info_link", "booking_link"] as const).reduce((sum, kind) => sum + antall(kind), 0);
@@ -65,6 +67,23 @@ export default async function AdminHutsPage({ searchParams }: { searchParams: Se
           ))}
         </ul>
       </section>
+
+      {stengte.length > 0 && (
+        <section className="mt-12">
+          <h2 className="text-lg font-semibold text-ink">
+            Status må kontrolleres · {forfalt} av {stengte.length}
+          </h2>
+          <p className="mt-1 max-w-2xl text-[13px] text-muted">
+            Hytter som står som midlertidig stengt. Ingen kilde oppdaterer dette, så hver stenging har en dato for ny kontroll.
+            Åpne forvalterens side og velg: fortsatt stengt, eller åpen igjen. Statusen oppheves aldri av seg selv.
+          </p>
+          <ul className="mt-4 space-y-3">
+            {stengte.map((hytte) => (
+              <HytteStatus key={hytte.id} hytte={hytte} />
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="mt-12">
         <h2 className="text-lg font-semibold text-ink">Bestilling og kontakt</h2>

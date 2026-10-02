@@ -233,5 +233,7 @@ til at hver lagret lenke er en side som faktisk ble åpnet og viste hyttas navn.
 - 65 DNT-hytter uten bekreftet forening, de fleste uten egen side hos DNT.
 - 124 DNT-hytter der tilgangen ikke er presisert.
 - 350 låste hytter utenfor DNT uten neste steg: fjellstyrene, «Andre» og Statskog.
-- Stengt-status settes for hånd og har ingen utløpsdato. Nonsbu, Skåpet og Solstua må følges opp.
-- Storlihytta, og de 22 rastebuene uten avklaring.
+- De 22 rastebuene uten avklaring.
+
+Stengt-status, Storlihytta og Statskog er fulgt opp i
+[hytter-statskog-berikelse.md](hytter-statskog-berikelse.md).

@@ -2,8 +2,8 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { reviewHutAction, setHutContactAction, setHutOverridesAction, type HutActionState } from "@/app/admin/hytter/actions";
-import { KILDENAVN, type HutContactRow, type HutReviewCase } from "@/lib/admin/huts";
+import { reviewHutAction, reviewHutStatusAction, setHutContactAction, setHutOverridesAction, type HutActionState } from "@/app/admin/hytter/actions";
+import { KILDENAVN, type HutContactRow, type HutReviewCase, type HutStatusRow } from "@/lib/admin/huts";
 import { buildHutHref } from "@/lib/huts/href";
 import { HUT_ACCESS_OVERRIDES, HUT_TYPE_OVERRIDES, hutAccessKind } from "@/lib/huts/types";
 import { HUT_NEXT_STEP_LABELS, HUT_OWNER_LABELS, HUT_TYPE_LABELS, hutNextStep, type HutNextStepKind } from "@/lib/huts/wording";
@@ -257,6 +257,14 @@ function HytteOverstyring({ hytte }: { hytte: HutContactRow }) {
             <option value="closed">Midlertidig stengt</option>
           </select>
         </label>
+        <label className="text-[13px] text-muted">
+          Hvis stengt: kontroller igjen om
+          <select name="reviewDays" defaultValue="60" className={felt}>
+            <option value="30">30 dager (kortvarig)</option>
+            <option value="60">60 dager</option>
+            <option value="90">90 dager (ubestemt tid)</option>
+          </select>
+        </label>
         <label className="text-[13px] text-muted sm:col-span-3">
           Offentlig merknad — én kort setning brukeren trenger, slik forvalteren oppgir det (vises på hyttesiden)
           <input name="publicNote" defaultValue={hytte.public_note ?? ""} maxLength={160} className={felt} />
@@ -273,5 +281,56 @@ function HytteOverstyring({ hytte }: { hytte: HutContactRow }) {
         </div>
       </form>
     </details>
+  );
+}
+
+const dato = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("nb-NO") : "–");
+
+/**
+ * Én midlertidig stengt hytte som skal kontrolleres.
+ *
+ * Statusen er satt for hånd etter forvalterens side og oppheves aldri av seg selv. Her åpner
+ * man siden igjen og velger ett av to: fortsatt stengt (ny dato), eller åpen igjen.
+ */
+export function HytteStatus({ hytte }: { hytte: HutStatusRow }) {
+  const [state, action, pending] = useActionState(reviewHutStatusAction, initial);
+
+  return (
+    <li className="rounded-2xl border border-line bg-surface px-4 py-3.5 sm:px-5">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <p className="text-[15px] font-medium text-ink">
+          <Link href={buildHutHref(hytte)} className="hover:underline">
+            {hytte.name}
+          </Link>
+        </p>
+        <span className={`rounded-full border px-2 py-0.5 text-[12px] font-medium ${hytte.overdue ? "border-plan/40 bg-plan-soft text-plan" : "border-line text-muted"}`}>
+          {hytte.overdue ? "Skal kontrolleres nå" : `Kontrolleres ${dato(hytte.review_at)}`}
+        </span>
+      </div>
+      <p className="mt-0.5 text-[13px] text-muted">
+        Midlertidig stengt{hytte.manager_name ? ` · ${hytte.manager_name}` : ""} · sist kontrollert {dato(hytte.verified_at)}
+      </p>
+      {hytte.public_note && <p className="mt-1 text-[14px] text-ink">«{hytte.public_note}»</p>}
+      <form action={action} className="mt-2 flex flex-wrap items-center gap-2">
+        <input type="hidden" name="hutId" value={hytte.id} />
+        {hytte.source_url && (
+          <a href={hytte.source_url} target="_blank" rel="noopener noreferrer" className={`${knapp} inline-flex items-center text-accent`}>
+            Åpne forvalterens side
+          </a>
+        )}
+        <select name="reviewDays" defaultValue="60" aria-label="Dager til neste kontroll" className="h-9 rounded-lg border border-line bg-surface px-2 text-[13px]">
+          <option value="30">ny kontroll om 30 dager</option>
+          <option value="60">ny kontroll om 60 dager</option>
+          <option value="90">ny kontroll om 90 dager</option>
+        </select>
+        <button type="submit" name="action" value="still_closed" disabled={pending} className={knapp}>
+          Fortsatt stengt
+        </button>
+        <button type="submit" name="action" value="reopened" disabled={pending} className={knapp}>
+          Åpen igjen
+        </button>
+        <Melding state={state} />
+      </form>
+    </li>
   );
 }

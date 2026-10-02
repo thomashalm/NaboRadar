@@ -95,6 +95,8 @@ const overstyring = z.object({
   type: z.union([z.literal(""), z.enum(HUT_TYPE_OVERRIDES)]),
   access: z.union([z.literal(""), z.enum(HUT_ACCESS_OVERRIDES)]),
   status: z.enum(["unknown", "closed", "seasonal", "open"]),
+  // Dager til en stenging skal kontrolleres på nytt. Brukes bare når status er «stengt».
+  reviewDays: z.coerce.number().int().min(7).max(365).catch(60),
   publicNote: z.string().max(160),
   sourceUrl: z.union([z.literal(""), z.url({ protocol: /^https$/ })]),
 });
@@ -117,6 +119,7 @@ export async function setHutOverridesAction(_prev: HutActionState, formData: For
     status: tekst("status") || "unknown",
     publicNote: tekst("publicNote"),
     sourceUrl: tekst("sourceUrl"),
+    reviewDays: tekst("reviewDays") || 60,
   });
   if (!parsed.success) return { status: "error", message: "Ugyldig verdi. Merknaden kan være høyst 160 tegn, og kilden må være en https-adresse." };
   const { hutId, type, access, status, publicNote, sourceUrl } = parsed.data;
@@ -130,9 +133,44 @@ export async function setHutOverridesAction(_prev: HutActionState, formData: For
     p_status: status,
     p_public_note: publicNote,
     p_source_url: sourceUrl,
+    p_review_days: parsed.data.reviewDays,
   });
   if (error) return { status: "error", message: error.message };
 
   revalidatePath("/admin/hytter");
   return { status: "ok", message: noeSatt ? "Lagret." : "Overstyringene er fjernet." };
+}
+
+const statuskontroll = z.object({
+  hutId: z.uuid(),
+  action: z.enum(["still_closed", "reopened"]),
+  reviewDays: z.coerce.number().int().min(7).max(365).catch(60),
+});
+
+/**
+ * Utfallet av en statuskontroll: fortsatt stengt (ny kontrolldato), eller åpen igjen.
+ *
+ * Den som trykker, har åpnet forvalterens side og sett hva den sier nå. Statusen oppheves
+ * aldri av seg selv, heller ikke når en oppgitt dato har passert.
+ */
+export async function reviewHutStatusAction(_prev: HutActionState, formData: FormData): Promise<HutActionState> {
+  const session = await getAdminSession();
+  if (session.state !== "admin") return { status: "error", message: "Ikke autorisert." };
+
+  const parsed = statuskontroll.safeParse({
+    hutId: formData.get("hutId"),
+    action: formData.get("action"),
+    reviewDays: formData.get("reviewDays") || 60,
+  });
+  if (!parsed.success) return { status: "error", message: "Ugyldig valg." };
+
+  const { error } = await session.client.rpc("review_hut_status", {
+    p_hut_id: parsed.data.hutId,
+    p_action: parsed.data.action,
+    p_review_days: parsed.data.reviewDays,
+  });
+  if (error) return { status: "error", message: error.message };
+
+  revalidatePath("/admin/hytter");
+  return { status: "ok", message: parsed.data.action === "reopened" ? "Statusen er fjernet." : `Ny kontroll om ${parsed.data.reviewDays} dager.` };
 }

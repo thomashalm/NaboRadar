@@ -686,6 +686,81 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
       });
     });
 
+    describe("midlertidig stengt: statusen følges opp", () => {
+      const KILDE = "https://eksempel.no/hytta";
+      const somAdmin = () => db.pg.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ role: "authenticated", email: ADMIN })]);
+      const rad = async (hytte: string) =>
+        (await db.pg.query<{ access_status: string; public_note: string | null; dager: number | null; kilde: string | null; type_override: string | null }>(
+          `select access_status, public_note, round(extract(epoch from (status_review_at - now())) / 86400)::int as dager, override_source_url as kilde, type_override from huts where id = $1`,
+          [hytte],
+        )).rows[0]!;
+
+      it("en stengt hytte får en dato for ny kontroll, og kan ikke stå uten", async () => {
+        const hytte = await id("name = 'Kobberhaughytta'");
+        await expect(db.pg.query(`update huts set access_status = 'closed', override_source_url = $2, override_verified_at = now() where id = $1`, [hytte, KILDE])).rejects.toThrow(
+          /huts_stengt_har_kontrolldato/,
+        );
+        await db.pg.exec("begin");
+        try {
+          await somAdmin();
+          // Standard er 60 dager; den som lagrer kan velge kortere eller lengre.
+          await db.pg.query(`select set_hut_overrides($1, null, null, 'closed', 'Stengt inntil videre.', $2)`, [hytte, KILDE]);
+          expect(await rad(hytte)).toMatchObject({ access_status: "closed", dager: 60 });
+          await db.pg.query(`select set_hut_overrides($1, null, null, 'closed', 'Stengt inntil videre.', $2, 90)`, [hytte, KILDE]);
+          expect((await rad(hytte)).dager).toBe(90);
+          // Køen viser hytta, og den er ikke forfalt ennå.
+          const kø = (await db.pg.query<{ id: string; overdue: boolean; source_url: string }>(`select id, overdue, source_url from hut_status_queue()`)).rows;
+          expect(kø).toEqual([{ id: hytte, overdue: false, source_url: KILDE }]);
+          // Når datoen er passert, står den som forfalt — men statusen oppheves ikke av seg selv.
+          await db.pg.query(`update huts set status_review_at = now() - interval '1 day' where id = $1`, [hytte]);
+          expect((await db.pg.query<{ overdue: boolean }>(`select overdue from hut_status_queue()`)).rows).toEqual([{ overdue: true }]);
+          expect((await db.pg.query<{ access_status: string }>(`select access_status from get_hut($1)`, [hytte.slice(0, 8)])).rows[0]!.access_status).toBe("closed");
+          // En ny sync rører verken statusen eller datoen.
+          await db.pg.exec("select * from refresh_huts()");
+          expect((await rad(hytte)).access_status).toBe("closed");
+          // Fortsatt stengt: ny dato.
+          await db.pg.query(`select review_hut_status($1, 'still_closed', 30)`, [hytte]);
+          expect(await rad(hytte)).toMatchObject({ access_status: "closed", dager: 30 });
+          // Kontrolldatoen er intern.
+          expect(Object.keys((await db.pg.query<Record<string, unknown>>(`select * from get_hut($1)`, [hytte.slice(0, 8)])).rows[0]!)).not.toContain("status_review_at");
+        } finally {
+          await db.pg.exec("rollback");
+        }
+      });
+
+      it("åpen igjen fjerner statusen og setningen om stenging, og beholder resten", async () => {
+        const hytte = await id("name = 'Kobberhaughytta'");
+        await db.pg.exec("begin");
+        try {
+          await somAdmin();
+          await db.pg.query(`select set_hut_overrides($1, null, 'code_lock', 'closed', 'Bestilles som hel hytte. Stengt for rehabilitering.', $2)`, [hytte, KILDE]);
+          await db.pg.query(`select review_hut_status($1, 'reopened')`, [hytte]);
+          const etter = (await db.pg.query<{ access_status: string; public_note: string | null; access_override: string | null; review: string | null; kilde: string | null }>(
+            `select access_status, public_note, access_override, status_review_at as review, override_source_url as kilde from huts where id = $1`,
+            [hytte],
+          )).rows[0]!;
+          expect(etter).toEqual({ access_status: "unknown", public_note: "Bestilles som hel hytte.", access_override: "code_lock", review: null, kilde: KILDE });
+          expect((await db.pg.query(`select 1 from hut_status_queue()`)).rows).toEqual([]);
+          // Var stengingen det eneste, er det ingenting igjen å ha en kilde for.
+          await db.pg.query(`select set_hut_overrides($1, null, null, 'closed', 'Stengt inntil videre etter brann.', $2)`, [hytte, KILDE]);
+          await db.pg.query(`select review_hut_status($1, 'reopened')`, [hytte]);
+          expect(await rad(hytte)).toMatchObject({ access_status: "unknown", public_note: null, kilde: null });
+          // En hytte som ikke er stengt, har ingen status å kontrollere.
+          await expect(db.pg.query(`select review_hut_status($1, 'still_closed')`, [hytte])).rejects.toThrow(/ikke som stengt/);
+        } finally {
+          await db.pg.exec("rollback");
+        }
+      });
+
+      it("er bare for admin", async () => {
+        const hytte = await id("name = 'Kobberhaughytta'");
+        for (const email of [null, "noen@example.com"]) {
+          expect(await flere(email, [`select review_hut_status('${hytte}', 'reopened')`])).toBe("NEKTET");
+          expect(await flere(email, [`select id from hut_status_queue()`])).toEqual(email ? [] : "NEKTET");
+        }
+      });
+    });
+
     it("slår opp én hytte på ID-delen av adressen", async () => {
       const hytte = await id("name = 'Kobberhaughytta'");
       const treff = (await som<{ id: string; name: string }>("anon", `select id, name from get_hut('${hytte.slice(0, 8)}')`)) as { id: string; name: string }[];
