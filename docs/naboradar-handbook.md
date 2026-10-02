@@ -1070,7 +1070,7 @@ ikke alt svarer på. Skal det inn senere, hører det sammen med valgt rad, ikke 
 Første friluftskategori. Retningen står i [data-roadmapen](data-roadmap.md#12-friluft-skjult-lokal-innsikt-ikke-en-turapp),
 modellen i [dataarkitekturen](data-architecture.md#5-kanoniske-enheter-eller-bulk-lag).
 
-**Status: hele landet er importert, upublisert.** 1 659 hytter, 1 491 av dem klare til å vises;
+**Status: hele landet er importert, upublisert.** 1 657 hytter, 1 501 av dem klare til å vises;
 resten står bare i sekundærkilden og er skjult til de er kontrollert. Oslomarka med omland er
 kvalitetssikret hytte for hytte. Resten av landet er kontrollert mot Kartverkets egne data, og
 DNT-hyttene (578) er beriket med forening, bestillingslenke og tilgang fra DNTs egne sider — se
@@ -1079,8 +1079,11 @@ forening eller lenke, er gått gjennom én for én i
 [research/hytter-dnt-gap-audit.md](research/hytter-dnt-gap-audit.md): 555 har kontrollert
 forvalter, og resten har et notat om hvorfor. Hyttene på Statskogs
 egen liste (193) har forvalter, lenke og riktig type og tilgang — se
-[research/hytter-statskog-berikelse.md](research/hytter-statskog-berikelse.md). Fjellstyrene
-og «Andre» er ikke beriket. Tallene, fylkestabellen og funnene står i
+[research/hytter-statskog-berikelse.md](research/hytter-statskog-berikelse.md). Fjellstyrehyttene
+(233) har navngitt fjellstyre på 224 og lenke på 209, fra Fjellstyresambandets oversikt og
+fjellstyrenes egne sider — se
+[research/hytter-fjellstyre-berikelse.md](research/hytter-fjellstyre-berikelse.md). «Andre» er
+ikke beriket. Tallene, fylkestabellen og funnene står i
 [research/hytter-nasjonal-import.md](research/hytter-nasjonal-import.md). `npm run qa:hytter`
 kjører regelsjekkene (koordinater, dubletter, lekkasje av avviste eller skjulte hytter,
 overstyring uten kilde) og skal være grønn før publisering.

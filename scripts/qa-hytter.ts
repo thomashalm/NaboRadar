@@ -121,6 +121,27 @@ const CHECKS: Check[] = [
     sql: `select h.name from huts h where ${SYNLIG} and h.manager_verified = 'Statskog' and h.booking_url is null and h.info_url is null`,
   },
   {
+    navn: "Låst fjellstyrehytte uten neste steg",
+    advarsel: true,
+    sql: `select h.name from huts h where ${SYNLIG} and h.owner_kind = 'fjellstyre' and h.locked is true
+          and coalesce(h.manager_verified, h.manager_name) is null and h.booking_url is null and h.info_url is null`,
+  },
+  {
+    navn: "Fjellstyrehytte uten navngitt fjellstyre",
+    advarsel: true,
+    sql: `select h.name from huts h where ${SYNLIG} and h.owner_kind = 'fjellstyre' and h.manager_verified is null`,
+  },
+  {
+    navn: "Forvalter som bare er en eierkategori («Fjellstyre», «DNT», «Statsallmenning»)",
+    sql: `select h.name from huts h where h.archived_at is null and lower(trim(h.manager_verified)) in ('fjellstyre', 'fjellstyret', 'dnt', 'statsallmenning', 'allmenning')`,
+  },
+  {
+    navn: "Godkjent hytte fra sekundærkilden uten notat om hva som bekreftet den",
+    advarsel: true,
+    sql: `select h.name from huts h where h.archived_at is null and h.rejected_at is null and h.confidence = 'low'
+          and h.last_verified_at is not null and coalesce(h.review_note, h.contact_note) is null`,
+  },
+  {
     navn: "Vanlig DNT-hytte (betjent, selvbetjent, ubetjent) uten kontrollert forvalter eller lenke",
     advarsel: true,
     sql: `select h.name from huts h where ${SYNLIG} and h.owner_kind = 'dnt'

@@ -328,6 +328,12 @@ Undersøkt 2026-10-02. Alt under er testet med faktiske kall der ikke annet stå
 | Ekstern ID | **Ingen.** `gml:id` genereres på nytt per eksport: to eksporter av Oslo samme natt hadde 0 av 13 224 felles |
 | Automatisk synk | Ja. Bygningsfilen leses ut av arkivet med delforespørsler (`lib/providers/zip-range.ts`) — Oslo tar 0,2 s |
 
+**Forvalternes egne oversikter (berikelse, ikke import).** Statskogs hytteoversikt
+(statskog.no/hytter-og-friluftsliv/hytter-koier-og-aremal) og Fjellstyresambandets «Fjellstyrehytter
+til leie» (fjellstyrene.no/hytte-og-friluftsliv, Inaturs søk avgrenset til fjellstyrene) er lest
+én gang hver for å finne forvalter og lenke til hytter vi alt har. Vi oppretter ikke hytter fra
+dem, og lagrer ikke pris, senger eller ledighet.
+
 Kodelistene: [betjeningsgrad](https://register.geonorge.no/sosi-kodelister/kartdata/betjeningsgrad),
 [hytteeier](https://register.geonorge.no/sosi-kodelister/kartdata/hytteeier),
 [tilgjengelighet](https://register.geonorge.no/sosi-kodelister/kartdata/tilgjengelighet).

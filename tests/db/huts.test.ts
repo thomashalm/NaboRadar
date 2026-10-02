@@ -692,6 +692,41 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
           await db.pg.exec("rollback");
         }
       });
+
+      it("fjellstyrehytte: eierkategorien er kildens, forvalter, lenke og avvik er våre — og overlever synken", async () => {
+        const hytte = await id("name = 'Kobberhaughytta'");
+        await db.pg.exec("begin");
+        try {
+          await somAdmin();
+          // N50: eierkategori fjellstyre, ulåst. Fjellstyret selv: utleiehytte som må bestilles.
+          await db.pg.query(
+            `update area_features set attributes = attributes || '{"owner_kind":"fjellstyre","locked":false}'::jsonb where id in (select feature_id from hut_sources where hut_id = $1)`,
+            [hytte],
+          );
+          await db.pg.exec("select * from refresh_huts()");
+          await db.pg.query(`select set_hut_contact($1, 'https://www.inatur.no/hytte/1/eksempel', '', 'Lesja fjellstyre', 'Fjellstyresambandets oversikt')`, [hytte]);
+          await db.pg.query(`select set_hut_overrides($1, null, 'locked_prebooking', null, 'Nøkkel hentes hos fjellstyret.', $2)`, [hytte, KILDE]);
+          const les = async () =>
+            (await db.pg.query<{ owner_kind: string; manager_name: string; booking_url: string; locked: boolean; access_kind: string; public_note: string }>(
+              `select owner_kind, manager_name, booking_url, locked, access_kind, public_note from get_hut($1)`,
+              [hytte.slice(0, 8)],
+            )).rows[0]!;
+          const ventet = {
+            owner_kind: "fjellstyre",
+            manager_name: "Lesja fjellstyre",
+            booking_url: "https://www.inatur.no/hytte/1/eksempel",
+            locked: false,
+            access_kind: "locked_prebooking",
+            public_note: "Nøkkel hentes hos fjellstyret.",
+          };
+          expect(await les()).toEqual(ventet);
+          // Synken kjører igjen med samme kildeverdier: ingenting av det som er lagt inn, forsvinner.
+          await db.pg.exec("select * from refresh_huts()");
+          expect(await les()).toEqual(ventet);
+        } finally {
+          await db.pg.exec("rollback");
+        }
+      });
     });
 
     describe("midlertidig stengt: statusen følges opp", () => {
