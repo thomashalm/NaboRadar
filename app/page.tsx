@@ -47,7 +47,13 @@ const DEKKER = [
   ["Nærområdet", "Skoler, barnehager, sykehus, omsorgstilbud, industri og steder med skjenkebevilling."],
 ] as const;
 
-// Lenken til hyttekartet følger publiseringen av kategorien. Siden bygges på nytt høyst hvert
+/** Siste rad i «Hva NaboRadar viser». Står bare når hyttekategorien er publisert. */
+const HYTTER = [
+  "Hytter og koier",
+  "Turisthytter, koier og rastebuer fra Kartverket, med forvalter, tilgang og mer informasjon der det finnes.",
+] as const;
+
+// Lenken til hyttekartet og raden over følger publiseringen av kategorien. Siden bygges på nytt høyst hvert
 // femte minutt, så lenken dukker opp kort tid etter at hyttene er lansert.
 export const revalidate = 300;
 
@@ -79,11 +85,13 @@ export default async function HomePage() {
 
           <p className="mt-6 text-sm text-muted">Offentlige data. Forklart enkelt.</p>
 
-          {/* En sekundær inngang. Adressesøket over er fortsatt det siden handler om. */}
+          {/* En sekundær inngang. Adressesøket over er fortsatt det siden handler om. Polstringen
+              gir en trykkflate på rundt 44 px uten at lenken ser større ut; den negative margen
+              holder avstanden til slagordet på omtrent 20 px. */}
           {visHytter && (
-            <p className="mt-3 text-sm">
-              <Link href="/hytter" className="text-accent hover:underline">
-                Se hytter og koier i Norge
+            <p className="mt-2 text-[15px]">
+              <Link href="/hytter" className="inline-block py-3 text-accent hover:underline">
+                Se hytter og koier i hele Norge →
               </Link>
             </p>
           )}
@@ -98,7 +106,7 @@ export default async function HomePage() {
               steder.
             </p>
             <dl className="mt-6 space-y-4">
-              {DEKKER.map(([tittel, tekst]) => (
+              {[...DEKKER, ...(visHytter ? [HYTTER] : [])].map(([tittel, tekst]) => (
                 <div key={tittel}>
                   <dt className="text-[15px] font-medium text-ink">{tittel}</dt>
                   <dd className="mt-0.5 text-[15px] leading-relaxed text-muted">{tekst}</dd>
