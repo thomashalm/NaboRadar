@@ -3256,9 +3256,13 @@ export const FUNN: Funn[] = [
     why_interesting:
       "Et etablert datasenter i et næringsområde på Grorud, tett på bolig.",
     notes:
-      "Primærkilde-runde 2026-09-30: rettet. Skygard kjøpte OSL3 fra Orange, ikke fra Basefarm, og " +
-      "«Orange OSL5» er et eget anlegg på Lørenskog – aliaset er fjernet. PeeringDB fører anlegget " +
-      "som Basefarm OSL3 (Grorud), som er det tidligere navnet på operatøren hos Orange.",
+      "Primærkilde-runde 2026-09-30: rettet. Skygard kjøpte OSL3 fra Orange, ikke fra Basefarm, " +
+      "og «Orange OSL5» er et eget anlegg på Lørenskog – aliaset er fjernet. PeeringDB fører " +
+      "anlegget som Basefarm OSL3 (Grorud), som er det tidligere navnet på operatøren hos Orange. " +
+      "Runde 10 (2026-10-02): Skygard fører OSL3 som eget datasenter med 3,6 MW ved siden av OSL1 " +
+      "og OSL5. Operatør og eier er Skygard AS. Gateadressen Stanseveien 30 kommer fortsatt bare " +
+      "fra katalogkilder; Skygard oppgir Grorud. Skygard OSL5 på Lørenskog mangler i basen og er " +
+      "lead til neste runde.",
     kilder: [
       {
         source_name: "PeeringDB: nettverk til stede i fasiliteten",
@@ -3486,11 +3490,13 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
-    title: "Forskningsparken, Gaustadalléen 21",
+    tidligere_titler: ["Forskningsparken, Gaustadalléen 21"],
+    title: "Forskningsparken Oslo (tidl. SSC Networks), Gaustadalléen 21",
     description:
-      "Samtrafikk- og colocation-punkt i Forskningsparken på Gaustad, direkte tilknyttet NIX. " +
-      "Nordlo (tidligere SSC Networks) og AVUR er oppført på adressen, men AVUR oppgir selv at " +
-      "selskapets datasenter ligger i Bergen, og at det bare har egne rutere her.",
+      "Lite hosting- og colocation-rom i Forskningsparken på Gaustad, opprinnelig drevet av SSC " +
+      "Networks. Etterfølgeren Nordlo nevner ikke datasenteret i dag, og ingen primærkilde " +
+      "bekrefter et anlegg på adressen. Samtrafikkpunktet NIX1 står i nabobygget Gaustadalléen " +
+      "23B hos UiO, ikke her. AVUR har bare egne rutere på adressen.",
     municipality: "Oslo",
     address: "Gaustadalléen 21",
     postal_code: "0349",
@@ -3498,18 +3504,20 @@ export const FUNN: Funn[] = [
     latitude: 59.94229,
     longitude: 10.71674,
     verification_status: "partially_verified",
-    operational_status: "active",
+    operational_status: "unknown",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "low",
     interest_level: "medium",
     why_interesting:
-      "Forskningsparken er et av de eldste samtrafikkpunktene i Norge, og ligger midt i et " +
-      "universitets- og boligområde.",
+      "Et eldre serverrom i et forsknings- og kontorbygg, med uklar status i dag.",
     notes:
       "Aliaser: Nordlo Forskningsparken, SSC Networks, AVUR Oslo. Primærkilde-runde 2026-09-30: " +
       "AVUR er rettet fra operatør til tilstedeværelse med rutere (AVURs egen side). Nordlos kjøp " +
       "av SSC Networks er bekreftet i Nordlos pressemelding, men den nevner ikke adressen. " +
-      "Primærkilde for selve anlegget er søkt, ikke funnet.",
+      "Primærkilde for selve anlegget er søkt, ikke funnet. Runde 10 (2026-10-02): status aktiv → " +
+      "ukjent, sikkerhet lav og ny tittel (tidligere «Forskningsparken, Gaustadalléen 21»). Den " +
+      "tidligere beskrivelsen («direkte tilknyttet NIX», «et av de eldste samtrafikkpunktene») " +
+      "bygget på katalogtekst og er nedtonet. Bygningseier er Oslotech AS.",
     kilder: [
       {
         source_name: "PeeringDB: nettverk til stede i fasiliteten",
@@ -3797,10 +3805,13 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
-    title: "Astrofarm Oslo, Nye Vakås vei 8 i Hvalstad",
+    tidligere_titler: ["Astrofarm Oslo, Nye Vakås vei 8 i Hvalstad"],
+    title: "Astrofarm serverrom, Nye Vakås vei 8 (Hvalstad)",
     description:
-      "Datasenteranlegg oppført av Astrofarm AS i næringsområdet på Hvalstad. Det eneste anlegget " +
-      "i de tre kommunene utenfor Oslo som dukker opp i bransjeoversiktene.",
+      "Serverrom i Astrofarm AS sitt kontor på Hvalstad i Asker. Operatøren beskrev det i 2016 " +
+      "som sitt sekundære datasenter; hoveddatasenteret lå da i et Telenor-eid bygg i Asker uten " +
+      "oppgitt adresse. Ingen kilde bekrefter drift i 2025–2026, og selskapet står ikke i Nkoms " +
+      "register.",
     municipality: "Asker",
     address: "Nye Vakås vei 8",
     postal_code: "1395",
@@ -3808,19 +3819,22 @@ export const FUNN: Funn[] = [
     latitude: 59.85647,
     longitude: 10.47605,
     verification_status: "partially_verified",
-    operational_status: "active",
+    operational_status: "unknown",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "low",
     interest_level: "medium",
     why_interesting:
-      "Det første dokumenterte datasenteret i Asker. Ligger i et næringsområde tett på bolig og " +
-      "på E18-korridoren, og er verdt å følge med på om det utvides.",
+      "Et lite serverrom i et kontorbygg, ikke et kommersielt datasenter av størrelse. Kandidat " +
+      "for arkivering hvis det ikke lar seg bekrefte.",
     notes:
-      "Oppfølgingsrunde: selskapet og adressen er bekreftet i flere kilder, men Astrofarm står ikke " +
-      "i Nkoms register — anlegget er trolig under 0,5 MW. Interessenivå nedjustert til middels: et " +
-      "lite anlegg, ikke en stor installasjon. Primærkilde-runde 2026-09-30: Brønnøysund bekrefter " +
-      "selskapet på adressen, og Astrofarm nevner «our Norwegian datacenters» uten adresse. " +
-      "Primærkilde for selve anlegget søkt, ikke funnet.",
+      "Oppfølgingsrunde: selskapet og adressen er bekreftet i flere kilder, men Astrofarm står " +
+      "ikke i Nkoms register — anlegget er trolig under 0,5 MW. Interessenivå nedjustert til " +
+      "middels: et lite anlegg, ikke en stor installasjon. Primærkilde-runde 2026-09-30: " +
+      "Brønnøysund bekrefter selskapet på adressen, og Astrofarm nevner «our Norwegian " +
+      "datacenters» uten adresse. Primærkilde for selve anlegget søkt, ikke funnet. Runde 10 " +
+      "(2026-10-02): status aktiv → ukjent, sikkerhet lav og ny tittel (tidligere «Astrofarm " +
+      "Oslo, Nye Vakås vei 8 i Hvalstad»). Operatørens arkiverte side fra 2016 beskriver rommet " +
+      "som «et rom i Astrofarm sitt kontor». Astrofarm eies av BRP Systems AB siden 2022.",
     kilder: [
       {
         source_name: "Bedriftsoppslag: Astrofarm AS, orgnr 979 905 173",
@@ -4734,6 +4748,280 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
+    title: "Eidsiva Digital Gjøvik, Hans Mustads gate 31",
+    description:
+      "Etablert colocation-datasenter i Gjøvik med fjellhaller under et kontorbygg i Hans Mustads " +
+      "gate 31. Eidsiva Digital kjøpte anlegget fra Tietoevry i januar 2024 og overtok full drift " +
+      "1. juli 2025. Eidsiva oppgir kapasiteten til 6 MW og omtaler anlegget som et av Norges " +
+      "sikreste. Anlegget var tidligere EVRYs og Tietoevrys datasenter på Gjøvik.",
+    municipality: "Gjøvik",
+    address: "Hans Mustads gate 31",
+    postal_code: "2821",
+    city: "Gjøvik",
+    latitude: 60.79213,
+    longitude: 10.68155,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Eidsivas første datasenter og et av få norske anlegg med helt offentlig, nasjonalt " +
+      "eierskap rettet mot kunder med særskilte sikkerhetskrav. Selskapet står med 4 MW i " +
+      "Statnetts kapasitetskø ved Vardal og planlegger et andre anlegg på Rudshøgda.",
+    notes:
+      "Opprettet i runde 10 etter verifisering av bifunnet fra runde 9. Adressen er nå bekreftet " +
+      "uavhengig av katalog og Brønnøysund-avdeling: Kystverkets sak 2024/2704 «Diesel til grunn " +
+      "– Hans Mustadsgate 31» (ansvarlig Tietoevry Tech Services Norway AS / Tietoevry Norway AS, " +
+      "2024–2025), Arbeidstilsynets forhåndsmelding fra Eidsiva Digital AS for byggearbeid i Hans " +
+      "Mustadsgate 31 (07.11.–31.12.2025), Gjøvik kommunes saksframlegg 2021 («EVRY sitt bygg i " +
+      "Hans Mustad gate») og Oppland Arbeiderblad 09.01.2024 («anlegget i Hans Mustads gate»). " +
+      "Samme fysiske anlegg som tidligere EVRY Gjøvik / Tietoevry Gjøvik – tidligere operatør er " +
+      "alias, ikke eget anlegg. Historikk: bygget ble ifølge OA (2007) reist av AS Industribygg " +
+      "(Gjøvik kommunes eiendomsselskap) for Statens Datasentral; Digi (2022) skriver at " +
+      "fjellhallene opprinnelig ble bygget av Telenor til OL i 1994 – opphavet er ikke entydig " +
+      "dokumentert. EVRY brukte Gjøvik som reserve-/katastrofesenter fra 2015. Eidsiva kunngjorde " +
+      "kjøpet 09.01.2024 (gjennomført januar 2024); Tietoevry sto for driften i en " +
+      "overgangsperiode, og Eidsiva Digital overtok full drift 01.07.2025. Eiendomsforholdet er " +
+      "uavklart: AS Industribygg sto som eier av gnr 67 bnr 68 i 2017 og 2020, og det er ikke " +
+      "dokumentert om Eidsiva eier bygningen/fjellhallene eller leier. «6 MW» er Eidsivas " +
+      "oppgitte kapasitet for anlegget (ikke målt IT-last); katalogen Inflect oppgir 1,2 MW " +
+      "kritisk IT-last og 1 000 m² for EVRY-perioden. 4 MW i Statnetts kapasitetskø ved Vardal " +
+      "TRA (sak 25/01992, sluttkunde «Eidsiva Bredbånd Gjøvik») er ikke sikret kraft. " +
+      "Skatteetaten har rammeavtale med Eidsiva Digital om datasenterkapasitet (2025), men er " +
+      "ikke ført som kunde fordi kilden ikke navngir anlegget. Miljødirektoratets sak 2025/969 " +
+      "(kvoteplikt) har tre dokumenter om «anlegg tilhørende Eidsiva Digital AS» (feb.–mars " +
+      "2026); innholdet er ikke offentlig, og kobling til Gjøvik er ikke bekreftet. Koordinaten " +
+      "er Kartverkets adressepunkt for bygningen; fjellhallenes nøyaktige plassering er ikke " +
+      "offentlig.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Eidsiva: Eidsiva kjøper datasenter på Gjøvik",
+        source_url: "https://www.eidsiva.no/artikler/eidsiva-kjoper-etablert-datasenter/",
+        publisher: "Eidsiva",
+        source_type: "web",
+        source_date: "2024-01-15",
+        primary_source: true,
+        excerpt_or_summary:
+          "Eidsiva går inn i datasentermarkedet ved kjøp av et etablert datasenter på 6 MW på Gjøvik " +
+          "(pressemelding via NTB 09.01.2024). Bekrefter anlegget; oppgir verken adresse, selger " +
+          "eller kjøpesum.",
+      },
+      {
+        source_name: "Eidsiva Energi: Årsrapport 2024",
+        source_url: "https://www.eidsiva.no/siteassets/filer-og-pdf/finansiell-informasjon/rapporter-og-presentasjoner/barekraftsrapporter/arsrapport-2024.pdf",
+        publisher: "Eidsiva Energi AS",
+        source_type: "document",
+        source_date: "2025-03-01",
+        primary_source: true,
+        excerpt_or_summary:
+          "Eidsiva Digital gjennomførte i januar 2024 oppkjøpet av Tietoevrys 6 MW store datasenter " +
+          "på Gjøvik, arbeidet gjennom 2024 med å overta driften, og tilbyr co-location. Datasenteret " +
+          "er operativt.",
+      },
+      {
+        source_name: "Eidsiva Energi: Halvårsrapport første halvår 2025",
+        source_url: "https://www.eidsiva.no/siteassets/filer-og-pdf/finansiell-informasjon/rapporter-og-presentasjoner/eidsiva-energi-forste-halvar-2025.pdf",
+        publisher: "Eidsiva Energi AS",
+        source_type: "document",
+        source_date: "2025-08-28",
+        primary_source: true,
+        excerpt_or_summary:
+          "Eidsiva Digital overtok fra 1. juli 2025 full drift av datasenteret på Gjøvik og er " +
+          "tildelt rammeavtale med Skatteetaten om datasentertjenester. Investeringer og kostnader " +
+          "knyttet til datasenteret omtales.",
+      },
+      {
+        source_name: "Eidsiva Energi: Årsrapport 2025",
+        source_url: "https://live.euronext.com/sites/default/files/company_press_releases/attachments_oslo/2026/03/26/669427_%C3%85rsrapport%202025.pdf",
+        publisher: "Eidsiva Energi AS (Oslo Børs)",
+        source_type: "document",
+        source_date: "2026-03-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Eidsiva Digital har posisjon i datasentermarkedet gjennom eierskap til datasenteret på " +
+          "Gjøvik; oppkjøpet er fullt integrert i 2025. Oppgir ikke effekt eller adresse.",
+      },
+      {
+        source_name: "Eidsiva: Eidsiva Digital vokser i bedriftsmarkedet",
+        source_url: "https://www.eidsiva.no/artikler/eidsiva-bredband-vokser-i-bedriftsmarkedet/",
+        publisher: "Eidsiva",
+        source_type: "web",
+        source_date: "2025-01-01",
+        primary_source: true,
+        excerpt_or_summary:
+          "Oppkjøpet av datasenteret på Gjøvik med kapasitet på 6 MW markerte inntreden i " +
+          "datasentermarkedet i 2024; ytterligere investeringer i datasenteret planlegges i 2025. " +
+          "Publiseringsdato er omtrentlig (2025).",
+      },
+      {
+        source_name: "Eidsiva: Eidsiva Digital inngår rammeavtale med Skatteetaten",
+        source_url: "https://www.eidsiva.no/artikler/eidsiva-digital-inngar-rammeavtale-med-skatteetaten/",
+        publisher: "Eidsiva",
+        source_type: "web",
+        source_date: "2025-07-11",
+        primary_source: true,
+        excerpt_or_summary:
+          "Rammeavtale om drift og tilrettelegging av datasenterkapasitet i Eidsiva Digitals anlegg " +
+          "for virksomheter med særskilte sikkerhetskrav, kunngjort på Doffin juni 2025. Navngir ikke " +
+          "Gjøvik.",
+      },
+      {
+        source_name: "Eidsiva: Eidsiva planlegger nytt datasenter",
+        source_url: "https://www.eidsiva.no/artikler/eidsiva-digital-planlegger-nytt-datasenter/",
+        publisher: "Eidsiva",
+        source_type: "web",
+        source_date: "2025-10-13",
+        primary_source: true,
+        excerpt_or_summary:
+          "Eidsiva Digital eier og driver et av landets sikreste datasentre i Gjøvik; Rudshøgda blir " +
+          "selskapets andre.",
+      },
+      {
+        source_name: "Kystverket sak 2024/2704: Diesel til grunn – Hans Mustadsgate 31, Gjøvik (eInnsyn)",
+        source_url: "https://api.einnsyn.no/saksmappe/sm_01j76vzv9bfrj8rsqmkjkabk6g/journalpost?limit=50&expand=korrespondansepart",
+        publisher: "Kystverket",
+        source_type: "register",
+        source_date: "2024-06-14",
+        primary_source: true,
+        excerpt_or_summary:
+          "Journal med 13 dokumenter 2024–2025 om diesellekkasje og opprydding i Hans Mustads gate " +
+          "31, med Tietoevry Tech Services Norway AS/Tietoevry Norway AS som ansvarlig og Sweco som " +
+          "rådgiver. Bekrefter Tietoevrys dieselanlegg på adressen; ordet datasenter står ikke i " +
+          "titlene.",
+      },
+      {
+        source_name: "Arbeidstilsynet: Forhåndsmelding – Hans Mustadsgate 31, Gjøvik 07.11.2025–31.12.2025 (eInnsyn)",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01k9nepsb6ev1ah41qrjaamfww?expand=korrespondansepart",
+        publisher: "Arbeidstilsynet",
+        source_type: "register",
+        source_date: "2025-11-04",
+        primary_source: true,
+        excerpt_or_summary:
+          "Forhåndsmelding om bygge-/anleggsarbeid i Hans Mustadsgate 31 med Eidsiva Digital AS som " +
+          "avsender. Bekrefter at Eidsiva Digital er byggherre på adressen; arbeidets art framgår " +
+          "ikke.",
+      },
+      {
+        source_name: "Arbeidstilsynet sak 2025/42599: Søknad om samtykke, Gjøvik kommune – Eidsiva Digital AS (eInnsyn)",
+        source_url: "https://api.einnsyn.no/saksmappe/sm_01jzp0z0yhfdb8setptg11mxaq/journalpost?expand=korrespondansepart",
+        publisher: "Arbeidstilsynet",
+        source_type: "register",
+        source_date: "2025-07-15",
+        primary_source: true,
+        excerpt_or_summary:
+          "Arbeidstilsynet innvilget 15.07.2025 samtykke i byggesak i Gjøvik med Eidsiva Digital AS " +
+          "som mottaker (søknad fra arkitektfirma 03.07.2025). Adressen er avskjermet i sakstittelen.",
+      },
+      {
+        source_name: "Digitaliserings- og forvaltningsdepartementet sak 2026/1432: Oppfølging etter besøk på Gjøvik – Eidsiva Datasenter (eInnsyn)",
+        source_url: "https://api.einnsyn.no/saksmappe/sm_01ks4nv1c2e1fswrmzjv96j944/journalpost?expand=korrespondansepart",
+        publisher: "Digitaliserings- og forvaltningsdepartementet",
+        source_type: "register",
+        source_date: "2026-05-13",
+        primary_source: true,
+        excerpt_or_summary:
+          "Inngående brev fra Eidsiva Digital AS etter departementets besøk ved Eidsivas datasenter " +
+          "på Gjøvik. Bekrefter at anlegget er i drift i 2026; ingen adresse eller effekt.",
+      },
+      {
+        source_name: "Gjøvik kommune: Planinitiativ for del av campus Gjøvik (sak 127/2021)",
+        source_url: "https://www.gjovik.kommune.no/_f/p2/icf9be3a7-39e2-4c0d-ac30-870e10d82c8e/vedtak-2007618_4_a.pdf",
+        publisher: "Gjøvik kommune",
+        source_type: "document",
+        source_date: "2021-11-26",
+        primary_source: true,
+        excerpt_or_summary:
+          "Saksframlegg som opplyser at Helsetjenestens driftsorganisasjon for nødnett da var " +
+          "lokalisert i «EVRY sitt bygg i Hans Mustad gate». Bekrefter EVRY-bygget på gateadressen; " +
+          "omtaler ikke datasenteret.",
+      },
+      {
+        source_name: "Arbeidstilsynet sak 2017/47231: Gnr 67 bnr 68 – Hans Mustads gate 31 – AS Industribygg (eInnsyn)",
+        source_url: "https://api.einnsyn.no/saksmappe/sm_01j74aqme6fz8ryzk3qk09v5ea",
+        publisher: "Arbeidstilsynet",
+        source_type: "register",
+        source_date: "2017-11-09",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bruksendring for en kontorleietaker i Hans Mustads gate 31 med AS Industribygg som " +
+          "tiltakshaver. Viser at AS Industribygg var gårdeier på gnr 67 bnr 68 i 2017; sier " +
+          "ingenting om datasenteret.",
+      },
+      {
+        source_name: "Miljødirektoratet sak 2025/969: Vurdering av kvoteplikt for anlegg – dokumenter om Eidsiva Digital AS (eInnsyn)",
+        source_url: "https://api.einnsyn.no/search?query=Eidsiva%20Digital%20kvoteplikt",
+        publisher: "Miljødirektoratet",
+        source_type: "register",
+        source_date: "2026-03-27",
+        primary_source: true,
+        excerpt_or_summary:
+          "Dok. 32 (23.02.2026) anmodning om opplysninger om anlegg tilhørende Eidsiva Digital AS, " +
+          "dok. 116 (20.03.2026) opplysninger om kvoteplikt, dok. 124 (27.03.2026) konklusjon. " +
+          "Anleggsnavn og konklusjon framgår ikke av journalen.",
+      },
+      {
+        source_name: "Enhetsregisteret: EIDSIVA DIGITAL AS AVD GJØVIK (936524826)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/underenheter/936524826",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Underenhet i Hans Mustads gate 31, 2821 Gjøvik, oppstart 01.11.2025, 6 ansatte. Bekrefter " +
+          "avdeling og adresse, ikke selve anlegget.",
+      },
+      {
+        source_name: "Kartverket: Hans Mustads gate 31, Gjøvik",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?sok=Hans%20Mustads%20gate%2031&kommunenavn=Gj%C3%B8vik",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Adressepunkt 60.79213, 10.68155, gnr 67 bnr 68, Gjøvik (3407). Bekrefter adresse og " +
+          "matrikkelenhet, ikke anlegg.",
+      },
+      {
+        source_name: "Statnett – liste over kapasitetskø (forbruk), 30.09.2026",
+        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak 25/01992 (ELB272): Vardal TRA, kunde Elvia AS, sluttkunde Eidsiva Bredbånd Gjøvik, " +
+          "datasenter, 4 MW i kø, moden bestilling 21.11.2024, ønsket tilknytning 30.03.2026. " +
+          "Køplass, ikke reservasjon.",
+      },
+      {
+        source_name: "EVRY: kontaktside Gjøvik (Wayback 2017)",
+        source_url: "https://web.archive.org/web/20170814121346/https://www.evry.com/no/kontakt/norge/gjovik/gjovik/",
+        publisher: "EVRY (arkivert av Internet Archive)",
+        source_type: "web",
+        source_date: "2017-08-14",
+        primary_source: true,
+        excerpt_or_summary:
+          "EVRYs egen kontaktside oppgir besøksadresse Hans Mustadsgt. 31, 2821 Gjøvik. Bekrefter " +
+          "EVRYs lokasjon på adressen, ikke datahallene spesifikt.",
+      },
+      {
+        source_name: "Eidsiva: Datasenter (produktside)",
+        source_url: "https://www.eidsiva.no/bedrift/produkter-og-tjenester/datasenter/",
+        publisher: "Eidsiva",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Colocation-datasentertjenester med døgnbemannet SOC og nasjonalt, offentlig eierskap. " +
+          "Oppgir ikke lokasjon eller effekt.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
     title: "Arcem Elverum, Sperre-tomta",
     description:
       "Planlagt datasenter på den tidligere Sperre Støperi-tomta i Industrigata 22 på Vestad i " +
@@ -4838,10 +5126,10 @@ export const FUNN: Funn[] = [
     title: "Ugna Lalm (tidl. Krefter), Kolbotn industriområde",
     description:
       "Datasenterprosjekt på Kolbotn industriområde på Lalm, startet av Krefter AS i 2021–2022 og " +
-      "videreført av Ugna-gruppen. Et bygg med containere og trafoer ble satt opp i 2022, men " +
-      "anlegget har aldri fått strøm og har ikke vært i drift. Statnett reserverte 10 MW ved " +
-      "Vågåmo til Ugna Properties AS i september 2026. Lokalpressen skrev i 2025 at " +
-      "datasenterplanene var lagt på is.",
+      "videreført av Ugna-gruppen. Et bygg ble satt opp i 2022, men anlegget har aldri fått strøm " +
+      "og har ikke vært i drift. Statnett reserverte 10 MW ved Vågåmo til Ugna Properties AS i " +
+      "september 2026, og selskapet sendte samme måned fornyet konsesjonssøknad til NVE for " +
+      "Kolbotten industriområde.",
     municipality: "Vågå",
     postal_code: "2682",
     city: "Lalm",
@@ -4850,19 +5138,24 @@ export const FUNN: Funn[] = [
     verification_status: "partially_verified",
     operational_status: "planned",
     sensitivity: "internal_only",
-    confidence: "low",
+    confidence: "medium",
     interest_level: "medium",
     why_interesting:
       "Et omstridt prosjekt med stoppordre i 2022 og mistanke om kryptoutvinning. En fersk " +
       "Statnett-reservasjon kan bety at prosjektet tas opp igjen.",
     notes:
       "Opprettet i runde 9 (2026-10-02) fra Nordavind-notatet. Koordinaten er Nordavinds " +
-      "kartpunkt for tomta (ved Kvennbergvegen) og er ikke bekreftet som selve bygget. Status er " +
-      "usikker: bygget står, men uten strøm og drift, og en ny reguleringsplan for «grønn " +
-      "industri» er sendt inn. Statnett-reservasjonen på 10 MW (22/00654) står på Ugna Properties " +
-      "AS, men navngir ikke Lalm, og selskapet har hatt forespørsler flere steder i Vågå og Sel; " +
-      "den er derfor ikke ført som sikret kraft. Type er ukjent: selskapet sier datalagring, mens " +
-      "kommunen og NRK beskriver kryptocontainere. Ikke samme prosjekt som Kitebrook Børdalen.",
+      "kartpunkt for tomta (ved Kvennbergvegen) og er ikke bekreftet som selve bygget. Type er " +
+      "ukjent: selskapet sier datalagring, mens kommunen og NRK beskriver kryptocontainere. Ikke " +
+      "samme prosjekt som Kitebrook Børdalen. Runde 10 (2026-10-02): NVEs journal viser at Ugna " +
+      "Properties AS i september 2026 sendte fornyet søknad om anleggskonsesjon for Kolbotten " +
+      "industriområde med henvisning til mottatt kapasitetsreservasjon fra Statnett (sak " +
+      "2026/19609), og at NVE har plassert søknaden i kø. Reservasjonen på 10 MW (22/00654) er " +
+      "dermed stedfestet til Lalm og ført som sikret kraft; sikkerheten er hevet fra lav til " +
+      "medium. Bare journaltitlene er lest, ikke dokumentene. Den forrige søknaden ble avvist i " +
+      "oktober 2025 på grunn av manglende framdrift. Det er ikke bekreftet at bygget fortsatt " +
+      "står: lokalpressen skrev i 2025 at det muligens rives. Krefters øvrige søknader (Tessand i " +
+      "Vågå og Skansen i Sel) har ingen aktivitet etter 2023.",
     public_candidate: false,
     kilder: [
       {
@@ -6118,7 +6411,14 @@ export const FUNN: Funn[] = [
       "vilkår) og ACDC Glomfjord AS som hadde 30 MW (bare betinget reservert); runde 8 hadde " +
       "byttet om tallene. Intrahouse/ACDC gjaldt et eget bygg (Likeretterbygget) og er ikke del " +
       "av dette anlegget. Begge selskapene ble tvangsoppløst 09.06.2026, bygget er ikke " +
-      "stedfestet, og de er beholdt som lead og avvist, ikke opprettet som egne punkter.",
+      "stedfestet, og de er beholdt som lead og avvist, ikke opprettet som egne punkter. Runde 10 " +
+      "(2026-10-02): alias «SiC-bygget» (tidligere SiC Processing). Hydrokraft og Arkon er " +
+      "tidligere operatører av samme bygg. Den tidligere Norwegian Crystals-fabrikken er " +
+      "stedfestet til Sam Eydes vei 26 (46/4, festenr. 12), ca. 240 m nord, og er omtalt som " +
+      "utvidelse her, ikke som eget punkt. Kryptovault Glomfjord (annonsert 2018 og lagt på is " +
+      "samme år) er avvist som eget anlegg. Intrahouse/Likeretterbygget er fortsatt lead uten " +
+      "entydig bygningspunkt. Net Zero Compute AS oppgir drift i Glomfjord fra april 2026 i et " +
+      "bygg som ikke er stedfestet, og er lead.",
     public_candidate: false,
     kilder: [
       {
@@ -6459,8 +6759,10 @@ export const FUNN: Funn[] = [
       "Konvertering av en nedlagt fabrikk til AI-datasenter, i en kommune med 4 000 innbyggere. Det " +
       "er mønsteret bransjen følger: kraft og nett finnes fra før på gamle industritomter.",
     notes:
-      "DataCenterMap fører anlegget under markedet «Bergen», men Dalekvam ligger i Vaksdal kommune. " +
-      "Kommunen er satt fra geokodet adresse.",
+      "DataCenterMap fører anlegget under markedet «Bergen», men Dalekvam ligger i Vaksdal " +
+      "kommune. Kommunen er satt fra geokodet adresse. Runde 10 (2026-10-02): Statnett-sak " +
+      "23/01416 (Dale TRA, sluttkunde «Dale Fabrikker», 20 MW reservert 11.12.2023) er nå kilde " +
+      "for sikret kraft. 10 MW til ASP Eiendom AS (26/03066) står i kø og er ikke ført.",
     kilder: [
       {
         source_name: "DataCenterMap: ASP Dalekvam",
@@ -6510,10 +6812,12 @@ export const FUNN: Funn[] = [
       "Opprettet i runde 9 (2026-10-02) fra leadet «Nscale Drift, avdeling Sola». Aliaser: Asp " +
       "K11, Forus Industry Arena, Nscale Stavanger. Anlegget er bekreftet av Asp Data Centers " +
       "prospekt (09.07.2025) og kvartalsrapport. Postadressen er 4033 Stavanger, men bygget " +
-      "ligger i Sola kommune (gnr 35 bnr 360). Koordinaten er Kartverkets adressepunkt. Statnett " +
-      "har 3 + 8 MW reservert til ASP Eiendom AS og 8 MW i kø for ASP Data Center AS ved Bærheim " +
-      "TRA; gruppen har to anlegg i området (K11 og M12), så tallene er ikke ført som sikret " +
-      "kraft. Eget anlegg, ikke ASP Dalekvam.",
+      "ligger i Sola kommune (gnr 35 bnr 360). Koordinaten er Kartverkets adressepunkt. Eget " +
+      "anlegg, ikke ASP Dalekvam. Runde 10 (2026-10-02): i drift siden slutten av 2024. Asps " +
+      "årsrapport 2024 oppgir at K11 er tildelt 8 MW ekstra nettkapasitet, som samsvarer med " +
+      "Statnett-reservasjon 24/01721 til ASP Eiendom AS; de 8 MW er ført som sikret kraft. De " +
+      "øvrige ASP-radene ved Bærheim TRA (3 MW reservert, 8 MW i kø) er på konsernnivå og er ikke " +
+      "ført. ASP M12 i Midtgårdveien 12 er et eget anlegg.",
     public_candidate: false,
     kilder: [
       {
@@ -6630,25 +6934,269 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
-    title: "Datafjellet, Bønes",
+    title: "ASP Suldal, Tysingvatnet",
     description:
-      "Datasenter i fjellhall på Bønes i Bergen, med private, spesialbygde datarom. Datafjellet AS er " +
-      "Nkom-registrert.",
+      "Asp Data Center planlegger et nytt datasenter på en 56 daa næringstomt ved Tysingvatnet " +
+      "nær Jelsa. Suldal kommunestyre vedtok i desember 2025 enstemmig å selge tomten til Asp " +
+      "Eiendom AS for 40 millioner kroner, med forbud mot kryptoutvinning og tilbakekjøpsrett. " +
+      "Asp oppgir driftsklart anlegg i første kvartal 2029, og prosjektet er omtalt med et " +
+      "effektbehov på 25 MW.",
+    municipality: "Suldal",
+    latitude: 59.39936,
+    longitude: 6.15376,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Norges største kraftkommune selger selv tomt til datasenter for å få verdiskaping av " +
+      "kraften lokalt. Dagens 66 kV-linje rekker ikke til 25 MW, så prosjektet avhenger av ny " +
+      "linje og ny trafo.",
+    notes:
+      "Aliaser: Asp Suldal, ASP DC Suldal, Datasenter ved Tysingvatnet. Opprettet i runde 10 fra " +
+      "leadet «ASP Suldal». Koordinaten er omtrentlig: Kartverkets teigpunkt for gnr 155 bnr 8 i " +
+      "det regulerte næringsområdet ved Tysingvatnet (plan-ID 201801); nøyaktig avgrensning av " +
+      "den solgte tomten er ikke kontrollert. Det finnes to vann med navnet Tysingvatnet i Suldal " +
+      "– dette er det sørlige, ved fv. 46 Indre Ryfylkevegen. Ingen ASP-rad i Statnetts lister " +
+      "for Suldal-området. Prosjektselskapet ASP DC Suldal AS (936901557) er registrert, men det " +
+      "er ikke dokumentert at det eier tomten.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Asp Data Center: to build sustainable data center in Suldal",
+        source_url: "https://www.aspdatacenter.no/news/data-center-in-suldal",
+        publisher: "Asp Data Center AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bekrefter prosjektet: kommunestyret i Suldal vedtok enstemmig salg av næringstomt ved " +
+          "Tysingvatnet til Asp Eiendom AS; 56 daa; kryptoforbud og tilbakekjøpsrett; " +
+          "detaljplanlegging starter. Publisert januar 2026.",
+      },
+      {
+        source_name: "Asp Data Center – nettside",
+        source_url: "https://www.aspdatacenter.no/",
+        publisher: "Asp Data Center AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Lokasjonsliste: «Suldal (Norway) Greenfield – RFS Q1 2029». Konserntall: 14 MW kontrahert, " +
+          "67 MW «power secured», 403 MW utvidelseskapasitet – ikke fordelt per anlegg.",
+      },
+      {
+        source_name: "Suldal kommune (arealplaner.no): Næringsområde ved Tysingvatnet, plan-ID 201801",
+        source_url: "https://www.arealplaner.no/suldal1134/arealplaner/117",
+        publisher: "Suldal kommune",
+        source_type: "regulation",
+        source_date: "2020-06-23",
+        primary_source: true,
+        excerpt_or_summary:
+          "Detaljregulering for næringsområde ved Tysingvatnet, gnr 155 bnr 8 m.fl., endelig vedtatt " +
+          "23.06.2020. Bekrefter det regulerte området, ikke datasenterprosjektet.",
+      },
+      {
+        source_name: "Kartverket: eiendomsgeokoding 1134-155/8",
+        source_url: "https://ws.geonorge.no/eiendom/v1/geokoding?kommunenummer=1134&gardsnummer=155&bruksnummer=8&omrade=false",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Teigpunkt for gnr 155 bnr 8 i Suldal (59,39936 N, 6,15376 Ø). Bekrefter eiendommens " +
+          "beliggenhet, ikke prosjektet.",
+      },
+      {
+        source_name: "Brønnøysundregistrene: ASP DC Suldal AS (936901557)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/936901557",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bekrefter prosjektselskapet: stiftet 06.10.2025, registrert 05.01.2026, formål investering " +
+          "i datasentervirksomhet, c/o Asp DC AS i Stavanger. Bekrefter ikke anlegg eller " +
+          "tomteeierskap.",
+      },
+      {
+        source_name: "Statnett: statistikk om tilknytningssaker",
+        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Ingen rad med ASP som sluttkunde i Suldal-området (Nesflaten/Suldal KRA, Saurdal KRA/TRA, " +
+          "Sauda TRA) per 2026-09-30.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "ASP M12, Midtgårdveien 12 (Forus)",
+    description:
+      "Datasenter på 1 500 m² ved Gandsfjorden på Forus, eid av Midtgårdveien 12 AS i Asp Data " +
+      "Center-gruppen. Anlegget har om lag 3 MW IT-kapasitet og sjøvannskjøling. Det ble kjøpt " +
+      "fra Seabrokers Eiendom i november 2024 og kom i drift for en ikke navngitt AI-kunde 6. " +
+      "mars 2026.",
+    municipality: "Stavanger",
+    address: "Midtgårdveien 12",
+    postal_code: "4031",
+    city: "Stavanger",
+    latitude: 58.89699,
+    longitude: 5.74926,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Et eldre bedriftsdatasenter med egen sjøvannspumpestasjon er tatt i bruk på nytt for " +
+      "AI-last. Anlegget ligger i et vanlig næringsområde og er det andre Asp-anlegget i drift i " +
+      "Stavanger-regionen.",
+    notes:
+      "Aliaser: M12, Asp M12, Midtgårdveien 12 AS. Opprettet i runde 10 fra leadet «ASP M12 " +
+      "Stavanger». Bygget er fra 1997/2000 og ble ifølge Asp opprinnelig bygget og drevet som " +
+      "datasenter av et norsk, multinasjonalt energiselskap (ikke navngitt). Kunden er omtalt som " +
+      "«AI enterprise customer» og er ikke navngitt, så ingen kunde er ført. Statnett-radene for " +
+      "ASP ved Bærheim TRA er på konsernnivå og er ikke ført som sikret kraft her. Eget anlegg, " +
+      "ikke ASP K11 (Kanalvegen 11, Sola).",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Asp Data Center AS: Annual Report 2025",
+        source_url: "https://cdn.prod.website-files.com/662f5637963f1693e3306556/69f395fdb1d553c6b561837c_Asp%20Data%20Center%20AS%20Annual%20Report%202025.pdf",
+        publisher: "Asp Data Center AS",
+        source_type: "document",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bekrefter anlegget: Midtgårdveien 12 er et 1 500 m² datasenter i Stavanger med ca. 3 MW IT " +
+          "og fjordvannskjøling, eid av Midtgårdveien 12 AS, kjøpt fra Seabrokers Eiendom AS " +
+          "15.11.2024. Opprinnelig bygget og drevet av et norsk energiselskap.",
+      },
+      {
+        source_name: "Asp Data Center AS: Financial statement 2Q 2026",
+        source_url: "https://cdn.prod.website-files.com/662f5637963f1693e3306556/6a957cb1b120ee180506d043_Asp%20Data%20Center%20AS%20Financial%20statement%202Q%202026.pdf",
+        publisher: "Asp Data Center AS",
+        source_type: "document",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bekrefter drift: M12 i drift fra 06.03.2026 under langsiktig avtale med en AI-kunde om 3 " +
+          "MW IT; fase 2-opptrapping fra 22.06.2026; egen sjøvannspumpestasjon.",
+      },
+      {
+        source_name: "Asp Data Center AS: Base Prospectus 09.07.2025",
+        source_url: "https://cdn.prod.website-files.com/662f5637963f1693e3306556/686e32e3d5523d438b00de8f_Base%20Prospectus%2009072025%20-%20Asp%20Data%20Center%20AS%20-%20Final%20with%20Annexes.pdf",
+        publisher: "Asp Data Center AS",
+        source_type: "document",
+        source_date: "2025-07-09",
+        primary_source: true,
+        excerpt_or_summary:
+          "Midtgårdveien 12 AS (917 385 734) eier et datasenter med kapasitet 4 megawatt, ledig per " +
+          "juli 2025. M12 overtatt 15.11.2024. De to datasentrene eies og drives av garantistene.",
+      },
+      {
+        source_name: "Asp Data Center: Q4 2025 financial statements and review",
+        source_url: "https://live.euronext.com/sites/default/files/company_press_releases/attachments_oslo/2026/02/28/667191_ASP%20Data%20Center%202025%20fourth%20quarter%20financial%20statements%20and%20review.pdf",
+        publisher: "Asp Data Center AS (Euronext Oslo)",
+        source_type: "document",
+        source_date: "2026-02-28",
+        primary_source: true,
+        excerpt_or_summary:
+          "Etter årsskiftet: ny langsiktig leieavtale med AI-kunde om ca. 3 MW IT på Midtgårdveien " +
+          "12; inntekter fra mars 2026. Kunden er ikke navngitt.",
+      },
+      {
+        source_name: "Asp Data Center AS: Financial Statements Q3 2025",
+        source_url: "https://cdn.prod.website-files.com/662f5637963f1693e3306556/692992c8d988988b07f3e31e_Financial%20Statements%20Q3%202025.pdf",
+        publisher: "Asp Data Center AS",
+        source_type: "document",
+        primary_source: true,
+        excerpt_or_summary:
+          "Midtgårdveien 12 sto tomt, men innredet som datasenter. Teknisk gjennomgang ferdig; " +
+          "sjøvannskjøling; arbeid med å sikre mer nettkapasitet til M12.",
+      },
+      {
+        source_name: "Asp Data Center – nettside",
+        source_url: "https://www.aspdatacenter.no/",
+        publisher: "Asp Data Center AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Lokasjonsliste: «M12 (Norway) In operation – fully occupied» og «K11 (Norway) In operation " +
+          "– fully occupied»; Suldal, Dale og Pori som utviklingsprosjekter.",
+      },
+      {
+        source_name: "Asp Data Center: Big news from Asp Data Center",
+        source_url: "https://www.aspdatacenter.no/news/big-news-from-asp-data-center",
+        publisher: "Asp Data Center AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kunngjør kjøp av et 1 500 m² ferdig datasenter med fjordkjøling, aggregater og UPS; " +
+          "kapasitet tilgjengelig for kunder fra desember 2024. Adressen er ikke nevnt.",
+      },
+      {
+        source_name: "Brønnøysundregistrene: Midtgårdveien 12 AS (917385734)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/917385734",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bekrefter selskapet: stiftet 15.06.2016, formål investering i datasentervirksomhet, c/o " +
+          "Asp DC AS i Stavanger. Bekrefter ikke anlegget.",
+      },
+      {
+        source_name: "Kartverket: adressesøk Midtgårdveien 12",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?sok=Midtg%C3%A5rdveien%2012&kommunenummer=1103",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bekrefter adressen: Midtgårdveien 12, 4031 Stavanger, gnr 13 bnr 54, Stavanger kommune. " +
+          "Bekrefter ikke datasenteret.",
+      },
+      {
+        source_name: "Statnett: statistikk om tilknytningssaker",
+        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bærheim TRA: ASP Eiendom AS 3 MW og 8 MW reservert, ASP Data Center AS 8 MW i kø. Ingen " +
+          "rad nevner M12 eller Midtgårdveien 12 AS.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    tidligere_titler: ["Datafjellet, Bønes"],
+    title: "Datafjellet, Bergen (fjellhall – adresse ikke offentlig)",
+    description:
+      "Colocation-datasenter i fjellhall i Bergensområdet, drevet av Datafjellet AS, som er " +
+      "Nkom-registrert. Selskapet holder anleggets adresse hemmelig. Selskapets egen nettside ble " +
+      "oppdatert i 2026.",
     municipality: "Bergen",
-    address: "Gullstølsstien 258",
-    postal_code: "5153",
-    city: "Bønes",
-    latitude: 60.33899,
-    longitude: 5.31271,
+    city: "Bergen",
     verification_status: "partially_verified",
     operational_status: "active",
     sensitivity: "internal_only",
     confidence: "medium",
     interest_level: "medium",
     why_interesting:
-      "Et fjellanlegg midt i et boligområde i Bergen — den typen anlegg som er helt usynlig fra " +
-      "overflaten.",
-    notes: "Kun katalogkilde pluss Nkom-registrering.",
+      "Et fjellanlegg i Bergensområdet, den typen anlegg som er helt usynlig fra overflaten.",
+    notes:
+      "Kun katalogkilde pluss Nkom-registrering. Runde 10 (2026-10-02): adressen og kartpunktet " +
+      "er fjernet. Det var selskapets forretningsadresse, ikke fjellhallen. Ny tittel (tidligere " +
+      "«Datafjellet, Bønes»). Operatør og eier er Datafjellet AS (tidl. SBT Eiendom). Selskapet " +
+      "oppgir to aggregater på 645 kVA; MW er ikke satt.",
     kilder: [
       {
         source_name: "DataCenterMap: Datafjellet, Bønes",
@@ -8584,6 +9132,194 @@ export const FUNN: Funn[] = [
         primary_source: true,
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Fossefall Åfjord, Stordalsveien 541",
+    description:
+      "Planlagt datasenter i et eksisterende industri- og kontorbygg i Stordalen i Åfjord. " +
+      "Fossefall AS står i Statnetts lister med 2,2 MW reservert og 5,8 MW i kø ved Åfjord " +
+      "transformatorstasjon, i en sak Storespeed tidligere omtalte som «Åfjord DC04». Fossefall " +
+      "har også spilt inn 60 dekar nytt næringsareal på nabotomta til kommuneplanens arealdel. " +
+      "Drift er ikke dokumentert.",
+    municipality: "Åfjord",
+    address: "Stordalsveien 541",
+    postal_code: "7170",
+    city: "Åfjord",
+    latitude: 63.97861,
+    longitude: 10.31937,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "medium",
+    why_interesting:
+      "Et lite brownfield-prosjekt som ser ut til å ha skiftet utvikler fra Storespeed til " +
+      "Fossefall, og der det samtidig søkes areal til en større utbygging på nabotomta.",
+    notes:
+      "Opprettet i runde 10 (2026-10-02) fra leadet «Storespeed Åfjord», med lav sikkerhet. " +
+      "Aliaser: Storespeed Åfjord DC04, Beversmark østre (NÆ-2-1). Stedfestingen bygger på Åfjord " +
+      "kommunes postliste (sak 2021/2130: Fossefall AS, Stordalsvegen 541, innspill til " +
+      "arealdelen) og Statnett-sak 24/01506. Ingen kilde bruker ordet «datasenter» om adressen; " +
+      "kommunen skriver næringsareal. Fossefalls brev og vedlegg er ikke lest. Overdragelsen fra " +
+      "Storespeed er ikke kunngjort; den er utledet av at sluttkunden i Statnett-saken er byttet. " +
+      "Reservasjonen står på holdingselskapet, som også har en sak ved Grenland TRA, og er ikke " +
+      "ført som sikret kraft. Planlagt tilknytning 30.01.2026 er passert uten tilknyttet effekt. " +
+      "Koordinaten er Kartverkets adressepunkt for Stordalsveien 541 (gnr 35 bnr 8). " +
+      "Høringsfristen for arealdelen var 02.10.2026; planen er ikke vedtatt.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Åfjord kommune, postliste: Fossefall AS – Stordalsvegen 541 (gnr/bnr 35/2) – Innspill til arealdelen",
+        source_url: "https://www.afjord.kommune.no/tjenester/politikk-planer-og-organisasjon/postliste-dokumenter-og-vedtak/postliste-sok-etter-saker-og-dokumenter/",
+        publisher: "Åfjord kommune",
+        source_type: "register",
+        source_date: "2025-12-05",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak 2021/2130 (arealdelen). Dok. 2025/14803, 14917, 14918 og 15312, 5.–18.12.2025, mellom " +
+          "kommunen og Fossefall AS. Vedlegg: «Kart med tomteparseller» og «WIIG – FOSEFALL (nb) " +
+          "60MW». Bekrefter at Fossefall har et prosjekt på adressen; brevene er ikke lest.",
+      },
+      {
+        source_name: "Åfjord kommune, postliste: byggesak 2026/615 Gnr 35 bnr 8 – Stordalsveien 541 – Avklaring vedrørende søknadsprosess",
+        source_url: "https://www.afjord.kommune.no/tjenester/politikk-planer-og-organisasjon/postliste-dokumenter-og-vedtak/postliste-sok-etter-saker-og-dokumenter/",
+        publisher: "Åfjord kommune",
+        source_type: "register",
+        source_date: "2026-03-12",
+        primary_source: true,
+        excerpt_or_summary:
+          "Henvendelse 12.03.2026 og kommunens svar 27.03.2026 om søknadsprosess for eiendommen. Part " +
+          "og dokumenter er unntatt offentlighet. Bekrefter at et tiltak på eiendommen er under " +
+          "avklaring, ikke hvem som står bak eller hva det gjelder.",
+      },
+      {
+        source_name: "Kommuneplanens arealdel 2026–2038, konsekvensutredning innspill: 018 Beversmark østre",
+        source_url: "https://www.arealplaner.no/aafjord5058/dokumenter/1308/Konsekvensutredning%20innspill.pdf",
+        publisher: "Åfjord kommune",
+        source_type: "document",
+        source_date: "2026-06-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Side 46–49: forslagsstiller Fossefall AS, gnr 35 bnr 2, grunneier Skogselskapet i " +
+          "Trøndelag, 60 daa fra LNFR til næringsareal. Rådmannen: innspillet tas til følge. Ordet " +
+          "datasenter brukes ikke.",
+      },
+      {
+        source_name: "Planbestemmelser til kommuneplanens arealdel 2026–2038 (høringsforslag)",
+        source_url: "https://www.arealplaner.no/aafjord5058/dokumenter/1310/Planbestemmelser%20til%20kommuneplanens%20arealdel%202026-2038.pdf",
+        publisher: "Åfjord kommune",
+        source_type: "regulation",
+        source_date: "2026-06-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "§ 2-10.3: NÆ-2-1 Beversmark østre er næringsbebyggelse med krav om vedtatt reguleringsplan " +
+          "før tiltak. Forslag på høring til 02.10.2026, ikke vedtatt.",
+      },
+      {
+        source_name: "Åfjord kommunes planregister: kommuneplanens arealdel, planID 202401",
+        source_url: "https://www.arealplaner.no/aafjord5058/arealplaner/342",
+        publisher: "Åfjord kommune / Norkart",
+        source_type: "register",
+        source_date: "2026-06-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Planstatus planforslag. Offentlig ettersyn 25.06.–02.10.2026 etter vedtak i planutvalget. " +
+          "Bekrefter planprosessen, ikke datasenteret.",
+      },
+      {
+        source_name: "Statnett: statistikk om tilknytningssaker (kø og reservasjoner, 30.09.2026)",
+        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak 24/01506 (ELB1715), Åfjord TRA, kunde Tensio AS, sluttkunde FOSSEFALL AS, datasenter: " +
+          "2,2 MW reservert 14.11.2025 (planlagt 30.01.2026) og 5,8 MW i kø. Ingen tilknyttet effekt. " +
+          "Bekrefter kraftsaken og næringstypen, ikke adressen.",
+      },
+      {
+        source_name: "Tensio: Dette er de nye storforbrukerne av strøm i Midt-Norge",
+        source_url: "https://www.tensio.no/no/proff/nyheter-proff/dette-er-de-nye-storforbrukerne-av-strom-i-midt-norge",
+        publisher: "Tensio AS",
+        source_type: "web",
+        source_date: "2025-04-03",
+        primary_source: true,
+        excerpt_or_summary:
+          "Netteier oppgir at Storespeed AS står i kø med 5,8 MW med uttak i Åfjord. Bekrefter at " +
+          "saken var Storespeeds i april 2025. Ingen adresse.",
+      },
+      {
+        source_name: "Storespeed.no (arkivert 05.12.2023): Åfjord DC04",
+        source_url: "http://web.archive.org/web/20231205084026/https://www.storespeed.no/aringfjord--dc04.html",
+        publisher: "Storespeed AS (via Internet Archive)",
+        source_type: "web",
+        source_date: "2023-12-05",
+        primary_source: true,
+        excerpt_or_summary:
+          "Storespeed sikrer et brownfield-sted med 6 MW i Midt-Norge; kraft under søknad, stedet kan " +
+          "være klart tidlig 2025. Siden lå uendret til august 2025. Ingen adresse.",
+      },
+      {
+        source_name: "Kartverket adresse-API: Stordalsveien 541, Åfjord",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?sok=Stordalsveien%20541&kommunenavn=%C3%85fjord",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stordalsveien 541, 7170 Åfjord, gnr 35 bnr 8, punkt 63,97861 N 10,31937 Ø. Bekrefter " +
+          "adressen, ikke at det er et datasenter der.",
+      },
+      {
+        source_name: "Kartverket: Matrikkelen – bygningspunkt (WFS)",
+        source_url: "https://wfs.geonorge.no/skwms1/wfs.matrikkelen-bygningspunkt",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bygningsnr. 18042630 (type 319 annen kontorbygning) og 18042622 (type 219 annen " +
+          "industribygning) ved Stordalsveien 541, begge tatt i bruk. Bekrefter at det står " +
+          "næringsbygg på tomta, ikke bruken.",
+      },
+      {
+        source_name: "Enhetsregisteret: Fossefall Holding AS (935794854)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/935794854",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 25.06.2025, Oslo. Formål: utvikling, finansiering, bygging og drift av datasentre " +
+          "for AI. Bekrefter selskapet og formålet, ikke anlegget.",
+      },
+      {
+        source_name: "Enhetsregisteret: Skogselskapet i Trøndelag (990095159)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/990095159",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Forening med adresse i Skage i Namdalen. Bekrefter bare at enheten finnes; grunneierrollen " +
+          "kommer fra kommunens konsekvensutredning.",
+      },
+      {
+        source_name: "Enhetsregisteret: Stordalsveien 541 AS (924658827)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/924658827",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Eiendomsutviklingsselskap i Halden, stiftet 2020. Navnet peker på eiendommen i Åfjord. " +
+          "Bekrefter selskapet, ikke hjemmel til gnr 35 bnr 8.",
       },
     ],
   },
