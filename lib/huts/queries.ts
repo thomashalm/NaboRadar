@@ -105,14 +105,24 @@ function toHut(row: z.infer<typeof rowSchema>): Hut {
   };
 }
 
-async function hutRpc(fn: string, args: Record<string, unknown>): Promise<unknown[] | null> {
+/** Så mange rader gir Supabase-API-et i ett svar (prosjektets «max rows»). */
+const API_PAGE = 1000;
+
+/**
+ * `fra` henter svaret fra og med den raden. Supabase-API-et gir høyst 1 000 rader per kall,
+ * uansett hva funksjonen selv tillater, så et større svar må hentes i flere omganger.
+ */
+async function hutRpc(fn: string, args: Record<string, unknown>, fra = 0): Promise<unknown[] | null> {
   if (getDbMode() === "supabase") {
     const client = await createSupabaseServerClient();
     if (!client) return null;
-    const { data, error } = await client.rpc(fn, args);
+    const kall = client.rpc(fn, args);
+    const { data, error } = fra > 0 ? await kall.range(fra, fra + API_PAGE - 1) : await kall;
     if (error) throw new DatabaseQueryError(fn, error.message);
     return (data as unknown[] | null) ?? [];
   }
+  // Lokalt finnes ingen slik grense: første kall gir alt, og det er ikke noe mer å hente.
+  if (fra > 0) return [];
   const db = await getReadDb();
   return db ? db.rpc<unknown>(fn, args) : null;
 }
@@ -198,17 +208,26 @@ export type HutListResult =
 /** Hytter i et kartutsnitt. `total` er antallet i utsnittet, også når listen er kuttet. */
 export async function getHutsInBbox(bbox: HutBbox, filters?: HutFilters, limit = 2000): Promise<HutListResult> {
   try {
-    const rows = await hutRpc("huts_in_bbox", {
+    const args = {
       min_lng: bbox.minLng,
       min_lat: bbox.minLat,
       max_lng: bbox.maxLng,
       max_lat: bbox.maxLat,
       ...filterArgs(filters),
       max_results: limit,
-    });
+    };
+    const rows = await hutRpc("huts_in_bbox", args);
     if (rows === null) return { status: "unavailable" };
     const parsed = z.array(rowSchema).parse(rows);
     const total = parsed[0]?.total ?? 0;
+    // Hele landet er flere hytter enn API-et gir i ett svar. Funksjonen sorterer på navn og ID,
+    // så resten kan hentes side for side uten hull eller dubletter.
+    const ønsket = Math.min(total, limit);
+    while (parsed.length < ønsket && parsed.length % API_PAGE === 0) {
+      const neste = await hutRpc("huts_in_bbox", args, parsed.length);
+      if (!neste || neste.length === 0) break;
+      parsed.push(...z.array(rowSchema).parse(neste));
+    }
     return { status: "ok", huts: parsed.map(toHut), total, truncated: total > parsed.length };
   } catch (error) {
     console.error("[hytter] huts_in_bbox feilet:", error instanceof Error ? error.name : "ukjent");
