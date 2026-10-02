@@ -1290,6 +1290,13 @@ skoler og organisasjoner (Husbergøya), og en som er stengt for vedlikehold på 
 (Solstua). Vi viser ikke noe av dette som egne felt — vi har ingen kilde som holder det ved
 like — men lenken til forvalteren gjør at brukeren finner det.
 
+**Navnesøk.** `huts_search` søker i navnet og i alle andre navn (`alt_names` fra sekundærkilden
+og `aliases` lagt inn for hånd). Søket tåler o for ø, a for å og e/ae for æ, begge veier:
+Kartverket følger lokal skrivemåte («Aursjobu», men «Aursjøhytta»), og den som søker vet ikke
+hvilken som gjelder. Et treff på nøyaktig skrivemåte står først. Søkefeltet skiller mellom
+«Ingen treff» og et søk som ikke fikk svar, og svarene fra `/api/hytter` caches ikke så lenge de
+avhenger av om kalleren er innlogget.
+
 **Fast adresse.** Hver hytte har siden `/hytter/<navn>-<id>`, der `<id>` er de åtte første
 tegnene i hyttas uuid. Oppslaget (`get_hut`) skjer på ID-en; navnet er pynt, så lenken overlever
 at hytta bytter navn. Siden er `noindex` så lenge datasettet er en pilot.

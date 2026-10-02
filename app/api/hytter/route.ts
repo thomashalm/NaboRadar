@@ -33,8 +33,11 @@ const bboxSchema = z
 
 const ugyldig = () => NextResponse.json<HutApiResponse>({ error: "invalid_query" }, { status: 400 });
 const nede = () => NextResponse.json<HutApiResponse>({ error: "unavailable" }, { status: 503, headers: { "Cache-Control": "no-store" } });
-// Svaret avhenger av om kalleren er innlogget admin (pilotfasen), så det caches bare privat.
-const OK = { headers: { "Cache-Control": "private, max-age=300" } } as const;
+// Svaret avhenger av om kalleren er innlogget admin (pilotfasen), så det caches ikke. Med
+// `max-age` ble et tomt svar fra før innlogging stående i nettleseren i fem minutter etter at
+// sesjonen var på plass: samme adresse, annet svar. (`Vary: Cookie` hjelper ikke — Next setter
+// sin egen `Vary`.) Kan åpnes for kort caching igjen når kategorien er publisert for alle.
+const OK = { headers: { "Cache-Control": "private, no-store" } } as const;
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;

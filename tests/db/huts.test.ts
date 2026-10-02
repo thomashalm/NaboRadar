@@ -320,6 +320,13 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
         const alt = (await som<{ name: string }>("anon", `select name from huts_search('Smedmyrkoia')`)) as { name: string }[];
         expect(alt.map((r) => r.name)).toEqual(["Smedmyrhytta"]);
         expect(await som("anon", `select name from huts_search('a')`)).toEqual([]);
+        // Lokal skrivemåte skal ikke stenge noen ute: o for ø, a for å, e for æ — og omvendt.
+        const navn = async (q: string) => ((await som<{ name: string }>("anon", `select name from huts_search('${q}')`)) as { name: string }[]).map((r) => r.name);
+        expect(await navn("tomtehytta")).toContain("Tømtehytta");
+        expect(await navn("Toemtehytta")).toContain("Tømtehytta");
+        expect(await navn("Købberhaug")).toContain("Kobberhaughytta");
+        // Det nøyaktige treffet står først når begge skrivemåter finnes.
+        expect((await navn("tømte"))[0]).toMatch(/Tømte/);
       });
 
       it("viser en hytte fra sekundærkilden først når et menneske har bekreftet den", async () => {

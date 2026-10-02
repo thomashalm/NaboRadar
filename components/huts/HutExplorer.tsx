@@ -367,6 +367,8 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
 function HutSearch({ onSelect }: { onSelect: (hit: Hut) => void }) {
   const [q, setQ] = useState("");
   const [hits, setHits] = useState<Hut[] | null>(null);
+  // Et søk som ikke fikk svar, er ikke det samme som et søk uten treff.
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const term = q.trim();
@@ -375,8 +377,17 @@ function HutSearch({ onSelect }: { onSelect: (hit: Hut) => void }) {
     const timer = setTimeout(() => {
       fetch(`/api/hytter?q=${encodeURIComponent(term)}`, { signal: controller.signal })
         .then((response) => response.json() as Promise<HutApiResponse>)
-        .then((body) => setHits("hits" in body ? body.hits : []))
-        .catch(() => {});
+        .then((body) => {
+          const ok = "hits" in body;
+          setFailed(!ok);
+          setHits(ok ? body.hits : []);
+        })
+        .catch((error: unknown) => {
+          // Et avbrutt kall er et nytt tastetrykk, ikke en feil.
+          if (error instanceof DOMException && error.name === "AbortError") return;
+          setFailed(true);
+          setHits([]);
+        });
     }, 250);
     return () => {
       controller.abort();
@@ -403,7 +414,9 @@ function HutSearch({ onSelect }: { onSelect: (hit: Hut) => void }) {
       />
       {synlige !== null && (
         <ul className="mt-1 divide-y divide-line rounded-xl border border-line bg-surface">
-          {synlige.length === 0 && <li className="px-3.5 py-2 text-[13px] text-muted">Ingen treff.</li>}
+          {synlige.length === 0 && (
+            <li className="px-3.5 py-2 text-[13px] text-muted">{failed ? "Søket svarte ikke. Prøv igjen." : "Ingen treff."}</li>
+          )}
           {synlige.map((hit) => (
             <li key={hit.id}>
               <button
