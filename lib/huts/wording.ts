@@ -85,6 +85,41 @@ export function hutDetailLines(hut: {
   return lines;
 }
 
+/** Hvem lenken går til, slik det står i knappen: «Bestill hos DNT». */
+const CTA_OWNER: Record<HutOwnerKind, string | null> = {
+  dnt: "DNT",
+  statskog: "Statskog",
+  fjellstyre: "fjellstyret",
+  kommune: "kommunen",
+  other: null,
+  unknown: null,
+};
+
+export interface HutLink {
+  kind: "booking" | "info";
+  href: string;
+  label: string;
+}
+
+/**
+ * Lenkene ut fra en hytte, bestilling først.
+ *
+ * Teksten følger hva lenken faktisk peker til: «Bestill» brukes bare om en side der man
+ * bestiller. NaboRadar gjør ingen bestilling selv, og viser verken ledighet eller pris.
+ */
+export function hutLinks(hut: {
+  bookingUrl: string | null;
+  infoUrl: string | null;
+  ownerKind: HutOwnerKind;
+  managerName: string | null;
+}): HutLink[] {
+  const hvem = CTA_OWNER[hut.ownerKind] ?? hut.managerName;
+  const links: HutLink[] = [];
+  if (hut.bookingUrl) links.push({ kind: "booking", href: hut.bookingUrl, label: hvem ? `Bestill hos ${hvem}` : "Bestill" });
+  if (hut.infoUrl) links.push({ kind: "info", href: hut.infoUrl, label: hvem ? `Se hos ${hvem}` : "Mer informasjon" });
+  return links;
+}
+
 /** «3 hytter og koier innen 15 km». */
 export function hutCountLine(count: number, radiusM: number, capped: boolean): string {
   const antall = capped ? `Over ${count}` : String(count);

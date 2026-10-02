@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { getHutsNear, type Hut } from "@/lib/huts/queries";
-import { buildHutMapHref } from "@/lib/huts/href";
+import { buildHutHref, buildHutMapHref } from "@/lib/huts/href";
 import { HUT_SECTION_LABEL, HUT_SOURCE_NOTE, hutCountLine, hutDetailLines, hutSummaryLine } from "@/lib/huts/wording";
 import { SectionShell } from "./SectionShell";
 
@@ -42,7 +42,7 @@ async function FriluftInnhold({ lat, lng }: { lat: number; lng: number }) {
           </p>
           <ul className="mt-1.5 divide-y divide-line">
             {resultat.cards.map((hut) => (
-              <HytteKort key={hut.id} hut={hut} href={buildHutMapHref({ lat, lng, hutId: hut.id })} />
+              <HytteKort key={hut.id} hut={hut} href={buildHutHref(hut)} />
             ))}
           </ul>
           <div className="border-t border-line px-4 py-3">
@@ -65,6 +65,7 @@ function HytteKort({ hut, href }: { hut: Hut; href: string }) {
         <span className="block text-[15px] font-medium text-ink">{hut.name}</span>
         <span className="block text-[13px] text-muted">{hutSummaryLine(hut)}</span>
         {detaljer.length > 0 && <span className="block text-[13px] text-muted">{detaljer.slice(0, 2).join(" · ")}</span>}
+        {/* Ingen knapp på kortet: lenken til den som driver hytta står på hyttas egen side. */}
       </Link>
     </li>
   );

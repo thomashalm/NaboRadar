@@ -87,3 +87,53 @@ describe("ordlyd", () => {
     expect(hutCountLine(100, 10_000, true)).toBe("Over 100 hytter og koier innen 10 km");
   });
 });
+
+import { buildHutHref, hutRefFromSlug, hutSlug } from "@/lib/huts/href";
+import { hutLinks } from "@/lib/huts/wording";
+
+describe("lenker ut fra en hytte", () => {
+  const base = { bookingUrl: null, infoUrl: null, ownerKind: "dnt" as const, managerName: null };
+
+  it("sier «Bestill» bare om en side der man bestiller", () => {
+    expect(hutLinks({ ...base, bookingUrl: "https://eksempel.no/bestill" })).toEqual([
+      { kind: "booking", href: "https://eksempel.no/bestill", label: "Bestill hos DNT" },
+    ]);
+    expect(hutLinks({ ...base, infoUrl: "https://eksempel.no/info" })).toEqual([
+      { kind: "info", href: "https://eksempel.no/info", label: "Se hos DNT" },
+    ]);
+  });
+
+  it("viser begge når begge finnes, bestilling først", () => {
+    const lenker = hutLinks({ ...base, ownerKind: "statskog", bookingUrl: "https://a.no", infoUrl: "https://b.no" });
+    expect(lenker.map((l) => l.label)).toEqual(["Bestill hos Statskog", "Se hos Statskog"]);
+  });
+
+  it("bruker forvalternavnet når eierkategorien ikke sier hvem, og ellers ingen navn", () => {
+    expect(hutLinks({ ...base, ownerKind: "other", managerName: "Lunner Almenning", infoUrl: "https://b.no" })[0]!.label).toBe("Se hos Lunner Almenning");
+    expect(hutLinks({ ...base, ownerKind: "other", infoUrl: "https://b.no" })[0]!.label).toBe("Mer informasjon");
+    expect(hutLinks({ ...base, ownerKind: "unknown", bookingUrl: "https://a.no" })[0]!.label).toBe("Bestill");
+  });
+
+  it("viser ingenting når vi ikke har en lenke", () => {
+    expect(hutLinks(base)).toEqual([]);
+  });
+});
+
+describe("fast adresse for en hytte", () => {
+  const hut = { id: "3f2a9c1e-1111-4222-8333-444455556666", name: "Sæteren gård" };
+
+  it("bygger adressen av navnet og starten på ID-en", () => {
+    expect(buildHutHref(hut)).toBe("/hytter/saeteren-gard-3f2a9c1e");
+    expect(hutSlug("Ommen/Veslestua")).toBe("ommen-veslestua");
+    expect(hutSlug("Bøvelstad")).toBe("bovelstad");
+    expect(hutSlug("—")).toBe("hytte");
+  });
+
+  it("finner ID-en igjen uansett hva navnet foran er", () => {
+    expect(hutRefFromSlug("saeteren-gard-3f2a9c1e")).toBe("3f2a9c1e");
+    expect(hutRefFromSlug("et-helt-annet-navn-3f2a9c1e")).toBe("3f2a9c1e");
+    expect(hutRefFromSlug("3f2a9c1e")).toBe("3f2a9c1e");
+    expect(hutRefFromSlug("saeteren-gard")).toBeNull();
+    expect(hutRefFromSlug("saeteren-gard-3F2A9C1E")).toBeNull();
+  });
+});

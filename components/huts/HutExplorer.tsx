@@ -1,21 +1,17 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AreaMap, type MapPopupContent } from "@/components/map/AreaMap";
 import type { HutApiResponse } from "@/app/api/hytter/route";
 import type { LngLatBounds } from "@/lib/geo/bounds";
 import { distanceMeters, radiusBounds } from "@/lib/geo/radius";
-import type { Hut, HutSearchHit } from "@/lib/huts/queries";
+import { buildHutHref } from "@/lib/huts/href";
+import type { Hut } from "@/lib/huts/queries";
 import type { HutOwnerKind, HutType } from "@/lib/huts/types";
-import {
-  HUT_ATTRIBUTION,
-  HUT_OWNER_FILTERS,
-  HUT_SOURCE_NOTE,
-  HUT_TYPE_FILTERS,
-  hutDetailLines,
-  hutSummaryLine,
-} from "@/lib/huts/wording";
-import { formatDate } from "@/lib/format";
+import { HUT_ATTRIBUTION, HUT_OWNER_FILTERS, HUT_SOURCE_NOTE, HUT_TYPE_FILTERS, hutSummaryLine } from "@/lib/huts/wording";
+import { HutDetails } from "./HutDetails";
 import type { MapTileConfig } from "@/lib/map/config";
 import { hutsLayer, type HutMapFeature } from "@/lib/map/layers/huts";
 import { bindLayer } from "@/lib/map/layers/types";
@@ -57,6 +53,7 @@ export function HutExplorer({ tiles, origin, initialHutId }: HutExplorerProps) {
   const [types, setTypes] = useState<HutType[]>([]);
   const [owners, setOwners] = useState<HutOwnerKind[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const router = useRouter();
   const [fit, setFit] = useState<{ bounds: LngLatBounds; key: string }>(() =>
     origin
       ? { bounds: radiusBounds(origin.lat, origin.lng, START_RADIUS_M), key: `sted:${origin.lat},${origin.lng}` }
@@ -136,29 +133,26 @@ export function HutExplorer({ tiles, origin, initialHutId }: HutExplorerProps) {
   );
   const layers = useMemo(() => [bindLayer(hutsLayer, features)], [features]);
 
+  /** Popupen i kartet er kort: navn, én linje, og veien til detaljene. Resten står i panelet. */
   const popupFor = useCallback(
     (id: string): MapPopupContent | null => {
       const hut = withDistance.find((h) => h.id === id);
       if (!hut) return null;
-      const oppdatert = formatDate(hut.sourceUpdatedAt);
-      const lenke = hut.bookingUrl ?? hut.infoUrl;
       return {
         lngLat: [hut.lng, hut.lat],
         title: hut.name,
-        lines: [
-          hutSummaryLine(hut),
-          ...hutDetailLines(hut),
-          `Kilde: Kartverket${oppdatert ? ` · oppdatert ${oppdatert}` : ""}`,
-        ],
-        href: lenke ?? undefined,
-        linkLabel: hut.bookingUrl ? "Bestill" : lenke ? "Les mer" : undefined,
+        lines: [hutSummaryLine(hut)],
+        href: buildHutHref(hut),
+        linkLabel: "Se hytta",
         minZoom: FOCUS_ZOOM,
       };
     },
     [withDistance],
   );
 
-  const goToHit = useCallback((hit: HutSearchHit) => {
+  const selected = useMemo(() => withDistance.find((hut) => hut.id === selectedId) ?? null, [withDistance, selectedId]);
+
+  const goToHit = useCallback((hit: Hut) => {
     pendingSelect.current = hit.id;
     setFit({ bounds: radiusBounds(hit.lat, hit.lng, 3000), key: `treff:${hit.id}` });
   }, []);
@@ -205,6 +199,23 @@ export function HutExplorer({ tiles, origin, initialHutId }: HutExplorerProps) {
               : `${total} ${total === 1 ? "hytte eller koie" : "hytter og koier"} i utsnittet${truncated ? ` — viser ${huts.length}` : ""}`)}
         </p>
 
+        {selected && (
+          <section aria-label="Valgt hytte" className="mt-3 rounded-2xl border border-line-strong bg-surface px-4 py-3.5">
+            <div className="flex items-start justify-between gap-3">
+              <h2 className="text-lg font-semibold tracking-tight text-ink">{selected.name}</h2>
+              <button type="button" onClick={() => setSelectedId(null)} className="text-[13px] text-muted hover:text-ink">
+                Lukk
+              </button>
+            </div>
+            <div className="mt-2">
+              <HutDetails hut={selected} compact />
+            </div>
+            <Link href={buildHutHref(selected)} className="mt-2 inline-block text-[14px] font-medium text-accent hover:underline">
+              Egen side for hytta
+            </Link>
+          </section>
+        )}
+
         <ul className="mt-2 divide-y divide-line rounded-2xl border border-line bg-surface empty:hidden">
           {withDistance.slice(0, LIST_LIMIT).map((hut) => (
             <li key={hut.id}>
@@ -241,6 +252,7 @@ export function HutExplorer({ tiles, origin, initialHutId }: HutExplorerProps) {
           onSelect={setSelectedId}
           onViewportChange={onViewportChange}
           popupFor={popupFor}
+          onNavigate={(href) => router.push(href)}
         />
       </div>
     </main>
@@ -263,9 +275,9 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
 }
 
 /** Navnesøk. Et treff flytter kartet dit og velger hytta. */
-function HutSearch({ onSelect }: { onSelect: (hit: HutSearchHit) => void }) {
+function HutSearch({ onSelect }: { onSelect: (hit: Hut) => void }) {
   const [q, setQ] = useState("");
-  const [hits, setHits] = useState<HutSearchHit[] | null>(null);
+  const [hits, setHits] = useState<Hut[] | null>(null);
 
   useEffect(() => {
     const term = q.trim();

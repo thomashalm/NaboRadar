@@ -256,8 +256,9 @@ kvikkleiresone har over 100 000 hjørner, og ville ellers sprengt svaret.
 | `get_event(event_id, lat, lng)` | Én plansak med dokumenter |
 | `data_status()` | Sist vellykkede sync per kilde, til kildelinjen i UI |
 | `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search` | Hytter og koier: rundt et punkt (inntil 50 km, nærmest først), i et kartutsnitt, i en kommune, og navnesøk. Svarer bare når kategorien `hytte` er publisert, eller kalleren er admin |
+| `get_hut(ref)` | Én hytte, slått opp på de åtte første tegnene i uuid-en. Til den faste hyttesiden |
 | `refresh_huts()` | Kobler kildeposter til hytter og regner de kanoniske feltene på nytt. Kjøres av synken, kun service_role |
-| `hut_review_queue()` | Hytter med en konflikt noen bør se på. Kun innlogget admin |
+| `hut_review_queue()`, `review_hut()`, `set_hut_links()` | Kontrollkøen, avgjørelsen (godkjenn, avvis, slå sammen) og de offisielle lenkene. Kun innlogget admin |
 | `upsert_events`, `upsert_area_features`, `mark_*_removed` | Skriving, kun service_role |
 | `sync_run_start/finish`, `sync_due`, `claim_next_due_sync`, `claim_sync_request`, `finish_sync_request`, `expire_stale_sync_requests`, `provider_baseline`, `set_alert_state` | Sync-koordinering, kun service_role |
 | `provider_health`, `recent_sync_runs`, `request_sync`, `scheduler_status` | `/admin`, kun innlogget admin |
@@ -300,8 +301,8 @@ Tilgangen er en **positiv, uttømmende liste**, ikke en opprydding i enkelttilfe
 
 | Rolle | Kan kalle |
 |---|---|
-| `anon` | `features_near`, `features_count_near`, `events_within`, `get_event`, `data_status`, `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search` |
-| `authenticated` | det samme, pluss `hut_review_queue`, `is_admin`, `provider_health`, `recent_sync_runs`, `recent_sync_requests`, `request_sync`, `scheduler_status` og research-, review- og datasenterfunksjonene — som alle sjekker `is_admin()` selv |
+| `anon` | `features_near`, `features_count_near`, `events_within`, `get_event`, `data_status`, `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search`, `get_hut` |
+| `authenticated` | det samme, pluss `hut_review_queue`, `review_hut`, `set_hut_links`, `is_admin`, `provider_health`, `recent_sync_runs`, `recent_sync_requests`, `request_sync`, `scheduler_status` og research-, review- og datasenterfunksjonene — som alle sjekker `is_admin()` selv |
 | `service_role` | alt — sync-workeren |
 | `postgres` | alt — migrasjoner og pg_cron |
 
@@ -1095,9 +1096,33 @@ Tolkningsreglene:
   = 'low'` og vises ikke før noen har satt `last_verified_at`. Turrutebasen fører blant annet
   hotellet Kleivstua som betjent hytte.
 
-Kontrollkøen (`hut_review_queue()`) fylles bare ved konflikt: kildene er uenige om typen, to
-hytter ligger innen 100 m eller har samme navn innen 2 km, eller hytta står bare i
-sekundærkilden. Det er ingen review-plan per hytte; ferskheten følger synken.
+**Kontrollkøen** ligger på `/admin/hytter`. Den fylles bare ved konflikt: kildene er uenige om
+typen, to hytter ligger innen 100 m eller har samme navn innen 2 km, eller hytta står bare i
+sekundærkilden. Det er ingen review-plan per hytte; ferskheten følger synken. En sak har tre
+utfall (`review_hut`):
+
+| Utfall | Virkning |
+|---|---|
+| **Godkjenn** | Hytta er riktig. Saken forlater køen, og en hytte fra sekundærkilden blir synlig |
+| **Avvis** | Hytta vises aldri. Raden og kildepostene blir stående, så neste sync oppretter den ikke på nytt. En godkjenning angrer avvisningen |
+| **Slå sammen** | Kildepostene flyttes til hytta som beholdes, og den andre arkiveres. Navnet tas vare på til søk |
+
+**Vi bygger ikke booking.** NaboRadar viser hytta og sender brukeren videre til den som driver
+den. Ledighet, kalender, pris og bestilling finnes ikke, og skal ikke bygges — se
+[data-roadmapen](data-roadmap.md#12-friluft-skjult-lokal-innsikt-ikke-en-turapp) og
+[researchen om DNTs booking](research/dnt-booking-ledighet.md).
+
+**Lenker.** `booking_url` er en side der man faktisk bestiller; `info_url` er den offisielle
+infosiden. Knappeteksten følger av hva lenken er: «Bestill hos DNT» bare for en bestillingsside,
+ellers «Se hos …» eller «Mer informasjon» (`hutLinks` i `lib/huts/wording.ts`). En lenke kan
+ikke lagres uten `links_verified_at` — databasen har en constraint på det — og settes med
+`set_hut_links` fra `/admin/hytter`. Lenker legges inn for hånd: åpne siden, se at den gjelder
+hytta, lagre. Vi henter ikke DNTs hytteregister for å skaffe ID-er. Ingen av dagens kilder
+leverer lenker.
+
+**Fast adresse.** Hver hytte har siden `/hytter/<navn>-<id>`, der `<id>` er de åtte første
+tegnene i hyttas uuid. Oppslaget (`get_hut`) skjer på ID-en; navnet er pynt, så lenken overlever
+at hytta bytter navn. Siden er `noindex` så lenge datasettet er en pilot.
 
 «I nærheten» er en trapp på 10, 20 og 30 km, uavhengig av radien brukeren har valgt for resten
 av siden. Se `HUT_NEARBY` i `lib/huts/queries.ts`.
@@ -1155,6 +1180,8 @@ koder vises ikke, vi gjetter ikke bygningstype), og nærmeste adresse.
 | `/omrade` | GET (side) | `lat`, `lng`, `radius`, `label`, `sortering` | Zod. Ugyldig `lat`/`lng` → feilside. Ugyldig `radius` → standard 1 km. `label` maks 120 tegn, kontrolltegn fjernet | Supabase + direkte oppslag | 8 s (saker), 8 s (DB), 12 s (oppslag) | Dynamisk | 240/min |
 | `/api/hytter` | GET | `bbox` *eller* `kommune` *eller* `q`; `type` og `eier` kan gjentas | Zod: utsnitt innenfor kloden og riktig vei, kommunenummer fire sifre, `q` 2–60 tegn, kjente typer og eiere | Supabase (`huts_*`) | databasens egen | `private, max-age=300` — svaret avhenger av om kalleren er admin | 120/min |
 | `/hytter` | GET (side) | `lat`, `lng`, `hytte` (alle valgfrie) | Zod; ugyldige verdier ignoreres | `/api/hytter` fra klienten | — | Dynamisk, `noindex` så lenge datasettet er en pilot | ingen |
+| `/hytter/[ref]` | GET (side) | `<navn>-<8 heksadesimale tegn>` | Bare ID-delen brukes; alt annet gir 404 | Supabase (`get_hut`) + Kartverkets kommuneregister for navnet | 4 s på kommuneregisteret | Dynamisk, `noindex` | ingen |
+| `/admin/hytter` | GET (side) + server actions | `q` | Supabase Auth + `is_admin()`, både i handlingene og i databasefunksjonene | Supabase | — | `private, no-store` | ingen |
 | `/sak/[id]` | GET (side) | uuid + søkekontekst | `get_event` | Supabase | — | Dynamisk | ingen |
 | `/` | GET (side) | — | — | — | — | Statisk, Netlify Durable | ingen |
 | `/admin` | GET (side) | — | Supabase Auth + `is_admin()` | Supabase | — | `private, no-store` | ingen |

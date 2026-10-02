@@ -421,7 +421,12 @@ begrunnelsen — så slipper vi å vurdere samme idé på nytt om et halvår.
 Retning besluttet 02.10.2026. Den brede modulen «Friluftsliv der du bor» ble vurdert og lagt
 bort til fordel for noe smalere.
 
-**NaboRadar skal ikke bli en generell turapp.** Vi tar inn friluftsdata bare når de
+**NaboRadar skal ikke bli en generell turapp** — og heller ikke en bookingtjeneste, en
+turplanlegger eller en POI-app. Verdien er å oppdage hytter man ikke visste om, få oversikt over
+et område, se basisinformasjon, og gå rett videre til den som driver hytta. All bestilling
+skjer hos dem.
+
+Vi tar inn friluftsdata bare når de
 
 - er vanskelige å få oversikt over andre steder,
 - gir lokal innsikt — noe som finnes i nærheten uten at man visste det,
@@ -441,8 +446,13 @@ fjellstyrer og kartdata, og ingen viser dem samlet rundt en adresse.
 | Lekeplasser, parker, vanlige turstier, badeplasser, generelle POI-er | ikke prioritert | — |
 
 Adresse først, men nasjonal utforskning når datasettet er nyttig i seg selv: hyttene vises som en
-liten seksjon på `/omrade` («Friluft i nærheten») og som eget kart på `/hytter`. Samme datasett,
-samme funksjoner i databasen.
+liten seksjon på `/omrade` («Friluft i nærheten»), som eget kart på `/hytter`, og med en fast
+side per hytte (`/hytter/<navn>-<id>`). Samme datasett, samme funksjoner i databasen.
+
+**Vi bygger ikke booking, ledighet eller pris** (besluttet 02.10.2026). DNTs bookingløsning har
+ledighets- og prisdata, men retten til å bruke dem automatisk og kommersielt er ikke avklart —
+se [researchen](research/dnt-booking-ledighet.md). Sporet er lukket. Det vi viser, er en
+offisiell lenke når vi har en.
 
 ### Hytter og koier — runde 1
 
@@ -463,9 +473,33 @@ rastebu), eierkategori (DNT, Statskog, fjellstyre, andre) og om døra er låst. 
 sengeplasser, sesong, åpen/stengt eller bookinglenke, og viser ingen av delene. «Ulåst» er
 kildens opplysning om døra — ikke et løfte om at hytta er åpen.
 
-**Avgrensning.** N50s «Serveringshytte» (markastuer med servering) og «Gapahuk» tas ikke inn.
-En hytte som bare finnes i sekundærkilden vises ikke før et menneske har bekreftet den;
-sekundærkilden skiller ikke turisthytter fra hoteller (Kleivstua er ett eksempel).
+**Avgrensning — besluttet 02.10.2026.**
+
+- **Serveringshytter tas ikke inn** (112 nasjonalt). N50 definerer dem som «serveringssted/
+  dagsturhytte som er sesongåpent», med betjening. Ullevålseter og Skjennungstua er fine turmål,
+  men de er spisesteder man besøker, ikke hytter man bruker — og de er nettopp det Google Maps
+  og markaoversiktene allerede viser godt. Betjente hytter med overnatting (Kikutstua,
+  Kobberhaughytta, Løvlia) er en annen klasse i kilden og er med. Kan bli en egen kategori
+  senere; da med åpningstider, som vi ikke har.
+- **Gapahuker tas ikke inn** (243 nasjonalt). Klassen rommer «gapahuker, primitive buer, gammer,
+  kåter og hytter med og uten ovn» — for sprikende til å kalles hytte, og mange mangler navn. Kan bli en egen kategori (rasteplass/gapahuk) senere.
+
+**Sekundærkilder.** Regelen for hva som publiseres uten at et menneske har sett på det:
+
+| Hytta står i | Publiseres |
+|---|---|
+| hovedkilden alene | automatisk |
+| hovedkilden og en sekundærkilde | automatisk, etter kobling |
+| bare en sekundærkilde | **ikke** før den er godkjent i `/admin/hytter` |
+
+Sekundærkilden skiller ikke turisthytter fra hoteller: Kleivstua står der som betjent hytte og
+i stedsnavnregisteret som hotell. Kontrollen ender i godkjent, avvist eller slått sammen.
+
+**Lenker.** En hytte kan ha en bestillingslenke og en offisiell infoside. En lenke lagres bare
+når den er åpnet og kontrollert av et menneske, kommer rett fra en kilde vi kan bruke, eller er
+bygget av en stabil ID vi lovlig har. Vi henter ikke DNTs hytteregister for å skaffe ID-er, og
+vi gjetter ikke adresser. Ingen lenke er bedre enn en gal. Ingen av kildene vi bruker i dag
+leverer lenker, så de legges inn for hånd i `/admin/hytter`; tre pilothytter har fått en.
 
 **Pilot.** Oslomarka med omland (10,3–11,1° Ø, 59,75–60,3° N, 21 kommuner): 55 poster fra N50
 og 47 fra Turrutebasen ble til 58 hytter, 55 av dem synlige, 8 til manuell kontroll. Mot DNT
@@ -485,12 +519,27 @@ og stopper på første trinn som gir minst tre treff. Kontrollert mot tolv adres
 
 Med 15 km som første trinn fikk Oslo sentrum 21 treff — det er marka, ikke nabolaget.
 
-**Før landsdekkende import** må dette avgjøres:
+**Kontroll av piloten (runde 3).** Alle 58 hyttene er sammenlignet med Sentralt
+stedsnavnregister: 51 har samme navn registrert på stedet, én har en annen skrivemåte
+(«Bekkenstein» i N50, «Bekkensten» i registeret), og seks ligger på øyer eller steder der
+registeret bare har adressenavn. Seks av de åtte kontrollsakene er avgjort: Kleivstua avvist
+(hotell), Snellingen godkjent med N50s type, og Fjellvang, Røverhula og de to på Ringkolltoppen
+godkjent som egne hytter. Solheim og Heidehaugen står igjen — ingen åpen kilde bekrefter dem.
 
-1. Om dekningen er god nok uten DNT-data. N50 har 636 DNT-hytter; DNT oppgir «over 600».
-2. Om serveringshytter og gapahuker skal med som egne typer.
-3. Hvem som kontrollerer hyttene som bare finnes i sekundærkilden (anslagsvis 200 nasjonalt).
-4. At N50-synken leser 357 kommunearkiv i stedet for 21 (målt: under ett sekund per kommune).
+**Landsdekkende import.** Regnet på Kartverkets egne tall med reglene over:
+
+| | Antall |
+|---|---|
+| Hytter totalt | ca. 1 680 |
+| Synlige uten kontroll (står i N50) | ca. 1 480 — 768 ubetjente, 422 rastebuer, 184 selvbetjente, 108 betjente |
+| Bare i sekundærkilden — skjult til de er godkjent | ca. 190 |
+| Mulige dubletter (innen 100 m, eller samme navn innen 2 km) | ca. 75 |
+| Kildene uenige om typen | ca. 45 |
+
+Kontrollkøen blir altså rundt 290 saker. Bare de 190 fra sekundærkilden holder noe tilbake; de
+andre hyttene vises mens saken står i køen. Det som gjenstår før import er å fjerne
+pilotavgrensningen i de to providerne og la N50-synken lese 357 kommunearkiv i stedet for 21
+(målt: under ett sekund per kommune).
 
 Databaseveksten er ikke et hinder: piloten økte basen fra 132,45 til 132,78 MB (0,33 MB for
 102 kildeposter og 58 hytter), og hele landet — om lag 2 900 kildeposter og 1 750 hytter — er

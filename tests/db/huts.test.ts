@@ -339,4 +339,144 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
       });
     });
   });
+
+  describe("kontroll, lenker og fast adresse", () => {
+    const ADMIN = "drift@example.com";
+
+    /** Flere setninger i samme transaksjon, som én rolle. Rulles alltid tilbake. */
+    async function flere<T>(email: string | null, sqls: string[]): Promise<T[] | "NEKTET"> {
+      await db.pg.exec("begin");
+      try {
+        await db.pg.query("select set_config('request.jwt.claims', $1, true)", [
+          JSON.stringify(email ? { role: "authenticated", email } : { role: "anon" }),
+        ]);
+        await db.pg.exec(`set local role ${email ? "authenticated" : "anon"}`);
+        let siste: T[] = [];
+        for (const sql of sqls) siste = (await db.pg.query<T>(sql)).rows;
+        return siste;
+      } catch {
+        return "NEKTET";
+      } finally {
+        await db.pg.exec("rollback");
+      }
+    }
+
+    const id = async (hvor: string) => (await db.pg.query<{ id: string }>(`select id from huts where ${hvor}`)).rows[0]!.id;
+    const synlige = `select name from huts_near(${ORIGIN.lat}, ${ORIGIN.lng}, 30000, 50)`;
+
+    it("lar bare admin avgjøre saker og sette lenker", async () => {
+      const hytte = await id("name = 'Kobberhaughytta'");
+      for (const email of [null, "noen@example.com"]) {
+        expect(await flere(email, [`select review_hut('${hytte}', 'approve')`])).toBe("NEKTET");
+        expect(await flere(email, [`select set_hut_links('${hytte}', 'https://eksempel.no/bestill', null)`])).toBe("NEKTET");
+      }
+    });
+
+    it("godkjenning gjør en hytte fra sekundærkilden synlig, og tar den ut av køen", async () => {
+      const lav = await id("confidence = 'low'");
+      const rader = (await flere<{ name: string }>(ADMIN, [`select review_hut('${lav}', 'approve', null, 'Kontrollert mot kart')`, synlige])) as { name: string }[];
+      expect(rader).toHaveLength(5);
+      const kø = (await flere<{ id: string }>(ADMIN, [`select review_hut('${lav}', 'approve')`, `select id from hut_review_queue()`])) as { id: string }[];
+      expect(kø.map((r) => r.id)).not.toContain(lav);
+    });
+
+    it("avvisning skjuler hytta for godt, også om kilden fortsatt har den", async () => {
+      const kobberhaug = await id("name = 'Kobberhaughytta'");
+      const rader = (await flere<{ name: string }>(ADMIN, [
+        `select review_hut('${kobberhaug}', 'reject', null, 'Hotell, ikke turisthytte')`,
+        // En ny sync endrer ikke på det: raden og kildepostene står, så ingenting opprettes på nytt.
+        `select * from refresh_huts()`,
+        synlige,
+      ])) as { name: string }[] | "NEKTET";
+      // refresh_huts er stengt for admin-rollen; kjør den som eier i stedet.
+      expect(rader).toBe("NEKTET");
+
+      await db.pg.exec("begin");
+      try {
+        await db.pg.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ role: "authenticated", email: ADMIN })]);
+        await db.pg.query(`select review_hut($1, 'reject', null, 'Hotell, ikke turisthytte')`, [kobberhaug]);
+        const [t] = (await db.pg.query<{ created: number }>(`select * from refresh_huts()`)).rows;
+        expect(t!.created).toBe(0);
+        const navn = (await db.pg.query<{ name: string }>(`select name from huts_public`)).rows.map((r) => r.name);
+        expect(navn).not.toContain("Kobberhaughytta");
+        expect((await db.pg.query(`select 1 from hut_review_queue() where id = $1`, [kobberhaug])).rows).toHaveLength(0);
+        // En angret avvisning hentes tilbake med en godkjenning.
+        await db.pg.query(`select review_hut($1, 'approve')`, [kobberhaug]);
+        expect((await db.pg.query(`select 1 from huts_public where id = $1`, [kobberhaug])).rows).toHaveLength(1);
+      } finally {
+        await db.pg.exec("rollback");
+      }
+    });
+
+    it("sammenslåing flytter kildepostene og beholder målets ID", async () => {
+      const lille = await id("name = 'Lille Tømtehytta'");
+      const tomte = await id("name = 'Tømtehytta' and confidence <> 'low'");
+      await db.pg.exec("begin");
+      try {
+        await db.pg.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ role: "authenticated", email: ADMIN })]);
+        await db.pg.query(`select review_hut($1, 'merge', $2)`, [lille, tomte]);
+        const etter = (await db.pg.query<{ id: string; archived: boolean; kilder: number }>(
+          `select h.id, h.archived_at is not null as archived,
+                  (select count(*)::int from hut_sources s where s.hut_id = h.id) as kilder
+           from huts h where h.id in ($1, $2)`,
+          [lille, tomte],
+        )).rows;
+        expect(etter.find((h) => h.id === lille)).toMatchObject({ archived: true, kilder: 0 });
+        expect(etter.find((h) => h.id === tomte)).toMatchObject({ archived: false, kilder: 3 });
+        const basis = (await db.pg.query<{ match_basis: string; confirmed_by: string }>(
+          `select match_basis, confirmed_by from hut_sources s join area_features f on f.id = s.feature_id
+           where s.hut_id = $1 and f.title = 'Lille Tømtehytta'`,
+          [tomte],
+        )).rows[0]!;
+        expect(basis).toEqual({ match_basis: "manual", confirmed_by: ADMIN });
+        // Det andre navnet tas vare på til søk.
+        const treff = (await db.pg.query<{ id: string }>(`select id from huts_search('Lille Tømtehytta')`)).rows;
+        expect(treff.map((r) => r.id)).toEqual([tomte]);
+        // Sammenslåing med seg selv eller med en hytte som ikke finnes, avvises.
+        await expect(db.pg.query(`select review_hut($1, 'merge', $1)`, [tomte])).rejects.toThrow();
+      } finally {
+        await db.pg.exec("rollback");
+      }
+    });
+
+    it("en lenke kan ikke lagres uten at den er kontrollert", async () => {
+      const hytte = await id("name = 'Kobberhaughytta'");
+      await expect(db.pg.query(`update huts set booking_url = 'https://eksempel.no/x' where id = $1`, [hytte])).rejects.toThrow(/huts_links_er_kontrollert/);
+      const rad = (await flere<{ booking_url: string; info_url: string | null }>(ADMIN, [
+        `select set_hut_links('${hytte}', ' https://eksempel.no/bestill ', '')`,
+        `select booking_url, info_url from get_hut('${hytte.slice(0, 8)}')`,
+      ])) as { booking_url: string; info_url: string | null }[];
+      expect(rad).toEqual([{ booking_url: "https://eksempel.no/bestill", info_url: null }]);
+      // Bare https, og tomme felt fjerner lenkene igjen.
+      expect(await flere(ADMIN, [`select set_hut_links('${hytte}', 'http://eksempel.no', null)`])).toBe("NEKTET");
+      const tomt = (await flere<{ kontrollert: boolean }>(ADMIN, [
+        `select set_hut_links('${hytte}', 'https://eksempel.no/bestill', null)`,
+        `select set_hut_links('${hytte}', '', null)`,
+        `select links_verified_at is not null as kontrollert from huts where id = '${hytte}'`,
+      ])) as unknown;
+      // Admin har ikke tabelltilgang; at kallet nektes er selve poenget.
+      expect(tomt).toBe("NEKTET");
+    });
+
+    it("slår opp én hytte på ID-delen av adressen", async () => {
+      const hytte = await id("name = 'Kobberhaughytta'");
+      const treff = (await som<{ id: string; name: string }>("anon", `select id, name from get_hut('${hytte.slice(0, 8)}')`)) as { id: string; name: string }[];
+      expect(treff).toEqual([{ id: hytte, name: "Kobberhaughytta" }]);
+      expect(await som("anon", `select id from get_hut('00000000')`)).toEqual([]);
+      // Alt annet enn åtte heksadesimale tegn gir ingenting — heller ikke et jokertegn.
+      expect(await som("anon", `select id from get_hut('%')`)).toEqual([]);
+      expect(await som("anon", `select id from get_hut('${hytte}')`)).toEqual([]);
+    });
+
+    it("køen viser de nærmeste andre hyttene", async () => {
+      const kø = (await som<{ name: string; nearby: { name: string; distance_m: number }[] | null }>(
+        "authenticated",
+        `select name, nearby from hut_review_queue()`,
+        ADMIN,
+      )) as { name: string; nearby: { name: string; distance_m: number }[] | null }[];
+      const lille = kø.find((s) => s.name === "Lille Tømtehytta")!;
+      expect(lille.nearby![0]).toMatchObject({ name: "Tømtehytta" });
+      expect(lille.nearby![0]!.distance_m).toBeLessThan(30);
+    });
+  });
 });

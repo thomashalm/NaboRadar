@@ -174,8 +174,8 @@ opprettes før første kartlag som spør på kartutsnitt (se [10](#10-romlige-in
 | Skriving | `upsert_area_features`, `upsert_events`, `mark_area_features_removed`, `mark_removed_from_source` | `service_role` |
 | Sync-koordinering | `sync_run_start/finish`, `sync_due`, `claim_next_due_sync`, `claim_sync_request`, `provider_baseline`, `set_alert_state` m.fl. | `service_role` |
 | Drift | `provider_health`, `recent_sync_runs`, `request_sync`, `scheduler_status` | admin |
-| Hytter | `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search` | `anon`, via Next-serveren. `security definer`; svarer bare når kategorien `hytte` er publisert eller kalleren er admin |
-| Hytter, internt | `refresh_huts` (`service_role`, etter sync), `hut_review_queue` (admin) | — |
+| Hytter | `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search`, `get_hut` | `anon`, via Next-serveren. `security definer`; svarer bare når kategorien `hytte` er publisert eller kalleren er admin |
+| Hytter, internt | `refresh_huts` (`service_role`, etter sync); `hut_review_queue`, `review_hut`, `set_hut_links` (admin) | — |
 | Research | `research_*`, `save_research_item`, `record_research_review`, `datacenter_*`, `save_datacenter_*` | admin; `is_admin()` sjekkes inne i hver |
 | Views | `admin_research_review_status`, `admin_datacenter_overview`, `admin_datacenter_refresh_status` | bare via funksjonene over |
 

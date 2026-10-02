@@ -2,6 +2,7 @@ import "server-only";
 import { z } from "zod";
 import { getDbMode, getReadDb } from "@/lib/db";
 import { DatabaseQueryError } from "@/lib/db/types";
+import { municipalityNames } from "@/lib/geo/municipalities";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { HUT_ACCESS_STATUSES, HUT_OVERNIGHT, HUT_OWNER_KINDS, HUT_TYPES, type HutOwnerKind, type HutType } from "./types";
 
@@ -54,6 +55,8 @@ export interface Hut {
   sourceUpdatedAt: string | null;
   /** Avstand fra søkepunktet. Bare satt av radiusspørringen. */
   distanceM: number | null;
+  /** Kommunenavnet, når kommuneregisteret svarte. Fylles inn av `withMunicipalityNames`. */
+  municipalityName?: string | null;
 }
 
 function toHut(row: z.infer<typeof rowSchema>): Hut {
@@ -200,42 +203,42 @@ export async function getHutsInMunicipality(municipalityNumber: string, filters?
   }
 }
 
-const searchRowSchema = rowSchema.pick({
-  id: true,
-  name: true,
-  hut_type: true,
-  owner_kind: true,
-  manager_name: true,
-  municipality_number: true,
-  latitude: true,
-  longitude: true,
-});
-
-export interface HutSearchHit {
-  id: string;
-  name: string;
-  type: HutType;
-  ownerKind: HutOwnerKind;
-  municipalityNumber: string | null;
-  lat: number;
-  lng: number;
-}
-
-export async function searchHuts(q: string): Promise<HutSearchHit[] | null> {
+/** Navnesøk. Returnerer hele hytta, slik at et treff kan vises uten et oppslag til. */
+export async function searchHuts(q: string): Promise<Hut[] | null> {
   try {
     const rows = await hutRpc("huts_search", { q, max_results: 20 });
     if (rows === null) return null;
-    return z.array(searchRowSchema).parse(rows).map((row) => ({
-      id: row.id,
-      name: row.name,
-      type: row.hut_type,
-      ownerKind: row.owner_kind,
-      municipalityNumber: row.municipality_number,
-      lat: row.latitude,
-      lng: row.longitude,
-    }));
+    return z.array(rowSchema).parse(rows).map(toHut);
   } catch (error) {
     console.error("[hytter] huts_search feilet:", error instanceof Error ? error.name : "ukjent");
     return null;
   }
+}
+
+export type HutDetailResult = { status: "ok"; hut: Hut } | { status: "not_found" } | { status: "unavailable" };
+
+/** Én hytte, slått opp på de åtte første tegnene i uuid-en (se lib/huts/href.ts). */
+export async function getHut(ref: string): Promise<HutDetailResult> {
+  try {
+    const rows = await hutRpc("get_hut", { p_ref: ref });
+    if (rows === null) return { status: "unavailable" };
+    const huts = z.array(rowSchema).parse(rows).map(toHut);
+    // To hytter med samme åtte tegn er usannsynlig, men da gjetter vi ikke hvilken som menes.
+    if (huts.length !== 1) return { status: "not_found" };
+    const [hut] = await withMunicipalityNames(huts);
+    return { status: "ok", hut: hut! };
+  } catch (error) {
+    console.error("[hytter] get_hut feilet:", error instanceof Error ? error.name : "ukjent");
+    return { status: "unavailable" };
+  }
+}
+
+/** Setter kommunenavn på hyttene. Svarer ikke registeret, står navnet tomt. */
+export async function withMunicipalityNames(huts: Hut[]): Promise<Hut[]> {
+  if (huts.every((hut) => !hut.municipalityNumber)) return huts;
+  const names = await municipalityNames();
+  return huts.map((hut) => ({
+    ...hut,
+    municipalityName: hut.municipalityNumber ? (names.get(hut.municipalityNumber) ?? null) : null,
+  }));
 }

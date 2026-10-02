@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
-import { getHutsInBbox, getHutsInMunicipality, searchHuts, type Hut, type HutSearchHit } from "@/lib/huts/queries";
+import { getHutsInBbox, getHutsInMunicipality, searchHuts, withMunicipalityNames, type Hut } from "@/lib/huts/queries";
 import { HUT_OWNER_KINDS, HUT_TYPES } from "@/lib/huts/types";
 
 /**
@@ -17,7 +17,7 @@ import { HUT_OWNER_KINDS, HUT_TYPES } from "@/lib/huts/types";
  */
 export type HutApiResponse =
   | { huts: Hut[]; total: number; truncated: boolean }
-  | { hits: HutSearchHit[] }
+  | { hits: Hut[] }
   | { error: "invalid_query" | "unavailable" };
 
 const liste = <T extends string>(verdier: readonly T[]) =>
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     const parsed = z.string().trim().min(2).max(60).safeParse(q);
     if (!parsed.success) return ugyldig();
     const hits = await searchHuts(parsed.data);
-    return hits === null ? nede() : NextResponse.json<HutApiResponse>({ hits }, OK);
+    return hits === null ? nede() : NextResponse.json<HutApiResponse>({ hits: await withMunicipalityNames(hits) }, OK);
   }
 
   const kommune = params.get("kommune");
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
     if (!/^\d{4}$/.test(kommune)) return ugyldig();
     const resultat = await getHutsInMunicipality(kommune, filters.data);
     if (resultat.status !== "ok") return nede();
-    return NextResponse.json<HutApiResponse>({ huts: resultat.huts, total: resultat.total, truncated: resultat.truncated }, OK);
+    return NextResponse.json<HutApiResponse>({ huts: await withMunicipalityNames(resultat.huts), total: resultat.total, truncated: resultat.truncated }, OK);
   }
 
   const bbox = bboxSchema.safeParse(params.get("bbox") ?? "");
@@ -62,5 +62,5 @@ export async function GET(request: NextRequest) {
   const [minLng, minLat, maxLng, maxLat] = bbox.data;
   const resultat = await getHutsInBbox({ minLng, minLat, maxLng, maxLat }, filters.data);
   if (resultat.status !== "ok") return nede();
-  return NextResponse.json<HutApiResponse>({ huts: resultat.huts, total: resultat.total, truncated: resultat.truncated }, OK);
+  return NextResponse.json<HutApiResponse>({ huts: await withMunicipalityNames(resultat.huts), total: resultat.total, truncated: resultat.truncated }, OK);
 }

@@ -116,6 +116,9 @@ export default async function AdminPage() {
         <Link href="/admin/datasenter" className="text-[15px] font-medium text-accent hover:underline">
           Datasentre →
         </Link>
+        <Link href="/admin/hytter" className="text-[15px] font-medium text-accent hover:underline">
+          Hytter og koier →
+        </Link>
       </p>
 
       <SchedulerCard scheduler={scheduler} />

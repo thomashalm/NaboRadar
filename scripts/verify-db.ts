@@ -40,7 +40,7 @@ async function main() {
   // uten denne sjekken åpner neste funksjon seg selv i det stille — slik
   // trigger_sync_workflow() gjorde til 2026-09-25.
   // Hyttefunksjonene er åpne for anon, men svarer bare når kategorien `hytte` er publisert.
-  const HUTS = ["huts_near", "huts_in_bbox", "huts_in_municipality", "huts_search"];
+  const HUTS = ["huts_near", "huts_in_bbox", "huts_in_municipality", "huts_search", "get_hut"];
   const ANON_OK = new Set(["data_status", "events_within", "features_near", "features_count_near", "get_event", ...HUTS]);
   // Research er admin-only, men går gjennom authenticated-rollen — is_admin() inne i hver
   // funksjon er det som faktisk stenger, ikke grantet. Anon skal aldri ha noen av dem.
@@ -62,6 +62,8 @@ async function main() {
     "scheduler_status",
     // Kontrollkøen for hytter: admin-only, med is_admin() inne i funksjonen.
     "hut_review_queue",
+    "review_hut",
+    "set_hut_links",
     ...RESEARCH,
     ...REVIEW,
     ...DATACENTER,
