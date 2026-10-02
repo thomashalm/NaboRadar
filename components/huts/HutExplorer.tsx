@@ -68,6 +68,15 @@ export function HutExplorer({ tiles, center, originName, radiusM, initialHutId }
   const [status, setStatus] = useState<Status>("loading");
   const [types, setTypes] = useState<HutType[]>([]);
   const [owners, setOwners] = useState<HutOwnerKind[]>([]);
+  // Søketeksten eies her, så «Nullstill» kan tømme den sammen med filtrene.
+  const [q, setQ] = useState("");
+  const filtered = q.trim() !== "" || types.length > 0 || owners.length > 0;
+  /** Tømmer søk og filtre. Kartutsnittet står; lista hentes på nytt fordi filtrene endres. */
+  const reset = () => {
+    setQ("");
+    setTypes([]);
+    setOwners([]);
+  };
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const router = useRouter();
   const [fit, setFit] = useState<{ bounds: LngLatBounds; key: string }>(() =>
@@ -229,7 +238,7 @@ export function HutExplorer({ tiles, center, originName, radiusM, initialHutId }
           Turisthytter, ubetjente hytter og rastebuer. Flytt kartet for å se et annet område.
         </p>
 
-        <HutSearch onSelect={goToHit} />
+        <HutSearch q={q} onChange={setQ} onSelect={goToHit} />
 
         <fieldset className="mt-5">
           <legend className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">Type</legend>
@@ -271,14 +280,23 @@ export function HutExplorer({ tiles, center, originName, radiusM, initialHutId }
       </div>
 
       <section className="px-5 pt-5 pb-10 sm:px-8 lg:col-start-1 lg:px-10 lg:pb-16">
-        <p className="text-[15px] font-medium text-ink" role="status">
-          {status === "loading" && "Henter hytter …"}
-          {status === "failed" && "Vi får ikke hentet hyttene akkurat nå."}
-          {status === "ready" &&
-            (total === 0
-              ? "Ingen hytter eller koier i dette utsnittet."
-              : `${total} ${total === 1 ? "hytte eller koie" : "hytter og koier"} i utsnittet${truncated ? ` — viser ${huts.length}` : ""}`)}
-        </p>
+        <div className="flex items-baseline justify-between gap-4">
+          <p className="min-w-0 text-[15px] font-medium text-ink" role="status">
+            {status === "loading" && "Henter hytter …"}
+            {status === "failed" && "Vi får ikke hentet hyttene akkurat nå."}
+            {status === "ready" &&
+              (total === 0
+                ? "Ingen hytter eller koier i dette utsnittet."
+                : `${total} ${total === 1 ? "hytte eller koie" : "hytter og koier"} i utsnittet${truncated ? ` — viser ${huts.length}` : ""}`)}
+          </p>
+          {/* Bare når noe er valgt. Polstringen gir en trykkflate på rundt 44 px; den negative
+              margen gjør at linja ikke blir høyere av den. */}
+          {filtered && (
+            <button type="button" onClick={reset} className="-my-3 shrink-0 py-3 text-[15px] text-accent hover:underline">
+              Nullstill
+            </button>
+          )}
+        </div>
         {originName && listed.length > 0 && (
           <p className="mt-0.5 text-[13px] text-muted">Nærmest {originName} først. Avstand i luftlinje.</p>
         )}
@@ -364,8 +382,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
 }
 
 /** Navnesøk. Et treff flytter kartet dit og velger hytta. Treffene har ingen avstand. */
-function HutSearch({ onSelect }: { onSelect: (hit: Hut) => void }) {
-  const [q, setQ] = useState("");
+function HutSearch({ q, onChange, onSelect }: { q: string; onChange: (q: string) => void; onSelect: (hit: Hut) => void }) {
   const [hits, setHits] = useState<Hut[] | null>(null);
   // Et søk som ikke fikk svar, er ikke det samme som et søk uten treff.
   const [failed, setFailed] = useState(false);
@@ -407,7 +424,7 @@ function HutSearch({ onSelect }: { onSelect: (hit: Hut) => void }) {
         id="hyttesok"
         type="search"
         value={q}
-        onChange={(event) => setQ(event.target.value)}
+        onChange={(event) => onChange(event.target.value)}
         placeholder="Navn på hytte eller koie"
         autoComplete="off"
         className="mt-2 block w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-[15px] text-ink placeholder:text-muted focus:border-accent focus:outline-none"
@@ -424,7 +441,7 @@ function HutSearch({ onSelect }: { onSelect: (hit: Hut) => void }) {
                 className="block w-full px-3.5 py-2 text-left hover:bg-ink/[0.03]"
                 onClick={() => {
                   onSelect(hit);
-                  setQ("");
+                  onChange("");
                 }}
               >
                 <span className="block text-[15px] text-ink">{hit.name}</span>
