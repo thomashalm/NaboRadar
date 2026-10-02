@@ -1070,7 +1070,15 @@ ikke alt svarer på. Skal det inn senere, hører det sammen med valgt rad, ikke 
 Første friluftskategori. Retningen står i [data-roadmapen](data-roadmap.md#12-friluft-skjult-lokal-innsikt-ikke-en-turapp),
 modellen i [dataarkitekturen](data-architecture.md#5-kanoniske-enheter-eller-bulk-lag).
 
-**Status: pilot i Oslomarka, upublisert.** Kategorien `hytte` står med `is_public = false`, så
+**Status: hele landet er importert, upublisert.** 1 675 hytter, 1 481 av dem klare til å vises;
+resten står bare i sekundærkilden og er skjult til de er kontrollert. Oslomarka med omland (58
+hytter) er kvalitetssikret hytte for hytte; resten av landet er kontrollert mot Kartverkets
+egne data, men ikke beriket med forvalter og lenker. Tallene, fylkestabellen og funnene står i
+[research/hytter-nasjonal-import.md](research/hytter-nasjonal-import.md). `npm run qa:hytter`
+kjører regelsjekkene (koordinater, dubletter, lekkasje av avviste eller skjulte hytter,
+overstyring uten kilde) og skal være grønn før publisering.
+
+Kategorien `hytte` står med `is_public = false`, så
 `huts_*`-funksjonene svarer tomt for alle andre enn innlogget admin. En admin ser hyttene på
 `/admin/adresse`, `/omrade` og `/hytter` som om de var publisert, og kan kontrollere dem der.
 Publisering er én linje: `update area_feature_categories set is_public = true where category = 'hytte'`.

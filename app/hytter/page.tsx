@@ -9,8 +9,8 @@ import { getMapTileConfig } from "@/lib/map/config";
  * Hytter og koier i kart.
  *
  * Samme datasett som «Friluft i nærheten» på områdesiden, men utforsket i kart: flytt
- * utsnittet, filtrer på type og eier, søk på navn. Siden er noindex så lenge datasettet er en
- * pilot — den dekker Oslomarka, og skal ikke framstå som en oversikt over hele landet.
+ * utsnittet, filtrer på type og eier, søk på navn. Datasettet dekker hele landet. Siden er
+ * noindex så lenge kategorien er upublisert.
  */
 export const metadata: Metadata = {
   title: "Hytter og koier",

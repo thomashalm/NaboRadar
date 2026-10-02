@@ -40,6 +40,24 @@ describe("N50: lesing av hytteobjekter", () => {
     ]);
   });
 
+  it("leser negativ øst-koordinat — Vestlandet ligger vest for nullpunktet i UTM 33", () => {
+    // Eigerøy fyr i Eigersund, slik posisjonen står i N50.
+    const [hut] = parseN50Huts(gml(hytte({ navn: "Eigerøy fyrvokterbolig", grad: "Ubetjent", pos: "-32047.31 6513094.79" })), "1101") as {
+      easting: number;
+      northing: number;
+    }[];
+    expect(hut).toMatchObject({ easting: -32047.31, northing: 6513094.79 });
+    const { records, rejected } = new KartverketN50HytterProvider().normalize({
+      features: parseN50Huts(gml(hytte({ navn: "Eigerøy fyrvokterbolig", grad: "Ubetjent", pos: "-32047.31 6513094.79" })), "1101"),
+      documents: [],
+    });
+    expect(rejected).toEqual([]);
+    const [lng, lat] = (records[0]!.geometry as unknown as { coordinates: [number, number] }).coordinates;
+    // Eigerøya ligger ved 58,43° N, 5,87° Ø.
+    expect(lat).toBeCloseTo(58.43, 1);
+    expect(lng).toBeCloseTo(5.87, 1);
+  });
+
   it("dekoder XML-tegn i navnet", () => {
     const [hut] = parseN50Huts(gml(hytte({ navn: "Ommen &amp; Veslestua", grad: "Ubetjent" })), "3212") as { navn: string }[];
     expect(hut!.navn).toBe("Ommen & Veslestua");
@@ -92,22 +110,32 @@ describe("N50: normalisering", () => {
     expect(records[0]!.attributes.locked).toBeNull();
   });
 
-  it("utelater serveringshytter, gapahuker, hytter uten navn og alt utenfor piloten — som valg, ikke feil", () => {
+  it("tar inn hele landet, og utelater serveringshytter, gapahuker og hytter uten navn — som valg, ikke feil", () => {
     const { records, rejected, skipped } = normaliser(
       hytte({ navn: "Ullevålseter", grad: "Serveringshytte" }),
       hytte({ navn: "Gapahuken", grad: "Gapahuk" }),
       hytte({ grad: "Ubetjent" }),
-      // Tromsø: gyldig hytte, men utenfor pilotområdet.
+      // Tromsø: like mye en hytte som en i Oslomarka.
       hytte({ navn: "Skarvassbu", grad: "Ubetjent", pos: "653000 7730000" }),
+      // Null-koordinater ligger langt utenfor Norge. Det er en feil i kilden, ikke en hytte.
+      hytte({ navn: "Nullhytta", grad: "Ubetjent", pos: "0 0" }),
     );
-    expect(records).toEqual([]);
+    expect(records.map((r) => r.title)).toEqual(["Skarvassbu"]);
     expect(rejected).toEqual([]);
     expect(skipped!.map((s) => s.reason)).toEqual([
       "Serveringshytte tas ikke inn",
       "Gapahuk tas ikke inn",
       "hytte uten navn",
-      "utenfor pilotområdet",
+      "koordinat utenfor Norge",
     ]);
+  });
+
+  it("nekter å synke hele landet fra en feed som mangler de fleste kommunene", async () => {
+    const feed = `<link href="https://nedlasting.geonorge.no/geonorge/Basisdata/N50Kartdata/GML/Basisdata_0301_Oslo_25833_N50Kartdata_GML.zip"/>`;
+    const landet = new KartverketN50HytterProvider((async () => new Response(feed)) as typeof fetch);
+    await expect(async () => {
+      for await (const batch of landet.fetch({ mode: "full" } as never)) void batch;
+    }).rejects.toThrow(/bare 1 kommuner/);
   });
 
   it("avviser en klasse kilden ikke har hatt før, i stedet for å gjette", () => {

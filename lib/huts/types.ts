@@ -83,40 +83,13 @@ export type HutSourceAttributes = {
 } & Record<`kilde_${string}`, string | number | boolean | null>;
 
 /**
- * Pilotområdet: Oslomarka med omland. Begge kildene avgrenses til samme rute, slik at en hytte
- * ikke finnes i den ene kilden og mangler i den andre bare fordi avgrensningene var ulike.
- *
- * Landsdekkende import er en egen beslutning — se docs/data-roadmap.md.
+ * Rammen en hytte må ligge innenfor: Fastlands-Norge med margin. Hyttene hentes for hele
+ * landet; et punkt utenfor rammen er en feil i kilden (byttede akser, null-koordinater), og
+ * tas ikke inn. Svalbard og Jan Mayen er ikke med i N50.
  */
-export const HUT_PILOT = {
-  bbox: { minLng: 10.3, minLat: 59.75, maxLng: 11.1, maxLat: 60.3 },
-  /** Kommunene som dekker ruta. N50 leveres per kommune. */
-  municipalities: [
-    "0301", // Oslo
-    "3201", // Bærum
-    "3203", // Asker
-    "3205", // Lillestrøm
-    "3207", // Nordre Follo
-    "3209", // Ullensaker
-    "3212", // Nesodden
-    "3214", // Frogn
-    "3218", // Ås
-    "3220", // Enebakk
-    "3222", // Lørenskog
-    "3224", // Rælingen
-    "3230", // Gjerdrum
-    "3232", // Nittedal
-    "3234", // Lunner
-    "3236", // Jevnaker
-    "3238", // Nannestad
-    "3305", // Ringerike
-    "3310", // Hole
-    "3312", // Lier
-    "3446", // Gran
-  ],
-} as const;
+export const HUT_BOUNDS = { minLng: 4, minLat: 57.5, maxLng: 32, maxLat: 71.5 } as const;
 
-export function inHutPilot([lng, lat]: readonly [number, number]): boolean {
-  const { minLng, minLat, maxLng, maxLat } = HUT_PILOT.bbox;
+export function inHutBounds([lng, lat]: readonly [number, number]): boolean {
+  const { minLng, minLat, maxLng, maxLat } = HUT_BOUNDS;
   return lng >= minLng && lng <= maxLng && lat >= minLat && lat <= maxLat;
 }

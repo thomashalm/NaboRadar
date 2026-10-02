@@ -1,4 +1,4 @@
-import { HUT_REFRESH_FN, HUT_SOURCE_CATEGORY, inHutPilot, type HutSourceAttributes } from "@/lib/huts/types";
+import { HUT_REFRESH_FN, HUT_SOURCE_CATEGORY, inHutBounds, type HutSourceAttributes } from "@/lib/huts/types";
 import { gmlPoint, nested, wfsPages, type GmlFeature } from "@/lib/providers/gml";
 import type {
   AreaFeatureProvider,
@@ -55,7 +55,13 @@ const KATEGORIORD: Record<string, HutSourceAttributes["owner_kind"]> = {
   privat: null,
 };
 
-const DIGITALISERINGSMETODE = /^(rett i kartet|ukjent|gps|ortofoto)$/i;
+/**
+ * Verdier i `opphav` som sier hvor punktet kommer fra, ikke hva hytta heter. Feltet er fritekst
+ * og brukes til begge deler. Nasjonalt går «Naturkartan», «Statskog», «Nordlandsruta.no» og
+ * navn på friluftsråd igjen på mange hytter — tatt som navn ville de gitt hytter som heter
+ * «Statskog». Da brukes navnet i `informasjon` i stedet, når det finnes.
+ */
+const DIGITALISERINGSMETODE = /^(rett i kartet|ukjent|gps|ortofoto|naturkartan|statskog|nordlandsruta\.no|.*\bfriluftsråd)$/i;
 
 /** Hyttenavnet, eller null når posten ikke har noe som kan være et navn. */
 export function turruteHutName(opphav: string | null, informasjon: string | null): string | null {
@@ -83,7 +89,7 @@ export class KartverketTurrutebasenHytterProvider implements AreaFeatureProvider
   readonly recordKind = "area_feature" as const;
   readonly license = { name: "Åpne data fra Kartverket (ingen bruksvilkår oppgitt i metadata)", url: DATASETT };
   readonly defaultStatus = "active" as const;
-  readonly statusReason = "Pilot: Oslomarka.";
+  readonly statusReason = "Hele landet.";
   readonly postSyncFn = HUT_REFRESH_FN;
 
   constructor(
@@ -119,8 +125,8 @@ export class KartverketTurrutebasenHytterProvider implements AreaFeatureProvider
         rejected.push({ kind: "feature", externalId: lokalId, reason: !lokalId ? "mangler lokalId" : "mangler posisjon" });
         continue;
       }
-      if (!inHutPilot(punkt)) {
-        skipped.push({ kind: "feature", externalId: lokalId, reason: "utenfor pilotområdet" });
+      if (!inHutBounds(punkt)) {
+        skipped.push({ kind: "feature", externalId: lokalId, reason: "koordinat utenfor Norge" });
         continue;
       }
       const navn = turruteHutName(nested(feature, "opphav"), nested(feature, "informasjon"));

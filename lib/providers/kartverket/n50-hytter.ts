@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { utm33ToWgs84 } from "@/lib/geo/utm";
-import { HUT_PILOT, HUT_REFRESH_FN, HUT_SOURCE_CATEGORY, inHutPilot, type HutSourceAttributes } from "@/lib/huts/types";
+import { HUT_REFRESH_FN, HUT_SOURCE_CATEGORY, inHutBounds, type HutSourceAttributes } from "@/lib/huts/types";
 import { fetchGml } from "@/lib/providers/gml";
 import type {
   AreaFeatureProvider,
@@ -43,6 +43,9 @@ import type { AreaAttributes, NormalizedAreaFeature } from "@/types/area-feature
  * er en «rastehytte/dagshytte/nødbu» der man kan sove «i et knipetak». Sengetall, sesong og
  * om hytta faktisk er åpen står ikke i N50, og settes ikke.
  */
+/** Norge har 357 kommuner. En feed med vesentlig færre er ufullstendig. */
+const MIN_MUNICIPALITIES = 340;
+
 const FEED = "https://nedlasting.geonorge.no/geonorge/ATOM-feeds/N50Kartdata_AtomFeedGML.xml";
 const DATASETT = "https://kartkatalog.geonorge.no/metadata/n50-kartdata/ea192681-d039-42ec-b1bc-f3ce04c189ac";
 
@@ -91,7 +94,9 @@ export function parseN50Huts(gml: string, knr: string): unknown[] {
   const huts: unknown[] = [];
   for (const block of gml.split("<gml:featureMember>")) {
     if (!block.includes("<app:hytteinformasjon>")) continue;
-    const pos = /<gml:pos>\s*([\d.]+)\s+([\d.]+)\s*<\/gml:pos>/.exec(block);
+    // Øst-koordinaten er negativ vest for sone 33 sin nullmeridian: hele Vestlandet. Leses ikke
+    // fortegnet, mister hytta posisjonen og avvises.
+    const pos = /<gml:pos>\s*(-?[\d.]+)\s+(-?[\d.]+)\s*<\/gml:pos>/.exec(block);
     huts.push({
       knr,
       navn: tag(block, "navn"),
@@ -132,20 +137,27 @@ export class KartverketN50HytterProvider implements AreaFeatureProvider {
   readonly recordKind = "area_feature" as const;
   readonly license = { name: "Creative Commons Navngivelse 4.0 (CC BY 4.0)", url: "https://creativecommons.org/licenses/by/4.0/" };
   readonly defaultStatus = "active" as const;
-  readonly statusReason = "Pilot: Oslomarka.";
+  readonly statusReason = "Hele landet.";
   readonly postSyncFn = HUT_REFRESH_FN;
 
   constructor(
     private readonly fetchImpl: typeof fetch = fetch,
     private readonly retry: HttpRetryPolicy = { ...DEFAULT_RETRY_POLICY, timeoutMs: 60_000 },
-    private readonly municipalities: readonly string[] = HUT_PILOT.municipalities,
+    /** Bare disse kommunene. Uten: alle kommunene i feeden, altså hele landet. */
+    private readonly municipalities: readonly string[] | null = null,
   ) {}
 
   async *fetch(options: SyncOptions): AsyncIterable<RawBatch> {
     const feed = await fetchGml(FEED, { retry: this.retry, signal: options.signal, fetchImpl: this.fetchImpl });
     const urls = n50ArchiveUrls(feed);
 
-    for (const knr of this.municipalities) {
+    // Feeden er fasiten på hvilke kommuner som finnes. Er den kortere enn landet, er det feeden
+    // som er ufullstendig — da stopper vi, ellers ville hyttene i resten blitt markert som fjernet.
+    if (!this.municipalities && urls.size < MIN_MUNICIPALITIES) {
+      throw new Error(`N50-feeden har bare ${urls.size} kommuner, ventet minst ${MIN_MUNICIPALITIES}`);
+    }
+
+    for (const knr of this.municipalities ?? [...urls.keys()].sort()) {
       const url = urls.get(knr);
       // En kommune som mangler i feeden er et brudd på forutsetningen, ikke et tomt svar: da
       // ville hyttene der blitt markert som fjernet.
@@ -183,8 +195,8 @@ export class KartverketN50HytterProvider implements AreaFeatureProvider {
 
       if (UTELATT.has(raw.betjeningsgrad)) {
         skipped.push({ kind: "feature", externalId: key, reason: `${raw.betjeningsgrad} tas ikke inn` });
-      } else if (!inHutPilot(point)) {
-        skipped.push({ kind: "feature", externalId: key, reason: "utenfor pilotområdet" });
+      } else if (!inHutBounds(point)) {
+        skipped.push({ kind: "feature", externalId: key, reason: "koordinat utenfor Norge" });
       } else if (!navn) {
         // Uten navn har vi verken noe å vise eller noe å nøkle på.
         skipped.push({ kind: "feature", externalId: null, reason: "hytte uten navn" });
@@ -231,12 +243,17 @@ export class KartverketN50HytterProvider implements AreaFeatureProvider {
     try {
       const feed = await fetchGml(FEED, { retry: this.retry, fetchImpl: this.fetchImpl });
       const urls = n50ArchiveUrls(feed);
-      const mangler = this.municipalities.filter((knr) => !urls.has(knr));
+      const mangler = (this.municipalities ?? []).filter((knr) => !urls.has(knr));
+      const forFå = !this.municipalities && urls.size < MIN_MUNICIPALITIES;
       return {
-        ok: mangler.length === 0,
+        ok: mangler.length === 0 && !forFå,
         checkedAt: new Date().toISOString(),
         latencyMs: Math.round(performance.now() - started),
-        message: mangler.length === 0 ? `${urls.size} kommunearkiv i feeden` : `Mangler i feeden: ${mangler.join(", ")}`,
+        message: forFå
+          ? `Bare ${urls.size} kommunearkiv i feeden`
+          : mangler.length === 0
+            ? `${urls.size} kommunearkiv i feeden`
+            : `Mangler i feeden: ${mangler.join(", ")}`,
       };
     } catch (error) {
       return { ok: false, checkedAt: new Date().toISOString(), latencyMs: null, message: error instanceof Error ? error.name : "Ukjent feil" };

@@ -22,6 +22,16 @@ describe("Turrutebasen: navn og forvalter", () => {
     expect(turruteHutName(null, null)).toBeNull();
   });
 
+  it("tar ikke navnet på den som har levert punktet, som hyttenavn", () => {
+    // Nasjonalt går disse igjen i `opphav` på mange hytter. De sier hvor punktet kommer fra.
+    expect(turruteHutName("Naturkartan", "Sårjåsjaure Fjällstuga")).toBe("Sårjåsjaure Fjällstuga");
+    expect(turruteHutName("Statskog", null)).toBeNull();
+    expect(turruteHutName("Midtre Hålogaland friluftsråd", "Blåvatnhytta - åpen")).toBe("Blåvatnhytta");
+    expect(turruteHutName("Nordlandsruta.no", null)).toBeNull();
+    // En hytte kan hete noe med «Statskog» i seg; bare den rene merkelappen forkastes.
+    expect(turruteHutName("Statskogkoia", null)).toBe("Statskogkoia");
+  });
+
   it("skiller kategoriord fra navngitte forvaltere", () => {
     expect(turruteManager("DNT")).toEqual({ owner_kind: "dnt", manager_name: null });
     expect(turruteManager("Andre")).toEqual({ owner_kind: "other", manager_name: null });
@@ -61,17 +71,19 @@ describe("Turrutebasen: normalisering", () => {
     expect(records[0]!.attributes).toMatchObject({ locked: null, beds: null, municipality_number: null });
   });
 
-  it("utelater punkter utenfor piloten og uten navn, og avviser punkter uten ID", () => {
+  it("tar inn hele landet, utelater punkter utenfor Norge og uten navn, og avviser punkter uten ID", () => {
     const { records, rejected, skipped } = provider.normalize({
       features: [
         punkt({ id: "nord", kode: "44", opphav: "Rundvannshytta", pos: "70.634750 23.789304" }),
+        // Byttede akser gir et punkt i Indiahavet. Det er en feil i kilden, ikke en hytte.
+        punkt({ id: "byttet", kode: "44", opphav: "Feilhytta", pos: "10.550021 60.051671" }),
         punkt({ id: "navnløs", kode: "44", opphav: "Rett i kartet" }),
         { ...punkt({ kode: "44", opphav: "Uten id" }), identifikasjon: undefined },
       ],
       documents: [],
     });
-    expect(records).toEqual([]);
-    expect(skipped!.map((s) => s.reason)).toEqual(["utenfor pilotområdet", "hytte uten navn"]);
+    expect(records.map((r) => r.title)).toEqual(["Rundvannshytta"]);
+    expect(skipped!.map((s) => s.reason)).toEqual(["koordinat utenfor Norge", "hytte uten navn"]);
     expect(rejected.map((r) => r.reason)).toEqual(["mangler lokalId"]);
   });
 });

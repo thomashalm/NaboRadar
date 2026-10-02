@@ -25,7 +25,8 @@
     "review:backfill": "tsx scripts/research-review-backfill.ts",
     "fix:dsb-identitet": "tsx scripts/fix-dsb-identity.ts",
     "qa:naturfare": "tsx scripts/qa-naturfare.ts",
-    "qa:datasenter": "tsx scripts/qa-datasenter.ts"
+    "qa:datasenter": "tsx scripts/qa-datasenter.ts",
+    "qa:hytter": "tsx scripts/qa-hytter.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
