@@ -2513,6 +2513,14 @@ Digiplex-porteføljen og Bitfurys anlegg i Mo i Rana. Tre ting å huske:
 - «Ingen funn» i en region betyr bare at de loggførte kildene er kontrollert. Dekningsnotatet
   og research-runen sier hvilke regioner som ikke er undersøkt godt nok.
 
+**En plan som også åpner for datasenter, er ikke en datasenterplan.** Runde 16 løftet seks
+leads til anlegg fordi kommunens egne dokumenter sier datasenter om en bestemt tomt (Sørfold,
+Aure, Rollag, Gulen, Strand) eller fordi NVE-saken oppgir adressen (Gardermoen). Ballangsleira
+ble stående som lead: reguleringsplanen nevner datasenter som ett av flere eksempler på
+kraftkrevende industri, og koblingen til Nscale hviler på en køplass og én avisartikkel. En
+reservasjon føres heller ikke som sikret kraft når forslagsstilleren er et annet selskap enn
+sluttkunden i Statnetts liste, selv om navn, sted og effekt sammenfaller (Gjerelvmoen).
+
 **En utvidelse av samme campus er ikke et nytt anlegg.** Nye bygg på samme tomt eller naboteig,
 med samme eier og uten egen kraftsak, føres på det eksisterende anlegget. «Ås datasenter» er
 Troll Housings egen utvidelse i samme planområde og står som utvidelsesnotat på Troll Housing.

@@ -4767,7 +4767,13 @@ export const FUNN: Funn[] = [
       "2024 og 4,40 mill. kr i 2025; tallet 20,3 mill. kr fra en katalogkilde var feil. Selskapet " +
       "står på Nkom-listen 02.10.2026 med 100 % krypto. En arkivert nettside beskriver servere " +
       "plassert hos varmekunder, altså trolig flere små installasjoner og ikke ett anlegg. " +
-      "Beholdt som lead uten punkt.",
+      "Beholdt som lead uten punkt. Runde 16 (2026-10-02): Fortsatt ikke noe stedfestbart anlegg. " +
+      "Brønnøysund fører nå forretningsadresse og eneste underenhet på Kvaløyvegen 168 på " +
+      "Tromsøya, så tittelen er upresis; Innlandsvegen 344 i Tromsdalen deles med MiningTech AS " +
+      "(928337650). Serverne ser ut til å stå i kundenes bygg som varmekilde (fra et søkeutdrag; " +
+      "nettstedet er ikke lest direkte). Miljødirektoratet ba 23.02.2026 om opplysninger om " +
+      "selskapets anlegg i kvotepliktsak 2025/969; dokumentene er ikke lest. Beholdt som lead " +
+      "uten punkt.",
     kilder: [
       {
         source_name: "Nkom: Thermaltech AS er registrert datasenteroperatør",
@@ -6829,7 +6835,11 @@ export const FUNN: Funn[] = [
       "Punktet er et områdepunkt i planområdet, ikke en tomt: at Kitebrook har nettopp " +
       "industrifeltet på Hausamoen er en slutning, og tomtas gnr/bnr er ikke kjent. Bluefjords " +
       "Gaupne ligger ca. 260 m unna i samme planområde og er et eget anlegg; Gaupne Datapark " +
-      "ligger ca. 5 km unna.",
+      "ligger ca. 5 km unna. Runde 16 (2026-10-02): Mulig forløper: «Sogn Datasenter», der " +
+      "Sognekraft var medeier, ville ifølge Sogn Avis 27.01.2021 bygge datasenter rett ved " +
+      "Bluefjords' anlegg. KB Sogn Datasenter AS (925885037, stiftet 25.09.2020) har samme " +
+      "adresse i Bergen som Kitebrook AS. Koblingen bygger på felles adresse og sted; " +
+      "eierforholdet er ikke verifisert. Ført som alias-notat, ikke som eget anlegg.",
     kilder: [
       {
         source_name: "DataCenterMap: Kitebrook Leirdøla, Gaupne",
@@ -6880,7 +6890,11 @@ export const FUNN: Funn[] = [
       "(navneendring kunngjort 05.08.2026). Raden står i reservasjonslisten, ikke i køen, så 120 " +
       "MW er ført som sikret kraft og som planlagt kapasitet; tallet lå tidligere feil som " +
       "campus-potensial. Forbehold: Statnett-raden mangler reservasjonsdato, og ledningen fram " +
-      "til tomta har ikke konsesjon ennå. Eget anlegg, ca. 5 km fra Bluefjords og Kitebrook.",
+      "til tomta har ikke konsesjon ennå. Eget anlegg, ca. 5 km fra Bluefjords og Kitebrook. " +
+      "Runde 16 (2026-10-02): Reguleringsplanen for Gaupnegrandane var på tredje gangs offentlige " +
+      "ettersyn i september 2026 (datasenter-delen), og Luster kommune har kalt inn til " +
+      "folkemøte. Planen er ikke sluttbehandlet. Samme utvikler (Sognekraft/Sogn Utvikling) står " +
+      "bak «Vangsnes Datapark» i Vik, som er ført som eget anlegg.",
     public_candidate: false,
     kilder: [
       {
@@ -6999,7 +7013,13 @@ export const FUNN: Funn[] = [
       "(2026-10-02): «Compute Nordic DC1» er et markedsnavn på dette anlegget, ikke et eget " +
       "anlegg. Compute Nordic Limited eide 18 % av Bluefjords AS i 2024 og er ført som investor, " +
       "ikke eier; eier og operatør er fortsatt Bluefjords AS. Kontrakten på vel 1,3 mrd. kr som " +
-      "Compute Nordic omtaler, kan ikke knyttes til Gaupne.",
+      "Compute Nordic omtaler, kan ikke knyttes til Gaupne. Runde 16 (2026-10-02): Luster kommune " +
+      "ga 30.06.2026 igangsettingstillatelse for «bygg for datalagring» og 19.08.2026 " +
+      "rammetillatelse for «datasenter» på gnr 88 bnr 7 fnr 1 (byggesak 2026/2275). Det er " +
+      "utbygging på samme campus, ikke et nytt anlegg. «Datasenter Reiarmoen» er et alias: " +
+      "Bluesite AS (samme ledelse som Bluefjords) søkte i 2020 NVE om 22 kV fordelingsanlegg «på " +
+      "Gaupne, i Reiarmoen», og NVE avviste søknaden 30.06.2026 på grunn av manglende fremdrift " +
+      "(bare journaltittel lest).",
     kilder: [
       {
         source_name: "DataCenterMap: Bluefjords og Compute Nordic, Gaupne",
@@ -9148,7 +9168,13 @@ export const FUNN: Funn[] = [
       "DC AS i Molde (924580151), som er et annet selskap. Rammetillatelsen kunne ikke leses " +
       "(dokumentnedlasting i innsynsportalen ligger bak bot-kontroll). Ikke bland med " +
       "Bredbåndsfylkets avsluttede byggesak på nabotomten 29/313 eller med Stormoen ca. 13 km " +
-      "vest.",
+      "vest. Runde 16 (2026-10-02): Ingen flere NorthDC-prosjekter funnet. NordiX Holding AS " +
+      "(989278592, samme adresse i Tromsø) omtaler samme colocation-prosjekt. Selskapet beskriver " +
+      "bygging i to moduler. Arealtallene spriker: over 2 700 m² (Nye Troms 25.05.2025) og ca. 4 " +
+      "000 m² (NRK 30.06.2025, som også oppgir 150–250 mill. kr); investeringen er ikke " +
+      "strukturert. Siste kommunale treff er rammetillatelsen 24.11.2025; igangsettingstillatelse " +
+      "er ikke funnet. Northern DC AS' køposter ved Balsfjord TRA (4,72 + 8 MW) er fortsatt ikke " +
+      "koblet til NorthDC AS.",
     public_candidate: false,
     kilder: [
       {
@@ -9259,7 +9285,10 @@ export const FUNN: Funn[] = [
       "for Hallvardalen 12 (124/57) – tomt, ikke bygg. At Statnett-reservasjonen ved Marka TRA " +
       "gjelder denne tomta er utledet av NVE-sak 2024/14044 (nettkapasitet i Bleikvassli " +
       "transformatorstasjon – Exanext/Exakraft); det står ikke i Statnetts liste. Ikke Nscale " +
-      "Korgen.",
+      "Korgen. Runde 16 (2026-10-02): eInnsyn viser en RME-sak fra august–november 2024 om " +
+      "«urettmessig forbigåelse i tildeling av nettkapasitet i Bleikvassli transformatorstasjon – " +
+      "Exanext/Exakraft» og en sak om markedsadgang fra desember 2024. Bare journaltitler er " +
+      "lest. Sakene kan forklare forholdet mellom reservasjonen ved Marka og tilknytningspunktet.",
     public_candidate: false,
     kilder: [
       {
@@ -9394,7 +9423,10 @@ export const FUNN: Funn[] = [
       "Korgen, Aker Nscale Korgen, Vesterlia. Opprinnelig Nordkraft/Powered Land-prosjekt " +
       "(planoppstart desember 2021). Punktet er Kartverkets teigpunkt for 109/3 – tomt, ikke " +
       "bygg. Eget anlegg; ikke Exakraft/Exanext Hallvardalen i Bleikvasslia (ca. 18 km lenger " +
-      "sør, annen aktør).",
+      "sør, annen aktør). Runde 16 (2026-10-02): Forhistorie: planinitiativet «Detaljregulering " +
+      "datasenter Korgen» ble utarbeidet av Multiconsult i november 2021 for Nordkraft Prosjekt " +
+      "AS som tiltakshaver (gnr 109 bnr 3), før Nscale Site 3 AS overtok. Samme anlegg; tidligere " +
+      "tiltakshaver, ikke ny post.",
     public_candidate: false,
     kilder: [
       {
@@ -9468,6 +9500,1268 @@ export const FUNN: Funn[] = [
         excerpt_or_summary:
           "Bekrefter selskapet (stiftet 31.10.2024, Narvik; formål utvikle landområder for " +
           "kraftintensiv industri).",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Vassbygdi datasenter, Aurland (tidl. Northern Data)",
+    description:
+      "Tidligere datasenter i det gamle industribygget i Vassbygdi i Aurland, ved Aurland I " +
+      "kraftverk. Kommunen leide ut bygget til en datasenteraktør fra 2019/2020 og solgte det til " +
+      "tyske Northern Data i juni 2021 for 12,6 mill. kr. Northern Data avviklet virksomheten i " +
+      "bygget i desember 2024 ifølge Sogn Avis. Dagens bruk og eier er ikke kjent.",
+    municipality: "Aurland",
+    address: "Vassbygdevegen 19",
+    postal_code: "5745",
+    city: "Aurland",
+    latitude: 60.87346,
+    longitude: 7.32012,
+    verification_status: "partially_verified",
+    operational_status: "historical",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "low",
+    why_interesting:
+      "Viser et fullt livsløp for et lite kraftkommune-datasenter: kommunalt industribygg, utleie " +
+      "bak lukkede dører, salg til internasjonal aktør og avvikling etter tre år. Samme operatør " +
+      "som Northern Data Notodden.",
+    notes:
+      "Opprettet i runde 16 (2026-10-02, coverage first). Adressen er underenhetens " +
+      "beliggenhetsadresse i Brønnøysund og Kartverkets adressepunkt (gnr 15 bnr 15). Effekt er " +
+      "ikke oppgitt i noen kilde. Virksomhetens art (kryptoutvinning eller annen HPC) er ikke " +
+      "dokumentert; Sogn Avis bruker «datalagring». Underenheten står fortsatt registrert uten " +
+      "nedleggelsesdato. Første leietaker omtales som «Vestland DC» i Sogn Avis (2019); juridisk " +
+      "enhet er ikke identifisert. «Aurland Server Park AS» (CERN-initiativ 2010) er et eldre, " +
+      "urealisert initiativ og kan ikke knyttes til bygget.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Brønnøysund: Northern Data Nor AS avd Aurland Data Center (929258215)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/underenheter/929258215",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2022-05-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Underenhet med næringskode 63.100, beliggenhet Vassbygdevegen 19, oppstart 01.05.2022, " +
+          "ingen nedleggelsesdato. Bekrefter enhet og adresse, ikke drift.",
+      },
+      {
+        source_name: "Aurland kommune: Vassbygdi industribygg lagt ut for sal (arkivert)",
+        source_url: "http://web.archive.org/web/20220420215413/https://www.aurland.kommune.no/vassbygdi-industribygg-lagt-ut-for-sal.6390601-155908.html",
+        publisher: "Aurland kommune (Wayback)",
+        source_type: "web",
+        source_date: "2021-05-28",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kommunen la ut «stor næringseigedom i Vassbygdi med stort produksjonslokale og tilhøyrande " +
+          "kontordel» for salg. Bekrefter bygget og eierskiftet, ikke datasenteret.",
+      },
+      {
+        source_name: "Kartverket adresse: Vassbygdevegen 19, Aurland",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?sok=Vassbygdevegen%2019&kommunenummer=4641",
+        publisher: "Kartverket",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Adressepunkt 60.87346, 7.32012, gnr 15 bnr 15. Bekrefter adressen.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Vangsnes Datapark",
+    description:
+      "Planlagt datasenterområde på Vangsnes i Vik, utviklet av Sognekraft-konsernet gjennom Sogn " +
+      "Utvikling og prosjektselskapet Vangsnes Datapark AS. Utvikleren omtaler om lag 170 mål og " +
+      "en mulig kapasitet på opptil 210 MW, med kraft tidligst fra 2032. Arealet er satt av til " +
+      "næring («grøn industri») i kommuneplanens arealdel fra november 2024, men det finnes ingen " +
+      "reguleringsplan eller byggesak. Kraften står i kø hos Statnett og er ikke reservert.",
+    municipality: "Vik",
+    city: "Vangsnes",
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "medium",
+    why_interesting:
+      "Ett av to datasenterområder Sognekraft markedsfører i Sogn (det andre er Gaupne Datapark), " +
+      "med 210 MW i Statnetts kø. Næringsarealet ble vedtatt etter innsigelse fra " +
+      "Statsforvalteren og to meklingsmøter i 2024.",
+    notes:
+      "Opprettet i runde 16 (2026-10-02, coverage first). Ingen kartpunkt er satt: stedsnavnet " +
+      "Raudegjerdet ved Austre Vangsnes gir navn til næringsområdet NÆ5, men plangrensene er ikke " +
+      "lest fra plankartet, og et stedsnavnpunkt er ikke en tomt. Plangrensene for NÆ5/NÆ5.1 er " +
+      "ikke lest fra plankartet, og gnr/bnr er ikke dokumentert (nærmeste adresser ligger på gnr " +
+      "97 bnr 10 og bnr 2 – ikke bekreftet som del av området). Kommuneplanen bruker «grøn " +
+      "industri», ikke «datasenter»; datasenterformålet står bare hos utvikleren. Utvikleren " +
+      "skriver «stadfesta tilgang på kraft frå 2032», men Statnett fører begge sakene som kø, " +
+      "ikke reservasjon. Opsjonsavtale mellom Sogn Utvikling og Vik kommune er omtalt i Sogn Avis " +
+      "(februar 2025), men ikke funnet i kommunens postliste. Refsdal/Dalastølane (NÆ4.1) er et " +
+      "eget næringsareal i samme plan uten aktør og er ikke en del av dette anlegget.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Sogn Utvikling: Vangsnes datasenter – prosjektside",
+        source_url: "https://www.sognutvikling.no/vangsnes-prosjektside",
+        publisher: "Sogn Utvikling AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Utviklerens egen side: «210 MW Hyperscale datasenter på Vangsnes», ca. 170 mål «regulert i " +
+          "arealplanen», forprosjekt og nettanalyse gjennomført, mulighet for dypvannskai. Bekrefter " +
+          "prosjektet og stedet, ikke bygg eller kunde.",
+      },
+      {
+        source_name: "Sogn Utvikling: Datasenter (prosjektoversikt)",
+        source_url: "https://www.sognutvikling.no/datasenter",
+        publisher: "Sogn Utvikling AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Lister to prosjekter: 120 MW i Gaupne og 210 MW på Vangsnes, sistnevnte med «stadfesta " +
+          "tilgang på kraft frå 2032».",
+      },
+      {
+        source_name: "Vik kommune: Kommuneplanens arealdel 2024–2035 (planID 4639_2023001)",
+        source_url: "https://www.arealplaner.no/vik4639/arealplaner/89",
+        publisher: "Vik kommune / arealplaner.no",
+        source_type: "regulation",
+        source_date: "2024-11-04",
+        primary_source: true,
+        excerpt_or_summary:
+          "Endelig vedtatt arealdel, i kraft 04.11.2024. Bekrefter planens status; områdenavnene står " +
+          "i planomtalen.",
+      },
+      {
+        source_name: "Vik kommune: Revisjon av kommuneplanens arealdel 2024–2035 – saksframlegg med planomtale",
+        source_url: "https://www.vik.kommune.no/innsyn/postliste-sok-etter-saker-og-dokument/#/details/a-bec2a5c5__3bcb__4c0c__84b1__7d98e38db8ce-2018000008!jMdmY6/d-bec2a5c5__3bcb__4c0c__84b1__7d98e38db8ce-2022029773!EeWYES",
+        publisher: "Vik kommune",
+        source_type: "document",
+        source_date: "2024-12-10",
+        primary_source: true,
+        excerpt_or_summary:
+          "Planomtalen lister NÆ5 Raudegjerdet (63 daa) og nytt område NÆ5.1 Austre Vangsnes «til " +
+          "grøn industri nær kraftpunkt». Bekrefter arealformålet, ikke datasenter.",
+      },
+      {
+        source_name: "Vik formannskap sak 043/24: avklaring av meklingspunkt (NÆ5.1 Vangsnes)",
+        source_url: "https://www.vik.kommune.no/innsyn/postliste-sok-etter-saker-og-dokument/#/details/a-bec2a5c5__3bcb__4c0c__84b1__7d98e38db8ce-2018000008!jMdmY6/d-bec2a5c5__3bcb__4c0c__84b1__7d98e38db8ce-2022023881!dYiAVs",
+        publisher: "Vik kommune",
+        source_type: "document",
+        source_date: "2024-04-18",
+        primary_source: true,
+        excerpt_or_summary:
+          "Statsforvalteren hadde innsigelse mot utvidelsen NÆ5.1 på Vangsnes; kommunen ba om mekling " +
+          "og viser til «konkret interesse frå ein kraftprodusent». Vedlagt høringsinnspill fra Sogn " +
+          "Utvikling (2023).",
+      },
+      {
+        source_name: "Brønnøysund: Vangsnes Datapark AS (935348935)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/935348935",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-07-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bekrefter selskapet: stiftet 14.03.2025, Røysavegen 1 i Vik, vedtekter endret 30.07.2026. " +
+          "Bekrefter ikke anlegget.",
+      },
+      {
+        source_name: "Statnett: liste over kapasitetskø (forbruk), 30.09.2026",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "25/02609 Hove KRA/TRA 120 MW og 26/04019 Sogndal TRA 90 MW, kunde Sygnir AS, sluttkunde " +
+          "VANGSNES UTVIKLING AS, næringstype datasenter. Kø, ikke reservasjon.",
+      },
+      {
+        source_name: "Kartverket stedsnavn: Raudegjerdet, Vik",
+        source_url: "https://ws.geonorge.no/stedsnavn/v1/navn?sok=Raudegjerdet&knr=4639",
+        publisher: "Kartverket",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stedsnavnpunkt 61.17172, 6.64783 (jorde). Bekrefter stedsnavnet, ikke anlegget.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Tau Datasenter, Nordmarka",
+    description:
+      "Planlagt datasenter i Nordmarka industriområde, om lag tre kilometer nord for Tau sentrum. " +
+      "Tau Næringspark AS har fremmet detaljregulering (plan-ID 202502) som åpner for datasenter " +
+      "på et 91 dekar stort, ferdig planert næringsområde, og forslaget lå på offentlig ettersyn " +
+      "sommeren 2026. Planbeskrivelsen viser tre datahaller på 30 MW hver og et samlet " +
+      "effektbehov på rundt 95 MW. Operatør og kunde er ikke kjent, og nettkapasiteten er ikke " +
+      "avklart.",
+    municipality: "Strand",
+    city: "Tau",
+    latitude: 59.08901,
+    longitude: 5.91813,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Nytt datasenterinitiativ i Strand etter at Green Mountain skrinla Jørpeland i mars 2026, " +
+      "drevet av en lokal næringsparkeier uten navngitt operatør. Planen åpner for " +
+      "samlokalisering med hydrogenanlegg og bygg på inntil 40 meter, og saken har delt " +
+      "forvaltningsutvalget.",
+    notes:
+      "Opprettet i runde 16 (2026-10-02). Koordinaten er Kartverkets teigpunkt for gnr. 16 bnr. " +
+      "340, som planområdet i hovedsak følger; bygningsplassering er ikke fastsatt. Planområdet " +
+      "omfatter også gnr. 16 bnr. 311, 353 og deler av kommunal eiendom 16/75. Adkomst fra " +
+      "Teknologivegen/Breivikvegen. Tidslinje: oppstartsmøte 20.06.2025, planprogram på høring " +
+      "27.08–08.10.2025, fastsatt i kommunestyret 17.12.2025, saken trukket av forslagsstiller " +
+      "før behandling i mars 2026, ny førstegangsbehandling 10.06.2026 (sak 041/26, sju stemmer " +
+      "for, INP og Sp imot), offentlig ettersyn til 19.08.2026. Datasenterformål får maks 60 % " +
+      "BYA og 25 meter byggehøyde, med inntil 40 meter på 27 % av tillatt BYA. Illustrert " +
+      "bruksareal er 110 244 m², og tiltaket forutsetter 150 ansatte. Planbeskrivelsen sier at " +
+      "tiltakshaver har avtale med en lokal virksomhet om å levere overskuddsvarme til fjernvarme " +
+      "på Tau. Kraft: området er tidligere vurdert å kunne få 10 MW på vilkår; full utbygging " +
+      "krever nettoppgradering, og ny 132 kV Tau–Veland med ny transformatorstasjon på Tau er " +
+      "anslått ferdig i 2030. Green Mountain har ifølge lokalavisen avkreftet at de står bak.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Arealplaner.no – Detaljregulering for gnr. 16 bnr. 340 m.fl. – Tau Datasenter (1130_202502)",
+        source_url: "https://arealplaner.no/strand1130/arealplaner/553",
+        publisher: "Strand kommune",
+        source_type: "register",
+        source_date: "2026-06-17",
+        primary_source: true,
+        excerpt_or_summary:
+          "Status planforslag, privat forslagsstiller, sak 2025/1290. Behandlinger: oppstart " +
+          "20.06.2025, planprogram på høring 27.08–08.10.2025, offentlig ettersyn 17.06–19.08.2026.",
+      },
+      {
+        source_name: "Offentlig ettersyn – forslag til detaljregulering for gnr./bnr. 16/340 m.fl. – Tau Datasenter",
+        source_url: "https://www.strand.kommune.no/tjenester/politikk-innsyn-og-medvirkning/horinger-og-kunngjoringer/offentlig-ettersyn-forslag-til-detaljregulering-for-gnr-bnr-16-340-m-fl-tau-datasenter.198314.aspx",
+        publisher: "Strand kommune",
+        source_type: "web",
+        source_date: "2026-06-16",
+        primary_source: true,
+        excerpt_or_summary:
+          "Utvalgsvedtak 10.06.2026 om offentlig ettersyn. Formålet er datasenter med " +
+          "støttefunksjoner i tillegg til dagens formål på gnr. 16 bnr. 340 og 311. Frist 19.08.2026.",
+      },
+      {
+        source_name: "Planbeskrivelse – Tau Datasenter, plan 202502 (Vial AS, 06.05.2026)",
+        source_url: "https://www.arealplaner.no/strand1130/dokumenter/4954/Vedlegg%203_Planbeskrivelse_06.05.2026.pdf",
+        publisher: "Strand kommune (Vial AS for Tau Næringspark AS)",
+        source_type: "document",
+        source_date: "2026-05-06",
+        primary_source: true,
+        excerpt_or_summary:
+          "Forslagsstiller Tau Næringspark AS. 91,3 daa. Tre datasenterbygg à 30 MW, effektbehov ca. " +
+          "95 MW, 150 ansatte. Området kan få 10 MW på vilkår; ny 132 kV Tau–Veland anslått 2030.",
+      },
+      {
+        source_name: "Saksframlegg – Plan 202502 ny førstegangsbehandling, forvaltningsutvalget 10.06.2026 (sak 041/26)",
+        source_url: "https://www.arealplaner.no/strand1130/dokumenter/4951/Plan%20202502%20Ny%201.%20gangsbehandling%20-%20detaljregulering%20for%20-%20Tau%20Datasenter%20m.fl.%20-%20Tau%20Datasenter.docx",
+        publisher: "Strand kommune",
+        source_type: "document",
+        source_date: "2026-06-10",
+        primary_source: true,
+        excerpt_or_summary:
+          "Vedtatt lagt ut med sju stemmer (mindretall INP og Sp). Maks 60 % BYA, 25 m høyde, inntil " +
+          "40 m på deler. Samlet effektbehov om lag 95 MW ved full utbygging.",
+      },
+      {
+        source_name: "Kartverket – eiendomsgeokoding Strand gnr. 16 bnr. 340",
+        source_url: "https://ws.geonorge.no/eiendom/v1/geokoding?kommunenummer=1130&gardsnummer=16&bruksnummer=340&utkoordsys=4258",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Teigpunkt 59.08901, 5.91813. Bekrefter eiendommen, ikke anlegget.",
+      },
+      {
+        source_name: "Enhetsregisteret: Tau Næringspark AS (992369213)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/992369213",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Eiendomsselskap på Tau, stiftet 2008. Bekrefter selskapet, ikke anlegget.",
+      },
+      {
+        source_name: "NVEs uttalelse – detaljregulering Tau datasenter, planID 202502",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01kwmwd88te548ks2j7bpqneb8",
+        publisher: "NVE (eInnsyn)",
+        source_type: "register",
+        source_date: "2026-06-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Journalpost som bekrefter plansak, plan-ID og gnr./bnr. Dokumentet er ikke lest.",
+      },
+      {
+        source_name: "Statnett – forespørsler og reservasjon i nettet (lister 30.09.2026)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Ingen rad for Tau Datasenter eller Tau Næringspark.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Skipavika datasenter, Gulen",
+    description:
+      "Planlagt KI-datasenter nord i Skipavika Næringspark i Gulen, på nordsiden av Fensfjorden. " +
+      "BW Velora Skipavika Digital Sikkerhet AS har søkt om reguleringsendring som åpner for " +
+      "datasenter på gnr. 79 bnr. 55, og forslaget er på høring til 27. oktober 2026. Prosjektet " +
+      "er beskrevet med 95 MW nettkapasitet i to trinn (50 + 45 MW) og opptil 72 MW IT-last. " +
+      "Kraften står i kø hos Statnett ved Lindås transformatorstasjon, og operatør er ikke valgt.",
+    municipality: "Gulen",
+    city: "Ånneland",
+    latitude: 60.86985,
+    longitude: 5.0252,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "high",
+    why_interesting:
+      "BW Veloras andre norske prosjekt etter Frier Vest, plassert i en ferdig regulert " +
+      "industripark ved siden av SkiGAs ammoniakkfabrikk. Datasenteret konkurrerer om kraft ved " +
+      "Lindås med Equinor Mongstad, SkiGA og Arcem/NODC, og avhenger av BKKs nye 132 " +
+      "kV-forbindelse fra Mongstad.",
+    notes:
+      "Opprettet i runde 16 (2026-10-02). Koordinaten er Kartverkets teigpunkt for gnr. 79 bnr. " +
+      "55, eiendommen som søknaden og fagnotatene stedfester datasenteret til (delfelt KBA4, som " +
+      "erstatter I/L5 og nordlig del av I/L3). Bnr. 55 er fradelt fra bnr. 53, der et " +
+      "fiskeslakteri tidligere var planlagt. KBA4 får maks 27 700 m² BYA (48 %); skissen viser 24 " +
+      "315 m² BYA, og byggehøyden for datasenter økes fra kote +25 til +30. Lokalavisen omtaler " +
+      "tomta som om lag 100 mål. Gjeldende plan ble vedtatt 17.06.2025, og Statsforvalteren avslo " +
+      "klagen i juni 2026. Søknaden om endring er datert 11.06.2026 (revidert 24.09.2026), med " +
+      "drøftingsmøte 18.08.2026. Fagnotatene er ikke helt samstemte om rekkefølgen: ROS-notatet " +
+      "har Campus A 45 MW og Campus B 50 MW, ringvirkningsanalysen har 50 MW i fase 1 og 45 MW i " +
+      "fase 2. Kjøling er ikke valgt (sjøvann eller luft); varmeavgivelse om lag 80 MW til " +
+      "Fensfjorden ved sjøkjøling. Historikk: Regn Infrastructure AS fikk i august 2018 " +
+      "anleggskonsesjon fra NVE for nettanlegg til et datasenter på 5–10 MW i Skipavika " +
+      "Næringspark, med utsatt frist i november 2021. Det ble ikke bygget, og det er ikke " +
+      "dokumentert at det gjaldt samme tomt.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Høyring – Reguleringsendring – Skipavika Næringspark, plan-ID 4635-2023002",
+        source_url: "https://gulen.kommune.no/artikkel/hoeyring---reguleringsendring---skipavika-naeringspark-plan-id-4635-2023002",
+        publisher: "Gulen kommune",
+        source_type: "web",
+        source_date: "2026-09-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Formålet er å legge til rette for datasenter i det regulerte industriområdet. Søker er " +
+          "Nordplan for BW Velora Skipavika Digital Sikkerhet AS. Frist 27.10.2026. Lenker alle " +
+          "vedlegg.",
+      },
+      {
+        source_name: "Høringsbrev – reguleringsendring Skipavika Næringspark (Nordplan, 24.09.2026)",
+        source_url: "https://aimblob.blob.core.windows.net/aimfiles/eb156801-3432-4126-836e-72d2c9ac7086.pdf",
+        publisher: "Gulen kommune / Nordplan",
+        source_type: "document",
+        source_date: "2026-09-24",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nytt delfelt KBA4 erstatter I/L5 og nordlig del av I/L3 og kombinerer datasenter, industri " +
+          "og lager. Byggehøyde for datasenter økes til kote +30. Kommunens ref. 2026/1169.",
+      },
+      {
+        source_name: "Søknad om endring av reguleringsplan etter pbl § 12-14 – Skipavika Næringspark",
+        source_url: "https://aimblob.blob.core.windows.net/aimfiles/591439cb-aeda-4fc9-9a20-668a330098a7.pdf",
+        publisher: "Nordplan for BW Velora Skipavika Digital Sikkerhet AS",
+        source_type: "document",
+        source_date: "2026-09-24",
+        primary_source: true,
+        excerpt_or_summary:
+          "Gjelder gnr./bnr. 79/55 m.fl. Modulbasert datasenter i skissefase, 24 315 m² BYA i " +
+          "skissen, maks 27 700 m² BYA. Tiltakshaver har vurdert over 100 tomter.",
+      },
+      {
+        source_name: "BW Velora Skipavika – Ringvirkningsanalyse (Horisont, juni 2026)",
+        source_url: "https://aimblob.blob.core.windows.net/aimfiles/4b83ab40-2eef-403c-a612-209c3950a42f.pdf",
+        publisher: "Horisont Consulting for BW Velora",
+        source_type: "document",
+        source_date: "2026-06-09",
+        primary_source: true,
+        excerpt_or_summary:
+          "95 MW nettkapasitet i to faser (50 + 45), IT-last opptil 72 MW, innrettet mot KI. Operatør " +
+          "ikke valgt. Om lag 130 årsverk i drift, 15 måneders byggetid.",
+      },
+      {
+        source_name: "BW Velora Skipavika – ROS-vurdering (Horisont, 2026)",
+        source_url: "https://aimblob.blob.core.windows.net/aimfiles/0dd5624e-365a-4c8c-9ea3-fff138b8b267.pdf",
+        publisher: "Horisont Consulting for BW Velora Skipavika Digital Sikkerhet AS",
+        source_type: "document",
+        source_date: "2026-06-09",
+        primary_source: true,
+        excerpt_or_summary:
+          "To campuser (A 45 MW, B 50 MW) innenfor KBA4/bnr. 55, IT-last 36 MW hver, sjøkjøling til " +
+          "Fensfjorden vurdert.",
+      },
+      {
+        source_name: "Varsel om oppstart av planarbeid – Skipavika Næringspark, planID 4635-2023002",
+        source_url: "https://aimblob.blob.core.windows.net/aimfiles/e7c46e8e-d7b5-4e02-8425-551b5bcbe0f6.pdf",
+        publisher: "Gulen kommune / Nordplan",
+        source_type: "document",
+        source_date: "2026-09-24",
+        primary_source: true,
+        excerpt_or_summary:
+          "Mindre reguleringsendring. Forslagsstiller BW Velora Skipavika Digital Sikkerhet AS " +
+          "(936791042). Frist for innspill 23.10.2026.",
+      },
+      {
+        source_name: "Arealplaner.no – Skipavika næringspark, planID 2023002",
+        source_url: "https://arealplaner.no/gulen4635/arealplaner/124",
+        publisher: "Gulen kommune",
+        source_type: "register",
+        source_date: "2025-06-17",
+        primary_source: true,
+        excerpt_or_summary:
+          "Gjeldende detaljregulering, endelig vedtatt 17.06.2025. Nevner ikke datasenter.",
+      },
+      {
+        source_name: "Notat krafttilgang og forventet forbruk Skipavika Næringspark (13.03.2025)",
+        source_url: "https://www.arealplaner.no/gulen4635/dokumenter/10407/Notat%20krafttilgang%20datert%2013.03.2025.PDF",
+        publisher: "Gulen kommune (SkiGA/Fuella)",
+        source_type: "document",
+        source_date: "2025-03-13",
+        primary_source: true,
+        excerpt_or_summary:
+          "20 MW tilgjengelig i parken i dag. BKK planlegger 132 kV sjøkabel fra Mongstad (260 MW) og " +
+          "stasjon Raunholmen i drift 2027. Gjelder området, ikke datasenteret.",
+      },
+      {
+        source_name: "Kartverket – eiendomsgeokoding Gulen gnr. 79 bnr. 55",
+        source_url: "https://ws.geonorge.no/eiendom/v1/geokoding?kommunenummer=4635&gardsnummer=79&bruksnummer=55&utkoordsys=4258",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Teigpunkt 60.86985, 5.02520. Bekrefter eiendommen, ikke anlegget.",
+      },
+      {
+        source_name: "Enhetsregisteret: BW Velora Skipavika Digital Sikkerhet AS (936791042)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/936791042",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 04.11.2025, Sandevegen 631, næringskode 63.100, formål datasenter for kritisk " +
+          "infrastruktur. Bekrefter selskapet, ikke anlegget.",
+      },
+      {
+        source_name: "Enhetsregisteret: BW Velora Skipavika 2 AS (937553978)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/937553978",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 25.03.2026, samme adresse og formål. Bekrefter selskapet.",
+      },
+      {
+        source_name: "Statnett – forespørsler og reservasjon i nettet (lister 30.09.2026)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kø ved Lindås TRA: 25/03021 BW Velora Skipavika Digital Sikkerhet AS 50 MW og 25/03004 " +
+          "Skipavika Næringspark AS 45 MW, begge datasenter. Ingen reservasjon.",
+      },
+      {
+        source_name: "DSB: Høyring – reguleringsendring etter forenkla prosess – Skipavika Næringspark",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01m3wrfmeeeg4vy0jtprcm5jme",
+        publisher: "DSB (eInnsyn)",
+        source_type: "register",
+        source_date: "2026-09-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Journalpost i sak 2026/12835 «planarbeid – etablering av datasenter i industriområdet».",
+      },
+      {
+        source_name: "Statsforvaltaren: vedtak – reguleringsplan – klage – Gulen 79/47 m.fl. – Skipavika næringspark",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01kw8c6771ea0bmkmwk8m0qfbv",
+        publisher: "Statsforvaltaren i Vestland (eInnsyn)",
+        source_type: "register",
+        source_date: "2026-06-15",
+        primary_source: true,
+        excerpt_or_summary:
+          "Klagen på reguleringsplanen er avgjort; planen står. Dokumentet er ikke lest.",
+      },
+      {
+        source_name: "NVE: Tillatelse for nettanlegg i datasenter i Skipavika – Regn Infrastructure AS",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01j748f807e5ev9bk40fjs1wd0",
+        publisher: "NVE (eInnsyn)",
+        source_type: "register",
+        source_date: "2018-08-27",
+        primary_source: true,
+        excerpt_or_summary:
+          "Historikk: anleggskonsesjon til Regn Infrastructure AS for nettanlegg til datasenter i " +
+          "Skipavika, august 2018.",
+      },
+      {
+        source_name: "NVE: Datasenter Skipavika – tillatelse til utsatt frist for idriftsettelse",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01j740s0cffapre5k72c04wcdb",
+        publisher: "NVE (eInnsyn)",
+        source_type: "register",
+        source_date: "2021-11-18",
+        primary_source: true,
+        excerpt_or_summary:
+          "Historikk: fristen for Regns anlegg ble forlenget i 2021. Ikke bygget.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Numedal Næringspark datasenter, Rollag",
+    description:
+      "Planlagt datasenter i Numedal Næringspark, den nedlagte bildelfabrikken i Rollag. Rollag " +
+      "kommunestyre fastsatte 25. juni 2026 planprogram for en detaljregulering der hovedformålet " +
+      "er datasenter med serverhaller, energiforsyning og kjøling. Tiltakshaver er " +
+      "eiendomsselskapet Numedal Næringspark AS. Operatør, effekt og kraftløsning er ikke " +
+      "avklart, og planforslaget er ikke lagt ut.",
+    municipality: "Rollag",
+    address: "Rollagsvegen 50",
+    postal_code: "3626",
+    city: "Rollag",
+    latitude: 59.97993,
+    longitude: 9.292,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "low",
+    interest_level: "medium",
+    why_interesting:
+      "Brownfield-prosjekt i en liten kommune der det lokale energiselskapet er involvert, og der " +
+      "saken har gitt mange habilitetsvurderinger og stor lokal debatt. Kommunestyret krevde at " +
+      "også maksimal utbygging og alternative næringsformål utredes.",
+    notes:
+      "Opprettet i runde 16 (2026-10-02) med lav sikkerhet. Koordinaten er Kartverkets " +
+      "adressepunkt for Rollagsvegen 50 (gnr. 75 bnr. 18), altså tomta med fabrikkbygget, ikke et " +
+      "datasenterbygg. Planområdet omfatter også gnr. 75 bnr. 1 og 16 og gnr. 2107 bnr. 1 (veg); " +
+      "gnr. 75 bnr. 30 sør i parken er holdt utenfor. Planprogrammets framdrift: planforslag " +
+      "høsten 2026, høring oktober–desember 2026, vedtak februar 2027. Planforslag var ikke " +
+      "kunngjort per 02.10.2026. 15 MW som første byggetrinn står bare i høringsmerknader og ble " +
+      "nevnt på informasjonsmøte; tallet står ikke i planprogrammet og er ikke strukturert. " +
+      "Lokalavisen oppgir at Numedal Næringspark, Rollag Energi og Glittertind Infra leder " +
+      "modningen, og et leserinnlegg oppgir eierfordelingen 20 % Rollag e-verk, 10 % Numedal " +
+      "Næringspark og 70 % private; dette er ikke bekreftet i primærkilde. Fossefall ble omtalt i " +
+      "kjøpsdrøftelser i mars 2026, men er ikke nevnt i planprogram, merknadsbehandling eller " +
+      "vedtak. Kryptoutvinning er tatt opp i høringen; planlegger svarer at spørsmålet vurderes i " +
+      "planarbeidet. Ingen rad i Statnetts lister per 30.09.2026.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Planprogram – detaljreguleringsplan Numedal Næringspark, planID 2026/001",
+        source_url: "https://aimblob.blob.core.windows.net/aimfiles/9af45c10-d53f-4fc0-98fa-e5e3b26a9522.pdf",
+        publisher: "Rollag kommune (Plan og Ressurs AS for Numedal Næringspark AS)",
+        source_type: "document",
+        source_date: "2026-06-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Hovedformålet er datasenter med serverhaller, energiforsyning og kjøling. Tiltakshaver " +
+          "Numedal Næringspark AS, gnr. 75 bnr. 18 m.fl. Framdrift: planforslag høst 2026, vedtak " +
+          "februar 2027. Ingen MW.",
+      },
+      {
+        source_name: "Særutskrift – Planprogram Numedal Næringspark planID 2026/001, kommunestyret 25.06.2026",
+        source_url: "https://aimblob.blob.core.windows.net/aimfiles/15706be0-5390-4ecd-b4a1-8ccbd6ed2ad4.pdf",
+        publisher: "Rollag kommune",
+        source_type: "document",
+        source_date: "2026-06-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kommunestyret fastsatte planprogrammet med 14 mot 3 stemmer (sak 32/2026) og krevde " +
+          "utredning av maksimal utbygging, alternative lokaliseringer og overskuddsvarme. Flere " +
+          "habilitetsvurderinger knyttet til Rollag Energi AS.",
+      },
+      {
+        source_name: "Planleggers kommentarer til høringsuttalelser – Numedal Næringspark",
+        source_url: "https://aimblob.blob.core.windows.net/aimfiles/7953e917-e87d-4a57-ab64-d7ffba7802a3.pdf",
+        publisher: "Rollag kommune (Plan og Ressurs AS)",
+        source_type: "document",
+        source_date: "2026-05-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Merknadene viser til 15 MW som første byggetrinn, krypto-bekymring og spørsmål om " +
+          "investorene. Planlegger svarer at temaene vurderes i planarbeidet.",
+      },
+      {
+        source_name: "Høringer og kunngjøringer – Kunngjøring: Vedtatt planprogram for Numedal Næringspark planID 2026/001",
+        source_url: "https://www.rollag.kommune.no/artikkel/hoering-og-kunngjoeringer",
+        publisher: "Rollag kommune",
+        source_type: "web",
+        source_date: "2026-09-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kommunens kunngjøringsside lenker planprogram, merknader og særutskrift. Intet planforslag " +
+          "kunngjort per 02.10.2026.",
+      },
+      {
+        source_name: "Kartverket – adresseoppslag Rollagsvegen 50",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?sok=Rollagsvegen%2050&kommunenummer=3336",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Rollagsvegen 50, 3626 Rollag, gnr. 75 bnr. 18. Bekrefter adresse og eiendom, ikke " +
+          "anlegget.",
+      },
+      {
+        source_name: "Enhetsregisteret: Numedal Næringspark AS (928352366)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/928352366",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Eiendomsselskap med adresse Rollagsvegen 50. Bekrefter selskapet, ikke anlegget.",
+      },
+      {
+        source_name: "Statnett – forespørsler og reservasjon i nettet (lister 30.09.2026)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Ingen rad for prosjektet i kø, reservasjoner, tilknyttet eller tilbaketrukket.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Polarise AI Hub ONE (NGB), Kurillvegen 8, Gardermoen",
+    description:
+      "KI-datasenter i en del av næringsbygget World Seafood Center i Kurillvegen 8 ved Oslo " +
+      "lufthavn. NGB AS, som ifølge egen konsesjonssøknad er en del av tyske Polarise, leier " +
+      "arealet og fikk 20.06.2025 NVE-konsesjon for egen 22 kV nettstasjon med 4 MW effektuttak. " +
+      "Polarise markedsfører anlegget som AI Hub ONE på 3 800 m² med «8+8 MW». Overskuddsvarmen " +
+      "skal leveres til Statkraft Varmes fjernvarmenett; drift er ikke bekreftet i primærkilde.",
+    municipality: "Ullensaker",
+    address: "Kurillvegen 8",
+    postal_code: "2060",
+    city: "Gardermoen",
+    latitude: 60.17538,
+    longitude: 11.1335,
+    verification_status: "partially_verified",
+    operational_status: "under_construction",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Eneste kjente datasenter i Ullensaker og det første KI-spesialiserte anlegget ved " +
+      "Gardermoen. Bygget inn i et eksisterende logistikkbygg, med fjernvarmeleveranse og 2,4 MW " +
+      "solceller på taket. Forklarer Statnett-raden «NGB – Datasenter fase 2».",
+    notes:
+      "Opprettet i runde 16 (2026-10-02, coverage first). Aliaser: AI Hub ONE, NGB datasenter, " +
+      "Polarise Gardermoen, Polarise Oslo. Punktet er Kartverkets adressepunkt for Kurillvegen 8 " +
+      "(gnr 152 bnr 90); datasenteret opptar bare en del av bygget (næringsbygget er 38 912 m², " +
+      "datasenteret 3 800 m² ifølge Polarise), og nettstasjonen står vegg i vegg. Runde 15 " +
+      "utledet adressen via leietakerlisten; den er nå direkte dokumentert i NVE-saken. " +
+      "NVE-brevet kaller utleier «grunneier … OAC Logistics AS»; søknaden presiserer at bygget " +
+      "eies av Slate Norwegian Re (WSC) AS, «tidligere kalt OAC Logistics AS». Polarise Norway AS " +
+      "har c/o-adresse hos NGB AS; hvilket av selskapene som formelt driver datasenteret er ikke " +
+      "oppgitt. Verken NGB eller Polarise sto i Nkoms register 02.10.2026. Elvia har i 2026 " +
+      "forelagt ny jordkabeltrasé til Kurillvegen 8 (dokumentene ikke lagt ut – formål ikke " +
+      "bekreftet, kan gjelde fase 2).",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "NVE konsesjonssak 21591: NGB – søknad om 22 kV anleggskonsesjon (sak 202507790)",
+        source_url: "https://www.nve.no/konsesjon/konsesjonssaker/konsesjonssak?id=21591&type=A",
+        publisher: "NVE",
+        source_type: "register",
+        source_date: "2025-06-20",
+        primary_source: true,
+        excerpt_or_summary:
+          "Konsesjon gitt 20.06.2025 til NGB AS for nettstasjon som skal forsyne et datasenter i " +
+          "Ullensaker. Søknad, vedtaksbrev og konsesjon ligger i fulltekst.",
+      },
+      {
+        source_name: "Søknad om 22 kV anleggskonsesjon for NGB – Til forsyning av datasenter i Kurillvegen 8 (Æge Energy, rev. D)",
+        source_url: "https://webfileservice.nve.no/API/PublishedFiles/Download/180a5e4b-2982-41e5-a5b5-8511dc98ad1c/202507790/3446151",
+        publisher: "NGB AS / Æge Energy AS (publisert av NVE)",
+        source_type: "document",
+        source_date: "2025-03-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "4 MW datasenter i deler av eksisterende næringsbygg på Kurillvegen 8 (152/90), eid av " +
+          "Slate Norwegian Re (WSC) AS; NGB er en del av Polarise; AI-servere; Elvia har bekreftet 4 " +
+          "MW; fjernvarme til Statkraft Varme; 2,4 MW solceller.",
+      },
+      {
+        source_name: "NVE: NVE gir konsesjon til nettstasjon for å forsyne strøm til datasenter i Ullensaker kommune (202507790-5)",
+        source_url: "https://webfileservice.nve.no/API/PublishedFiles/Download/2fffcc84-216c-4d53-aaf7-8d063eba82da/202507790/3446152",
+        publisher: "NVE",
+        source_type: "document",
+        source_date: "2025-06-20",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nettstasjon ved næringsbygget på gbnr 152/90; effektuttak 4 MVA; avtale med Elvia; " +
+          "leieavtale med OAC Logistics AS 10.10.2023; kommunal endringstillatelse 02.10.2024.",
+      },
+      {
+        source_name: "Anleggskonsesjon NGB AS (NVE 202507790-6)",
+        source_url: "https://webfileservice.nve.no/API/PublishedFiles/Download/4fe5ff98-c549-4ded-b173-848ca6a4bc56/202507790/3446153",
+        publisher: "NVE",
+        source_type: "regulation",
+        source_date: "2025-06-20",
+        primary_source: true,
+        excerpt_or_summary:
+          "4 stk. 22/0,415 kV transformatorer inntil 2 MVA og innendørs 22 kV koblingsanlegg; " +
+          "anlegget skal være i drift innen tre år.",
+      },
+      {
+        source_name: "Kartverket adresse-API: Ullensaker gnr 152 bnr 90",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?kommunenummer=3209&gardsnummer=152&bruksnummer=90",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kurillvegen 8, 2060 Gardermoen, 60.17538 N 11.13350 Ø, gnr/bnr 152/90. Bekrefter adressen, " +
+          "ikke anlegget.",
+      },
+      {
+        source_name: "Polarise: AI Hub ONE",
+        source_url: "https://polarise.eu/ai-factories/ai-hub-one",
+        publisher: "Polarise",
+        source_type: "web",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "«Located at Gardermoen Airport in Oslo Airport City», 3 800 m², «8+8 MW Power», over 300 " +
+          "kW per rack, «Colocation available Q2-2026». Ingen gateadresse.",
+      },
+      {
+        source_name: "Polarise: AI Factories (oversikt)",
+        source_url: "https://polarise.eu/ai-factories",
+        publisher: "Polarise",
+        source_type: "web",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "AI Hub ONE Oslo står med «Colocation available Q2-2026»; bare Frankfurt omtales som i " +
+          "drift.",
+      },
+      {
+        source_name: "Enhetsregisteret: NGB AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/930566098",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 17.11.2022, Fredrik Selmers vei 6, Oslo; formål datasenter og investeringer. " +
+          "Bekrefter bare selskapet (kontoradresse, ikke anlegg).",
+      },
+      {
+        source_name: "Enhetsregisteret: Polarise Norway AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/934540379",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 15.11.2024, c/o NGB AS; formål drift av datasenter. Bekrefter bare selskapet.",
+      },
+      {
+        source_name: "Enhetsregisteret: Slate Norwegian Re (WSC) AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/921480784",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 05.09.2018, c/o Newsec Basale. Byggeier ifølge NGBs søknad. Bekrefter bare " +
+          "selskapet.",
+      },
+      {
+        source_name: "Statnett: lister over tilknytningssaker (30.09.2026)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
+        publisher: "Statnett SF",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kø 25/02070: Minne TRA, Elvia AS, «NGB – Datasenter fase 2», Datasenter, 4 MW, moden " +
+          "bestilling 24.03.2025, ønsket tilknytning 30.12.2025.",
+      },
+      {
+        source_name: "Statsforvalteren-journal: Områdekonsesjon – Ullensaker 152/90 – Kurillvegen 8 – ny jordkabeltrasé",
+        source_url: "https://api.einnsyn.no/saksmappe/sm_01kxhg8td4ehvtyp3k8xmp75zv",
+        publisher: "Statsforvalteren i Østfold, Buskerud, Oslo og Akershus (eInnsyn)",
+        source_type: "register",
+        source_date: "2026-07-15",
+        primary_source: true,
+        excerpt_or_summary:
+          "Forelegging av ny jordkabeltrasé til Kurillvegen 8 under områdekonsesjonen, juli–august " +
+          "2026. Dokumentene er ikke lagt ut; formålet er ikke bekreftet.",
+      },
+      {
+        source_name: "Investerer flere hundre millioner i neste generasjons datasenter ved Gardermoen",
+        source_url: "https://kommunikasjon.ntb.no/pressemelding/18461173/investerer-flere-hundre-millioner-i-neste-generasjons-datasenter-ved-gardermoen?publisherId=17849139&lang=no",
+        publisher: "Polarise via NTB Kommunikasjon",
+        source_type: "document",
+        source_date: "2025-03-19",
+        primary_source: true,
+        excerpt_or_summary:
+          "Polarise kunngjør AI Hub ONE i Oslo Airport City, 3 800 m², fjernvarme med Statkraft " +
+          "Varme, drift varslet våren 2025.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Salfjord datasenter, Tjeldbergodden øst (Aure)",
+    description:
+      "Planlagt datasenter på Salfjord AS' industritomt øst for Equinors metanolfabrikk på " +
+      "Tjeldbergodden. Datasenteret skal levere overskuddsvarme til selskapets landbaserte " +
+      "lakseoppdrett og er tenkt på en egen tomt på ca. 21 daa på gnr 51 bnr 44. Salfjord oppgir " +
+      "til NVE ca. 20 MW i første fase og inntil ca. 110 MW ved full utbygging. " +
+      "Tomteopparbeidingen er tillatt, men dispensasjonen for datasenterformålet var ikke avgjort " +
+      "per 02.10.2026.",
+    municipality: "Aure",
+    postal_code: "6699",
+    city: "Kjørsvikbugen",
+    latitude: 63.41419,
+    longitude: 8.70662,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Første kjente datasenterprosjekt i Aure og et tydelig eksempel på datasenter som " +
+      "varmekilde for industri. Forklarer Statnett-raden «Salfjord AS – Datasenter – 90 MW» ved " +
+      "Surna.",
+    notes:
+      "Opprettet i runde 16 (2026-10-02, coverage first). Aliaser: Salfjord Termisk, datasenter " +
+      "Tjeldbergodden øst, Salfjord Tjeldbergodden. Punktet er Kartverkets teigpunkt for gnr 51 " +
+      "bnr 44; situasjonsplanen viser at datasentertomta ligger på denne teigen, men eksakt " +
+      "byggeplassering finnes ikke. Søknaden omtaler «termisk energiproduksjon/datasenter»; type " +
+      "datasenter, operatør og kunde er åpent («avhengig av type datasenter»). Naboer: Equinor " +
+      "(metanolfabrikk, vest) og Tjeldbergodden Utvikling AS (kjølevannstunnel under tomta, " +
+      "Bioparken øst) – begge er bare høringsparter, ikke deltakere. Mellom AS bygger ny 132/22 " +
+      "kV-stasjon på nabotomta (NVE-konsesjon 08.10.2025, drift planlagt mai 2028). Salfjord " +
+      "vurderer å skille virksomhetene ut i egne selskaper; rollen til Salfjord Termisk AS er " +
+      "ikke dokumentert utover formålet. Søker anslår investeringen til «opptil ca. 10 milliarder " +
+      "kr» avhengig av type datasenter – ikke strukturert.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Aure kommune sak 19/01041: Salfjord AS – terrenginngrep, veier (postliste med dokumenter)",
+        source_url: "https://aure.pj.360online.com/Journal/SearchRelated?caseYear=2019&sequenceNumber=1041&documentNumber=34",
+        publisher: "Aure kommune",
+        source_type: "register",
+        source_date: "2026-08-31",
+        primary_source: true,
+        excerpt_or_summary:
+          "Saksmappe med dispensasjonssøknad, høringsuttalelser, vedtak 10.07.2026 og oversendelse " +
+          "til settekommune 27.08.2026.",
+      },
+      {
+        source_name: "Søknad om dispensasjon fra regulert byggegrense og industriformål – Industritomt gnr. 51, bnr. 44",
+        source_url: "https://aure.pj.360online.com/Download/DownloadFile/?journalid=2019-1041-34&variant=A&version=2&sequence=10&filereference=444105_2_1.pdf",
+        publisher: "Areal & Plan AS for Salfjord AS (Aure kommunes postliste)",
+        source_type: "document",
+        source_date: "2026-04-10",
+        primary_source: true,
+        excerpt_or_summary:
+          "21 daa opparbeides til tomt for termisk energiproduksjon/datasenter på kote 34 bak " +
+          "oppdrettstomta; 55 MW tildelt Salfjord-anlegget; søknad om selve datasenterbygget sendes " +
+          "senere.",
+      },
+      {
+        source_name: "Situasjonsplan endringssøknad 07.04.2026 (1:2000)",
+        source_url: "https://aure.pj.360online.com/Download/DownloadFile/?journalid=2019-1041-28&variant=A&version=2&sequence=3&filereference=448917_2_1.pdf",
+        publisher: "Areal & Plan AS (Aure kommunes postliste)",
+        source_type: "document",
+        source_date: "2026-04-07",
+        primary_source: true,
+        excerpt_or_summary:
+          "Viser «Omsøkt tomteutvidelse» på teig 51/44 mellom oppdrettstomta (51/30) og eksisterende " +
+          "kjølevannstunnel. Grunnlag for stedfesting.",
+      },
+      {
+        source_name: "Aure kommune: Vedtak om endring av gitt tillatelse – Gnr 51 bnr 30, 44 – Salfjord AS (BYGG-19/00223-28)",
+        source_url: "https://aure.pj.360online.com/Download/DownloadFile/?journalid=2019-1041-28&variant=A&version=1&sequence=1&filereference=448915_1_1.pdf",
+        publisher: "Aure kommune",
+        source_type: "document",
+        source_date: "2026-07-10",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tillatelse til heving av tomtenivå og utvidelse av tomt i regulert industriområde. " +
+          "Dispensasjonen for datasenter avventes og legges fram for hovedutvalg for " +
+          "kommuneutvikling.",
+      },
+      {
+        source_name: "Aure kommune: Settekommune – Salfjord AS – søknad om dispensasjon – etablering av datasenter på regulert industriområde",
+        source_url: "https://aure.pj.360online.com/Download/DownloadFile/?journalid=2019-1041-34&variant=A&version=7&sequence=1&filereference=452101_7_1.pdf",
+        publisher: "Aure kommune",
+        source_type: "document",
+        source_date: "2026-08-27",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kommunedirektøren i Aure er inhabil; Heim kommune er settekommune. Tomtedelen av søknaden " +
+          "er avgjort og behandles ikke på nytt.",
+      },
+      {
+        source_name: "Saksframlegg 19/01041-31: søknad om dispensasjon – etablering av datasenter på regulert industriområde",
+        source_url: "https://aure.pj.360online.com/Download/DownloadFile/?journalid=2019-1041-34&variant=A&version=1&sequence=8&filereference=452107_1_1.pdf",
+        publisher: "Aure kommune",
+        source_type: "document",
+        source_date: "2026-08-27",
+        primary_source: true,
+        excerpt_or_summary:
+          "Ca. 21 daa til termisk energiproduksjon/datasenter; uttalelser fra Statsforvalteren, " +
+          "fylkeskommunen, NVE, Equinor og Tjeldbergodden Utvikling; datasenteret skal bruke en andel " +
+          "av de 55 MW.",
+      },
+      {
+        source_name: "Heim kommune sak 26/03238: Settekommune for Aure – etablering av datasenter (svar 24.09.2026 med saksframlegg)",
+        source_url: "https://heim.pj.360online.com/Journal/SearchRelated?caseYear=2026&sequenceNumber=3238&documentNumber=2",
+        publisher: "Heim kommune",
+        source_type: "document",
+        source_date: "2026-09-24",
+        primary_source: true,
+        excerpt_or_summary:
+          "Settekommunens innstilling: dispensasjon for datasenterformål på industriregulert areal " +
+          "innvilges. Dette er innstilling, ikke vedtak.",
+      },
+      {
+        source_name: "Dispensasjon for etablering av datasenter på gnr. 51, bnr. 44 – kommentarer til uttalelser fra myndigheter",
+        source_url: "https://aure.pj.360online.com/Download/DownloadFile/?journalid=2019-1041-29&variant=A&version=2&sequence=2&filereference=449500_2_1.pdf",
+        publisher: "Areal & Plan AS for Salfjord AS (Aure kommunes postliste)",
+        source_type: "document",
+        source_date: "2026-07-09",
+        primary_source: true,
+        excerpt_or_summary:
+          "20 daa til datasenter som kilde for termisk energi; investering opptil ca. 10 mrd. kr " +
+          "avhengig av type; ingen utslipp til sjø i normal drift; atkomst via Buhaugvegen.",
+      },
+      {
+        source_name: "NVE: Respons på anmodning om forhåndsavklaring – konsesjonsplikt og krav til kost-/nytteanalyse (202616119-2)",
+        source_url: "https://aure.pj.360online.com/Download/DownloadFile/?journalid=2019-1041-33&variant=A&version=1&sequence=2&filereference=450968_1_1.pdf",
+        publisher: "NVE (Aure kommunes postliste)",
+        source_type: "document",
+        source_date: "2026-08-10",
+        primary_source: true,
+        excerpt_or_summary:
+          "NVE om Salfjords plan om datasenter som forsyner landbasert oppdrett: fjernvarmekonsesjon " +
+          "bare ved varmeleveranse mellom selskaper over 10 MW; ikke krav om kost-/nytteanalyse når " +
+          "varmen har dokumentert bruk.",
+      },
+      {
+        source_name: "Salfjord AS til NVE: Anmodning om forhåndsavklaring – organisering av elektriske anlegg … integrert industriområde på Tjeldbergodden",
+        source_url: "https://api.einnsyn.no/dokumentobjekt/do_01m1hyn3zce439rc0rzymn74z5/download",
+        publisher: "Salfjord AS via NVE/eInnsyn",
+        source_type: "document",
+        source_date: "2026-08-18",
+        primary_source: true,
+        excerpt_or_summary:
+          "Fase 1: oppdrett ca. 7 000 tonn og datasenter om lag 20 MW. Full utbygging: 43 000 tonn og " +
+          "datasenter inntil ca. 110 MW. Grunnarbeid for tomt pågår; ny 132/22 kV-stasjon bygges av " +
+          "Mellom AS på nabotomta.",
+      },
+      {
+        source_name: "NVE-journal: sak 2026/16119, Salfjord AS – forhåndsavklaring område-/anleggskonsesjon",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01m1hyn3y6ec286vp6hqnp6gvy",
+        publisher: "NVE (eInnsyn)",
+        source_type: "register",
+        source_date: "2026-08-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Journalpost med Salfjords brev og NVEs svar 25.08.2026 om anleggskonsesjon for interne 22 " +
+          "kV-anlegg.",
+      },
+      {
+        source_name: "Statsforvaltaren i Møre og Romsdal: Uttale – dispensasjon – Aure 51/30 – 51/44 mfl. – Tjeldbergodden",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01kwmwfe5peqfrp79z1xf9fypd",
+        publisher: "Statsforvaltaren i Møre og Romsdal (kopi i NVE/eInnsyn)",
+        source_type: "document",
+        source_date: "2026-06-24",
+        primary_source: true,
+        excerpt_or_summary:
+          "Ingen innvendinger mot dispensasjon for datasenter på industriareal; påpeker at " +
+          "energibehovet ikke er opplyst og at eventuelt kjølevannsutslipp må avklares etter " +
+          "forurensningsloven.",
+      },
+      {
+        source_name: "Detaljregulering Tjeldbergodden Øst – planbestemmelser (plan-ID 157620230008)",
+        source_url: "https://www.aure.kommune.no/_f/p1/id3ba0448-d01e-4ce8-9cfc-75047090a044/23_01038-23-02_r-20230008_planbestemmelser_29082024-386832_1_1.PDF",
+        publisher: "Aure kommune / Norconsult for Salfjord AS",
+        source_type: "regulation",
+        source_date: "2024-08-29",
+        primary_source: true,
+        excerpt_or_summary:
+          "Planens hensikt er landbasert fiskeoppdrett med tilknytning til sjø; datasenter er ikke " +
+          "nevnt – derfor dispensasjonssøknaden.",
+      },
+      {
+        source_name: "Statnett: lister over tilknytningssaker (30.09.2026)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
+        publisher: "Statnett SF",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Surna, Mellom AS, Salfjord AS: 26/03096 Datasenter 90 MW i kø (ønsket 01.04.2028); " +
+          "21/00068 Oppdrett 55 MW reservert (01.01.2028); 24/01739 Oppdrett 55 MW i kø (2032).",
+      },
+      {
+        source_name: "Enhetsregisteret: Salfjord AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/920536689",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 11.01.2018, Bankvegen 11, Aure; formål fiskeoppdrett. Bekrefter bare selskapet.",
+      },
+      {
+        source_name: "Enhetsregisteret: Salfjord Termisk AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/937883447",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 27.04.2026, samme adresse; formål termiske energiløsninger og datasenter. " +
+          "Bekrefter bare selskapet, ikke rollen i prosjektet.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Gjerelvmoen datasenter (Norsk Datakraft / Northern DC), Sørfold",
+    description:
+      "Planlagt datasenter på Gjerelvmoen ved Kobbvatnet i Sørfold, inntil Kystnetts " +
+      "transformatorstasjon. Norsk Datakraft AS (tidligere Northern DC Sørfold AS) fikk i " +
+      "november 2025 politisk ja til å starte reguleringsplanarbeid for et planområde på 68,8 daa " +
+      "på gnr 17 bnr 1, 2, 15 og 21. Kommunen beskriver et datasenter med 50 MW kapasitet i flere " +
+      "bygg på til sammen ca. 12 000 m² BYA. Statnett har reservert 50 MW ved Kobbvatnet til " +
+      "sluttkunden «Northern DC».",
+    municipality: "Sørfold",
+    city: "Kobbvatnet",
+    latitude: 67.6386,
+    longitude: 15.97752,
+    verification_status: "partially_verified",
+    operational_status: "planned",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Eneste kjente datasenterprosjekt i Sørfold og et av få i Nord-Norge med 50 MW reservert i " +
+      "transmisjonsnettet. Lokalt omstridt: stoppet i kommunestyret i 2023, gjenåpnet i 2025, " +
+      "lovlighetsklage avvist i 2026.",
+    notes:
+      "Opprettet i runde 16 (2026-10-02, coverage first). Aliaser: Northern DC Sørfold, " +
+      "Datasenter ved Kobbvatnet, Gjerelvmoen næringsområde (plan-ID 1845 2022001, også skrevet " +
+      "202201). Punktet er omtrentlig midtpunkt i varslet planavgrensning (UTM33 ca. Ø541500 " +
+      "N7502900 fra plankartets rutenett Ø541200–541800 / N7502700–7503100), ikke et bygg; " +
+      "planområdet skal reduseres når atkomstvei er valgt. Arealet er LNF-A/LNF-B i " +
+      "kommuneplanens arealdel (2010), så planen er i strid med gjeldende arealplan og utløser " +
+      "konsekvensutredning. Kommunens saksframlegg sier at tiltakshaver «kontrollerer tomt»; " +
+      "avtaleform (kjøp/opsjon) og grunneiere er ikke dokumentert. Tiltakshaver i 2021–2023 var " +
+      "Northern DC AS (924580151, Molde); forslagsstiller i 2025 er Norsk Datakraft AS " +
+      "(932691485, samme adresse), som kommunens postliste fortsatt adresserer som «Northern DC " +
+      "Sørfold AS». Northern DC AS har ingen dokumentert kobling til NorthDC AS i Tromsø " +
+      "(Nordkjosbotn). Kommunen opplyser at datasenteret ikke skal drive kryptoutvinning. " +
+      "Kystnett varslet i 2024 at reservasjonen kan gå tapt uten framdrift; den sto fortsatt som " +
+      "reservert 30.09.2026. Vedtaksbrev og planinitiativ 2026 er journalført, men ikke lagt ut i " +
+      "fulltekst.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Sørfold kommune: saksframlegg Planinitiativ – Detaljregulering for næringsområde gnr 17/1 m.fl. Gjerelvmoen (sak 2021/1203)",
+        source_url: "https://prod02.elementscloud.no/publikum/Documents/ShowDmbHandlingDocument/cd27d632-5ea5-475d-9184-a52a32c4b472/10816/CasesFremlegg",
+        publisher: "Sørfold kommune",
+        source_type: "document",
+        source_date: "2025-11-20",
+        primary_source: true,
+        excerpt_or_summary:
+          "Norsk Datakraft AS er forslagsstiller og «kontrollerer tomt»; datasenter med 50 MW " +
+          "kapasitet; planområde 68,8 daa på gnr 17/1, 2, 15, 21 ved Kystnetts trafo; LNF i KPA; søkt " +
+          "100 MW, 50 MW i første trinn; ikke krypto.",
+      },
+      {
+        source_name: "Sørfold kommunestyre 20.11.2025, saksprotokoll PS 97/2025",
+        source_url: "https://prod02.elementscloud.no/publikum/Documents/ShowDmbHandlingDocument/cd27d632-5ea5-475d-9184-a52a32c4b472/10816/Protokoll",
+        publisher: "Sørfold kommune",
+        source_type: "document",
+        source_date: "2025-11-20",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tidligere vedtak om planinitiativet oppheves med 15 mot 2 stemmer; saken sendes plan- og " +
+          "ressursutvalget 25.11.2025.",
+      },
+      {
+        source_name: "Sørfold plan- og ressursutvalg 25.11.2025, møteprotokoll PS 118/25",
+        source_url: "https://prod02.elementscloud.no/publikum/Documents/ShowDocument/cd27d632-5ea5-475d-9184-a52a32c4b472/120210/198489",
+        publisher: "Sørfold kommune",
+        source_type: "document",
+        source_date: "2025-11-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kommunedirektørens innstilling vedtatt 5–3: oppstart av reguleringsplanarbeid for " +
+          "næringsområde med formål datasenter på Gjerelvmoen godkjennes; krav om ROS og KU.",
+      },
+      {
+        source_name: "Statsforvalteren i Nordland: Avvist – lovlighetskontroll – vedtak om igangsetting av planarbeid (RS 35/2026)",
+        source_url: "https://prod02.elementscloud.no/publikum/Documents/ShowDmbHandlingDocument/cd27d632-5ea5-475d-9184-a52a32c4b472/11542/CasesFremlegg",
+        publisher: "Statsforvalteren i Nordland / Sørfold kommune",
+        source_type: "document",
+        source_date: "2026-04-24",
+        primary_source: true,
+        excerpt_or_summary:
+          "Lovlighetsklagen over PS 118/25 avvises fordi oppstartsvedtaket er en prosessledende " +
+          "beslutning. Bekrefter at planarbeidet for datasenter på Gjerelvmoen kan gå videre.",
+      },
+      {
+        source_name: "Sørfold plan- og ressursutvalg 24.02.2026, PS 4/2026 Henstilling om lovlighetskontroll PS 118/25",
+        source_url: "https://prod02.elementscloud.no/publikum/Documents/ShowDmbHandlingDocument/cd27d632-5ea5-475d-9184-a52a32c4b472/11055/Protokoll",
+        publisher: "Sørfold kommune",
+        source_type: "document",
+        source_date: "2026-02-24",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tre medlemmer krever lovlighetskontroll; saken oversendes Statsforvalteren.",
+      },
+      {
+        source_name: "Sørfold kommune postliste: sak 2021/1203 og 2026/1137 (Gjerelvmoen)",
+        source_url: "https://prod02.elementscloud.no/publikum/972417750_PROD-972417750/Search?Query=Gjerelvmoen&OrderBy=DATE&SortOrder=1&DateFrom=2024-10-02&DateTo=2026-10-02&IncludeCases=true",
+        publisher: "Sørfold kommune",
+        source_type: "register",
+        source_date: "2026-09-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Vedtaksbrev til «Northern DC Sørfold AS» 06.02.2026; anmodning om lovlighetskontroll " +
+          "06.03.2026; Nordplan Stord AS «Ber om oppstartsmøte – Detaljregulering for datasenter " +
+          "Gjerelvmoen, gnr 17/1» 14.09.2026. Dokumentene er ikke lagt ut.",
+      },
+      {
+        source_name: "Sørfold kommune utvalgsmøter: treff på Gjerelvmoen 2023–2026",
+        source_url: "https://prod02.elementscloud.no/publikum/972417750_PROD-972417750/DmbMeetingSearch?Query=Gjerelvmoen&OrderBy=DATE&SortOrder=1&SearchFilter=case%2Chandling%2Chandlingdesc%2Cdecision",
+        publisher: "Sørfold kommune",
+        source_type: "register",
+        source_date: "2026-05-13",
+        primary_source: true,
+        excerpt_or_summary:
+          "Ni møter med saken: PS 32/2023, PS 80/2023, PS 158–159/2023, RS 97/2024, PS 97/2025, PS " +
+          "4/2026, RS 35/2026.",
+      },
+      {
+        source_name: "Melding om oppstart av detaljregulering for næringsområde Gjerelvmoen (følgebrev, ABO Plan & Arkitektur)",
+        source_url: "https://api.einnsyn.no/dokumentobjekt/do_01j76hvwvbesx9wzxwb8ss3rww/download",
+        publisher: "ABO Plan & Arkitektur Stord AS via NVE/eInnsyn",
+        source_type: "document",
+        source_date: "2023-07-24",
+        primary_source: true,
+        excerpt_or_summary:
+          "Varsel etter pbl § 12-8 «på oppdrag av Northern DC AS»: gbnr 17/1, 2, 15 og 21, plan-ID " +
+          "202201, 68,8 daa, datasenter maks ca. 20 m og 15 000 m² BRA; 100 MW, 50 MW i første trinn.",
+      },
+      {
+        source_name: "Planavgrensing 10.08.22 – Detaljreguleringsplan for gbnr 17/1 m.fl. Gjerelvmoen",
+        source_url: "https://api.einnsyn.no/dokumentobjekt/do_01j76hvwwceqftamh3eayq7x52/download",
+        publisher: "ABO Plan & Arkitektur Stord AS via NVE/eInnsyn",
+        source_type: "document",
+        source_date: "2022-08-10",
+        primary_source: true,
+        excerpt_or_summary:
+          "Plangrensekart 1:1000 med UTM33-rutenett (Ø541200–541800, N7502700–7503100), plan-ID " +
+          "1845_2022001, forslagsstiller Northern DC AS. Grunnlag for koordinaten.",
+      },
+      {
+        source_name: "Planinitiativ – Detaljregulering for næringsområde Gjerelvmoen (20.12.2021, rev. 07.06.2023)",
+        source_url: "https://api.einnsyn.no/dokumentobjekt/do_01j76hvwx4f9waa022mnpx5kvs/download",
+        publisher: "ABO Plan & Arkitektur Stord AS via NVE/eInnsyn",
+        source_type: "document",
+        source_date: "2023-06-07",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tiltakshaver Northern DC AS; ISE AS konsulent; datasenter i flere bygg, ca. 12 000 m² BYA; " +
+          "tilknyttet Kobbvatnet og Gjerelvmo transformatorstasjoner; 20–30 arbeidsplasser.",
+      },
+      {
+        source_name: "NVE-journal: Varsel om oppstart – Detaljregulering – Næringsbebyggelse/industri på Gjerelvmoen",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01j76hvwt3emxs8qphmjrt9awh",
+        publisher: "NVE (eInnsyn)",
+        source_type: "register",
+        source_date: "2023-07-27",
+        primary_source: true,
+        excerpt_or_summary:
+          "Journalpost med varselet og de tre vedleggene i fulltekst.",
+      },
+      {
+        source_name: "Statnett: forespørsler og reservasjon i nettet (lister 30.09.2026)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
+        publisher: "Statnett SF",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak 22/00692: «Northern DC», Datasenter, 50 MW RESERVERT 13.11.2022, Kobbvatnet TRA, " +
+          "Kystnett AS, planlagt tilknytning 30.11.2028.",
+      },
+      {
+        source_name: "Enhetsregisteret: Norsk Datakraft AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/932691485",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 01.11.2023, Lergrovikvegen 2, Molde, næring 63.100, formål datasenter m.m. " +
+          "Bekrefter bare selskapet.",
+      },
+      {
+        source_name: "Enhetsregisteret: Northern DC AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/924580151",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 04.02.2020, samme adresse i Molde. Opprinnelig tiltakshaver og Statnetts " +
+          "sluttkunde. Bekrefter bare selskapet.",
       },
     ],
   },
@@ -11116,7 +12410,18 @@ export const FUNN: Funn[] = [
       "som manglet er lagt inn, og om lag 90 leads er loggført på research-runen. Statnetts " +
       "lister og eInnsyn ga flest funn; Nkom-registeret fanget ingen av funnene i Troms og " +
       "Finnmark. «Ingen funn» betyr bare at de oppgitte kildene er kontrollert, ikke at regionen " +
-      "er tom.",
+      "er tom. Runde 16 (2026-10-02), coverage first: de fem regionene som sto som ikke undersøkt " +
+      "godt nok etter runde 15, er gjennomgått i 49 delområder – anlegg funnet i 8, ingen anlegg " +
+      "funnet i 34, ingen offentlig dokumentasjon i 6 (Kvaløya, Brønnøy, Årdal, Sogndal, Telenor, " +
+      "Innit), og 1 er fortsatt ikke undersøkt godt nok (GlobalConnect utenfor Oslo). " +
+      "Tromsø-området, Bærum og Asker, Helgeland sør og Sunnhordland/Hardanger ga ingen nye " +
+      "anlegg; Sogn ga to (Vangsnes Datapark og det nedlagte Vassbygdi datasenter i Aurland). " +
+      "Seks sterke leads ble løftet til anlegg (Gjerelvmoen i Sørfold, Salfjord på " +
+      "Tjeldbergodden, Polarise på Gardermoen, Numedal Næringspark i Rollag, Skipavika i Gulen og " +
+      "Tau Datasenter). Aktiv total er 111. Kommunale saksdokumenter og NVE-saker ga flest " +
+      "avklaringer; Statnett og Nkom fanget ingen nye anlegg alene. «Ingen funn» betyr fortsatt " +
+      "ikke at det ikke finnes anlegg: søkekvoten tok slutt, lokalaviser er bare lest i ingress, " +
+      "og anlegg under ca. 1 MW er usynlige i registrene.",
     kilder: [
       {
         source_name: "DataCenterMap: markeder gjennomgått i denne runden",
@@ -11187,8 +12492,16 @@ export const FUNN: Funn[] = [
       "Kvalitetsrunde 2026-09-30: koordinaten er industribygget med igangsettingstillatelse på " +
       "gnr/bnr 10/742 (Nordmoveien 301), der Narvik kommune ga rammetillatelse til datasenter. " +
       "Koblingen bygg–datasenter er utledet fra matrikkelen. 230 MW er reservert hos Statnett for " +
-      "netteier Nordkraft Industrinett, som har tildelt 130 MW til de to første byggene. 520 MW er " +
-      "ikke sikret.",
+      "netteier Nordkraft Industrinett, som har tildelt 130 MW til de to første byggene. 520 MW " +
+      "er ikke sikret. Runde 16 (2026-10-02): Statnett fører «AN SITE 4 AS» med 5 MW tilknyttet " +
+      "12.05.2026 ved Kvandal TRA (sak 26/03265, kunde Noranett). Selskapet er trolig Nscale Site " +
+      "4 AS (929837452); navnehistorikken er ikke lest i Brønnøysund. An Site 4 AS søkte i januar " +
+      "2026 om midlertidig vei over gnr 10 bnr 3, 10 og 745, naboteiger til anlegget (Statens " +
+      "vegvesen sak 2025/362666). Det er samme campus, ikke et eget anlegg. De 5 MW går via en " +
+      "annen netteier enn hovedanlegget og er ikke lagt til sikret kraft. NVE-søknaden for 33 " +
+      "kV-anlegg (sak 202521094) viser at Aaktik Digital AS har samme organisasjonsnummer som " +
+      "Nscale Norway AS (932524678), og oppgir 32,5 + 97,5 MW tildelt, i tråd med 130 MW sikret. " +
+      "Nscale Site 1, 2, 5 og 6 AS er fortsatt ikke stedfestet.",
     kilder: [
       {
         source_name: "DataCenterMap: Stargate Norway / Nscale Narvik, Kvanndal",
@@ -13010,9 +14323,14 @@ export const FUNN: Funn[] = [
     notes:
       "Kvalitetsrunde 2026-09-30: koordinaten er flyttet fra Husnes sentrum til et punkt i " +
       "næringsparken. Arcems egen tomt er ikke stedfestet. 40 MW er ikke ført som sikret kraft, " +
-      "fordi prosjektet står i kø hos Statnett (sak 25/02545). Runde 5: prosjektselskapet er ARCEM " +
-      "GO-DC2 AS (917510784, tidligere Bonum Prosjekt 9 AS / NXT AI AS), heleid av Arcem AS. Alias: " +
-      "Arcem GO-DC2.",
+      "fordi prosjektet står i kø hos Statnett (sak 25/02545). Runde 5: prosjektselskapet er " +
+      "ARCEM GO-DC2 AS (917510784, tidligere Bonum Prosjekt 9 AS / NXT AI AS), heleid av Arcem " +
+      "AS. Alias: Arcem GO-DC2. Runde 16 (2026-10-02): Grenda 15.04.2026: Bonum/Arcem har " +
+      "kontroll på over 60 mål i næringsparken; kommunedirektøren opplyste 16.04.2026 at " +
+      "intensjonsavtalen ikke gjelder kommunal eiendom. Grenda 30.04.2026: selskapet har bedt om " +
+      "mer enn dobbelt så mye kraft som de 40 MW. Avisen skriver «reservert», men Statnett fører " +
+      "40 MW i kø (sak 25/02545), så ingenting er ført som sikret kraft. Arcem ba 09.06.2026 om " +
+      "møte med kommunen. Ingen plansak er funnet.",
     kilder: [
       {
         source_name: "DataCenterMap: Arcem Husnes, Grøn Næringspark",
@@ -13061,7 +14379,16 @@ export const FUNN: Funn[] = [
     notes:
       "Runde 2 (2026-09-30): nytt navn og ny tomt. Eget prosjekt, ikke samme anlegg som Arcem " +
       "Husnes. Koordinaten er omtrentlig, satt på adressepunktet til TESS Kvinnherad ved siden av " +
-      "tomta. 150 MW-potensialet gjaldt den gamle tomta i Grøn Næringspark og er ikke videreført.",
+      "tomta. 150 MW-potensialet gjaldt den gamle tomta i Grøn Næringspark og er ikke videreført. " +
+      "Runde 16 (2026-10-02): Prosjektselskapet Reikna NDC Husnes AS (937783698, stiftet " +
+      "01.03.2026) sendte 03.09.2026 kost-nytteanalyse for overskuddsvarme til NVE (sak " +
+      "2026/18902). Tomten på ca. 13 000 m² ble ifølge Kvinnheringen kjøpt fra Stripo Eigedom AS " +
+      "i april 2026 for ca. 19,8 mill. kr. En mindre reguleringsendring for industriområdet ble " +
+      "sendt inn i august 2026, og ny politisk sak er ventet høsten 2026. Hvem av Reikna AS og " +
+      "prosjektselskapet som står som eier av tomten er ikke dokumentert; eierrollen er derfor " +
+      "uendret. Statnett fører 50 MW i kø på Reikna AS (sak 26/03432); det er ikke sikret kraft. " +
+      "Kvinnheringen meldte 02.09.2026 om «eit mindre datasenter på Husnes» (Reikna Edge); trolig " +
+      "første trinn på samme tomt, men ikke dokumentert, og ført som lead, ikke som eget anlegg.",
     kilder: [
       {
         source_name: "DataCenterMap: NDC Husnes, Grøn Næringspark",
