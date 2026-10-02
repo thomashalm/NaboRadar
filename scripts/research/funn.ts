@@ -3033,7 +3033,10 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "GlobalConnect HMG1, Hans Møller Gasmanns vei 1",
     description:
-      "Datasenter-site oppført av GlobalConnect i samme gate som Alfabygget, men i et annet bygg.",
+      "GlobalConnects datasenter i Hans Møller Gasmanns vei 1 på Ulven, på samme eiendom som " +
+      "Østre Aker vei 68. Oslo kommune godkjente bruksendring av lager til datasenter (647,5 m²) " +
+      "med ferdigattest i mars 2024, og en fase 2 med datahall og generator- og kjølebygg har " +
+      "igangsettingstillatelse fra august 2024.",
     municipality: "Oslo",
     address: "Hans Møller Gasmanns vei 1",
     postal_code: "0598",
@@ -3043,15 +3046,20 @@ export const FUNN: Funn[] = [
     verification_status: "partially_verified",
     operational_status: "active",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "high",
     interest_level: "medium",
     why_interesting:
       "Området rundt Hans Møller Gasmanns vei framstår som en datasenterklynge med flere bygg og " +
       "operatører — det er nyttig å vite når man ser på næringsbygg i Hovinbyen.",
     notes:
-      "Primærkilde-runde 2026-09-30: primærkilde for anlegget søkt, ikke funnet. Adressen (gnr/bnr " +
-      "88/273) og GlobalConnect AS er bekreftet i Kartverket og Brønnøysund, men selskapet har " +
-      "ingen underenhet på adressen. Blix' PoP-liste nevner «GC HMG1» (sekundær).",
+      "Primærkilde-runde 2026-09-30: primærkilde for anlegget søkt, ikke funnet. Adressen " +
+      "(gnr/bnr 88/273) og GlobalConnect AS er bekreftet i Kartverket og Brønnøysund, men " +
+      "selskapet har ingen underenhet på adressen. Blix' PoP-liste nevner «GC HMG1» (sekundær). " +
+      "Runde 11 (2026-10-02): anlegget er nå primærbekreftet av Plan- og bygningsetatens sak " +
+      "202217340 («Bruksendring av lager til datasenter», tiltakshaver GlobalConnect AS). " +
+      "Aliaser: GlobalConnect OAV68, Østre Aker vei 68, Broadnet Østre Aker vei. Broadnet AS er " +
+      "samme juridiske enhet (navneskifte 06.06.2019). Ikke samme anlegg som Bulk OS-IX i nr. 9. " +
+      "Bygningseier er ikke avklart.",
     kilder: [
       {
         source_name: "PeeringDB: GlobalConnect Oslo (HMG1)",
@@ -3176,10 +3184,11 @@ export const FUNN: Funn[] = [
       "planlegges tett bolig. Effektbehov og kjøling er relevant for hele nabolaget.",
     notes:
       "Løst i oppfølgingsrunden: 20 MW. Rettet i datasenter-enrichment runde 1 (2026-09-30): " +
-      "første halvår 2025 var opprinnelig plan; Sentias børsmelding 16.06.2026 sier at trinn 1 ble " +
-      "overlevert i april 2026. Skygard kjøpte to datasentre " +
-      "av Orange i Oslo — det forklarer «Orange OSL5» som alias på OSL3. Registrert hos Nkom, med " +
-      "kontoradresse Karenslyst allé 10.",
+      "første halvår 2025 var opprinnelig plan; Sentias børsmelding 16.06.2026 sier at trinn 1 " +
+      "ble overlevert i april 2026. Registrert hos Nkom, med kontoradresse Karenslyst allé 10. " +
+      "Runde 11 (2026-10-02): rettet en notatfeil – «Orange OSL5» er ikke et alias på OSL3, men " +
+      "et eget anlegg på Lørenskog (Skygard OSL5). Skygard har tre separate anlegg: OSL1, OSL3 og " +
+      "OSL5. Ingen primærkilde sier ennå at trinn 1 er i kundedrift.",
     public_candidate: true,
     public_candidate_note:
       "Bekreftet fysisk anlegg i drift, operatørens egen kilde pluss uavhengig fagpresse, verifisert adresse og korrekt status.",
@@ -3239,9 +3248,9 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Skygard OSL3, Stanseveien 30",
     description:
-      "Skygards datasenter på Grorud, kjøpt fra Orange Business Services Norway (avtale desember " +
-      "2025). Skygard og HitecVision bekrefter anlegget i egne meldinger. Gateadressen Stanseveien " +
-      "30 kommer fra katalogkilder.",
+      "Skygards datasenter på Grorud, overtatt fra Orange Business i januar 2026 og tidligere " +
+      "drevet som Basefarm OSL3. Skygard oppgir 3,6 MW. Adressen Stanseveien 30 er bekreftet av " +
+      "en støysak i Bydel Grorud om kjøleaggregatene på anlegget.",
     municipality: "Oslo",
     address: "Stanseveien 30",
     postal_code: "0976",
@@ -3251,7 +3260,7 @@ export const FUNN: Funn[] = [
     verification_status: "partially_verified",
     operational_status: "active",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "high",
     interest_level: "medium",
     why_interesting:
       "Et etablert datasenter i et næringsområde på Grorud, tett på bolig.",
@@ -3262,7 +3271,10 @@ export const FUNN: Funn[] = [
       "Runde 10 (2026-10-02): Skygard fører OSL3 som eget datasenter med 3,6 MW ved siden av OSL1 " +
       "og OSL5. Operatør og eier er Skygard AS. Gateadressen Stanseveien 30 kommer fortsatt bare " +
       "fra katalogkilder; Skygard oppgir Grorud. Skygard OSL5 på Lørenskog mangler i basen og er " +
-      "lead til neste runde.",
+      "lead til neste runde. Runde 11 (2026-10-02): Stanseveien 30 er nå primærbekreftet (Bydel " +
+      "Grorud, sak 2025/31558 om støy fra kjøleaggregater; pålegg 01.07.2026). Parten i saken " +
+      "skiftet fra Orange Business Digital Norway AS til Skygard 2 AS i januar 2026, og Skygard 2 " +
+      "AS er ført som eier. Tidligere operatører av samme anlegg: Basefarm og Orange Business.",
     kilder: [
       {
         source_name: "PeeringDB: nettverk til stede i fasiliteten",
@@ -3309,10 +3321,263 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
-    title: "Østre Aker vei 18 — Telia og Arelion samtrafikkpunkt",
+    title: "Skygard OSL5, Hornerudveien 25 (Lørenskog)",
     description:
-      "Colocation- og samtrafikkanlegg med to operatøroppføringer på samme adresse: Telia (OKR/C) " +
-      "og Arelion (Oslo OKR/C). Samme facility-kode peker mot ett fysisk anlegg.",
+      "Skygards datasenter på Rasta i Lørenskog, med 7,2 MW kapasitet og 10 000 m² ifølge " +
+      "operatøren. Anlegget ble åpnet av Basefarm i november 2017 i en ombygd telefonfabrikk, ble " +
+      "en del av Orange Business i 2018 og ble kjøpt av Skygard med overtakelse i januar 2026. " +
+      "Statnett fører 12 MW som tilknyttet for «Basefarm» ved Røykås transformatorstasjon, som " +
+      "ligger rundt 700 meter unna. Bygget rommer også andre leietakere.",
+    municipality: "Lørenskog",
+    address: "Hornerudveien 25",
+    postal_code: "1461",
+    city: "Lørenskog",
+    latitude: 59.92596,
+    longitude: 10.94207,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Det største datasenteret Skygard har i drift, plassert i et kombinert næringsbygg med " +
+      "boligfelt på flere sider og innenfor 150 meter. Nettilknytningen er vesentlig større enn " +
+      "det operatøren oppgir som kapasitet.",
+    notes:
+      "Opprettet i runde 11 (2026-10-02). Tidligere navn: Basefarm OSL5 / Datasenter Oslo 5 " +
+      "(2017–), Orange Business OSL5 (til jan. 2026). Eldre adresse på samme bygg: Nordliveien " +
+      "21, 1476 Rasta (veinavnet finnes ikke lenger i Kartverkets adresseregister for Lørenskog). " +
+      "Hornerudveien 21 og 25 deler gnr/bnr 102/2; hvilken del av komplekset datasenteret opptar " +
+      "er ikke dokumentert, så punktet er adressepunktet for nr. 25. Juridisk eier av anlegget er " +
+      "ikke offentliggjort – Skygard 2 AS er dokumentert som ansvarlig enhet for OSL3, ikke for " +
+      "OSL5. NAV og Bane NOR har driftsavtaler med Basefarm/Orange som er videreført til Skygard, " +
+      "men ingen kilde sier hvilket anlegg de bruker. Statnetts 12 MW tilknyttet ved Røykås står " +
+      "på merkenavnet «Basefarm», som hadde to anlegg, og er ikke ført som sikret kraft. " +
+      "Grunneier er ikke ført; grunnboka er ikke sjekket.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Skygard: OSL5",
+        source_url: "https://www.skygard.no/osl5-eng",
+        publisher: "Skygard AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Operatørens anleggsside: OSL5 på Lørenskog, 10 000 m², 7,2 MW, PUE <1,25, EN50600, egnet " +
+          "for dual-site med OSL3 på Grorud. Bekrefter selve anlegget og drift – ikke gateadresse.",
+      },
+      {
+        source_name: "Skygard utvider kapasiteten etter strategisk oppkjøp",
+        source_url: "https://www.skygard.no/nb/articles/skygard-utvider-kapasiteten-etter-strategisk-oppkjops",
+        publisher: "Skygard AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Skygard kjøper datasentrene OSL3 og OSL5 fra Orange Business Services Norway. Eiere: " +
+          "Telenor, Hafslund, HitecVision og Analysys Mason. Bekrefter operatørskiftet, ikke adresse " +
+          "eller MW.",
+      },
+      {
+        source_name: "Arbeidstilsynet sak 2024/54781: Lørenskog kommune – gnr/bnr 102/2 – Hornerudveien 25 – Søknad om samtykke",
+        source_url: "https://api.einnsyn.no/saksmappe/sm_01jabp0qpyf6kbzpz6r8m00nch",
+        publisher: "Arbeidstilsynet (eInnsyn)",
+        source_type: "register",
+        source_date: "2024-10-11",
+        primary_source: true,
+        excerpt_or_summary:
+          "Samtykke innvilget til Orange Business Digital Norway AS for tiltak på Hornerudveien 25, " +
+          "gnr/bnr 102/2. Bekrefter at datasenteroperatøren har virksomhet på adressen; sakstittelen " +
+          "nevner ikke datasenter.",
+      },
+      {
+        source_name: "Arbeidstilsynet sak 2024/36323: Lørenskog kommune – gnr/bnr 102/2 – Hornerudveien 25 – Søknad om samtykke",
+        source_url: "https://api.einnsyn.no/saksmappe/sm_01j76wah39fd5bhqc571kb5tba",
+        publisher: "Arbeidstilsynet (eInnsyn)",
+        source_type: "register",
+        source_date: "2024-06-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Første samtykkesak i 2024 for samme eiendom, mottaker Orange Business Digital Norway AS, " +
+          "kopi til Lørenskog kommune.",
+      },
+      {
+        source_name: "Arbeidstilsynet: Forhåndsmelding – Hornerudveien 25, 1476 Rasta, 01.03.2021–29.06.2022",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01j74cfc2cewdrzmncf067fnw0",
+        publisher: "Arbeidstilsynet (eInnsyn)",
+        source_type: "register",
+        source_date: "2022-01-05",
+        primary_source: true,
+        excerpt_or_summary:
+          "Forhåndsmelding om bygge-/anleggsarbeid på adressen i 16 måneder fra mars 2021. Byggherre " +
+          "og innhold framgår ikke av journalen; tidsrommet sammenfaller med Statnett-tilknytningen i " +
+          "2021.",
+      },
+      {
+        source_name: "Miljødirektoratet sak 2021/4666: Byggesak på eiendommen Hornerudveien 25, gnr. 102 bnr. 2, Lørenskog",
+        source_url: "https://api.einnsyn.no/saksmappe/sm_01j75c65haekatbjbspte915pm",
+        publisher: "Miljødirektoratet (eInnsyn)",
+        source_type: "register",
+        source_date: "2021-04-16",
+        primary_source: true,
+        excerpt_or_summary:
+          "Arkitektfirma ba om avklaring mot Miljødirektoratet i en byggesak på eiendommen i april " +
+          "2021. Dokumentet er ikke lest; journalen sier ikke at saken gjelder datasenteret.",
+      },
+      {
+        source_name: "Akershus fylkeskommune sak 2024/38253: Gbnr 102/2 Hornerudveien 25 – Bygningstekniske installasjoner – Nytt anlegg",
+        source_url: "https://api.einnsyn.no/saksmappe/sm_01j76w096sfbvvtwx8v2a4t25w",
+        publisher: "Akershus fylkeskommune (eInnsyn)",
+        source_type: "register",
+        source_date: "2024-06-12",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nabovarsel sendt av eiendomsselskapet med adresse Hornerudveien 25 for nytt teknisk anlegg " +
+          "på eiendommen. Bekrefter hvem som opptrer som eier/tiltakshaver for bygget, ikke " +
+          "datasenteret.",
+      },
+      {
+        source_name: "Statnett: statistikk om tilknytningssaker (lister lastet ned 30.09.2026)",
+        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tilknyttet: sak 21/00160, Røykås TRA, kunde Elvia AS, sluttkunde Basefarm, Datasenter, " +
+          "01.10.2021, 12 MW (ordinære vilkår). Ingen Skygard- eller Orange-rad ved Røykås i kø eller " +
+          "reservasjoner.",
+      },
+      {
+        source_name: "Kartverket stedsnavn: Røykås trafostasjon",
+        source_url: "https://ws.geonorge.no/stedsnavn/v1/navn?sok=R%C3%B8yk%C3%A5s*&knr=3222",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Røykås trafostasjon ligger i Lørenskog kommune (59.93015, 10.93281), ca. 700 m fra " +
+          "Hornerudveien 25. Bekrefter stasjonens plassering, ikke hvem som er tilknyttet.",
+      },
+      {
+        source_name: "Kartverket adresse-API: Hornerudveien 25",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?sok=Hornerudveien%2025&kommunenummer=3222",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Hornerudveien 25, 1461 Lørenskog, kommune 3222, gnr/bnr 102/2, punkt 59.92596/10.94207. " +
+          "Hornerudveien 21 har samme gnr/bnr. Bekrefter adressen – ikke at anlegget finnes.",
+      },
+      {
+        source_name: "Basefarm: Datasenter bedre i Oslo enn på avsidesliggende steder (pressemelding 17.11.2017, arkivert)",
+        source_url: "https://web.archive.org/web/20210224204026/https://basefarm.no/presse/datasenter-bedre-i-oslo-enn-pa-avsidesliggende-steder/",
+        publisher: "Basefarm AS",
+        source_type: "web",
+        source_date: "2017-11-17",
+        primary_source: true,
+        excerpt_or_summary:
+          "Basefarm åpnet 16. november 2017 nytt datasenter til over 300 millioner kroner på Rasta i " +
+          "Lørenskog. Bekrefter åpningsdato, sted og investering.",
+      },
+      {
+        source_name: "Basefarm is building Oslo's biggest and greenest data center (pressemelding mars 2015, arkivert)",
+        source_url: "https://web.archive.org/web/20161231132700/https://www.basefarm.com/en/press-room/new-data-center-Oslo-Norway",
+        publisher: "Basefarm AS",
+        source_type: "web",
+        source_date: "2015-03-09",
+        primary_source: true,
+        excerpt_or_summary:
+          "Nytt datasenter i Lørenskog, ca. 300 mill. kr over fem år; ferdig utbygd mer enn 10 MW og " +
+          "6 000 m² datagulv, med plass til vesentlig mer på eiendommen. Historisk planinformasjon.",
+      },
+      {
+        source_name: "Basefarm: Datasenter Oslo 5 – fakta (arkivert jan. 2017)",
+        source_url: "https://web.archive.org/web/20170102062725/https://www.basefarm.com/no/tjenester/basefarm-datasenter-oslo5",
+        publisher: "Basefarm AS",
+        source_type: "web",
+        source_date: "2017-01-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Faktaside: inntil 6 000 m² serverplass i flere faser, mer enn 10 MW kritisk kapasitet, 2,5 " +
+          "MVA-generatorer, indirekte luft-til-luft-kjøling, linjenøytralt. Historiske designtall.",
+      },
+      {
+        source_name: "Enhetsregisteret: ORANGE BUSINESS DIGITAL NORWAY AS (982211743)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/982211743",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tidligere Basefarm AS; stiftet 2000, 327 ansatte, Lørenfaret 1E i Oslo. Ingen underenhet i " +
+          "Lørenskog. Bekrefter selskapet, ikke anlegget.",
+      },
+      {
+        source_name: "Enhetsregisteret: TOM HAGEN EIENDOM AS (916975538)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/916975538",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Eiendomsselskap med forretningsadresse Hornerudveien 25, formål utvikling og forvaltning " +
+          "av fast eiendom. Bekrefter selskapet og adressen, ikke hjemmel til eiendommen.",
+      },
+      {
+        source_name: "Enhetsregisteret: SKYGARD 2 AS (935496624)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/935496624",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 02.05.2025, formål datasentre, 6 ansatte, Karenslyst allé 10; underenhet med " +
+          "oppstart 16.09.2025. Bekrefter selskapet – ingen kilde knytter det direkte til OSL5.",
+      },
+      {
+        source_name: "NAV: Sikkerhetsavtale mellom NAV og Skygard 2 AS",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01kget8r5xen4r8ah7ayrq9n70",
+        publisher: "Arbeids- og velferdsdirektoratet (eInnsyn)",
+        source_type: "register",
+        source_date: "2026-01-05",
+        primary_source: true,
+        excerpt_or_summary:
+          "Avskjermet journalpost i saken «Sikkerhetsavtaler med leverandører». Viser at Skygard 2 AS " +
+          "er NAVs avtalepart fra januar 2026; anlegg er ikke oppgitt.",
+      },
+      {
+        source_name: "Skygard: Future Sites",
+        source_url: "https://www.skygard.no/future-sites",
+        publisher: "Skygard AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Skygard vurderer nye datasentre i Norge, særlig på Vestlandet, i samarbeid med Eviny. " +
+          "Ingen navngitte anlegg, steder eller MW. Menyen fører bare OSL1, OSL3 og OSL5.",
+      },
+      {
+        source_name: "Skygard: About us",
+        source_url: "https://www.skygard.no/en/about-us",
+        publisher: "Skygard AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "«With three data centres in the Oslo region»; eid av Telenor, Hafslund og HitecVision. " +
+          "Bekrefter at OSL5 er ett av tre anlegg i porteføljen (lest i runde 10).",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    tidligere_titler: ["Østre Aker vei 18 — Telia og Arelion samtrafikkpunkt"],
+    title: "Telenor Økern telesentral, Østre Aker vei 18 — Arelion-PoP (OKR/C)",
+    description:
+      "Telenors telesentral på Økern, der Arelion (tidligere Telia Carrier) har en nettnode med " +
+      "koden OKR/C. Bygget har vært telesentral siden 1970-årene. Arelion-noden er bare bekreftet " +
+      "av PeeringDB og katalogkilder, ikke av Arelion eller Telenor selv.",
     municipality: "Oslo",
     address: "Østre Aker vei 18",
     postal_code: "0581",
@@ -3331,7 +3596,11 @@ export const FUNN: Funn[] = [
       "Aliaser: OKR/C, TeliaSonera OKR/C. Primærkilde-runde 2026-09-30: primærkilde for anlegget " +
       "søkt, ikke funnet. Adressen er bekreftet i Kartverket (gnr/bnr 122/354). Arelion Norway AS " +
       "og Telia Norge AS har ingen underenhet på adressen, og Telenor er også oppført der i " +
-      "katalogene.",
+      "katalogene. Runde 11 (2026-10-02): ny tittel (tidligere «Østre Aker vei 18 — Telia og " +
+      "Arelion samtrafikkpunkt») og type nettnode. «Telia» og «Arelion» i katalogene er samme " +
+      "node: TeliaSonera International Carrier ble Telia Carrier og deretter Arelion. Telia Norge " +
+      "AS er ikke dokumentert på adressen. Eiendommen ble solgt i 2021 med leiekontrakt til " +
+      "Telenor. Ikke samme anlegg som Skygard OSL1 i nr. 24C.",
     kilder: [
       {
         source_name: "DataCenterMap: TeliaSonera OKR/C",
@@ -3452,7 +3721,11 @@ export const FUNN: Funn[] = [
     interest_level: "medium",
     why_interesting:
       "Et nettverksknutepunkt i et sentrumskvartal, i et bygg folk flest oppfatter som kontor.",
-    notes: "Beskrevet som nettverksanlegg, ikke et fullt datasenter.",
+    notes:
+      "Beskrevet som nettverksanlegg, ikke et fullt datasenter. Runde 11 (2026-10-02): Blix' egne " +
+      "sider bekrefter et lite colocation-rom og PoP her (3 kW per rack); gateadressen kommer " +
+      "bare fra PeeringDB og DataCenterMap. Operatør er Blix Solutions AS som leietaker; bygget " +
+      "(Ibsenkvartalet) eies av KLP Eiendom. I drift senest fra desember 2015.",
     kilder: [
       {
         source_name: "DataCenterMap: Blix CJH Oslo",
@@ -6418,7 +6691,13 @@ export const FUNN: Funn[] = [
       "utvidelse her, ikke som eget punkt. Kryptovault Glomfjord (annonsert 2018 og lagt på is " +
       "samme år) er avvist som eget anlegg. Intrahouse/Likeretterbygget er fortsatt lead uten " +
       "entydig bygningspunkt. Net Zero Compute AS oppgir drift i Glomfjord fra april 2026 i et " +
-      "bygg som ikke er stedfestet, og er lead.",
+      "bygg som ikke er stedfestet, og er lead. Runde 11 (2026-10-02): et vedlegg til Nscales " +
+      "børsprospekt hos SEC (låneavtale med Macquarie) definerer «Glomfjord Data Centre» som " +
+      "datasenteret Nscale Glomfjord AS driver på Sam Eydes vei 47. Nscale Drift II AS har en " +
+      "colocation-avtale der og en skytjenesteavtale fra 15.05.2025 med Spring (SG) Pte. Ltd. om " +
+      "GPU-ene; Spring er ført som kunde. Pressen omtaler Spring som et ByteDance-selskap, men " +
+      "det framgår ikke av avtalen. Net Zero Compute og Intrahouse/Likeretterbygget er fortsatt " +
+      "leads uten stedfestet bygg.",
     public_candidate: false,
     kilder: [
       {
@@ -7216,6 +7495,198 @@ export const FUNN: Funn[] = [
         primary_source: true,
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet mot Kartverkets adresseregister, med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "AVUR Casperkollen, Øvre Kråkenes 17",
+    description:
+      "Colocation- og driftsdatasenter i kontorbygget Casperkollen på Bønes, drevet av AVUR AS, " +
+      "som også har hovedkontor og nettknutepunkt der. Bygget ble oppført i 1989 som kontorsenter " +
+      "for IBM. AVUR oppgir to separate høyspentinnføringer, egen transformator på eiendommen, " +
+      "UPS, dieselaggregat og fire fiberføringer. Størrelse og effekt er ikke oppgitt.",
+    municipality: "Bergen",
+    address: "Øvre Kråkenes 17",
+    postal_code: "5152",
+    city: "Bønes",
+    latitude: 60.3405,
+    longitude: 5.32716,
+    verification_status: "partially_verified",
+    operational_status: "active",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "medium",
+    why_interesting:
+      "Et datasenter i et tidligere IBM-bygg midt i et boligområde på Bønes, og knutepunktet for " +
+      "et eget fibernett med samtrafikk i Bergen (BIX).",
+    notes:
+      "Opprettet i runde 11 (2026-10-02). Aliaser: AVUR DC Bergen (ADC), Casperkollen datasenter, " +
+      "AVUR Bergen. Ikke samme anlegg som Datafjellet (fjellhall, annen operatør), selv om " +
+      "Datafjellets forretningsadresse ligger rundt 800 meter unna. Dagens AVUR AS ble stiftet i " +
+      "2021; virksomheten het tidligere Intellit AS og Kokstad Data AS (startet 1992) og hadde " +
+      "besøksadresse Kokstadvegen 29 så sent som i 2018. Når datahallen på Casperkollen ble tatt " +
+      "i bruk, er ikke dokumentert. Bygget er på over 4600 m² og har også andre leietakere; " +
+      "datasenteret er bare en del av det.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Avur – Data centre and colocation in Bergen (arkivert 12.04.2026)",
+        source_url: "https://web.archive.org/web/20260412134201/https://avur.no/datasenter/?lang=en",
+        publisher: "Avur AS (via Internet Archive)",
+        source_type: "web",
+        source_date: "2026-04-12",
+        primary_source: true,
+        excerpt_or_summary:
+          "Operatørens datasenterside: AVUR driver Casperkollen, Øvre Kråkenes 17, opprinnelig bygget " +
+          "for IBM. A/B-strøm, to høyspentkabler, egen transformator, UPS, dieselaggregat, " +
+          "colocation. Bergen = hovedkontor og datasenter; Oslo m.fl. er PoP. Bekrefter anlegget.",
+      },
+      {
+        source_name: "Avur – Colocation at Casperkollen (arkivert 12.04.2026)",
+        source_url: "https://web.archive.org/web/20260412131415/https://avur.no/colocation/?lang=en",
+        publisher: "Avur AS (via Internet Archive)",
+        source_type: "web",
+        source_date: "2026-04-12",
+        primary_source: true,
+        excerpt_or_summary:
+          "Produktside: rackplass, dedikert rack, bur, remote hands og cross connect på Casperkollen; " +
+          "presisjonskjøling, adgangskontroll, BIX-tilknytning. «Not an office building with a server " +
+          "room». Oppgir ikke effekt.",
+      },
+      {
+        source_name: "Avur – Kontakt (arkivert 12.04.2026)",
+        source_url: "https://web.archive.org/web/20260412132049/https://avur.no/kontakt/",
+        publisher: "Avur AS (via Internet Archive)",
+        source_type: "web",
+        source_date: "2026-04-12",
+        primary_source: true,
+        excerpt_or_summary:
+          "Avur AS, Casperkollen, Øvre Kråkenes 17, 5152 Bønes, org.nr 928 077 993. Bekrefter " +
+          "selskapets adresse.",
+      },
+      {
+        source_name: "Enhetsregisteret: AVUR AS (928077993)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/928077993",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "AVUR AS, stiftet 01.08.2021, næringskode 61.100, forretningsadresse Casperkollen, Øvre " +
+          "Kråkenes 17, 5152 Bønes; én underenhet (928275051) samme sted. Bekrefter selskap og " +
+          "adresse, ikke anlegget.",
+      },
+      {
+        source_name: "Kartverket adresse-API: Øvre Kråkenes 17",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?sok=%C3%98vre%20Kr%C3%A5kenes%2017&kommunenummer=4601",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Øvre Kråkenes 17, 5152 Bønes, Bergen (4601), gnr/bnr 16/50, punkt 60.34050, 5.32716. " +
+          "Bekrefter adressen, ikke anlegget.",
+      },
+      {
+        source_name: "Nkom, registrerte kommersielle datasenteroperatører",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "AVUR AS (928077993) står i listen, uten kryptoutvinning (oppdatert 02.10.2026). Bekrefter " +
+          "operatørregistrering, ikke lokasjon eller størrelse.",
+      },
+      {
+        source_name: "Miljødirektoratet 2025/969: Anmodning om opplysninger om anlegg tilhørende Avur AS",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01kjnxkzdwe68sqdwae6tfs83e",
+        publisher: "Miljødirektoratet (eInnsyn)",
+        source_type: "regulation",
+        source_date: "2026-02-23",
+        primary_source: true,
+        excerpt_or_summary:
+          "Utgående brev i sak «Vurdering av kvoteplikt for anlegg». Tittelen viser at direktoratet " +
+          "ba AVUR om opplysninger om et anlegg. Dokumentet er ikke tilgjengelig i eInnsyn; innhold " +
+          "og adresse er ikke lest.",
+      },
+      {
+        source_name: "Miljødirektoratet 2025/969: Konklusjon anmodning om opplysninger – Avur AS",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01kn0dnr50ek2st4ekhf50btvy",
+        publisher: "Miljødirektoratet (eInnsyn)",
+        source_type: "regulation",
+        source_date: "2026-03-24",
+        primary_source: true,
+        excerpt_or_summary:
+          "Utgående konklusjonsbrev til Avur AS i kvotepliktsaken. Skjermet/ikke tilgjengelig; " +
+          "utfallet er ikke kjent.",
+      },
+      {
+        source_name: "Miljødirektoratet 2025/969: Anmodning om opplysninger om anlegg tilhørende Datafjellet AS",
+        source_url: "https://api.einnsyn.no/journalpost/jp_01kjp0xhtzeakajawtaskadheh",
+        publisher: "Miljødirektoratet (eInnsyn)",
+        source_type: "regulation",
+        source_date: "2026-02-23",
+        primary_source: true,
+        excerpt_or_summary:
+          "Eget brev til Datafjellet AS samme dag som brevet til Avur AS. Brukt i dedup: direktoratet " +
+          "behandler de to som separate operatører med hvert sitt anlegg. Dokumentet er ikke lest.",
+      },
+      {
+        source_name: "Bergen byleksikon: Øvre Kråkenes",
+        source_url: "https://www.bergenbyarkiv.no/bergenbyleksikon/arkiv/1425250",
+        publisher: "Bergen Byarkiv",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "«Casperkollen kontorsenter IBM, oppført 1989 (ark. Arkitektkontoret Grieg)» på nr. 17. " +
+          "Navn etter Johan Caspar Lange; Langes legat eier det utskilte området. Bekrefter byggets " +
+          "opphav, ikke datasenteret.",
+      },
+      {
+        source_name: "Casperkollen – kontorbygget",
+        source_url: "https://casperkollen.no/",
+        publisher: "Casperkollen (byggets nettside)",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kontorbygg på over 4600 m², Øvre Kråkenes 17. Tilbyr leietakere serverplass «i datahall " +
+          "utstyrt med nødstrøm og moderne kjøling». Avur vist blant logoene. Bekrefter datahall i " +
+          "bygget.",
+      },
+      {
+        source_name: "Enhetsregisteret: CASPERKOLLEN AS (987837756)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/987837756",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        primary_source: true,
+        excerpt_or_summary:
+          "Eiendomsselskap stiftet 2005, næringskode 68.200, forretningsadresse Casperkollen, Øvre " +
+          "Kråkenes 17. Bekrefter selskapet, ikke hjemmel til eiendommen.",
+      },
+      {
+        source_name: "AVUR – Historie (arkivert 25.09.2018)",
+        source_url: "https://web.archive.org/web/20180925222425/http://www.avur.no:80/om-oss/historie/",
+        publisher: "AVUR (via Internet Archive)",
+        source_type: "web",
+        source_date: "2018-09-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "«AVUR ble startet som Kokstad Data AS i 1992»; navneskifte til Intellit i 2003 og senere " +
+          "AVUR. Gir operatørhistorikk, ikke datasenterets adresse.",
+      },
+      {
+        source_name: "AVUR – Kontakt (arkivert 25.09.2018)",
+        source_url: "https://web.archive.org/web/20180925222435/http://www.avur.no:80/om-oss/kontakt/",
+        publisher: "AVUR (via Internet Archive)",
+        source_type: "web",
+        source_date: "2018-09-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Besøksadresse i 2018 var Kokstadvegen 29, 5257 Kokstad. Viser at hovedkontoret flyttet til " +
+          "Casperkollen senere; sier ikke hvor datahallen lå i 2018.",
       },
     ],
   },
@@ -8070,6 +8541,419 @@ export const FUNN: Funn[] = [
         source_date: "2026-09-26",
         excerpt_or_summary:
           "Adresse og kommune verifisert og geokodet med postnummer som krav.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Fyresdal Datacenter (Fossefall), Molandsmoen",
+    description:
+      "Lite datasenter på Molandsmoen industriområde i Fyresdal, etablert 2021–2022 med 5 MW " +
+      "effektrettighet i distribusjonsnettet og først brukt til kryptoutvinning. Fossefall " +
+      "inngikk i november 2025 avtale om å kjøpe eierselskapet Fyresdal Datacenter AS fra Norsk " +
+      "Data og vil bygge det om til en AI-fabrikk. Selskapet fikk i juni 2026 rammeløyve for " +
+      "nybygg på gnr 38 bnr 136, som kommunen omregulerte til datasenter i mars 2026. Planlagt " +
+      "effekt oppgis ulikt, fra 10 til 18 MW.",
+    municipality: "Fyresdal",
+    address: "Molandsmoen 28",
+    postal_code: "3870",
+    city: "Fyresdal",
+    latitude: 59.20136,
+    longitude: 8.08256,
+    verification_status: "partially_verified",
+    operational_status: "unknown",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "medium",
+    why_interesting:
+      "Fossefalls første anlegg og hovedformålet med selskapets emisjon på 500 mill. kr. Det " +
+      "ligger rundt 450 meter fra EdgeConneX' hyperskalatomt, men er et eget og langt mindre " +
+      "anlegg med egen kraftforsyning.",
+    notes:
+      "Opprettet i runde 11 (2026-10-02). Koordinaten er Kartverkets adressepunkt for Molandsmoen " +
+      "28 (gnr 38 bnr 136, ca. 8 daa), som er tomta for nybygget i byggesak 2026/688. Det " +
+      "eksisterende datasenterbygget er ikke stedfestet i noen kilde som navngir det; kommunens " +
+      "plansak sier at 38/117 (Molandsmoen 7B) gjelder «etablering i eksisterande bygg», men " +
+      "nevner ikke Fossefall. Byggesaksdokumentene ligger ikke åpent og er ikke lest. " +
+      "Igangsettingsløyve er ikke funnet. Drift: Fossefall skrev 25.11.2025 at anlegget var i " +
+      "drift, mens E24 i juni 2026 omtaler det som under utvikling; drift i dag er ikke " +
+      "dokumentert. Operatør er ikke satt: Fossefall sier de selv skal eie og drifte, og har " +
+      "avtale med CBRE Data Centre Solutions om utvikling og drift. Seekr er investor og kunde i " +
+      "Fossefall, ikke dokumentert som kunde ved dette anlegget. Fyresdal Datacenter AS står " +
+      "fortsatt med forretningsadresse i Horten; gjennomføringsdato for kjøpet er ikke kunngjort. " +
+      "Kraft: 5 MW effektrettighet (Lede), tidligere eier oppga inntil 5,5 MW. Statnett-sak " +
+      "26/03132 (Grenland TRA, Lede, sluttkunde FOSSEFALL AS, 1 MW i kø, moden 01.12.2025) kan " +
+      "gjelde Fyresdal, fordi Einangsmoen normalt forsynes radielt fra Bolvik, men ingen kilde " +
+      "bekrefter det.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Lede: Konsesjonssøknad Molandsmoen koblingsstasjon",
+        source_url: "https://lede.no/getfile.php/1359408-1760376471/Lede/Prosjekter/Molandsmoen/Konsesjonss%C3%B8knad%20Molandsmoen%20Koblingsstasjon%20%281%29.pdf",
+        publisher: "Lede AS",
+        source_type: "document",
+        source_date: "2025-07-01",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kap. 3.2: Telemark Nett og Myldr – Energipark Fyresdal AS etablerte i 2021–2022 et " +
+          "datasenter i distribusjonsnettet på Molandsmoen med effektrettighet på 5 MW. Bekrefter " +
+          "anlegget og effekten, ikke adressen.",
+      },
+      {
+        source_name: "Fyresdal kommune, innsyn: sak 2026/688 Molandsmoen gbnr. 38/136 – Fyresdal datacenter AS – byggesak",
+        source_url: "https://prod02.elementscloud.no/publikum/939772766_PROD-939772766/Case/8547",
+        publisher: "Fyresdal kommune",
+        source_type: "register",
+        source_date: "2026-06-11",
+        primary_source: true,
+        excerpt_or_summary:
+          "Søknad om rammetillatelse 28.05.2026 og rammeløyve datert 08.06.2026 for gbnr 38/136; " +
+          "bytte av ansvarlig søker i september 2026. Bekrefter prosjekt, part og tomt. Dokumentene " +
+          "er ikke åpent tilgjengelige.",
+      },
+      {
+        source_name: "Fyresdal kommune, postliste: Brakkerigg Fossefall – Molandsmoen gbnr. 38/75 (sak 2026/936)",
+        source_url: "https://prod02.elementscloud.no/publikum/939772766_PROD-939772766/Search?Query=Fossefall&OrderBy=DATE&SortOrder=1&DateFrom=2026-04-02",
+        publisher: "Fyresdal kommune",
+        source_type: "register",
+        source_date: "2026-09-11",
+        primary_source: true,
+        excerpt_or_summary:
+          "Søknad 01.09.2026 og løyve 11.09.2026 til brakkerigg for Fossefall på gbnr 38/75, " +
+          "naboeiendom til 38/136. Bekrefter at Fossefall forbereder anleggsarbeid på Molandsmoen.",
+      },
+      {
+        source_name: "Fyresdal kommune: Mindre endring av reguleringsplan for Molandsmoen industriområde",
+        source_url: "https://www.fyresdal.kommune.no/nyheter/2026-04-13-mindre-endring-av-reguleringsplan-for-molandsmoen-industriomrade",
+        publisher: "Fyresdal kommune",
+        source_type: "regulation",
+        source_date: "2026-04-13",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kommunestyret vedtok 19.03.2026 (sak 19/26) å endre gbnr 38/117, 38/120 og 38/136 fra " +
+          "industri til datasenter eller kombinert industri/datasenter, planID 200402.",
+      },
+      {
+        source_name: "Fyresdal kommune: samlet saksprotokoll, mindre endring av reguleringsplan for Molandsmoen industriområde",
+        source_url: "https://www.fyresdal.kommune.no/download/18.4e5c610719d707447d92cd/1775734102690/Mindre%20endring%20reguleringsplan%20for%20Molandsmoen%20industriomr%C3%A5de%202026.pdf",
+        publisher: "Fyresdal kommune",
+        source_type: "document",
+        source_date: "2026-03-19",
+        primary_source: true,
+        excerpt_or_summary:
+          "38/136 (ca. 8 daa) gjelder ny etablering, 38/117 og 38/120 (ca. 1,2 daa) etablering i " +
+          "eksisterende bygg. Maks 70 % BYA og 12 m høyde. Navngir ikke Fossefall.",
+      },
+      {
+        source_name: "Fossefall: Fossefall acquires Fyresdal Datacenter AS and establishes its first AI factory",
+        source_url: "https://www.fossefall.ai/news/fossefall-acquires-fyresdal-datacenter-as-and-establishes-its-first-ai-factory",
+        publisher: "Fossefall",
+        source_type: "web",
+        source_date: "2025-11-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Avtale om kjøp av Fyresdal Datacenter fra Norsk Data AS. Anlegget oppgis å være i drift og " +
+          "ha reservert nettkapasitet. Oppgir ikke adresse eller MW.",
+      },
+      {
+        source_name: "Fossefall: Doubling down in Fyresdal – partners with CBRE",
+        source_url: "https://www.fossefall.ai/news/doubling-down-in-fyresdal-partners-with-cbre",
+        publisher: "Fossefall",
+        source_type: "web",
+        source_date: "2025-12-17",
+        primary_source: true,
+        excerpt_or_summary:
+          "Fossefall vil bygge en andre AI-fabrikk i Fyresdal fra grunnen på nyervervet tomt, og har " +
+          "inngått samarbeid med CBRE Data Centre Solutions om utvikling og drift.",
+      },
+      {
+        source_name: "Fossefall: Series A closing, NOK 500 million",
+        source_url: "https://www.fossefall.ai/news/fossefall-enters-next-phase-of-growth-following-successful-nok-500-million-series-a-closing",
+        publisher: "Fossefall",
+        source_type: "web",
+        source_date: "2026-06-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Emisjon på 500 mill. kr; provenyet skal i hovedsak dekke egenkapitalen i AI-fabrikken i " +
+          "Fyresdal.",
+      },
+      {
+        source_name: "Fossefall: Fossefall Selects Armada to Accelerate Nordic AI Factory Deployment",
+        source_url: "https://www.fossefall.ai/news/fossefall-selects-armada-to-accelerate-nordic-ai-factory-deployment",
+        publisher: "Fossefall",
+        source_type: "web",
+        source_date: "2026-08-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bestilling av fem modulære datasentre på til sammen over 9 MW med levering innen første " +
+          "kvartal 2027. Oppgir ikke hvilket sted de skal til.",
+      },
+      {
+        source_name: "Enhetsregisteret: Fyresdal Datacenter AS (927283239)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/927283239",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 10.05.2021, eiendomsselskap, forretningsadresse fortsatt i Horten. Bekrefter " +
+          "selskapet, ikke anlegget eller eierskiftet.",
+      },
+      {
+        source_name: "Enhetsregisteret: roller i Fyresdal Datacenter AS",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/927283239/roller",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Revisor Ernst & Young og regnskapsfører Jansson & Larsen Regnskap, de samme som Fossefall " +
+          "Holding AS. Indikerer at selskapet er overtatt; viser ikke aksjonærer.",
+      },
+      {
+        source_name: "Enhetsregisteret: Fossefall Holding AS (935794854)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/935794854",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 25.06.2025, formål utvikling, finansiering, bygging og drift av datasentre for AI. " +
+          "Bekrefter selskapet.",
+      },
+      {
+        source_name: "Kartverket: adressesøk Molandsmoen 28, Fyresdal",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?sok=Molandsmoen%2028&kommunenummer=4032",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Molandsmoen 28 er gnr 38 bnr 136, adressepunkt 59.20136, 8.08256. Bekrefter adressen, ikke " +
+          "anlegget.",
+      },
+      {
+        source_name: "Statnett: statistikk om tilknytningssaker (kapasitetskø, 30.09.2026)",
+        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak 26/03132: Grenland TRA, Lede AS, sluttkunde FOSSEFALL AS, datasenter, 1 MW i kø, moden " +
+          "01.12.2025, ønsket 01.10.2026. Køpost på konsernnivå; ikke dokumentert koblet til " +
+          "Fyresdal.",
+      },
+      {
+        source_name: "Norsk Data: Fyresdal Datacenter AS",
+        source_url: "https://norskdata.no/fyresdal-datacenter/",
+        publisher: "Norsk Data AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Tidligere eiers omtale: datasenter i Fyresdal med kapasitet til inntil 5,5 MW og mulighet " +
+          "for utvidelse. Oppgir ikke adresse.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "EdgeConneX Fyresdal, Molandsmoen",
+    description:
+      "Hyperskala datasenter under bygging på Molandsmoen i Fyresdal, på gnr 38 bnr 133 og 134. " +
+      "EdgeConneX MCN Norway AS fikk rammeløyve for seks datahaller i august 2025 og startet " +
+      "byggingen i første kvartal 2026. Anlegget har 140 MW reservert hos Statnett via Lede og " +
+      "ytterligere 225 MW i kapasitetskø. Første bygg skal etter planen stå ferdig i 2027 og det " +
+      "siste i 2029.",
+    municipality: "Fyresdal",
+    address: "Birtedalsvegen 57",
+    postal_code: "3870",
+    city: "Fyresdal",
+    latitude: 59.20343,
+    longitude: 8.07584,
+    verification_status: "partially_verified",
+    operational_status: "under_construction",
+    sensitivity: "internal_only",
+    confidence: "high",
+    interest_level: "high",
+    why_interesting:
+      "Et av de største datasenterprosjektene i Norge som faktisk er under bygging, lagt til en " +
+      "kommune med rundt 1 270 innbyggere. Tomtesalget via kommunens selskap og en mellommann har " +
+      "vært omstridt, og det bygges egen 132 kV koblingsstasjon og ny ledning fra Brokke for å " +
+      "forsyne anlegget.",
+    notes:
+      "Opprettet i runde 11 (2026-10-02). Tomt: gnr 38 bnr 133 (ca. 83 daa) og bnr 134 (ca. 90 " +
+      "daa), til sammen ca. 173 daa; E24 oppgir 160 av 240 mål regulert til datasenter. " +
+      "Koordinaten er midtpunktet mellom de to teigene; Kartverkets adressepunkt for " +
+      "Birtedalsvegen 57 ligger på bnr 134. Plan: kommunen bruker planID 38230001, Lede bruker " +
+      "4032_202201. Rammeløyve 14.08.2025 (sak 2025/183); endret rammetillatelse ble påklaget og " +
+      "behandlet hos Statsforvalteren sommeren 2026 (sak 2026/6324, utfallet er ikke lest). " +
+      "Igangsettingsløyve er ikke lest, men EdgeConneX oppgir at byggingen startet første kvartal " +
+      "2026. Søknad om utslippstillatelse etter forurensningsforskriften ligger hos " +
+      "Statsforvalteren (sak 2025/8979). Kraft: Statnett 23/01250 (ELB1848), Brokke KRA/TRA, " +
+      "kunde Lede AS, sluttkunde EdgeConneX MCN Norway AS, 140 MW reservert 29.10.2024 med " +
+      "planlagt tilknytning 31.05.2026, som er passert uten tilknyttet effekt. Statnett 24/01822 " +
+      "(ELB1849): 225 MW i kø, moden 10.02.2025, ønsket 30.11.2028. Tilknytningen krever Ledes " +
+      "nye Molandsmoen koblingsstasjon og ny 132 kV-ledning Brokke–Bjørgedalen; " +
+      "konsesjonssøknadene ligger hos NVE (sak 2025/18352 og 2026/2681), vedtak er ikke funnet. " +
+      "Grunneier: Lede skrev i 2025 at området tilhører Myldr – Energipark Fyresdal AS " +
+      "(kommunalt); E24 skriver at tomta ble solgt via Norsk Data til EdgeConneX i slutten av " +
+      "2025. Hjemmelshaver er ikke sjekket i grunnboka. Kommunen oppgir CTS som " +
+      "entreprenørkontakt. EdgeConneX omtaler seg som svenskeid; eierskapet over " +
+      "prosjektselskapet er ikke dokumentert i åpne registerdata.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Fyresdal kommune: Rammeløyve – Molandsmoen gbnr 38/133-134 (vedtaksbrev 14.08.2025)",
+        source_url: "https://www.fyresdal.kommune.no/download/18.4e2db72e19993ad41d9177/1759146337004/Rammel%C3%B8yve%20-%20Molandsmoen%20gbnr%2038%20133-134,%20Fyresdal.PDF",
+        publisher: "Fyresdal kommune",
+        source_type: "document",
+        source_date: "2025-08-14",
+        primary_source: true,
+        excerpt_or_summary:
+          "Delegert vedtak 147/25, sak 2025/183: rammeløyve for seks datahaller, adkomstbygg og to " +
+          "vanntårn på gbnr 38/133-134, Birtedalsvegen 57. Tiltakshaver Edgeconnex MCN Norway AS. " +
+          "Bekrefter anlegget, tomta og plangrunnlaget.",
+      },
+      {
+        source_name: "Fyresdal kommune: Rammeløyve gitt for etablering av datasenter på Molandsmoen",
+        source_url: "https://www.fyresdal.kommune.no/nyheter/2025-09-29-rammeloyve-gitt-for-etablering-av-datasenter-pa-molandsmoen-gbnr.-38-133-134",
+        publisher: "Fyresdal kommune",
+        source_type: "web",
+        source_date: "2025-09-29",
+        primary_source: true,
+        excerpt_or_summary:
+          "Kunngjøring av rammeløyvet og av dispensasjon for avkjørsler fra fv. 3384. Bekrefter " +
+          "søker, tiltakshaver og gnr/bnr.",
+      },
+      {
+        source_name: "Fyresdal kommune: Hyperskala datasenter på Molandsmoen",
+        source_url: "https://www.fyresdal.kommune.no/tenester/naering-natur-og-landbruk/hyperskala-datasenter-pa-molandsmoen",
+        publisher: "Fyresdal kommune",
+        source_type: "web",
+        source_date: "2026-08-27",
+        primary_source: true,
+        excerpt_or_summary:
+          "Prosjektet utvikles av EdgeConneX. Strømtilknytning 365 MW, hvorav 140 MW tildelt og 225 " +
+          "MW i kø. Seks bygg på rundt 6 000 m² grunnflate, tre etasjer, inntil 25 m.",
+      },
+      {
+        source_name: "EdgeConneX: Fyresdal, Norway (prosjektside)",
+        source_url: "https://go.edgeconnex.com/-edgeconnex-fyresdal-norway-norwegian",
+        publisher: "EdgeConneX",
+        source_type: "web",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Byggingen startet første kvartal 2026. September–oktober 2026: stålreising bygg 1, pæling " +
+          "bygg 2–4, rundt 200 personer. Bygg 1 ferdig 2027, siste bygg 2029. Utvikles og driftes av " +
+          "EdgeConneX. 365 MW planlagt nettkapasitet.",
+      },
+      {
+        source_name: "Statnett: statistikk om tilknytningssaker (reservasjoner og kø, 30.09.2026)",
+        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-09-30",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak 23/01250: Brokke KRA/TRA, Lede AS, sluttkunde EdgeConneX MCN Norway AS, 140 MW " +
+          "reservert 29.10.2024, planlagt 31.05.2026. Sak 24/01822: samme, 225 MW i kø. Bekrefter " +
+          "kraftreservasjonen, ikke bygget.",
+      },
+      {
+        source_name: "Lede: Konsesjonssøknad Molandsmoen koblingsstasjon",
+        source_url: "https://lede.no/getfile.php/1359408-1760376471/Lede/Prosjekter/Molandsmoen/Konsesjonss%C3%B8knad%20Molandsmoen%20Koblingsstasjon%20%281%29.pdf",
+        publisher: "Lede AS",
+        source_type: "document",
+        source_date: "2025-07-01",
+        primary_source: true,
+        excerpt_or_summary:
+          "Lede fikk i september 2023 forespørsel fra EdgeConneX MCN Norway AS om 140 MW på 132 kV " +
+          "til datasenter på Molandsmoen. Dimensjonert for maks 140 MW, 50 MW ved oppstart. Nevner " +
+          "også et eksisterende datasenter på 5 MW i distribusjonsnettet.",
+      },
+      {
+        source_name: "Lede: Molandsmoen koblingsstasjon (prosjektside)",
+        source_url: "https://lede.no/prosjekter/molandsmoen-koblingsstasjon",
+        publisher: "Lede AS",
+        source_type: "web",
+        source_date: "2025-07-01",
+        primary_source: true,
+        excerpt_or_summary:
+          "Ny 132 kV koblingsstasjon på Molandsmoen, jordkabel fra Einangsmoen og ny ledning " +
+          "Brokke–Bjørgedalen for å tilknytte datasenteret. Området tilhørte Myldr – Energipark " +
+          "Fyresdal AS.",
+      },
+      {
+        source_name: "Fyresdal kommune: Kunngjøring om vedtatt reguleringsendring på Molandsmoen",
+        source_url: "https://www.fyresdal.kommune.no/artikler/2024/q3/2024-09-25-kunngjering-om-vedtatt-reguleringsendring-pa-molandsmoen",
+        publisher: "Fyresdal kommune",
+        source_type: "regulation",
+        source_date: "2024-09-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Reguleringsendring for Molandsmoen industri- og friluftsområde vedtatt i kommunestyret " +
+          "19.09.2024 (sak 65/24), med plankart, bestemmelser og konsekvensutredning.",
+      },
+      {
+        source_name: "Enhetsregisteret: EdgeConneX MCN Norway AS (931615254)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/931615254",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Stiftet 01.05.2023, næringskode 63.100, formål datasentervirksomhet, c/o-adresse i Asker. " +
+          "Bekrefter selskapet, ikke anlegget; eiere framgår ikke.",
+      },
+      {
+        source_name: "Kartverket: eiendomsgeokoding gnr 38 bnr 133, Fyresdal",
+        source_url: "https://ws.geonorge.no/eiendom/v1/geokoding?kommunenummer=4032&gardsnummer=38&bruksnummer=133&omrade=true&utkoordsys=4258",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Teiggeometri for 38/133 (ca. 83 daa); 38/134 er ca. 90 daa. Bekrefter eiendommenes " +
+          "beliggenhet, ikke anlegget.",
+      },
+      {
+        source_name: "eInnsyn: Statsforvalteren – byggesak Fyresdal 38/133 og 38/134, endret rammetillatelse (2026/6324)",
+        source_url: "https://api.einnsyn.no/saksmappe/sm_01kt2m3t8ve0kvav2k4wfr6xas",
+        publisher: "Statsforvalteren i Vestfold og Telemark",
+        source_type: "register",
+        source_date: "2026-06-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Klagesak om endret rammetillatelse for Molandsmoen datasenter, mai–august 2026. Vedtak " +
+          "oversendt 01.07.2026; innholdet er ikke lest.",
+      },
+      {
+        source_name: "eInnsyn: NVE – EdgeConneX MCN Norway AS, søknad om anleggskonsesjon (2026/2681)",
+        source_url: "https://api.einnsyn.no/saksmappe/sm_01kh7bcs8vemd9taqm7q4wme57",
+        publisher: "NVE",
+        source_type: "register",
+        source_date: "2026-02-11",
+        primary_source: true,
+        excerpt_or_summary:
+          "EdgeConneX' egen konsesjonssøknad for transformatorstasjon på Molandsmoen, registrert " +
+          "februar 2026. Vedtak er ikke funnet.",
+      },
+      {
+        source_name: "eInnsyn: NVE – kost-nytteanalyse av overskuddsvarme, Fyresdal Datasenter (2026/8858)",
+        source_url: "https://api.einnsyn.no/saksmappe/sm_01kp9f2v3se959w07v5yd5h2h8",
+        publisher: "NVE",
+        source_type: "register",
+        source_date: "2026-04-15",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak om kost-nytteanalyse av overskuddsvarme for EdgeConneX MCN Norway AS' datasenter i " +
+          "Fyresdal, april–juni 2026.",
       },
     ],
   },
@@ -9170,7 +10054,9 @@ export const FUNN: Funn[] = [
       "Reservasjonen står på holdingselskapet, som også har en sak ved Grenland TRA, og er ikke " +
       "ført som sikret kraft. Planlagt tilknytning 30.01.2026 er passert uten tilknyttet effekt. " +
       "Koordinaten er Kartverkets adressepunkt for Stordalsveien 541 (gnr 35 bnr 8). " +
-      "Høringsfristen for arealdelen var 02.10.2026; planen er ikke vedtatt.",
+      "Høringsfristen for arealdelen var 02.10.2026; planen er ikke vedtatt. Runde 11 " +
+      "(2026-10-02): Fossefalls egne sider navngir bare Fyresdal og et svensk anlegg; Åfjord " +
+      "nevnes ikke. Ingen ny informasjon.",
     public_candidate: false,
     kilder: [
       {
