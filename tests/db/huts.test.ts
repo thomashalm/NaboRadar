@@ -551,6 +551,14 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
         // Med søk: treff på navn, også ulåste.
         const ulåst = (await db.pg.query<{ name: string }>(`select name from huts where locked is false and archived_at is null and rejected_at is null order by name limit 1`)).rows[0]!.name;
         expect((await liste(ulåst)).map((h) => h.name)).toContain(ulåst);
+        // DNT-visningen: hytter med eierkategori DNT som mangler kontrollert forening eller lenke, låst eller ikke.
+        await db.pg.exec(`update huts set owner_kind = 'dnt' where name in ('Kobberhaughytta', 'Tømtehytta')`);
+        const gap = async () => (await db.pg.query<{ name: string }>(`select name from hut_contact_list(null, 'dnt_gap')`)).rows.map((h) => h.name);
+        expect(await gap()).toContain("Tømtehytta");
+        expect(await gap()).not.toContain("Kobberhaughytta");
+        await db.pg.query(`select set_hut_contact($1, '', '', 'Eksempellaget', 'internt notat')`, [låst]);
+        expect(await gap()).toContain("Kobberhaughytta");
+        await db.pg.query(`select set_hut_contact($1, 'https://eksempel.no/bestill', '', 'Eksempellaget', 'internt notat')`, [låst]);
         // Notatet er internt: ingen offentlig funksjon returnerer det.
         const offentlig = (await db.pg.query<Record<string, unknown>>(`select * from get_hut($1)`, [låst.slice(0, 8)])).rows[0]!;
         expect(Object.keys(offentlig)).not.toContain("contact_note");

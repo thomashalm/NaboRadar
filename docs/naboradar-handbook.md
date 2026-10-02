@@ -1070,11 +1070,14 @@ ikke alt svarer på. Skal det inn senere, hører det sammen med valgt rad, ikke 
 Første friluftskategori. Retningen står i [data-roadmapen](data-roadmap.md#12-friluft-skjult-lokal-innsikt-ikke-en-turapp),
 modellen i [dataarkitekturen](data-architecture.md#5-kanoniske-enheter-eller-bulk-lag).
 
-**Status: hele landet er importert, upublisert.** 1 661 hytter, 1 490 av dem klare til å vises;
+**Status: hele landet er importert, upublisert.** 1 659 hytter, 1 491 av dem klare til å vises;
 resten står bare i sekundærkilden og er skjult til de er kontrollert. Oslomarka med omland er
 kvalitetssikret hytte for hytte. Resten av landet er kontrollert mot Kartverkets egne data, og
-DNT-hyttene (576) er beriket med forening, bestillingslenke og tilgang fra DNTs egne sider — se
-[research/hytter-dnt-berikelse.md](research/hytter-dnt-berikelse.md). Hyttene på Statskogs
+DNT-hyttene (578) er beriket med forening, bestillingslenke og tilgang fra DNTs egne sider — se
+[research/hytter-dnt-berikelse.md](research/hytter-dnt-berikelse.md). De som sto igjen uten
+forening eller lenke, er gått gjennom én for én i
+[research/hytter-dnt-gap-audit.md](research/hytter-dnt-gap-audit.md): 555 har kontrollert
+forvalter, og resten har et notat om hvorfor. Hyttene på Statskogs
 egen liste (193) har forvalter, lenke og riktig type og tilgang — se
 [research/hytter-statskog-berikelse.md](research/hytter-statskog-berikelse.md). Fjellstyrene
 og «Andre» er ikke beriket. Tallene, fylkestabellen og funnene står i
@@ -1123,7 +1126,9 @@ Tolkningsreglene:
   vises som «ikke beregnet for overnatting».
 - **Eier er ikke forvalter.** `owner_kind` er N50s eierkategori (DNT, Statskog, fjellstyre,
   andre). `manager_name` er navnet Turrutebasen oppgir som vedlikeholdsansvarlig, når det
-  finnes. «Andre» betyr uspesifisert, og vises ikke som en eier.
+  finnes. «Andre» betyr uspesifisert, og vises ikke som en eier. Kategorien tar også feil:
+  Besso står som DNT og er en privat turisthytte; Holmvasshytta i Sunnfjord står som Statskog og
+  tilhører KFUK-KFUM. Og private turisthytter med DNT-avtale (Dørålseter) står som «Andre».
 - **Sengeplasser, sesong og booking vises ikke.** De finnes bare hos DNT/UT.no, som vi ikke
   kan hente fra.
 - **Serveringshytter og gapahuker er utelatt.** N50s «Serveringshytte» er markastuer med
@@ -1195,7 +1200,7 @@ bygger ingen adresse etter mønster. Ingen av dagens kilder leverer lenker. Lenk
 automatisk ennå; kontrolltidspunktet står i admin.
 
 `/admin/hytter` viser de låste hyttene som mangler bestillingsside (høyst 100; søk finner
-resten), med status — «Mangler forvalter», «Mangler
+resten; `?vis=dnt` viser DNT-hyttene uten kontrollert forening eller lenke), med status — «Mangler forvalter», «Mangler
 booking/info», «Infoside finnes», «Lenke komplett» — de som mangler mest først
 (`hut_contact_list`).
 

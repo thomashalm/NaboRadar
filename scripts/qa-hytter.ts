@@ -121,6 +121,13 @@ const CHECKS: Check[] = [
     sql: `select h.name from huts h where ${SYNLIG} and h.manager_verified = 'Statskog' and h.booking_url is null and h.info_url is null`,
   },
   {
+    navn: "Vanlig DNT-hytte (betjent, selvbetjent, ubetjent) uten kontrollert forvalter eller lenke",
+    advarsel: true,
+    sql: `select h.name from huts h where ${SYNLIG} and h.owner_kind = 'dnt'
+          and h.hut_type in ('staffed_hut', 'self_service_hut', 'unstaffed_hut')
+          and (h.manager_verified is null or (h.booking_url is null and h.info_url is null))`,
+  },
+  {
     navn: "DNT-hytte uten navngitt forening",
     advarsel: true,
     sql: `select h.name from huts h where ${SYNLIG} and h.owner_kind = 'dnt' and coalesce(h.manager_verified, h.manager_name) is null`,

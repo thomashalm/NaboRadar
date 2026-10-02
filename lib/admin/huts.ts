@@ -75,14 +75,20 @@ const kontaktSchema = z.object({
 });
 
 export type HutContactRow = z.infer<typeof kontaktSchema>;
+export type HutContactView = "dnt_gap";
 
 /**
  * Kontaktopplysningene for hytter. Uten søk: de låste hyttene som mangler bestillingsside
  * (høyst 100), med
- * de som mangler mest først. Med søk: hyttene som passer navnet.
+ * de som mangler mest først. Med søk: hyttene som passer navnet. Med `dnt_gap`: DNT-hyttene som
+ * mangler kontrollert forening eller lenke, vanlige hytter før rastebuer.
  */
-export async function hentHytteKontakt(client: SupabaseClient, q: string | null): Promise<{ hytter: HutContactRow[]; feil: string | null }> {
-  const { data, error } = await client.rpc("hut_contact_list", { p_q: q });
+export async function hentHytteKontakt(
+  client: SupabaseClient,
+  q: string | null,
+  view: HutContactView | null = null,
+): Promise<{ hytter: HutContactRow[]; feil: string | null }> {
+  const { data, error } = await client.rpc("hut_contact_list", { p_q: q, p_view: view });
   if (error) return { hytter: [], feil: error.message };
   const parsed = z.array(kontaktSchema).safeParse(data ?? []);
   return parsed.success ? { hytter: parsed.data, feil: null } : { hytter: [], feil: "Uventet svar fra hut_contact_list" };

@@ -147,7 +147,8 @@ og står på lista over.
 
 ## Det som gjenstår
 
-- 259 låste hytter uten neste steg: fjellstyrene (147), «Andre» (109) og Statskog (3).
+- 259 låste hytter uten neste steg: fjellstyrene (147), «Andre» (109) og Statskog (3). De tre
+  Statskog-hyttene er fulgt opp i [hytter-dnt-gap-audit.md](hytter-dnt-gap-audit.md).
 - 43 hytter med eierkategori Statskog som ikke står på Statskogs liste.
 - 51 hytter på Statskogs liste som mangler i kildene våre.
 - De fire godkjente hyttene fra Turrutebasen har ikke kommunenummer (kilden har det ikke), og

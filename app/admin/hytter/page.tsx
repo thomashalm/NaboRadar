@@ -25,9 +25,10 @@ export default async function AdminHutsPage({ searchParams }: { searchParams: Se
 
   const raw = (await searchParams).q;
   const q = (Array.isArray(raw) ? raw[0] : raw)?.trim() ?? "";
+  const dntGap = (await searchParams).vis === "dnt" && q.length < 2;
   const [{ saker, feil }, kontakt, status, stengte] = await Promise.all([
     hentHytteKø(session.client),
-    hentHytteKontakt(session.client, q.length >= 2 ? q : null),
+    hentHytteKontakt(session.client, q.length >= 2 ? q : null, dntGap ? "dnt_gap" : null),
     hentKontaktstatus(session.client),
     hentStatuskø(session.client),
   ]);
@@ -108,13 +109,24 @@ export default async function AdminHutsPage({ searchParams }: { searchParams: Se
         {kontakt.feil && <p className="mt-3 text-[13px] text-danger">Fikk ikke hentet hyttene: {kontakt.feil}</p>}
         {q.length >= 2 ? (
           kontakt.hytter.length === 0 && !kontakt.feil && <p className="mt-3 text-[15px] text-muted">Ingen treff på «{q}».</p>
+        ) : dntGap ? (
+          <p className="mt-3 text-[13px] text-ink">
+            {kontakt.hytter.length} DNT-hytter uten kontrollert forening eller offisiell lenke. Vanlige hytter står først;
+            rastebuer og nødbuer har ofte ingen egen side, og notatet sier hvorfor.{" "}
+            <Link href="/admin/hytter" className="underline">
+              Vis låste hytter
+            </Link>
+          </p>
         ) : (
           <p className="mt-3 text-[13px] text-ink">
             {låste} låste hytter:{" "}
             {(["unknown", "manager_only", "info_link", "booking_link"] as const)
               .map((kind) => `${antall(kind)} ${HUT_NEXT_STEP_LABELS[kind].toLowerCase()}`)
               .join(" · ")}
-            . Listen viser de som mangler bestillingsside, høyst 100, med de som mangler mest først. Søk for å finne en bestemt hytte.
+            . Listen viser de som mangler bestillingsside, høyst 100, med de som mangler mest først. Søk for å finne en bestemt hytte.{" "}
+            <Link href="/admin/hytter?vis=dnt" className="underline">
+              Vis DNT uten forening eller lenke
+            </Link>
           </p>
         )}
         <ul className="mt-4 space-y-3">
