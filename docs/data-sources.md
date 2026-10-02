@@ -309,6 +309,54 @@ Saksinnsyn-lenker som kommunen selv har lagt inn i DiBK-feltet `link` vises like
 
 ---
 
+## 7. Hytter og koier
+
+Undersøkt 2026-10-02. Alt under er testet med faktiske kall der ikke annet står.
+
+### Kartverket – N50 Kartdata (hovedkilde)
+
+| | |
+|---|---|
+| Eier | Kartverket |
+| Lisens | CC BY 4.0. Navngivelse: «© Kartverket» |
+| Tilgang | Filnedlasting. **Ingen WFS** (`wfs.n50` svarer «UKJENT APPLIKASJON»). Ett zip-arkiv per kommune, listet i `https://nedlasting.geonorge.no/geonorge/ATOM-feeds/N50Kartdata_AtomFeedGML.xml` |
+| Objekt | `Bygning` med `bygningstype = 956` og `hytteinformasjon`. Det finnes ingen objekttype «Turisthytte» i gjeldende skjema (20230401) |
+| Antall | 1 880 nasjonalt: Ubetjent 771, Rastebu 461, Gapahuk 243, Selvbetjent 184, Serveringshytte 112, Betjent 109 |
+| Felt | `navn`, `betjeningsgrad`, `hytteeier` (1 DNT, 2 Andre, 3 Fjellstyre, 4 Statskog), `tilgjengelighet` (Låst/Ulåst), `oppdateringsdato`, punkt i UTM 33 |
+| Mangler | Sengeplasser, sesong, åpen/stengt, navngitt eier, booking |
+| Oppdatering | Ukentlig |
+| Ekstern ID | **Ingen.** `gml:id` genereres på nytt per eksport: to eksporter av Oslo samme natt hadde 0 av 13 224 felles |
+| Automatisk synk | Ja. Bygningsfilen leses ut av arkivet med delforespørsler (`lib/providers/zip-range.ts`) — Oslo tar 0,2 s |
+
+Kodelistene: [betjeningsgrad](https://register.geonorge.no/sosi-kodelister/kartdata/betjeningsgrad),
+[hytteeier](https://register.geonorge.no/sosi-kodelister/kartdata/hytteeier).
+
+### Kartverket – Tur- og friluftsruter, `RuteInfoPunkt` (sekundærkilde)
+
+| | |
+|---|---|
+| Lisens | Metadata: «No conditions apply to access and use». Kartverket navngis uansett |
+| Tilgang | WFS: `https://wfs.geonorge.no/skwms1/wfs.turogfriluftsruter`, `app:RuteInfoPunkt` |
+| Antall | 9 744 punkter, 1 356 av dem hytter (kode 42, 43, 44 og 12) |
+| Felt | `lokalId` (UUID), `opphav` (oftest navnet), `informasjon`, `tilrettelegging` (tallkode), `vedlikeholdsansvarlig` (fritekst), `sesong` (bokstavkode) |
+| Typekoder | Ikke publisert. Kontrollert mot N50 på samme koordinat: 42 = betjent (94 av 103), 43 = selvbetjent (166 av 173), 44 = ubetjent (470 av 520). 12 = «hytte» uten nærmere type |
+| Ekstern ID | `lokalId`, unik. Stabilitet over tid er ikke testet |
+| Svakheter | `opphav` er noen ganger «Rett i kartet». Fører også hoteller og serveringssteder som hytter |
+
+### Vurdert og ikke brukt
+
+| Kilde | Hvorfor ikke |
+|---|---|
+| **DNT / UT.no** | Nasjonal Turbase er nedlagt (`api.nasjonalturbase.no` gir 404). UT.no har ikke noe offentlig API, og brukervilkårene (oppdatert 09.03.2026) forbyr automatisk innhenting til kommersiell bruk. DNT oppgir «over 600 hytter», 47 betjente. Sengeplasser, sesong og booking finnes bare her. **Krever avtale.** Kontakt: post@ut.no |
+| **Statskog** | 247 punkter (119 åpne buer, 125 utleiehytter, 3 åremål) ligger innebygd på statskog.no. Ingen lisens oppgitt, ikke i Geonorge. **Krever samtykke** |
+| **OpenStreetMap** | 978 hytter i Norge (`alpine_hut`, `wilderness_hut`), med sengetall og operatør på om lag halvparten. ODbL: visning med navngivelse er greit, men flettes OSM-felt inn i andre kilders rader, blir resultatet en avledet database med share-alike. Må i så fall holdes som egen kilde som bare kan skjules, ikke flettes |
+| **Sentralt stedsnavnregister** | 1 162 steder av typen `turisthytte`, med varig `stedsnummer`. Bare navn og punkt. Aktuell som alias-kilde |
+| **Oslo kommune, Bymiljøetaten** | ArcGIS-lag «Hytter» (42) og «Markastue» (42). Lisens ikke oppgitt, ingen endringsdato, døde lenker |
+| **Dagsturhytta** | 67 punkter på dagsturhytta.no (Vestland, Rogaland), pluss spredte fylkeslag. Ingen lisens |
+| **Fjellstyrene / inatur** | Ikke noe åpent register. inatur har ingen dokumentert åpen API |
+| **Wikidata** | 33 objekter i Norge. For lite |
+| **Miljødirektoratet** | Statlig sikra friluftsområder er flater uten hyttefelt |
+
 ## Testpunkter (offentlige steder)
 
 Antall DiBK-planområder innen radius (discovery 2026-09-21, grovmåling til nærmeste polygonhjørne; produktet bruker PostGIS `ST_DWithin` mot hele polygonet).

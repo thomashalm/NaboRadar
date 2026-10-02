@@ -25,6 +25,9 @@ export const AREA_CATEGORIES = [
   // derfor ikke til noen seksjon i AREA_SECTIONS, og vises som en egen liten notis.
   "skolekrets",
   "tilfluktsrom",
+  // Kildeposter for hytter og koier. Aldri publisert og aldri vist: de er råstoffet til den
+  // kanoniske tabellen `huts`, som har sine egne lesefunksjoner. Se lib/huts.
+  "hytte_kilde",
 ] as const;
 export type AreaCategory = (typeof AREA_CATEGORIES)[number];
 

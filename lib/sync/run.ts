@@ -201,6 +201,14 @@ export async function runSync<TRecord>(
       progress({ phase: "reconcile", message: "hoppet over (mistenkelige tall)" });
     }
 
+    // 6. Etterarbeid i databasen, for kilder der radene er kildeposter (se DataProvider.postSyncFn).
+    if (provider.postSyncFn && verdict.allowReconcile) {
+      const [etter] = await db.rpc<Record<string, number>>(provider.postSyncFn);
+      const tekst = etter ? Object.entries(etter).map(([k, v]) => `${k} ${v}`).join(", ") : "ingen tellere";
+      progress({ phase: "reconcile", message: `${provider.postSyncFn}: ${tekst}` });
+      if (etter?.flagged) result.warnings.push(`${etter.flagged} hytter venter på manuell kontroll.`);
+    }
+
     result.status = verdict.suspicious ? "suspicious" : result.failed > 0 ? "partial" : "success";
   } catch (error) {
     result.status = "failed";

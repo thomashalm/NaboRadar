@@ -114,7 +114,9 @@ Radantall og størrelser er målt i produksjon 2026-10-02. Hele basen er 132 MB.
 | Tabell | Lag | Rader | Størrelse | Geometri | Nøkkel | Risiko ved skala |
 |---|---|---|---|---|---|---|
 | `area_features` | publisert | 38 128 | 90 MB | `geometry(Geometry, 4326)`, punkt/linje/flate | `id` uuid; unik `(provider_id, external_id)` | **høy** — se sync |
-| `area_feature_categories` | register | 11 | liten | — | `category` | lav |
+| `area_feature_categories` | register | 13 | liten | — | `category` | lav |
+| `huts` | kanonisk | 58 (pilot) | < 1 MB | punkt | `id` uuid | lav — noen tusen rader nasjonalt |
+| `hut_sources` | kobling | 99 (pilot) | liten | — | `feature_id`; FK `hut_id` | lav |
 | `events` | publisert | 1 561 | 14 MB | flate | `id`; unik `(provider_id, external_id)` | lav |
 | `event_documents` | publisert | 3 094 | 1,4 MB | — | `id`; FK `event_id` | lav |
 | `providers` | kildemodell | 20 | liten | — | `id` text | lav |
@@ -172,6 +174,8 @@ opprettes før første kartlag som spør på kartutsnitt (se [10](#10-romlige-in
 | Skriving | `upsert_area_features`, `upsert_events`, `mark_area_features_removed`, `mark_removed_from_source` | `service_role` |
 | Sync-koordinering | `sync_run_start/finish`, `sync_due`, `claim_next_due_sync`, `claim_sync_request`, `provider_baseline`, `set_alert_state` m.fl. | `service_role` |
 | Drift | `provider_health`, `recent_sync_runs`, `request_sync`, `scheduler_status` | admin |
+| Hytter | `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search` | `anon`, via Next-serveren. `security definer`; svarer bare når kategorien `hytte` er publisert eller kalleren er admin |
+| Hytter, internt | `refresh_huts` (`service_role`, etter sync), `hut_review_queue` (admin) | — |
 | Research | `research_*`, `save_research_item`, `record_research_review`, `datacenter_*`, `save_datacenter_*` | admin; `is_admin()` sjekkes inne i hver |
 | Views | `admin_research_review_status`, `admin_datacenter_overview`, `admin_datacenter_refresh_status` | bare via funksjonene over |
 
@@ -220,7 +224,7 @@ mene noe om?**
 |---|---|---|
 | Datasentre | **Kanonisk** (research) | Identitet over tid: eierskifte, rebrand, utvidelse. Flere kilder per felt |
 | Besøksgårder, dyregårder, 4H-gårder | **Kanonisk** (research eller hybrid) | Ingen nasjonal kilde; åpningstid og status må verifiseres |
-| DNT-hytter, andre åpne hytter og koier | **Sted** i `area_features`; kanonisk kobling når to kilder overlapper | Én god kilde gir stabil ID. Samme hytte hos DNT, Statskog og kommunen er et dedup-problem |
+| Hytter og koier | **Kanonisk** (`huts`), bygget automatisk av kildeposter i `area_features` | Hovedkilden har ingen stabil ID, og samme hytte finnes i flere kilder. Se under |
 | Badeplasser, gapahuker, rasteplasser, turmål | **Sted** i `area_features` | Punkt med navn og noen kodede egenskaper. Identitet = kildens ID |
 | Natur- og friluftssentre, familieaktiviteter | **Sted**, eller research hvis kilden er svak | Avhenger av om det finnes en strukturert kilde |
 | Fiskevann | **Sted** for vannet som turmål (punkt + arter); **bulk** for selve innsjøflaten | Arter og regler er egenskaper ved et navngitt vann. Flaten er kartdata |
@@ -235,6 +239,31 @@ review-plan og historikk. I dag er det `admin_research_items` med tilleggstabell
 
 **Sted** betyr: én rad per objekt i kilden, identifisert av `(provider_id, external_id)`.
 Ingen manuell review. Ferskhet følger kilden.
+
+**Kanonisk over kildeposter** er mellomtingen, og hytter er første eksempel (migrasjon
+`20261019000000_huts.sql`):
+
+```
+area_features (kategori hytte_kilde, aldri publisert)   én rad per objekt per kilde
+        │  refresh_huts() etter hver sync
+        ▼
+huts                                                    én rad per fysiske hytte, egen uuid
+hut_sources (feature_id → hut_id, match_basis)          hvilke poster som beskriver hvilken hytte
+        │
+        ▼
+huts_near / huts_in_bbox / huts_in_municipality / huts_search     svarer bare når `hytte` er publisert
+```
+
+Synken er den vanlige: provideren skriver kildeposter, og vaktene og reconciliation virker som
+før. Det nye er etterarbeidet (`DataProvider.postSyncFn`), som kobler postene til hytter —
+samme navn innen 300 m, ellers innen 50 m uansett navn, ellers ny hytte — regner de kanoniske
+feltene på nytt fra den høyest prioriterte kilden som har en verdi, og arkiverer hytter uten
+aktiv kilde. Hyttas uuid overlever dermed at kilden bytter nøkkel eller navn. Manuell kontroll
+er unntaket: bare når kildene er uenige om typen, når to hytter ligger innen 100 m, eller når
+en hytte bare finnes i en sekundærkilde.
+
+Mønsteret gjenbrukes for neste kategori med flere kilder og ustabile ID-er. Det er ikke et
+generelt entitetslag: tabellen er hyttespesifikk, med ekte kolonner.
 
 **Bulk-lag** betyr: en egen tabell per datasett, med bare det spørringene trenger. Ingen
 review, ingen feltproveniens, ingen historikk per rad. Lastes som hele versjoner, ikke rad for
@@ -302,7 +331,8 @@ to_id, kind)` kan ikke ha fremmednøkler og kan ikke validere noe av dette.
 | Vann ↔ fiskeart | egen tabell `(vann, art)` når fiskevann bygges; arter som kodet liste |
 | Hytte ↔ forvalter | kolonne på hytta til det finnes to forvaltere for samme hytte |
 | Rute ↔ hytte | egen tabell når ruter bygges |
-| Enhet ↔ kildepost | `entity_source_records`, se [8](#8-stabile-id-er-og-dedup) |
+| Hytte ↔ kildepost | `hut_sources` (finnes) |
+| Research-enhet ↔ kildepost | `entity_source_records`, se [8](#8-stabile-id-er-og-dedup) |
 
 Organisasjoner (operatører, forvaltere) er i dag navn og organisasjonsnummer på relasjonen.
 En egen `organizations`-tabell lønner seg først når samme aktør skal vises på tvers av
@@ -736,11 +766,11 @@ læres av bruk, eller fasetter på tvers av mange felt. Ingen av dem er i nærhe
 
 | Rolle | Tabeller | Funksjoner |
 |---|---|---|
-| `anon` | **ingen** | `features_near`, `features_count_near`, `events_within`, `get_event`, `data_status` |
+| `anon` | **ingen** | `features_near`, `features_count_near`, `events_within`, `get_event`, `data_status`, og `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search` |
 | `authenticated` | `SELECT` på admin-tabellene bak `is_admin()`; eget innhold i `watched_areas` | de samme, pluss admin-funksjonene — som alle sjekker `is_admin()` selv |
 | `service_role` | alt | alt — sync-workeren |
 
-**Offentlig lesing går bare gjennom RPC.** De fem lesefunksjonene er `security definer` med
+**Offentlig lesing går bare gjennom RPC.** Lesefunksjonene er `security definer` med
 fast `search_path`. Hver har harde grenser i seg, og `features_near` / `features_count_near`
 returnerer bare kategorier med `is_public = true`.
 

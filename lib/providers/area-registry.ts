@@ -1,5 +1,7 @@
 import { DsbTilfluktsromProvider } from "./dsb/tilfluktsrom";
 import { SykehusProvider } from "./helse/sykehus";
+import { KartverketN50HytterProvider } from "./kartverket/n50-hytter";
+import { KartverketTurrutebasenHytterProvider } from "./kartverket/turrutebasen-hytter";
 import { MdirForurensetGrunnProvider } from "./mdir/forurenset-grunn";
 import { MdirIndustriProvider } from "./mdir/industri";
 import { NveKvikkleireSonerProvider } from "./nve/kvikkleire-soner";
@@ -27,6 +29,10 @@ export const areaFeatureProviders: readonly AreaFeatureProvider[] = [
   new OmsorgstilbudProvider(),
   new OsloSkolekretsProvider(),
   new DsbTilfluktsromProvider(),
+  // Hyttekildene skriver kildeposter (kategori hytte_kilde), og kaller refresh_huts() etterpå.
+  // Hovedkilden først, slik at den oppretter hyttene og sekundærkilden kobler seg på.
+  new KartverketN50HytterProvider(),
+  new KartverketTurrutebasenHytterProvider(),
 ];
 
 export function getAreaFeatureProvider(id: string): AreaFeatureProvider | undefined {

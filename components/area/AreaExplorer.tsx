@@ -50,6 +50,8 @@ interface AreaExplorerProps {
    * teksten i HTML-en uten at denne klientkomponenten må kjenne til oppslaget.
    */
   skolekrets?: React.ReactNode;
+  /** «Friluft i nærheten», rendret på serveren. Står sist blant seksjonene. Se AreaFacts. */
+  friluft?: React.ReactNode;
   /**
    * Innhold som legges **over** resultatet, før de offentlige seksjonene.
    *
@@ -154,6 +156,7 @@ export function AreaExplorer({
   lookupFacts: lookupFactsPromise,
   tiles,
   skolekrets,
+  friluft,
   leadSections,
   extraSections,
   internalFeatures = NO_INTERNAL,
@@ -412,6 +415,7 @@ export function AreaExplorer({
           lookupFacts={lookupFactsPromise}
           radius={radius}
           pending={pending}
+          friluft={friluft}
           saker={
           <EventFeed
             events={eventsPromise}

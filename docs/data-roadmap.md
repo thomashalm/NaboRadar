@@ -257,7 +257,7 @@ kopiere resultatet ved å kjøpe et datasett.
 | Kategori | Hvorfor ikke |
 |---|---|
 | Dagligvare, kafé, apotek, lege | Google Maps og Nabolagsprofil gjør det bedre. Vi tilfører ingenting |
-| Lekeplasser, parker, turstier, badeplasser | Samme. Dette er den største fellen i en «positive kvaliteter»-liste: det føles nyttig og er gratis å foreslå, men vi ville vedlikeholdt et dårligere Google Maps |
+| Lekeplasser, parker, turstier, badeplasser | Samme. Dette er den største fellen i en «positive kvaliteter»-liste: det føles nyttig og er gratis å foreslå, men vi ville vedlikeholdt et dårligere Google Maps. **Presisert 02.10.2026:** hytter og koier er unntatt og bygges — se [Friluft](#12-friluft-skjult-lokal-innsikt-ikke-en-turapp) |
 | Pris, verdiestimat, prishistorikk | Eiendomsverdi, Hjemla og Virdi eier dette. Dyrt, delvis regulert, og ikke vår vinkel |
 | Byggeår, boligtype, tomteareal | Låst bak Matrikkelen, og står i annonsen allerede |
 | Demografi og levekårsdata | Nabolagsprofil har det. «Hvem bor her» er dessuten en framstilling vi bevisst holder oss unna |
@@ -416,37 +416,84 @@ begrunnelsen — så slipper vi å vurdere samme idé på nytt om et halvår.
 
 ---
 
-## 12. Planlagt modul: «Friluftsliv der du bor»
+## 12. Friluft: skjult lokal innsikt, ikke en turapp
 
-Besluttet som retning 02.10.2026. **Ingenting er importert eller bygget.** Fundamentet er
-gjennomgått først — se [dataarkitekturen](data-architecture.md).
+Retning besluttet 02.10.2026. Den brede modulen «Friluftsliv der du bor» ble vurdert og lagt
+bort til fordel for noe smalere.
 
-**Åpent punkt som må avgjøres før noe bygges:** «Lekeplasser, parker, turstier, badeplasser» står
-i [ikke verdt det nå](#ikke-verdt-det-nå), med begrunnelsen at vi ville vedlikeholdt et dårligere
-Google Maps. Modulen er en beslutning om at premisset er endret for friluftsliv. Hva vi tilfører
-utover kart og turapper, må skrives inn her — kategori for kategori, som hygiene eller moat — før
-første import. Til det er gjort, står begge deler i dokumentet, og det er med vilje.
+**NaboRadar skal ikke bli en generell turapp.** Vi tar inn friluftsdata bare når de
 
-Arkitekturmodell per planlagt kategori:
+- er vanskelige å få oversikt over andre steder,
+- gir lokal innsikt — noe som finnes i nærheten uten at man visste det,
+- kan overraske,
+- og har en tydelig geografisk verdi rundt en adresse.
 
-| Kategori | Modell | Merknad |
+Det er også svaret på premisset i [ikke verdt det nå](#ikke-verdt-det-nå): lekeplasser, parker,
+vanlige turstier, badeplasser og generelle POI-er står der fortsatt, fordi Google Maps og
+turappene gjør dem bedre. Hytter og koier er noe annet — de finnes spredt på DNT, Statskog,
+fjellstyrer og kartdata, og ingen viser dem samlet rundt en adresse.
+
+| Kategori | Status | Modell |
 |---|---|---|
-| DNT-hytter, andre åpne hytter og koier, Statskog-/fjellstyre-/kommunale hytter | Provider (sted) | Flere kilder for samme hytte er et dedup-problem; kanonisk kobling først når to kilder overlapper |
-| Badeplasser, gapahuker, rasteplasser, turmål | Provider (sted) | Punkt med kodede egenskaper |
-| Fiskevann og fiskearter | Provider (sted) + bulk-lag for flatene | Arter er en egenskap ved et navngitt vann; innsjøflaten er kartdata |
-| Besøksgårder, dyregårder, 4H-gårder, familieaktiviteter | Research eller hybrid | Ingen nasjonal kilde; åpningstid og status må verifiseres og reviewes |
-| Natur- og friluftssentre | Provider hvis kilden finnes, ellers research | |
-| Turstier | Bulk-lag | Segmenter har ikke identitet. Ruter er steder |
-| Myr (grunnlag for et senere «MulteRadar») | Bulk-lag | Et modellert lag bygges oppå, ikke i samme tabell |
+| **Hytter og koier** | Runde 1: pilot i Oslomarka, upublisert | Kanonisk tabell (`huts`) over kildeposter |
+| Fiskevann og fiskearter | mulig senere | ikke vurdert |
+| Multepotensial | mulig senere | ikke vurdert |
+| Lekeplasser, parker, vanlige turstier, badeplasser, generelle POI-er | ikke prioritert | — |
 
-Forutsetninger som gjelder uansett hvilken kategori som kommer først:
+Adresse først, men nasjonal utforskning når datasettet er nyttig i seg selv: hyttene vises som en
+liten seksjon på `/omrade` («Friluft i nærheten») og som eget kart på `/hytter`. Samme datasett,
+samme funksjoner i databasen.
 
-1. Kategorien registreres **upublisert** i `area_feature_categories` og publiseres etter kontroll.
-2. Kildekravene i [kapittel 8](#8-kildekrav), inkludert at ekstern ID er bevist stabil.
-3. Lisensen må tillate vår bruk — avklares per kilde, særlig for turdata.
-4. Databaseplanen oppgraderes før første datasett som ikke er noen tusen punkter. Basen er
-   132 MB av 500 MB på Supabase Free.
-5. Sync legges om før første datasett over 100 000 rader, og bulk-lag lastes ikke gjennom den.
+### Hytter og koier — runde 1
+
+**Kilder.** Undersøkt 02.10.2026; detaljer i [data-sources.md](data-sources.md#7-hytter-og-koier).
+
+| Kilde | Vurdering |
+|---|---|
+| **Kartverket N50 Kartdata** (bygningstype 956 med hytteinformasjon) | **Hovedkilde.** CC BY 4.0, 1 880 objekter nasjonalt, betjeningsgrad, eierkategori og låst/ulåst. Ingen stabil ID og ingen WFS — leses fra kommunevise arkiv |
+| **Kartverket Tur- og friluftsruter** (`RuteInfoPunkt`) | **Sekundærkilde.** WFS, varig UUID, forvalternavn for noen. 1 356 hytter. Ujevn kvalitet |
+| DNT / UT.no | **Kan ikke brukes.** Nasjonal Turbase er nedlagt, UT.no har ikke noe API, og vilkårene forbyr automatisk innhenting til kommersiell bruk. Sengeplasser, sesong og booking finnes bare her — krever avtale |
+| Statskog | 247 hytter og koier ligger på statskog.no, uten lisens. Krever samtykke |
+| OpenStreetMap | ODbL. Har sengetall og UT-lenker, men kan ikke flettes felt for felt med andre kilder uten at share-alike slår inn. Ikke brukt |
+| Oslo kommune (Bymiljøetaten), dagsturhytta.no, fjellstyrene/inatur | Ingen oppgitt lisens, eller bare tilgjengelig etter avtale |
+| Sentralt stedsnavnregister | Bare navn og punkt. Aktuelt som alias-kilde senere |
+
+**Hva vi dermed vet og ikke vet.** Vi har navn, sted, type (betjent, selvbetjent, ubetjent,
+rastebu), eierkategori (DNT, Statskog, fjellstyre, andre) og om døra er låst. Vi har **ikke**
+sengeplasser, sesong, åpen/stengt eller bookinglenke, og viser ingen av delene. «Ulåst» er
+kildens opplysning om døra — ikke et løfte om at hytta er åpen.
+
+**Avgrensning.** N50s «Serveringshytte» (markastuer med servering) og «Gapahuk» tas ikke inn.
+En hytte som bare finnes i sekundærkilden vises ikke før et menneske har bekreftet den;
+sekundærkilden skiller ikke turisthytter fra hoteller (Kleivstua er ett eksempel).
+
+**Pilot.** Oslomarka med omland (10,3–11,1° Ø, 59,75–60,3° N, 21 kommuner): 55 poster fra N50
+og 47 fra Turrutebasen ble til 58 hytter, 55 av dem synlige, 8 til manuell kontroll. Mot DNT
+Oslo og Omegns egen liste (47 hytter i marka) finner vi 30. Av de 17 som mangler er åtte anneks
+på tun vi har (Sæteren Gård, Tømtehyttene); resten er nyere eller små hytter som ikke står
+i N50. Ett typeavvik: N50 fører Sæteren Gård som ubetjent, DNT som betjent.
+
+**Radius.** Hytter er ikke butikker. Seksjonen bruker en trapp — 10 km, så 20 km, så 30 km —
+og stopper på første trinn som gir minst tre treff. Kontrollert mot tolv adresser:
+
+| Adresse | 10 km | 20 km | 30 km | Valgt |
+|---|---|---|---|---|
+| Oslo sentrum, Majorstuen, Sognsvann, Bekkestua | 9–10 | 30–34 | 46–50 | 10 km |
+| Asker, Nittedal, Grua | 4–8 | 11–20 | 26–44 | 10 km |
+| Hønefoss, Lillestrøm, Ski | 1–2 | 11–16 | 19–31 | 20 km |
+| Drøbak, Jessheim | 0 | 3–7 | 14–22 | 20 km |
+
+Med 15 km som første trinn fikk Oslo sentrum 21 treff — det er marka, ikke nabolaget.
+
+**Før landsdekkende import** må dette avgjøres:
+
+1. Om dekningen er god nok uten DNT-data. N50 har 636 DNT-hytter; DNT oppgir «over 600».
+2. Om serveringshytter og gapahuker skal med som egne typer.
+3. Hvem som kontrollerer hyttene som bare finnes i sekundærkilden (anslagsvis 200 nasjonalt).
+4. At N50-synken leser 357 kommunearkiv i stedet for 21 (målt: under ett sekund per kommune).
+
+Databaseveksten er ikke et hinder: piloten la til under 1 MB, og hele landet er anslått til
+3–5 MB av de 500 MB planen har.
 
 ---
 

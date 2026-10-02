@@ -46,6 +46,12 @@ interface AreaFactsProps {
    * resten — derfor sendes de inn hit i stedet for å ligge i en egen blokk over siden.
    */
   saker: React.ReactNode;
+  /**
+   * «Friluft i nærheten». Rendret på serveren og sendt inn ferdig, som skolekretsnotisen.
+   * Står sist blant seksjonene, før kildelinjen: det er noe som finnes i nærheten, ikke et
+   * forhold ved adressen, og har sin egen radius.
+   */
+  friluft?: React.ReactNode;
 }
 
 /**
@@ -58,6 +64,7 @@ export function AreaFacts({
   radius,
   pending,
   saker,
+  friluft,
 }: AreaFactsProps) {
   return (
     <section
@@ -81,6 +88,7 @@ export function AreaFacts({
             lookupFacts={lookupFacts}
             radius={radius}
             saker={saker}
+            friluft={friluft}
           />
         </Suspense>
       </div>
@@ -110,11 +118,13 @@ function FactsBody({
   lookupFacts,
   radius,
   saker,
+  friluft,
 }: {
   storedFacts: Promise<AreaFactsResult>;
   lookupFacts: Promise<AreaFactsResult>;
   radius: number;
   saker: React.ReactNode;
+  friluft?: React.ReactNode;
 }) {
   const db = use(storedFacts);
   const order =
@@ -151,6 +161,7 @@ function FactsBody({
             />
           ),
         )}
+        {friluft}
       </div>
       <Suspense fallback={null}>
         <Kildelinjer db={db} lookupFacts={lookupFacts} radius={radius} />

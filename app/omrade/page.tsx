@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AreaShell } from "@/components/area/AreaShell";
 import { AreaExplorer } from "@/components/area/AreaExplorer";
+import { FriluftSeksjon } from "@/components/area/FriluftSeksjon";
 import { SkolekretsNotis } from "@/components/area/SkolekretsNotis";
 import { SearchBox } from "@/components/search/SearchBox";
 import { areaParamsSchema } from "@/lib/area-params";
@@ -56,6 +57,7 @@ export default async function AreaPage({ searchParams }: { searchParams: SearchP
         lookupFacts={lookupFacts}
         tiles={getMapTileConfig()}
         skolekrets={<SkolekretsNotis lat={lat} lng={lng} />}
+        friluft={<FriluftSeksjon lat={lat} lng={lng} />}
       />
     </AreaShell>
   );

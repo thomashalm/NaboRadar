@@ -224,6 +224,8 @@ hver kjøring, så en migrasjon som ikke kan spilles av på nytt, brekker testen
 | `events` | Plansaker fra DiBK. Polygon/multipolygon, generert `centroid` og `computed_area_m2` | **Ja** — full sync fra DiBK |
 | `event_documents` | Tillatte plandokumenter. CHECK på type, tittel og mime-type | **Ja** |
 | `area_features` | Alle synkede områdefakta, ~38 000 rader. Inkluderer kategorien `skolekrets`, som er den eneste som besvarer «ligger punktet inne i?» og derfor står utenfor `AREA_SECTIONS` | **Ja** |
+| `huts` | Hytter og koier: én rad per fysiske hytte, bygget av kildeposter i `area_features` (kategori `hytte_kilde`). Se [Hytter og koier](#hytter-og-koier) | **Ja** — synk + `refresh_huts()`. Unntak: `last_verified_at` og `review_dismissed`, som settes av mennesker |
+| `hut_sources` | Hvilke kildeposter som beskriver hvilken hytte, og hvorfor de ble koblet | Ja, men koblingene bygges på nytt — hyttenes uuid blir da nye |
 | `area_feature_categories` | Kategoriregisteret: domene, etikett og `is_public`. `area_features.category` er en fremmednøkkel hit. En kategori som ikke er publisert, returneres ikke av lese-RPC-ene | Ja (seedes i migrasjon) |
 | `sync_runs` | Én rad per kjøring: modus, tellere, advarsler, feil | Nei, men kun drifthistorikk |
 | `sync_requests` | Kø for «Kjør sync nå» fra `/admin` | Nei, men flyktig |
@@ -253,6 +255,9 @@ kvikkleiresone har over 100 000 hjørner, og ville ellers sprengt svaret.
 | `events_within(lat, lng, radius_m, announced_since, sort, max_results)` | Plansaker innen radius |
 | `get_event(event_id, lat, lng)` | Én plansak med dokumenter |
 | `data_status()` | Sist vellykkede sync per kilde, til kildelinjen i UI |
+| `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search` | Hytter og koier: rundt et punkt (inntil 50 km, nærmest først), i et kartutsnitt, i en kommune, og navnesøk. Svarer bare når kategorien `hytte` er publisert, eller kalleren er admin |
+| `refresh_huts()` | Kobler kildeposter til hytter og regner de kanoniske feltene på nytt. Kjøres av synken, kun service_role |
+| `hut_review_queue()` | Hytter med en konflikt noen bør se på. Kun innlogget admin |
 | `upsert_events`, `upsert_area_features`, `mark_*_removed` | Skriving, kun service_role |
 | `sync_run_start/finish`, `sync_due`, `claim_next_due_sync`, `claim_sync_request`, `finish_sync_request`, `expire_stale_sync_requests`, `provider_baseline`, `set_alert_state` | Sync-koordinering, kun service_role |
 | `provider_health`, `recent_sync_runs`, `request_sync`, `scheduler_status` | `/admin`, kun innlogget admin |
@@ -295,8 +300,8 @@ Tilgangen er en **positiv, uttømmende liste**, ikke en opprydding i enkelttilfe
 
 | Rolle | Kan kalle |
 |---|---|
-| `anon` | `features_near`, `features_count_near`, `events_within`, `get_event`, `data_status` |
-| `authenticated` | det samme, pluss `is_admin`, `provider_health`, `recent_sync_runs`, `recent_sync_requests`, `request_sync`, `scheduler_status` og research-, review- og datasenterfunksjonene — som alle sjekker `is_admin()` selv |
+| `anon` | `features_near`, `features_count_near`, `events_within`, `get_event`, `data_status`, `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search` |
+| `authenticated` | det samme, pluss `hut_review_queue`, `is_admin`, `provider_health`, `recent_sync_runs`, `recent_sync_requests`, `request_sync`, `scheduler_status` og research-, review- og datasenterfunksjonene — som alle sjekker `is_admin()` selv |
 | `service_role` | alt — sync-workeren |
 | `postgres` | alt — migrasjoner og pg_cron |
 
@@ -329,7 +334,7 @@ fjernet.
 
 | Tabell | `anon` | `authenticated` |
 |---|---|---|
-| `providers`, `events`, `event_documents`, `area_features`, `area_feature_categories` | ingen | ingen |
+| `providers`, `events`, `event_documents`, `area_features`, `area_feature_categories`, `huts`, `hut_sources` | ingen | ingen |
 | `admin_users`, `sync_runs`, `sync_requests`, `admin_research_*` | ingen | SELECT bak `is_admin()` |
 | `watched_areas` | ingen | eget innhold, `user_id = auth.uid()` |
 | `notifications` | ingen | via eierskap til `watched_areas` |
@@ -695,6 +700,10 @@ uttrekk, og 0 av 556 ID-er var felles mellom to uttrekk et døgn fra hverandre.
 1. Tar forespørsler fra `sync_requests` (admin-køen)
 2. Kjører providere som er forfalt, én av gangen via `claim_next_due_sync()`
 
+**Etterarbeid:** en provider kan oppgi en databasefunksjon som kjøres etter en vellykket
+skriving (`postSyncFn`). Hyttekildene bruker det til `refresh_huts()`. Funksjonen kjøres ikke når
+kjøringen feilet eller reconciliation ble hoppet over — da er bildet av kilden ufullstendig.
+
 **Provider-isolasjon:** en kilde som feiler stopper aldri de andre. Feilen havner på providerens
 egen rad og i `sync_runs`, og workeren går videre. Exit-kode 0 = alt bra, 2 = minst én kilde feilet,
 1 = fatalt (ingen database eller ugyldige argumenter).
@@ -821,6 +830,13 @@ testdetaljer og eksempelresponser.
 | Skjenkebevillinger | Næringsetaten, Oslo kommune | Serverings- og skjenkesteder | Punkt | 1 406 | **Lisens ikke oppgitt av kilden** | Kun Oslo. Bør avklares med Næringsetaten |
 | Skolekretser | Plan- og bygningsetaten, Oslo kommune | Veiledende inntaksområde for barneskole | Polygon | 105 | **Lisens ikke avklart** — tjenesten oppgir «Copyright Plan- og bygningsetaten» | Kun Oslo, kun barnetrinn. Kilden har ingen datostempling, og grensene revideres hver høst |
 | Offentlige tilfluktsrom | Sivilforsvaret / DSB, via Geonorge-WFS | Tilfluktsrom i nærheten, med antall plasser | Punkt | 556 | **NLOD 1.0** — «Åpne data», «Ugradert» | Hele Norge. Kilden gir ikke areal, type eller status |
+
+Hyttekildene står for seg, fordi radene deres er kildeposter og ikke det som vises:
+
+| Kilde | Leverandør | Brukes til | Geometri | Rader | Lisens | Begrensninger |
+|---|---|---|---|---|---|---|
+| N50 Kartdata, bygningstype 956 | Kartverket | Hytter og koier — hovedkilde | Punkt | 55 i piloten (1 880 nasjonalt) | CC BY 4.0 | Ingen stabil ID og ingen WFS. Ingen sengeplasser, sesong eller status |
+| Tur- og friluftsruter, `RuteInfoPunkt` | Kartverket | Hytter og koier — sekundærkilde | Punkt | 47 i piloten (1 356 nasjonalt) | Åpne data, ingen vilkår oppgitt | Ujevn kvalitet; typekodene er kontrollert mot N50 |
 
 ### Direkte oppslag (per søk, ikke synket)
 
@@ -1048,6 +1064,44 @@ ikke alt svarer på. Skal det inn senere, hører det sammen med valgt rad, ikke 
 - Seksjonen ligger **sist**, og faller bort når det ikke er treff — som alle andre seksjoner.
   Vi skriver ikke «ingen tilfluktsrom her», som ville lest som en påstand om områdets beredskap.
 
+### Hytter og koier
+
+Første friluftskategori. Retningen står i [data-roadmapen](data-roadmap.md#12-friluft-skjult-lokal-innsikt-ikke-en-turapp),
+modellen i [dataarkitekturen](data-architecture.md#5-kanoniske-enheter-eller-bulk-lag).
+
+**Status: pilot i Oslomarka, upublisert.** Kategorien `hytte` står med `is_public = false`, så
+`huts_*`-funksjonene svarer tomt for alle andre enn innlogget admin. En admin ser hyttene på
+`/admin/adresse`, `/omrade` og `/hytter` som om de var publisert, og kan kontrollere dem der.
+Publisering er én linje: `update area_feature_categories set is_public = true where category = 'hytte'`.
+Kategorien `hytte_kilde` (kildepostene) skal aldri publiseres.
+
+Tolkningsreglene:
+
+- **Typen er kildens.** Betjent, selvbetjent, ubetjent og rastebu er N50s egne klasser. Vi har
+  ingen «åpen koie» eller «dagsturhytte», fordi ingen kilde skiller dem ut.
+- **«Ulåst» er ikke «åpen».** Kilden sier om døra er låst. Den sier ikke om hytta er i drift,
+  i sesong eller ledig. Feltet `access_status` står derfor på `unknown` for alle hytter.
+- **Overnatting følger klassens definisjon.** Betjent, selvbetjent og ubetjent er
+  overnattingshytter i N50; en rastebu er en dagshytte der man kan sove «i et knipetak», og
+  vises som «ikke beregnet for overnatting».
+- **Eier er ikke forvalter.** `owner_kind` er N50s eierkategori (DNT, Statskog, fjellstyre,
+  andre). `manager_name` er navnet Turrutebasen oppgir som vedlikeholdsansvarlig, når det
+  finnes. «Andre» betyr uspesifisert, og vises ikke som en eier.
+- **Sengeplasser, sesong og booking vises ikke.** De finnes bare hos DNT/UT.no, som vi ikke
+  kan hente fra.
+- **Serveringshytter og gapahuker er utelatt.** N50s «Serveringshytte» er markastuer med
+  betjent servering; de teller som `skipped` i synken, ikke som feil.
+- **Sekundærkilden alene er ikke nok.** En hytte som bare står i Turrutebasen får `confidence
+  = 'low'` og vises ikke før noen har satt `last_verified_at`. Turrutebasen fører blant annet
+  hotellet Kleivstua som betjent hytte.
+
+Kontrollkøen (`hut_review_queue()`) fylles bare ved konflikt: kildene er uenige om typen, to
+hytter ligger innen 100 m eller har samme navn innen 2 km, eller hytta står bare i
+sekundærkilden. Det er ingen review-plan per hytte; ferskheten følger synken.
+
+«I nærheten» er en trapp på 10, 20 og 30 km, uavhengig av radien brukeren har valgt for resten
+av siden. Se `HUT_NEARBY` i `lib/huts/queries.ts`.
+
 ### Skjenkesteder
 
 - Tiden i kilden er **tillatt stengetid** — ikke skjenketid, og ikke stedets faktiske åpningstid.
@@ -1099,13 +1153,15 @@ koder vises ikke, vi gjetter ikke bygningstype), og nærmeste adresse.
 | `/api/eiendom` | GET | `lat`, `lng` | Zod: `lat` 57–72, `lng` 4–32. Alt annet → 400 | Geonorge WFS ×2 + adresse-API | 8 s totalt, 6 s per kall, 1 retry | `private, max-age=60` + 10 min serverside | 120/min |
 | `/api/geocode` | GET | `q` | Zod: 2–100 tegn etter trim | Kartverket adresser + stedsnavn | Per kilde, delvis svar tillatt | `private, max-age=300`, `no-store` ved delvis svar | 120/min |
 | `/omrade` | GET (side) | `lat`, `lng`, `radius`, `label`, `sortering` | Zod. Ugyldig `lat`/`lng` → feilside. Ugyldig `radius` → standard 1 km. `label` maks 120 tegn, kontrolltegn fjernet | Supabase + direkte oppslag | 8 s (saker), 8 s (DB), 12 s (oppslag) | Dynamisk | 240/min |
+| `/api/hytter` | GET | `bbox` *eller* `kommune` *eller* `q`; `type` og `eier` kan gjentas | Zod: utsnitt innenfor kloden og riktig vei, kommunenummer fire sifre, `q` 2–60 tegn, kjente typer og eiere | Supabase (`huts_*`) | databasens egen | `private, max-age=300` — svaret avhenger av om kalleren er admin | 120/min |
+| `/hytter` | GET (side) | `lat`, `lng`, `hytte` (alle valgfrie) | Zod; ugyldige verdier ignoreres | `/api/hytter` fra klienten | — | Dynamisk, `noindex` så lenge datasettet er en pilot | ingen |
 | `/sak/[id]` | GET (side) | uuid + søkekontekst | `get_event` | Supabase | — | Dynamisk | ingen |
 | `/` | GET (side) | — | — | — | — | Statisk, Netlify Durable | ingen |
 | `/admin` | GET (side) | — | Supabase Auth + `is_admin()` | Supabase | — | `private, no-store` | ingen |
 | `/dev` | GET (side) | — | **404 utenfor development** | — | — | — | — |
 | `/robots.txt` | GET | — | — | — | — | Statisk | ingen |
 
-Begge API-rutene svarer **405** på POST.
+Alle API-rutene svarer **405** på POST.
 
 `/dev` og dens server action er beskyttet serverside på `NODE_ENV`, ikke bare ved at knappen er
 skjult — en server action kan POST-es direkte.

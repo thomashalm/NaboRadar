@@ -58,6 +58,12 @@ interface AreaMapProps {
   propertyLookupActive?: boolean;
   /** Gjeldende zoomnivå, slik at kalleren kan slå av funksjoner som krever detaljnivå. */
   onZoomChange?: (zoom: number) => void;
+  /**
+   * Utsnittet etter at kartet har flyttet seg, og første gang det er lastet. For lag som
+   * henter data per utsnitt. Kalleren bør selv vente litt før den spør — dette kalles for
+   * hver avsluttet panorering.
+   */
+  onViewportChange?: (bounds: LngLatBounds) => void;
   popupFor?: (id: string) => MapPopupContent | null;
   /** Klientnavigasjon for lenker i popup. */
   onNavigate?: (href: string) => void;
@@ -192,6 +198,15 @@ export function AreaMap(props: AreaMapProps) {
         latestProps.current.onZoomChange?.(instance.getZoom());
       });
       instance.on("zoomend", () => latestProps.current.onZoomChange?.(instance.getZoom()));
+      const meldUtsnitt = () => {
+        const b = instance.getBounds();
+        latestProps.current.onViewportChange?.([
+          [b.getWest(), b.getSouth()],
+          [b.getEast(), b.getNorth()],
+        ]);
+      };
+      instance.on("load", meldUtsnitt);
+      instance.on("moveend", meldUtsnitt);
 
       // Klikk: punktmarkører først, så eiendom, så flater. Se lib/map/click.ts.
       instance.on("click", (event: MapLayerMouseEvent) => {

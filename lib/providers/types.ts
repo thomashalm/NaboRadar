@@ -94,6 +94,15 @@ export interface DataProvider<TRecord = NormalizedEvent> {
   normalize(batch: RawBatch): NormalizeResult<TRecord>;
 
   healthCheck(): Promise<ProviderHealth>;
+
+  /**
+   * Databasefunksjon som kjøres etter en vellykket skriving, uten argumenter.
+   *
+   * For kilder der radene i `area_features` er kildeposter og ikke det som vises: hyttekildene
+   * kaller `refresh_huts`, som kobler postene til kanoniske hytter. Kjøres ikke når kjøringen
+   * feilet, og heller ikke når reconciliation ble hoppet over — da er bildet av kilden ufullstendig.
+   */
+  readonly postSyncFn?: string;
 }
 
 /** Hva som startet kjøringen. */

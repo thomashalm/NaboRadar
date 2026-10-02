@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AreaExplorer } from "@/components/area/AreaExplorer";
 import { AreaShell } from "@/components/area/AreaShell";
+import { FriluftSeksjon } from "@/components/area/FriluftSeksjon";
 import { SkolekretsNotis } from "@/components/area/SkolekretsNotis";
 import { IkkeTilgang } from "@/components/admin/IkkeTilgang";
 import { InternSeksjon } from "@/components/admin/InternSeksjon";
@@ -74,6 +75,7 @@ export default async function AdminAddressPage({ searchParams }: { searchParams:
         tiles={getMapTileConfig()}
         basePath="/admin/adresse"
         skolekrets={<SkolekretsNotis lat={lat} lng={lng} />}
+        friluft={<FriluftSeksjon lat={lat} lng={lng} />}
         internalFeatures={funn ? internalFeatures(funn) : []}
         leadSections={<InternSeksjon funn={funn} radiusM={radius} />}
       />

@@ -17,7 +17,21 @@ const E2 = F * (2 - F);
 const EP2 = E2 / (1 - E2);
 
 /** @param coordinate `[easting, northing]` i meter. @returns `[lengdegrad, breddegrad]`. */
-export function utm32ToWgs84([easting, northing]: readonly [number, number]): [number, number] {
+export function utm32ToWgs84(coordinate: readonly [number, number]): [number, number] {
+  return utmToWgs84(coordinate, ZONE_32_CENTRAL_MERIDIAN);
+}
+
+const ZONE_33_CENTRAL_MERIDIAN = (15 * Math.PI) / 180;
+
+/**
+ * ETRS89 / UTM sone 33N (EPSG:25833) — det Kartverket bruker for landsdekkende data, også
+ * utenfor sonen. Formelen er den samme; bare sentralmeridianen er en annen.
+ */
+export function utm33ToWgs84(coordinate: readonly [number, number]): [number, number] {
+  return utmToWgs84(coordinate, ZONE_33_CENTRAL_MERIDIAN);
+}
+
+function utmToWgs84([easting, northing]: readonly [number, number], centralMeridian: number): [number, number] {
   const e1 = (1 - Math.sqrt(1 - E2)) / (1 + Math.sqrt(1 - E2));
   const m = northing / K0;
   const mu = m / (A * (1 - E2 / 4 - (3 * E2 ** 2) / 64 - (5 * E2 ** 3) / 256));
@@ -48,7 +62,7 @@ export function utm32ToWgs84([easting, northing]: readonly [number, number]): [n
         ((61 + 90 * t1 + 298 * c1 + 45 * t1 ** 2 - 252 * EP2 - 3 * c1 ** 2) * d ** 6) / 720);
 
   const lng =
-    ZONE_32_CENTRAL_MERIDIAN +
+    centralMeridian +
     (d -
       ((1 + 2 * t1 + c1) * d ** 3) / 6 +
       ((5 - 2 * c1 + 28 * t1 - 3 * c1 ** 2 + 8 * EP2 + 24 * t1 ** 2) * d ** 5) / 120) /
