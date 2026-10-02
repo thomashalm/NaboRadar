@@ -2501,6 +2501,18 @@ SVG1), står noden som notat på vertsanlegget. Østre Aker vei 18 er Telenors t
 Arelion-node og er gjort om til notat, som Sognsveien 75. `network_pop` brukes bare når en
 operatør faktisk selger plass i rommet (Blix CJH), ikke for å redde en post som ikke er et anlegg.
 
+**Coverage-audit: let etter det som mangler, ikke bare følg leads.** Runde 15 kryssjekket
+Statnetts 183 datasenter-rader og Nkoms 60 operatører mot basen og gikk gjennom 57 delregioner.
+Det ga 18 anlegg som aldri hadde vært et lead, blant annet tre anlegg i den tidligere
+Digiplex-porteføljen og Bitfurys anlegg i Mo i Rana. Tre ting å huske:
+
+- Statnetts lister og eInnsyn gir flest funn. Nkom-registeret fanger bare operatører som har
+  registrert seg; ingen av funnene i Troms og Finnmark sto der.
+- En navnebasert kryssjekk mot basen gir falske treff. En rad er først dekket når en post
+  forklarer den.
+- «Ingen funn» i en region betyr bare at de loggførte kildene er kontrollert. Dekningsnotatet
+  og research-runen sier hvilke regioner som ikke er undersøkt godt nok.
+
 **En utvidelse av samme campus er ikke et nytt anlegg.** Nye bygg på samme tomt eller naboteig,
 med samme eier og uten egen kraftsak, føres på det eksisterende anlegget. «Ås datasenter» er
 Troll Housings egen utvidelse i samme planområde og står som utvidelsesnotat på Troll Housing.
