@@ -2501,6 +2501,11 @@ SVG1), står noden som notat på vertsanlegget. Østre Aker vei 18 er Telenors t
 Arelion-node og er gjort om til notat, som Sognsveien 75. `network_pop` brukes bare når en
 operatør faktisk selger plass i rommet (Blix CJH), ikke for å redde en post som ikke er et anlegg.
 
+**En utvidelse av samme campus er ikke et nytt anlegg.** Nye bygg på samme tomt eller naboteig,
+med samme eier og uten egen kraftsak, føres på det eksisterende anlegget. «Ås datasenter» er
+Troll Housings egen utvidelse i samme planområde og står som utvidelsesnotat på Troll Housing.
+Søkt og varslet effekt («har søkt om 15 MW», «skal søke om 100 MW») føres ikke i MW-feltene.
+
 **En avdeling i Brønnøysund er ikke et anlegg.** En underenhet viser hvor et selskap har ansatte,
 ikke at det eier eller driver et datasenter der. I runde 9 lå Nscale Drifts avdeling på Hønefoss
 på adressen til hscale OSL1 (samme anlegg, ikke nytt), og avdelingen på Sola lå i ASP K11, som

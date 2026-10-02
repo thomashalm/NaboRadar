@@ -2981,7 +2981,11 @@ export const FUNN: Funn[] = [
       "forretningsadresse Karenslyst allé 53 på Skøyen — det er kontoret, ikke anlegget. Runde 12 " +
       "(2026-10-02): Anlegget er ett av tre steder der samtrafikkpunktet NIX1 (drevet av " +
       "UiO/USIT) har svitsjer, i IFD A-rommet. NIX er nettinfrastruktur i anlegget, ikke en kunde " +
-      "eller et eget datasenter.",
+      "eller et eget datasenter. Runde 14 (2026-10-02): driftskapasiteten er rettet fra 14 til " +
+      "10,5 MW. 14 MW var kraftforsyningen («14MW of 2N redundant power»), ikke kapasitet i " +
+      "drift. 10,5 MW er summen av to tall fra Bulk: 5 MW eksisterende og 5,5 MW i tre nye " +
+      "datahaller ferdige i mai 2025. Bulk har 19,3 MW i Statnetts kø ved Furuset, som ikke er " +
+      "sikret kraft. i3D.net er ført som kunde.",
     public_candidate: true,
     public_candidate_note:
       "Bekreftet fysisk anlegg med tre uavhengige oppføringer på samme adresse, verifisert adresse og korrekt status.",
@@ -3118,11 +3122,15 @@ export const FUNN: Funn[] = [
       "Et AI-datasenter som skal skaleres til 9 MW i et bolignært næringsbygg er en vesentlig " +
       "endring i effektbruk og kjølebehov, og den typen anlegg som nå får eget arealformål i plan.",
     notes:
-      "Aliaser: Blix NR5, Magnora Oslo. Bygget er 6 050 m² fra 1988, eid av Bruun Eiendom. " +
-      "Effekttallene kommer fra bransjeomtale, ikke fra en myndighetskilde. Runde 4: Magnora " +
-      "skriver at søknaden om mer effekt står i kø hos netteier; Blix Data Center AS har 10 MW i " +
-      "Statnetts kø ved Furuset TRA, men det er uavklart om den gjelder dette bygget eller Blix " +
-      "BDC.",
+      "Aliaser: Blix NR5, Magnora Oslo. Bygget er 6 050 m² fra 1988 og er et seksjonert sameie; " +
+      "hvem som eier datasenterseksjonen er ikke dokumentert. Runde 4: Magnora skriver at " +
+      "søknaden om mer effekt står i kø hos netteier; Blix Data Center AS har 10 MW i Statnetts " +
+      "kø ved Furuset TRA, men det er uavklart om den gjelder dette bygget eller Blix BDC. Runde " +
+      "14 (2026-10-02): 2 MW er tatt ut av feltet for driftskapasitet; kilden beskriver en " +
+      "installert transformator på 2000 kVA og «up to 3 MW», ikke kapasitet i drift. Typen er " +
+      "endret fra blandet til colocation, fordi AI-delen ikke er i drift og ikke har noen kunde. " +
+      "1 MW planlagt og 9 MW potensial gjelder den planlagte AI-seksjonen. Posten er ett anlegg: " +
+      "samme bygg, Blix som operatør, og Magnora Data Center som investor i et 50/50-samarbeid.",
     public_candidate: true,
     public_candidate_note:
       "Bekreftet fysisk anlegg med to operatøroppføringer. Effekttallene er fra bransjekilde og skal ikke gjengis som fakta.",
@@ -3164,6 +3172,7 @@ export const FUNN: Funn[] = [
         publisher: "Kartverket",
         source_type: "register",
         source_date: "2026-09-26",
+        primary_source: true,
         excerpt_or_summary:
           "Adressen er verifisert og geokodet mot Kartverkets adresseregister.",
       },
@@ -3448,7 +3457,7 @@ export const FUNN: Funn[] = [
       },
       {
         source_name: "Statnett: statistikk om tilknytningssaker (lister lastet ned 30.09.2026)",
-        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
         publisher: "Statnett",
         source_type: "register",
         source_date: "2026-09-30",
@@ -3801,9 +3810,7 @@ export const FUNN: Funn[] = [
     address: "Gaustadalléen 21",
     postal_code: "0349",
     city: "Oslo",
-    latitude: 59.94229,
-    longitude: 10.71674,
-    verification_status: "partially_verified",
+    verification_status: "archived",
     operational_status: "unknown",
     sensitivity: "internal_only",
     confidence: "low",
@@ -3817,7 +3824,12 @@ export const FUNN: Funn[] = [
       "Primærkilde for selve anlegget er søkt, ikke funnet. Runde 10 (2026-10-02): status aktiv → " +
       "ukjent, sikkerhet lav og ny tittel (tidligere «Forskningsparken, Gaustadalléen 21»). Den " +
       "tidligere beskrivelsen («direkte tilknyttet NIX», «et av de eldste samtrafikkpunktene») " +
-      "bygget på katalogtekst og er nedtonet. Bygningseier er Oslotech AS.",
+      "bygget på katalogtekst og er nedtonet. Bygningseier er Oslotech AS. Runde 14 (2026-10-02): " +
+      "arkivert, og kartpunktet er fjernet. Plan- og bygningsetaten har 71 byggesaker på " +
+      "Gaustadalléen 21; ingen gjelder datarom, kjøling eller nødstrøm. Siste operatørutsagn er " +
+      "en arkivert SSC-side fra juni 2023 uten adresse, og siste nett i PeeringDB ble lagt til i " +
+      "januar 2021. Ingen kilde bekrefter et anlegg på adressen. Nedleggelse er ikke dokumentert, " +
+      "så posten er arkivert som ubekreftet serverrom, ikke satt til nedlagt.",
     kilder: [
       {
         source_name: "PeeringDB: nettverk til stede i fasiliteten",
@@ -4696,7 +4708,15 @@ export const FUNN: Funn[] = [
       "(2026-10-02): MW-revisjon uten feltendring. 84 MW i drift er eierens tall (Bitdeer fører " +
       "anlegget med 84 MW «Online» i børsmelding 21.07.2026), mens Statnett har 63,6 MW " +
       "tilknyttet; avviket er ikke forklart. Et planinitiativ fra 2026 for «Ås datasenter» på " +
-      "nabotomta gjelder en KI-utvidelse; de 15 MW reservert hører trolig til den.",
+      "nabotomta gjelder en KI-utvidelse; de 15 MW reservert hører trolig til den. Runde 14 " +
+      "(2026-10-02): «Ås datasenter» er en utvidelse av dette anlegget, ikke et eget anlegg. " +
+      "Troll Housing AS er selv forslagsstiller, planområdet er det samme som for dagens " +
+      "datasenter (Ås steinbrudd), og de nye byggene er skissert på naboteigen gnr 19 bnr 32. " +
+      "Planen gjelder to databygg og et administrasjonsbygg på over 15 000 m²; planprogrammet er " +
+      "på høring til 12.10.2026. «Har søkt om 15 MW» og «skal søke om 100 MW» er søkt og varslet " +
+      "effekt og er ikke ført. Grunnen eies hovedsakelig av en privat grunneier. Statnett fattet " +
+      "12.06.2026 vedtak om brudd på reglene om idriftsettelse uten systemansvarliges vedtak; " +
+      "dokumentene er ikke offentlige. Type er fortsatt krypto.",
     kilder: [
       {
         source_name: "Nkom: Troll Housing AS er registrert datasenteroperatør",
@@ -5029,7 +5049,7 @@ export const FUNN: Funn[] = [
       },
       {
         source_name: "Statnett – liste over reservasjoner (forbruk), 30.09.2026",
-        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
         publisher: "Statnett",
         source_type: "register",
         source_date: "2026-09-30",
@@ -5326,7 +5346,7 @@ export const FUNN: Funn[] = [
       },
       {
         source_name: "Statnett – liste over kapasitetskø (forbruk), 30.09.2026",
-        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
         publisher: "Statnett",
         source_type: "register",
         source_date: "2026-09-30",
@@ -5390,7 +5410,12 @@ export const FUNN: Funn[] = [
       "nett, 6 × 1 MW trafoer, 80 MW utvidelse) er operatørens markedsføring av tilgjengelig " +
       "effekt og er ikke ført som kapasitet. Omsetningen falt fra 5,8 mill. kr (2023) til 0,7 " +
       "mill. kr (2025), og selskapet hadde nesten ingen eiendeler ved utgangen av 2025. Hvem som " +
-      "eier bygget er ikke dokumentert.",
+      "eier bygget er ikke dokumentert. Runde 14 (2026-10-02): status fortsatt ukjent. Drift er " +
+      "bare uavhengig dokumentert i 2018; for 2025–2026 finnes bare operatørens nettside, " +
+      "Nkom-registreringen og Nkoms varsel om sektoravgift. Bygningseier er ifølge Fylkesmannen i " +
+      "Oppland (2014) et enkeltpersonforetak, og innehaveren ble daglig leder i Nordic Blocks AS " +
+      "i november 2025. Ny nettstasjon og 24 kV-kabel til eiendommen er omtalt i saker fra 2018 " +
+      "og 2021, uten effekt.",
     public_candidate: false,
     kilder: [
       {
@@ -5595,7 +5620,7 @@ export const FUNN: Funn[] = [
     kilder: [
       {
         source_name: "Statnett – liste over reservasjoner (forbruk), 30.09.2026",
-        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
         publisher: "Statnett",
         source_type: "register",
         source_date: "2026-09-30",
@@ -5707,7 +5732,11 @@ export const FUNN: Funn[] = [
       "(underenhet, 17 ansatte, fra mars 2025) registrert på Follummoveien 94, som er hscale " +
       "OSL1s adresse og teig (51/55). Nscale fører selv «Oslo» som partnerdrevet datasenter i " +
       "drift. Det er en driftsavdeling i dette anlegget, ikke et eget anlegg. Ingen kilde navngir " +
-      "hscale som vert eller oppgir MW, så Nscale er ikke ført som kunde.",
+      "hscale som vert eller oppgir MW, så Nscale er ikke ført som kunde. Runde 14 (2026-10-02): " +
+      "MW-revisjon uten feltendring. Sikret kraft på 177 MW er 12 MW tilknyttet og 15 + 150 MW " +
+      "reservert til eierselskapet Odin Green DC AS; 150 MW har planlagt tilknytning i 2032 og " +
+      "gjelder hele campus. Ingen kilde fra 2025–2026 bekrefter at NexGen Cloud fortsatt er " +
+      "leietaker.",
     kilder: [
       {
         source_name: "Nkom: Odin Green DC AS registrert som datasenteroperatør",
@@ -5832,7 +5861,7 @@ export const FUNN: Funn[] = [
       },
       {
         source_name: "Statnett: statistikk om tilknytningssaker (reservasjoner forbruk)",
-        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
         publisher: "Statnett",
         source_type: "register",
         source_date: "2026-09-30",
@@ -6216,18 +6245,13 @@ export const FUNN: Funn[] = [
     category: "Datasenter / industri / tekniske anlegg",
     subcategory: "Datasenter",
     item_type: "finding",
-    title: "Green Horizon «Vidar», Kvernaland",
+    tidligere_titler: ["Green Horizon «Vidar», Kvernaland"],
+    title: "Green Horizon «Vidar» (8 MW, sted ikke bekreftet)",
     description:
-      "Planlagt Green Horizon-anlegg oppført på Plogfabrikkvegen 8 på Kvernaland i Klepp, ca. 1 " +
-      "km fra Heimdal. Green Horizons egen portefølje viser et eget anlegg på 8 MW med " +
-      "tilgjengelighet fra andre kvartal 2028, og Statnett har en egen reservasjon på 8 MW ved " +
-      "Fagrafjell på selskapet. Adressen bygger bare på DataCenterMap.",
+      "Planlagt Green Horizon-anlegg på 8 MW. Navnet «Vidar» er bekreftet av Green Horizons egen " +
+      "side fra 2024, og Statnett har en reservasjon på 8 MW ved Fagrafjell på selskapet. Stedet " +
+      "er ikke bekreftet: adressen Plogfabrikkvegen 8 på Kvernaland kommer bare fra en katalog.",
     municipality: "Klepp",
-    address: "Plogfabrikkvegen 8",
-    postal_code: "4353",
-    city: "Kvernaland",
-    latitude: 58.78333,
-    longitude: 5.70576,
     verification_status: "partially_verified",
     operational_status: "planned",
     sensitivity: "internal_only",
@@ -6242,7 +6266,11 @@ export const FUNN: Funn[] = [
       "portefølje (greenbox.no) viser et anlegg på 8 MW og et på 48 MW som separate anlegg, og " +
       "Statnett har to separate saker (24/01601, 8 MW, og 24/01503, 48 MW), begge på Green " +
       "Horizon AS. At «Vidar» er 8 MW-anlegget er utledet av MW-tallene. Reservasjonen står på " +
-      "selskapet og er ikke ført som sikret kraft. Koordinaten er omtrentlig.",
+      "selskapet og er ikke ført som sikret kraft. Koordinaten er omtrentlig. Runde 14 " +
+      "(2026-10-02): kartpunktet er fjernet, og tittelen er endret (tidligere «Green Horizon " +
+      "«Vidar», Kvernaland»). Næringsparken beskriver Plogfabrikkvegen 8 som et kombinasjonsbygg " +
+      "til leie, ferdig i 2025. Green Horizon omtaler Norway 2 som et mindre anlegg på 4 + 8 MW; " +
+      "det kan være en fase to ved Wiig Gartneri på Orre, men det er ikke dokumentert.",
     kilder: [
       {
         source_name: "DataCenterMap: Green Horizon «Vidar», Kvernaland",
@@ -6449,7 +6477,9 @@ export const FUNN: Funn[] = [
       "geokode. Avviket er ikke oppklart. Runde 12 (2026-10-02): Det regionale samtrafikkpunktet " +
       "SIX (Stavanger Internet Exchange, del av NIX) står ifølge NIX hos Green Mountain i " +
       "Hodneveien 260; det sto tidligere ved Universitetet i Stavanger. SIX er nettinfrastruktur " +
-      "i anlegget, ikke et eget datasenter.",
+      "i anlegget, ikke et eget datasenter. Runde 14 (2026-10-02): MW-revisjon uten feltendring. " +
+      "16,5 MW er dagens kapasitet og 25 MW total IT-kapasitet ifølge Green Mountain. Volkswagen " +
+      "er ført som kunde (3 MW i fjellet, Green Mountain 03.11.2022).",
     kilder: [
       {
         source_name: "DataCenterMap: Green Mountain SVG1-Rennesøy",
@@ -6630,7 +6660,7 @@ export const FUNN: Funn[] = [
       },
       {
         source_name: "Statnett: statistikk om tilknytningssaker (lister lastet ned 30.09.2026)",
-        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
         publisher: "Statnett",
         source_type: "register",
         source_date: "2026-09-30",
@@ -6823,10 +6853,10 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "Gaupne Datapark, Gaupnegrandane",
     description:
-      "Planlagt datasenter på Gaupnegrandane i Gaupne, utviklet av Sognekraft gjennom Sogn " +
-      "Utvikling og prosjektselskapet Gaupne Datapark AS. Tomta er over 55 mål, og Sognekraft " +
-      "oppgir mulig kapasitet på opptil 120 MW. Kommunens reguleringsplan for området er ute på " +
-      "andre gangs høring.",
+      "Planlagt datasenter på Gaupnegrandane i Gaupne, utviklet av Sognekraft gjennom " +
+      "prosjektselskapet Gaupne Datapark AS. Tomta er over 55 mål. Statnett har reservert 120 MW " +
+      "ved Leirdøla til prosjektselskapet, og selskapet søkte NVE om anleggskonsesjon for " +
+      "ledningen Fonndøla–Gaupne i september 2026. Reguleringsplanen er delvis vedtatt.",
     municipality: "Luster",
     city: "Gaupne",
     latitude: 61.40031,
@@ -6840,10 +6870,13 @@ export const FUNN: Funn[] = [
       "Et kraftselskap som selv utvikler datasenter i egen kraftkommune, i samme dalføre som " +
       "Kitebrook Leirdøla og Bluefjords.",
     notes:
-      "Opprettet i runde 3 (2026-09-30). Statnett har 120 MW reservert ved Leirdøla TRA med " +
-      "sluttkunde «Gaupne Utvikling AS». At dette er Gaupne Datapark AS er ikke verifisert i " +
-      "Brønnøysund, så tallet er ikke ført som sikret kraft. Koordinaten er Kartverkets " +
-      "stedsnavnpunkt for Gaupnegrandane, ikke tomta.",
+      "Opprettet i runde 3 (2026-09-30). Koordinaten er Kartverkets stedsnavnpunkt for " +
+      "Gaupnegrandane, ikke tomta; tomtas gnr/bnr er ikke dokumentert. Runde 14 (2026-10-02): " +
+      "«Gaupne Utvikling AS» i Statnetts liste er samme selskap som Gaupne Datapark AS " +
+      "(navneendring kunngjort 05.08.2026). Raden står i reservasjonslisten, ikke i køen, så 120 " +
+      "MW er ført som sikret kraft og som planlagt kapasitet; tallet lå tidligere feil som " +
+      "campus-potensial. Forbehold: Statnett-raden mangler reservasjonsdato, og ledningen fram " +
+      "til tomta har ikke konsesjon ennå. Eget anlegg, ca. 5 km fra Bluefjords og Kitebrook.",
     public_candidate: false,
     kilder: [
       {
@@ -6958,7 +6991,11 @@ export const FUNN: Funn[] = [
       "driftskapasitet: Bluefjords skriver selv at det er tilgjengelig effekt på tomta, ikke " +
       "kapasitet i drift, og det finnes ingen Statnett-rad. Type satt til blandet (colocation og " +
       "krypto). Eget anlegg, ikke Gaupne Datapark eller Kitebrook Leirdøla. Bluefjords kjøper " +
-      "også Årdal Næringssenter for et KI-datasenter; det er lead uten stedfesting.",
+      "også Årdal Næringssenter for et KI-datasenter; det er lead uten stedfesting. Runde 14 " +
+      "(2026-10-02): «Compute Nordic DC1» er et markedsnavn på dette anlegget, ikke et eget " +
+      "anlegg. Compute Nordic Limited eide 18 % av Bluefjords AS i 2024 og er ført som investor, " +
+      "ikke eier; eier og operatør er fortsatt Bluefjords AS. Kontrakten på vel 1,3 mrd. kr som " +
+      "Compute Nordic omtaler, kan ikke knyttes til Gaupne.",
     kilder: [
       {
         source_name: "DataCenterMap: Bluefjords og Compute Nordic, Gaupne",
@@ -7035,17 +7072,18 @@ export const FUNN: Funn[] = [
     item_type: "finding",
     title: "BlueBite Sulitjelma",
     description:
-      "Datasenter i et eldre industribygg i Sulitjelma, drevet av tyske BlueBite GmbH siden 2021. " +
-      "Selskapet oppgir til Nkom at 55 % av strømforbruket går til kryptoutvinning; resten er " +
-      "annen regnekraft. NVE førte tilsyn med anlegget i 2025. Størrelse i MW er ikke offentlig " +
-      "dokumentert.",
+      "Datasenter i den gamle verkstedhallen til Sulitjelma Gruber, drevet av tyske BlueBite GmbH " +
+      "siden 2021. Selskapet oppgir til Nkom at 55 % av strømforbruket går til kryptoutvinning. " +
+      "Statnett har 4 MW tilknyttet for BlueBite ved Salten. Drift er bekreftet i 2026.",
     municipality: "Fauske",
     postal_code: "8230",
     city: "Sulitjelma",
+    latitude: 67.1316,
+    longitude: 16.0815,
     verification_status: "partially_verified",
     operational_status: "active",
     sensitivity: "internal_only",
-    confidence: "medium",
+    confidence: "high",
     interest_level: "medium",
     why_interesting:
       "Et av få stedfestede kryptoanlegg i Nord-Norge, i et tidligere gruvesamfunn der ordføreren " +
@@ -7053,13 +7091,14 @@ export const FUNN: Funn[] = [
       "uten konsesjon.",
     notes:
       "Opprettet i runde 13 (2026-10-02), skilt ut fra «Fire kryptooperatører uten stedfestet " +
-      "anlegg». Uten kartpunkt: bygget er ikke identifisert med adresse i noen kilde, og " +
-      "koblingen til Industriparken er en slutning fra utleiers adresse. High North News " +
-      "beskriver et mekanisk verksted på 650 m² fra 1972 i det gamle industriområdet, leid via " +
-      "Sulitjelma Industripark fra Arctic Sapphire (som er registrert i Industriparken 3). " +
-      "Sjøgata 86 i Fauske og Postboks 23 i Sulitjelma er selskapsadresser, ikke anlegget. Ikke " +
-      "bland med Nscale Fauske, som ligger ca. 35 km unna og er et annet selskap. 4 MW (2022) er " +
-      "et eldre bransjetall og ikke ført som kapasitet.",
+      "anlegg». High North News beskriver et mekanisk verksted på 650 m² fra 1972 i det gamle " +
+      "industriområdet, leid via Sulitjelma Industripark fra Arctic Sapphire. Sjøgata 86 i Fauske " +
+      "og Postboks 23 i Sulitjelma er selskapsadresser, ikke anlegget. Ikke bland med Nscale " +
+      "Fauske, som ligger ca. 35 km unna og er et annet selskap. Runde 14 (2026-10-02): posten " +
+      "har fått et omtrentlig områdepunkt. En DSB-sak om en elulykke 13.11.2024 med BlueBite som " +
+      "avsender dokumenterer gata Industriparken i Sulitjelma, men ikke husnummeret; punktet er " +
+      "midt i gata og er ikke et bygg. 4 MW tilknyttet hos Statnett (sak 21/00347) er ført som " +
+      "sikret kraft; 1 MW som bare er reservert, er ikke lagt til. Sikkerheten er hevet til høy.",
     public_candidate: false,
     kilder: [
       {
@@ -7217,7 +7256,7 @@ export const FUNN: Funn[] = [
       },
       {
         source_name: "Statnett – statistikk om tilknytningssaker (tilknyttet og reservert)",
-        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
         publisher: "Statnett",
         source_type: "register",
         source_date: "2026-09-30",
@@ -7462,7 +7501,7 @@ export const FUNN: Funn[] = [
       },
       {
         source_name: "Statnett: statistikk om tilknytningssaker (Haugsvær TRA)",
-        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
         publisher: "Statnett",
         source_type: "register",
         source_date: "2026-09-30",
@@ -7692,7 +7731,7 @@ export const FUNN: Funn[] = [
       },
       {
         source_name: "Statnett – statistikk om tilknytningssaker (Bærheim TRA)",
-        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
         publisher: "Statnett",
         source_type: "register",
         source_date: "2026-09-30",
@@ -7793,7 +7832,7 @@ export const FUNN: Funn[] = [
       },
       {
         source_name: "Statnett: statistikk om tilknytningssaker",
-        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
         publisher: "Statnett",
         source_type: "register",
         source_date: "2026-09-30",
@@ -7935,7 +7974,7 @@ export const FUNN: Funn[] = [
       },
       {
         source_name: "Statnett: statistikk om tilknytningssaker",
-        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
         publisher: "Statnett",
         source_type: "register",
         source_date: "2026-09-30",
@@ -8227,7 +8266,11 @@ export const FUNN: Funn[] = [
       "Kartverkets adressepunkt for villaen; fjellhallen ligger under bygget. Status ukjent: EMP " +
       "Secure selger i dag colocation bare i Vats DC1, og ISO-sertifikatet fra 2026 fører Bergen " +
       "som «Produksjon». DataCenterMap har arkivert oppføringen. På samme eiendom (43/182) ble " +
-      "bruksendring fra kontor til bolig legalisert i 2025–2026.",
+      "bruksendring fra kontor til bolig legalisert i 2025–2026. Runde 14 (2026-10-02): eier er " +
+      "rettet til Jakob Hatteland Bygg AS, som står som tiltakshaver og eier i en byggesøknad fra " +
+      "2025. Den saken gjaldt en boenhet i 2. etasje og berører ikke fjellhallen, som i søknaden " +
+      "omtales som lager. Status er fortsatt ukjent. Webhusets datasenter i Sandbrekkevegen 95 " +
+      "ligger 87 m unna på en annen eiendom og er et eget anlegg.",
     public_candidate: false,
     kilder: [
       {
@@ -8317,6 +8360,288 @@ export const FUNN: Funn[] = [
           "Hoveddatasenteret er EMP-sikret fjellhall i Nedre Vats. «I tillegg til fjellhallen har vi " +
           "også flere datarom geografisk spredt» for offsite backup, DR og «second site». Bergen " +
           "nevnes ikke ved navn.",
+      },
+    ],
+  },
+  {
+    category: "Datasenter / industri / tekniske anlegg",
+    subcategory: "Datasenter",
+    item_type: "finding",
+    title: "Webhuset Bergen, Sandbrekkevegen 95",
+    description:
+      "Datahall i et lager- og handelsbygg på Midtun ved Nesttun, bygget av Webhuset og Reaktor " +
+      "IT Service og tatt i bruk rundt mars 2010. Anlegget ble planlagt for om lag 50 rackskap og " +
+      "fikk egen nettstasjon fra BKK, dieselaggregat og utvendig kjøleanlegg, som kommunen ga " +
+      "ferdigattest for i 2014. Webhuset førte adressen i sine nettverkslister til 2019 og sier i " +
+      "2026 at selskapet eier et datasenter i Bergen, men uten adresse. Om hallen fortsatt er i " +
+      "drift, er ikke bekreftet.",
+    municipality: "Bergen",
+    address: "Sandbrekkevegen 95",
+    postal_code: "5225",
+    city: "Nesttun",
+    latitude: 60.32266,
+    longitude: 5.36894,
+    verification_status: "partially_verified",
+    operational_status: "unknown",
+    sensitivity: "internal_only",
+    confidence: "medium",
+    interest_level: "low",
+    why_interesting:
+      "Et lite hostinganlegg gjemt i samme bygg som et byggevarehus, under 100 meter fra " +
+      "Fjellhallen Bergen. Kjøleviftene utløste en nabostrid om støy som gikk helt til " +
+      "Fylkesmannen.",
+    notes:
+      "Opprettet i runde 14 (2026-10-02) fra leadet «Webhuset Bergen». Bygget er dokumentert i " +
+      "Bergen kommunes byggesak 201012636: «Shared Data Senter AS» søkte om kjøleanlegg " +
+      "(tørrkjøler, kjøletårn, lydskjerm) på gnr/bnr 43/260; tillatelse 01.11.2010, naboklage " +
+      "behandlet av byrådet og komite for miljø og byutvikling i 2011 og av Fylkesmannen i 2012, " +
+      "ferdigattest 28.03.2014. BKK Nett meldte transformatorstasjon på eiendommen i januar 2010. " +
+      "Sakenes dokumenter er ikke publisert for nedlasting; bare titler, parter og datoer er " +
+      "lest. Hjemmelshaver til eiendommen er Bergen Logistikkbygg AS (søknad desember 2025). " +
+      "Punktet er Kartverkets adressepunkt for bygget; hvor i bygget datahallen ligger, er ikke " +
+      "kjent. Plantegning for 1. etasje fra 2025 viser Obs Bygg, Røde Kors-lager, tavlerom, «Nød " +
+      "aggr.» og «Gammelt trafo rom», men ingen datahall. Ikke samme anlegg som Fjellhallen " +
+      "Bergen (Hardangervegen 48A, 43/182), Datafjellet eller AVUR Casperkollen. Shared Data " +
+      "Senter AS er ikke funnet i Enhetsregisteret. Aliaser: Webhuset Bergen1, Webhuset Bergen 2, " +
+      "Shared Data Center, Webhuset/Reaktor datasenter Nesttun.",
+    public_candidate: false,
+    kilder: [
+      {
+        source_name: "Bergen kommune, byggesak 201012636: Sandbrekkevegen 95, installasjon av kjøleanlegg/nyanlegg",
+        source_url: "https://www.bergen.kommune.no/omkommunen/offentlig-innsyn/innsynplanogbyggesak/saksinnsyn/sak/201012636",
+        publisher: "Bergen kommune, Plan- og bygningsetaten",
+        source_type: "register",
+        source_date: "2010-08-31",
+        primary_source: true,
+        excerpt_or_summary:
+          "Gnr/bnr 43/260. Tiltakshaver Shared Data Senter AS. Tørrkjøler, kjøletårn og lydskjerm: " +
+          "tillatelse 01.11.2010, naboklage til Fylkesmannen 2012, ferdigattest 28.03.2014. Bekrefter " +
+          "datasenterselskapets anlegg på eiendommen. Dokumentene er ikke publisert; titler lest.",
+      },
+      {
+        source_name: "Bergen kommune, byggesak 201001054: Sandbrekkevegen 95, transformatorstasjon",
+        source_url: "https://www.bergen.kommune.no/omkommunen/offentlig-innsyn/innsynplanogbyggesak/saksinnsyn/sak/201001054",
+        publisher: "Bergen kommune, Plan- og bygningsetaten",
+        source_type: "register",
+        source_date: "2010-01-21",
+        primary_source: true,
+        excerpt_or_summary:
+          "BKK Nett AS meldte ny transformatorstasjon på gnr/bnr 43/260; godkjent melding 25.01.2010. " +
+          "Sammenfaller med Webhusets omtale av egen trafokiosk. Nevner ikke datasenteret i tittelen; " +
+          "dokumentene er ikke publisert.",
+      },
+      {
+        source_name: "Bergen kommune, sak 201005575: Sandbrekkeveien 95, klage på støy fra kjøle-/viftesystem",
+        source_url: "https://www.bergen.kommune.no/omkommunen/offentlig-innsyn/innsynplanogbyggesak/saksinnsyn/sak/201005575",
+        publisher: "Bergen kommune, Plan- og bygningsetaten",
+        source_type: "register",
+        source_date: "2010-04-16",
+        primary_source: true,
+        excerpt_or_summary:
+          "Naboklage april 2010, pålegg om retting juli 2010 og pålegg om opphør av bruk av " +
+          "kjøleanlegg oktober 2010. Forløperen til søknaden fra Shared Data Senter AS. Bare " +
+          "journaltitler lest.",
+      },
+      {
+        source_name: "Bergen kommune, byggesak BYGG-2025/18293: Sandbrekkevegen 95, fasadeendring lagerbygning",
+        source_url: "https://www.bergen.kommune.no/omkommunen/offentlig-innsyn/innsynplanogbyggesak/saksinnsyn/sak/BYGG-2025/18293",
+        publisher: "Bergen kommune, Plan- og bygningsetaten",
+        source_type: "register",
+        source_date: "2025-12-15",
+        primary_source: true,
+        excerpt_or_summary:
+          "Port i kaldtlager for Obs Bygg; tillatelse 18.12.2025, ferdigattest 07.09.2026. Viser at " +
+          "bygget er i bruk som handel/lager i 2026. Sier ingenting om datahallen.",
+      },
+      {
+        source_name: "Følgebrev til søknad om fasadeendring, Sandbrekkevegen 95 (08.12.2025)",
+        source_url: "https://www.bergen.kommune.no/innsynplanogbyggesak/api/fil/2236272/2144379/F%C3%B8lgebrev?p=L3Nha3Npbm5zeW4vc2FrL0JZR0ctMjAyNS8xODI5Mw==",
+        publisher: "SE-Arkitektur AS / Bergen kommune saksinnsyn",
+        source_type: "document",
+        source_date: "2025-12-08",
+        primary_source: true,
+        excerpt_or_summary:
+          "Hjemmelshaver: Bergen Logistikkbygg AS (991163123). Tiltakshaver Coop Hordaland SA. " +
+          "Gnr/bnr 43/260, bygningsnr. 9513310, «Annen lagerbygning», tomt 14 357 m². Bekrefter eier " +
+          "av bygget, ikke datahallen.",
+      },
+      {
+        source_name: "Plantegning 1. etasje, Sandbrekkevegen 95 (09.12.2025)",
+        source_url: "https://www.bergen.kommune.no/innsynplanogbyggesak/api/fil/2236272/2144384/E-848-20251209-plan%2001%20-%20oversikt?p=L3Nha3Npbm5zeW4vc2FrL0JZR0ctMjAyNS8xODI5Mw==",
+        publisher: "SE-Arkitektur AS / Bergen kommune saksinnsyn",
+        source_type: "document",
+        source_date: "2025-12-09",
+        primary_source: true,
+        excerpt_or_summary:
+          "Viser Obs Bygg, drive-in, lager for Røde Kors, to tavlerom, «Nød aggr.» og «Gammelt trafo " +
+          "rom». Ingen datahall er tegnet inn i 1. etasje. Verken bekrefter eller avkrefter drift.",
+      },
+      {
+        source_name: "Vi bygger nytt datasenter på Nesttun i Bergen",
+        source_url: "https://www.webhuset.no/news/vi-bygger-nytt-datasenter-i-pa-nesttun-i-bergen",
+        publisher: "Webhuset AS",
+        source_type: "web",
+        source_date: "2009-12-16",
+        primary_source: true,
+        excerpt_or_summary:
+          "Webhuset og Reaktor IT Service bygger datasenter på Nesttun, klart februar 2010. " +
+          "Kraftselskapet setter opp egen trafokiosk (ca. 5×3 m). Første trinn ca. 2000 servere. " +
+          "Dell/NTC Services bygger datahallen. Ingen gateadresse.",
+      },
+      {
+        source_name: "Nye bilder fra byggingen av nytt datasenter",
+        source_url: "https://www.webhuset.no/news/nye-bilder-fra-byggingen-av-nytt-datasenter-januar-2010",
+        publisher: "Webhuset AS",
+        source_type: "web",
+        source_date: "2010-01-27",
+        primary_source: true,
+        excerpt_or_summary:
+          "Ca. 50 rackskap i varm/kald gang; trafokiosk «totalt ca 1 megawatt»; dieselgenerator; " +
+          "innløfting direkte fra Bring i samme bygg. Bekrefter anlegget og bygget.",
+      },
+      {
+        source_name: "Datasenter: Siste innspurt – få dager igjen",
+        source_url: "https://www.webhuset.no/news/datasenter-siste-innspurt-fa-dager-igjen",
+        publisher: "Webhuset AS",
+        source_type: "web",
+        source_date: "2010-02-25",
+        primary_source: true,
+        excerpt_or_summary:
+          "Få dager til hundrevis av servere flytter inn; 18 nye dedikerte servere er montert for " +
+          "lasttest.",
+      },
+      {
+        source_name: "Datasenterfilm: Bli med «behind the scenes»",
+        source_url: "https://www.webhuset.no/news/datasenterfilm-bli-med-behind-the-scenes",
+        publisher: "Webhuset AS",
+        source_type: "web",
+        source_date: "2010-04-08",
+        primary_source: true,
+        excerpt_or_summary:
+          "Film lansert 07.04.2010 med faktadel som viser «de nye datasenterfasilitetene»; opptak " +
+          "gjort i datasenteret. Bekrefter at hallen var tatt i bruk våren 2010.",
+      },
+      {
+        source_name: "Nå kan du leie rackskap hos Webhuset (Wayback)",
+        source_url: "https://web.archive.org/web/20190716171310/https://www.webhuset.no/blogg/na-kan-du-leie-rackskap-hos-webhuset/",
+        publisher: "Webhuset AS (Wayback Machine)",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Hele og halve rackskap «i vårt datasenter» med UPS, dieselgenerator og Inergen. " +
+          "«Avtalepartner og ansvarlig leverandør av tjenesten er Shared Data Center AS.» Kobler " +
+          "Webhuset til tiltakshaveren i byggesaken. Arkivert 2019; innleggets dato ukjent.",
+      },
+      {
+        source_name: "Webhuset – Nettverk, points of presence (Wayback 2016)",
+        source_url: "https://web.archive.org/web/20161028161616/https://www.webhuset.no/tjenester/nettverk",
+        publisher: "Webhuset AS (Wayback Machine)",
+        source_type: "web",
+        source_date: "2016-10-28",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bergen: Torgallmenningen, Sandbrekkeveien 95, Kokstaddalen 23. Nettnodeliste; knytter " +
+          "Webhuset til adressen, men er ikke alene anleggsbevis.",
+      },
+      {
+        source_name: "Webhuset – Datasenter og nettverk (Wayback 2019)",
+        source_url: "https://web.archive.org/web/20190917000922/https://www.webhuset.no/tjenester/datasenternettverk",
+        publisher: "Webhuset AS (Wayback Machine)",
+        source_type: "web",
+        source_date: "2019-09-17",
+        primary_source: true,
+        excerpt_or_summary:
+          "Samme Bergen-liste i 2019. Datasentrene samlet: «Strøm 1 MW», UPS (N+1), dieselgenerator, " +
+          "Emerson-kjøling (N+1). Tallet gjelder ikke Bergen alene.",
+      },
+      {
+        source_name: "Webhuset – Leie rack (Wayback 2019)",
+        source_url: "https://web.archive.org/web/20190917011613/https://www.webhuset.no/tjenester/leie-rack",
+        publisher: "Webhuset AS (Wayback Machine)",
+        source_type: "web",
+        source_date: "2019-09-17",
+        primary_source: true,
+        excerpt_or_summary:
+          "Bergen-datasenteret ligger nær Nesttun. Rackutleie, maks 4 kW per helt rack. Siste daterte " +
+          "operatørkilde som beskriver anlegget.",
+      },
+      {
+        source_name: "Webhuset – Om Webhuset",
+        source_url: "https://www.webhuset.no/om-webhuset/",
+        publisher: "Webhuset AS",
+        source_type: "web",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "«Vi eier datasentrene selv — i Oslo og Bergen»; Bergen er sekundærlokasjon. Ingen adresse. " +
+          "Bekrefter ikke at hallen på Sandbrekkevegen 95 er i drift.",
+      },
+      {
+        source_name: "Reaktor – Serverhousing (produktark, Wayback 2010)",
+        source_url: "https://web.archive.org/web/20101122171043/http://www.reaktor.no:80/Global/drift/ServerHousing.pdf",
+        publisher: "Reaktor (Wayback Machine)",
+        source_type: "document",
+        source_date: "2010-11-22",
+        primary_source: true,
+        excerpt_or_summary:
+          "Reaktor tilbyr rackplass «i vårt eget profesjonelle datasenter» med Inergen og sikring mot " +
+          "strømbrudd. Oppgir ikke adresse; støtter bare at medbyggeren solgte housing i 2010.",
+      },
+      {
+        source_name: "Kartverket: Sandbrekkevegen 95",
+        source_url: "https://ws.geonorge.no/adresser/v1/sok?adressetekst=Sandbrekkevegen%2095&kommunenummer=4601",
+        publisher: "Kartverket",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sandbrekkevegen 95, 5225 Nesttun, gnr/bnr 43/260, punkt 60.32266, 5.36894. Bekrefter " +
+          "adresse og punkt, ikke anlegget.",
+      },
+      {
+        source_name: "Brønnøysund: BERGEN LOGISTIKKBYGG AS (991163123)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/991163123",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Eiendomsselskap stiftet 2007, forretningsadresse Sandbrekkevegen 95, postadresse c/o Coop " +
+          "Hordaland Eiendom AS. Bekrefter selskapet, ikke anlegget.",
+      },
+      {
+        source_name: "Brønnøysund: WEBHUSET AS (981532848)",
+        source_url: "https://data.brreg.no/enhetsregisteret/api/enheter/981532848",
+        publisher: "Brønnøysundregistrene",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Næringskode 63.100, forretningsadresse Stord; eneste underenhet samme sted. Ingen enhet på " +
+          "Sandbrekkevegen 95. Bekrefter selskapet, ikke anlegget.",
+      },
+      {
+        source_name: "Nkom, registrerte kommersielle datasenteroperatører",
+        source_url: "https://nkom.no/datasenter/oversikt",
+        publisher: "Nasjonal kommunikasjonsmyndighet",
+        source_type: "register",
+        source_date: "2026-10-02",
+        primary_source: true,
+        excerpt_or_summary:
+          "Webhuset, Serverbite, Shared Data Center og Reaktor står ikke i listen. Bergen-operatører " +
+          "i listen: AVUR, Datafjellet, EMP Secure, Eviny Fiber.",
+      },
+      {
+        source_name: "Bergen kommune, byggesak 202026679: Kokstaddalen 23, riving",
+        source_url: "https://www.bergen.kommune.no/omkommunen/offentlig-innsyn/innsynplanogbyggesak/saksinnsyn/sak/202026679",
+        publisher: "Bergen kommune, Plan- og bygningsetaten",
+        source_type: "register",
+        source_date: "2020-11-05",
+        primary_source: true,
+        excerpt_or_summary:
+          "Rivetillatelse 27.11.2020 for bygget på gnr/bnr 114/248 (tiltakshaver EGD Property AS); " +
+          "senere ny bilforretning. Brukt til å avklare at PoP-adressen Kokstaddalen 23 ikke er et " +
+          "eget Webhuset-anlegg i dag.",
       },
     ],
   },
@@ -8895,7 +9220,7 @@ export const FUNN: Funn[] = [
       },
       {
         source_name: "Statnett – statistikk om tilknytningssaker (reservasjonsliste forbruk, lastet 30.09.2026)",
-        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
         publisher: "Statnett",
         source_type: "register",
         source_date: "2026-09-30",
@@ -9216,7 +9541,10 @@ export const FUNN: Funn[] = [
       "Kraft: 5 MW effektrettighet (Lede), tidligere eier oppga inntil 5,5 MW. Statnett-sak " +
       "26/03132 (Grenland TRA, Lede, sluttkunde FOSSEFALL AS, 1 MW i kø, moden 01.12.2025) kan " +
       "gjelde Fyresdal, fordi Einangsmoen normalt forsynes radielt fra Bolvik, men ingen kilde " +
-      "bekrefter det.",
+      "bekrefter det. Runde 14 (2026-10-02): uendret. Ingen kilde fra 2026 bekrefter drift i det " +
+      "eksisterende anlegget. Det eksisterende bygget er trolig gnr 38 bnr 117 (Molandsmoen 7B, " +
+      "ca. 370 m nord for punktet) ut fra kommunens saksframlegg, men selskapet navngis ikke der, " +
+      "så punktet er ikke flyttet. Fyresdal kommunes postliste etter 11.09.2026 er ikke lest.",
     public_candidate: false,
     kilder: [
       {
@@ -9366,7 +9694,7 @@ export const FUNN: Funn[] = [
       },
       {
         source_name: "Statnett: statistikk om tilknytningssaker (kapasitetskø, 30.09.2026)",
-        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
         publisher: "Statnett",
         source_type: "register",
         source_date: "2026-09-30",
@@ -9485,7 +9813,7 @@ export const FUNN: Funn[] = [
       },
       {
         source_name: "Statnett: statistikk om tilknytningssaker (reservasjoner og kø, 30.09.2026)",
-        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
         publisher: "Statnett",
         source_type: "register",
         source_date: "2026-09-30",
@@ -10568,7 +10896,7 @@ export const FUNN: Funn[] = [
     verification_status: "partially_verified",
     operational_status: "planned",
     sensitivity: "internal_only",
-    confidence: "low",
+    confidence: "medium",
     interest_level: "medium",
     why_interesting:
       "Enda et tilfelle av datasenter på en eksisterende industritomt med kraft og nett fra før.",
@@ -10578,7 +10906,11 @@ export const FUNN: Funn[] = [
       "på 80–200 MW finnes bare i leserinnlegg. Koordinaten er Saugbrugs registrerte anleggspunkt " +
       "(Miljødirektoratet), ikke en datasentertomt. Runde 7 (2026-10-01): Statnett har ingen sak " +
       "for prosjektet ved Halden TRA. Oppstartsmøte om regulering 24.09.2025 er bare omtalt i et " +
-      "leserinnlegg. Eget prosjekt, ikke Halden DC01.",
+      "leserinnlegg. Eget prosjekt, ikke Halden DC01. Runde 14 (2026-10-02): Norske Skog har ikke " +
+      "besluttet retning; siste børsmelding 01.10.2026 gjelder et salg, og kvartalsrapporten " +
+      "kommer 22.10.2026. Nytt: en detaljregulering for Saugbrugs næringsområde (planID G-768) " +
+      "har saker hos NVE («Datasenter»), Statnett, Statsforvalteren og fylkeskommunen. " +
+      "Sikkerheten er hevet til medium. Ingen MW og ingen Statnett-sak.",
     kilder: [
       {
         source_name: "DataCenterMap: Green Mountain Halden, Saugbrug",
@@ -10749,7 +11081,7 @@ export const FUNN: Funn[] = [
       },
       {
         source_name: "Statnett: statistikk om tilknytningssaker (kø og reservasjoner, 30.09.2026)",
-        source_url: "https://www.statnett.no/for-aktorer-i-kraftbransjen/tilknytning-og-nettkapasitet/statistikk-om-tilknytningssaker/",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/",
         publisher: "Statnett",
         source_type: "register",
         source_date: "2026-09-30",
