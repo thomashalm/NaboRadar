@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getAdminSession } from "@/lib/admin/session";
-import { HUT_ACCESS_OVERRIDES, HUT_TYPE_OVERRIDES } from "@/lib/huts/types";
+import { HUT_ACCESS_OVERRIDES, HUT_OWNER_OVERRIDES, HUT_TYPE_OVERRIDES } from "@/lib/huts/types";
 
 export type HutActionState = { status: "idle" } | { status: "ok"; message: string } | { status: "error"; message: string };
 
@@ -94,6 +94,7 @@ const overstyring = z.object({
   hutId: z.uuid(),
   type: z.union([z.literal(""), z.enum(HUT_TYPE_OVERRIDES)]),
   access: z.union([z.literal(""), z.enum(HUT_ACCESS_OVERRIDES)]),
+  owner: z.union([z.literal(""), z.enum(HUT_OWNER_OVERRIDES)]),
   status: z.enum(["unknown", "closed", "seasonal", "open"]),
   // Dager til en stenging skal kontrolleres på nytt. Brukes bare når status er «stengt».
   reviewDays: z.coerce.number().int().min(7).max(365).catch(60),
@@ -116,14 +117,15 @@ export async function setHutOverridesAction(_prev: HutActionState, formData: For
     hutId: formData.get("hutId"),
     type: tekst("type"),
     access: tekst("access"),
+    owner: tekst("owner"),
     status: tekst("status") || "unknown",
     publicNote: tekst("publicNote"),
     sourceUrl: tekst("sourceUrl"),
     reviewDays: tekst("reviewDays") || 60,
   });
   if (!parsed.success) return { status: "error", message: "Ugyldig verdi. Merknaden kan være høyst 160 tegn, og kilden må være en https-adresse." };
-  const { hutId, type, access, status, publicNote, sourceUrl } = parsed.data;
-  const noeSatt = type !== "" || access !== "" || status !== "unknown" || publicNote !== "";
+  const { hutId, type, access, owner, status, publicNote, sourceUrl } = parsed.data;
+  const noeSatt = type !== "" || access !== "" || owner !== "" || status !== "unknown" || publicNote !== "";
   if (noeSatt && sourceUrl === "") return { status: "error", message: "En overstyring eller merknad krever en kilde: den offisielle siden som sier det." };
 
   const { error } = await session.client.rpc("set_hut_overrides", {
@@ -134,6 +136,7 @@ export async function setHutOverridesAction(_prev: HutActionState, formData: For
     p_public_note: publicNote,
     p_source_url: sourceUrl,
     p_review_days: parsed.data.reviewDays,
+    p_owner: owner,
   });
   if (error) return { status: "error", message: error.message };
 

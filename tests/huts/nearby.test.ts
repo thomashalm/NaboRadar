@@ -198,7 +198,7 @@ describe("ordlyd", () => {
 });
 
 import { buildHutHref, buildHutMapHref, hutRefFromSlug, hutSlug } from "@/lib/huts/href";
-import { HUT_NEXT_STEP_NOTES, hutLinks, hutNextStep } from "@/lib/huts/wording";
+import { HUT_NEXT_STEP_NOTES, hutLinks, hutNextStep, hutUseLine } from "@/lib/huts/wording";
 
 describe("lenker ut fra en hytte", () => {
   const base = { bookingUrl: null, infoUrl: null, managerName: null };
@@ -210,6 +210,15 @@ describe("lenker ut fra en hytte", () => {
     expect(hutLinks({ ...base, infoUrl: "https://www.dnt.no/hytter/x" })).toEqual([
       { kind: "info", href: "https://www.dnt.no/hytter/x", label: "Se hos DNT" },
     ]);
+  });
+
+  it("en hytte som ikke er for allmennheten, får ingen oppfordring til å bestille", () => {
+    const steg = hutNextStep({ ...base, access: "not_public", managerName: "Selbu fjellstyre" });
+    expect(steg).toMatchObject({ bookingRequired: false, kind: "manager_only", note: HUT_NEXT_STEP_NOTES.notPublic });
+    expect(hutAccessLine("not_public")).toBe("Ikke for allmennheten");
+    // Den står ikke som et sted å overnatte, selv om kilden klassifiserer den slik.
+    expect(hutUseLine({ overnight: "yes", beds: null, access: "not_public" })).toBeNull();
+    expect(hutUseLine({ overnight: "yes", beds: null, access: "locked_prebooking" })).toBe("Overnatting");
   });
 
   it("navngir stedet lenken går til, ellers forvalteren — aldri eierkategorien", () => {

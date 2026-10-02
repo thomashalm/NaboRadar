@@ -5,7 +5,7 @@ import Link from "next/link";
 import { reviewHutAction, reviewHutStatusAction, setHutContactAction, setHutOverridesAction, type HutActionState } from "@/app/admin/hytter/actions";
 import { KILDENAVN, type HutContactRow, type HutReviewCase, type HutStatusRow } from "@/lib/admin/huts";
 import { buildHutHref } from "@/lib/huts/href";
-import { HUT_ACCESS_OVERRIDES, HUT_TYPE_OVERRIDES, hutAccessKind } from "@/lib/huts/types";
+import { HUT_ACCESS_OVERRIDES, HUT_OWNER_OVERRIDES, HUT_TYPE_OVERRIDES, hutAccessKind } from "@/lib/huts/types";
 import { HUT_NEXT_STEP_LABELS, HUT_OWNER_LABELS, HUT_TYPE_LABELS, hutNextStep, type HutNextStepKind } from "@/lib/huts/wording";
 import type { HutOwnerKind, HutType } from "@/lib/huts/types";
 
@@ -146,7 +146,7 @@ export function HytteKontakt({ hytte }: { hytte: HutContactRow }) {
         </p>
         <span className={`rounded-full border px-2 py-0.5 text-[12px] font-medium ${STATUSFARGE[steg.kind]}`}>{HUT_NEXT_STEP_LABELS[steg.kind]}</span>
         {hytte.locked && <span className="rounded-full border border-line px-2 py-0.5 text-[12px] text-ink">Låst</span>}
-        {(hytte.type_override || hytte.access_override) && (
+        {(hytte.type_override || hytte.access_override || hytte.owner_override) && (
           <span className="rounded-full border border-line px-2 py-0.5 text-[12px] text-ink">Avviker fra Kartverket</span>
         )}
         {hytte.access_status === "closed" && (
@@ -201,6 +201,7 @@ const TILGANG_VALG: Record<(typeof HUT_ACCESS_OVERRIDES)[number], string> = {
   special_key: "Spesialnøkkel",
   code_or_special_key: "Kodelås eller spesialnøkkel",
   locked_prebooking: "Låst – må bestilles på forhånd",
+  not_public: "Ikke for allmennheten",
 };
 
 /**
@@ -246,6 +247,17 @@ function HytteOverstyring({ hytte }: { hytte: HutContactRow }) {
             {HUT_ACCESS_OVERRIDES.map((kind) => (
               <option key={kind} value={kind}>
                 {TILGANG_VALG[kind]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="text-[13px] text-muted">
+          Eier — bare når kildens kategori er feil
+          <select name="owner" defaultValue={hytte.owner_override ?? ""} className={felt}>
+            <option value="">Som kilden ({eierNavn(hytte.owner_kind).toLowerCase()})</option>
+            {HUT_OWNER_OVERRIDES.map((kind) => (
+              <option key={kind} value={kind}>
+                {eierNavn(kind)}
               </option>
             ))}
           </select>

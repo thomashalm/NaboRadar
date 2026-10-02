@@ -89,7 +89,9 @@ export function hutSummaryLine(
 }
 
 /** Hva hytta er beregnet for, slik kilden klassifiserer den. Null når kilden ikke sier noe. */
-export function hutUseLine(hut: { overnight: HutOvernight; beds: number | null }): string | null {
+export function hutUseLine(hut: { overnight: HutOvernight; beds: number | null; access?: HutAccessKind }): string | null {
+  // En hytte som ikke er for allmennheten, skal ikke stå som et sted å overnatte.
+  if (hut.access === "not_public") return null;
   if (hut.overnight === "yes") return hut.beds ? `Overnatting · ${hut.beds} sengeplasser` : "Overnatting";
   if (hut.overnight === "no") return "Rast og dagsbesøk, ikke beregnet for overnatting";
   return null;
@@ -117,6 +119,7 @@ export const HUT_ACCESS_LABELS: Record<HutAccessKind, string | null> = {
   code_lock: "Kodelås",
   special_key: "Spesialnøkkel",
   code_or_special_key: "Kodelås eller spesialnøkkel",
+  not_public: "Ikke for allmennheten",
   unknown: null,
 };
 
@@ -290,6 +293,8 @@ export const HUT_NEXT_STEP_NOTES = {
   info: "Oppdatert informasjon om tilgang og bestilling finner du hos forvalteren.",
   /** Infoside for en hytte som ikke må bestilles: da er det ingen bestilling å vise til. */
   infoOnly: "Oppdatert informasjon finner du hos forvalteren.",
+  /** Hytta er ikke et tilbud til turgåere. Merknaden over sier hvem den er for. */
+  notPublic: "Hytta er ikke et tilbud til allmennheten.",
   managerOnly: "Bestilling kreves. NaboRadar har foreløpig ikke en verifisert bestillingslenke.",
   unknown:
     "Kartverket oppgir at hytta krever forhåndsbooking. NaboRadar har foreløpig ikke funnet en verifisert kontakt- eller bestillingsside.",
@@ -305,6 +310,10 @@ export function hutNextStep(hut: {
   const bookingRequired = hut.access === "locked_prebooking";
   const links = hutLinks(hut);
   const base = { bookingRequired, links, managerName: hut.managerName };
+  // Ikke for allmennheten: ingen oppfordring til å bestille. En infolenke kan fortsatt vises.
+  if (hut.access === "not_public") {
+    return { ...base, kind: hut.bookingUrl ? "booking_link" : hut.infoUrl ? "info_link" : hut.managerName ? "manager_only" : "unknown", note: HUT_NEXT_STEP_NOTES.notPublic };
+  }
   // Med en bestillingslenke trengs ingen forklaring: knappen er neste steg.
   if (hut.bookingUrl) return { ...base, kind: "booking_link", note: null };
   if (hut.infoUrl) return { ...base, kind: "info_link", note: bookingRequired ? HUT_NEXT_STEP_NOTES.info : HUT_NEXT_STEP_NOTES.infoOnly };

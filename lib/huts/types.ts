@@ -36,6 +36,8 @@ export type HutAccessStatus = (typeof HUT_ACCESS_STATUSES)[number];
 /**
  * Tilgang: dør og nøkkel. De to første er Kartverkets kodeliste («Låst», «Ulåst»); resten
  * finnes bare som overstyring, når forvalterens side sier noe mer presist eller noe annet.
+ * `not_public` sier hvem hytta er for, ikke hvordan døra er: bare medlemmer, skoler eller
+ * jegere, eller ikke i utleie. Det er noe annet enn midlertidig stengt.
  * Speiler CHECK-listen på `huts.access_override` pluss kildens to verdier.
  */
 export const HUT_ACCESS_KINDS = [
@@ -46,12 +48,15 @@ export const HUT_ACCESS_KINDS = [
   "code_lock",
   "special_key",
   "code_or_special_key",
+  "not_public",
   "unknown",
 ] as const;
 export type HutAccessKind = (typeof HUT_ACCESS_KINDS)[number];
 
 /** Verdiene en overstyring kan ha. Kildens «ulåst eller DNT-nøkkel» er ikke en av dem. */
-export const HUT_ACCESS_OVERRIDES = ["unlocked", "dnt_key", "code_lock", "special_key", "code_or_special_key", "locked_prebooking"] as const;
+export const HUT_ACCESS_OVERRIDES = ["unlocked", "dnt_key", "code_lock", "special_key", "code_or_special_key", "locked_prebooking", "not_public"] as const;
+/** Eierkategoriene en overstyring kan ha. Brukes bare når forvalterens side viser at N50s kategori er feil. */
+export const HUT_OWNER_OVERRIDES = ["dnt", "statskog", "fjellstyre", "kommune", "other"] as const;
 export const HUT_TYPE_OVERRIDES = ["staffed_hut", "self_service_hut", "unstaffed_hut", "rest_cabin", "open_cabin", "day_trip_hut", "emergency_shelter"] as const;
 
 /** Tilgangen slik den vises: overstyringen når den finnes, ellers kildens Låst/Ulåst. */

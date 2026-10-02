@@ -62,8 +62,8 @@ const CHECKS: Check[] = [
     sql: `select p.name from huts_public p join huts h on h.id = p.id where h.confidence = 'low' and h.last_verified_at is null`,
   },
   {
-    navn: "Overstyring eller offentlig merknad uten kilde",
-    sql: `select h.name from huts h where (h.type_override is not null or h.access_override is not null or h.public_note is not null or h.access_status <> 'unknown')
+    navn: "Overstyring (type, tilgang, eier) eller offentlig merknad uten kilde",
+    sql: `select h.name from huts h where (h.type_override is not null or h.access_override is not null or h.owner_override is not null or h.public_note is not null or h.access_status <> 'unknown')
           and (h.override_source_url is null or h.override_verified_at is null)`,
   },
   {
@@ -84,7 +84,7 @@ const CHECKS: Check[] = [
   },
   {
     navn: "Overstyring av type eller tilgang til en verdi utenfor de kontrollerte listene",
-    sql: `select h.name from huts h where (h.access_override is not null and h.access_override not in ('unlocked','dnt_key','code_lock','special_key','code_or_special_key','locked_prebooking'))
+    sql: `select h.name from huts h where (h.access_override is not null and h.access_override not in ('unlocked','dnt_key','code_lock','special_key','code_or_special_key','locked_prebooking','not_public'))
           or (h.type_override is not null and h.type_override not in ('staffed_hut','self_service_hut','unstaffed_hut','rest_cabin','open_cabin','day_trip_hut','emergency_shelter'))`,
   },
   {
@@ -119,6 +119,24 @@ const CHECKS: Check[] = [
     navn: "Hytte med Statskog som forvalter uten direkte lenke",
     advarsel: true,
     sql: `select h.name from huts h where ${SYNLIG} and h.manager_verified = 'Statskog' and h.booking_url is null and h.info_url is null`,
+  },
+  {
+    navn: "Samme adresse som både bestillings- og infolenke (gir to like knapper)",
+    sql: `select h.name from huts h where h.archived_at is null and h.booking_url is not null and h.booking_url = h.info_url`,
+  },
+  {
+    navn: "«Ikke for allmennheten» uten merknad om hvem hytta er for",
+    sql: `select h.name from huts h where h.archived_at is null and h.access_override = 'not_public' and h.public_note is null`,
+  },
+  {
+    navn: "«Ikke for allmennheten» og samtidig midlertidig stengt (to ulike ting)",
+    advarsel: true,
+    sql: `select h.name from huts h where h.archived_at is null and h.access_override = 'not_public' and h.access_status = 'closed'`,
+  },
+  {
+    navn: "Eieroverstyring som er lik kildens kategori (overflødig)",
+    advarsel: true,
+    sql: `select h.name from huts h where h.archived_at is null and h.owner_override = h.owner_kind`,
   },
   {
     navn: "Låst fjellstyrehytte uten neste steg",

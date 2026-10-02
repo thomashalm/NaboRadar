@@ -727,6 +727,56 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
           await db.pg.exec("rollback");
         }
       });
+
+      it("eierkategorien kan korrigeres når kilden tar feil, og kildens verdi står urørt", async () => {
+        const hytte = await id("name = 'Kobberhaughytta'");
+        await db.pg.exec("begin");
+        try {
+          await somAdmin();
+          const eier = async () =>
+            (await db.pg.query<{ owner_kind: string; overridden: string[] }>(`select owner_kind, overridden from get_hut($1)`, [hytte.slice(0, 8)])).rows[0]!;
+          const kildens = (await eier()).owner_kind;
+          // Uten kilde: avvist, som de andre overstyringene.
+          await db.pg.exec("savepoint s");
+          await expect(db.pg.query(`select set_hut_overrides($1, null, null, null, null, null, null, 'kommune')`, [hytte])).rejects.toThrow(/kilde/);
+          await db.pg.exec("rollback to s");
+          await db.pg.query(`select set_hut_overrides($1, null, null, null, null, $2, null, 'kommune')`, [hytte, KILDE]);
+          expect(await eier()).toEqual({ owner_kind: "kommune", overridden: ["owner"] });
+          // Filteret i kartet følger den offentlige verdien.
+          const treff = async (owner: string) =>
+            (await db.pg.query<{ id: string }>(`select id from huts_in_bbox(4, 57, 32, 72, null, array[$1])`, [owner])).rows.map((r) => r.id);
+          expect(await treff("kommune")).toContain(hytte);
+          // Synken rører ikke overstyringen, og kildens verdi er den samme som før.
+          await db.pg.exec("select * from refresh_huts()");
+          expect((await eier()).owner_kind).toBe("kommune");
+          expect((await db.pg.query<{ owner_kind: string }>(`select owner_kind from huts where id = $1`, [hytte])).rows[0]!.owner_kind).toBe(kildens);
+          // Et kall som ikke nevner eier (eldre klient), lar overstyringen stå.
+          await db.pg.query(`select set_hut_overrides($1, null, 'code_lock', null, null, $2)`, [hytte, KILDE]);
+          expect((await eier()).owner_kind).toBe("kommune");
+          // Tom streng fjerner den.
+          await db.pg.query(`select set_hut_overrides($1, null, 'code_lock', null, null, $2, null, '')`, [hytte, KILDE]);
+          expect((await eier()).owner_kind).toBe(kildens);
+        } finally {
+          await db.pg.exec("rollback");
+        }
+      });
+
+      it("«ikke åpen for allmennheten» er en kontrollert tilgangsverdi, ikke fritekst", async () => {
+        const hytte = await id("name = 'Kobberhaughytta'");
+        await db.pg.exec("begin");
+        try {
+          await somAdmin();
+          await db.pg.query(`select set_hut_overrides($1, null, 'not_public', null, 'Kun for medlemmer.', $2)`, [hytte, KILDE]);
+          expect(await offentlig(hytte)).toMatchObject({ access_kind: "not_public", access_status: "unknown", public_note: "Kun for medlemmer." });
+          // Det er ikke det samme som midlertidig stengt: hytta står ikke i statuskøen.
+          expect((await db.pg.query(`select id from hut_status_queue() where id = $1`, [hytte])).rows).toEqual([]);
+          await db.pg.exec("savepoint s");
+          await expect(db.pg.query(`select set_hut_overrides($1, null, 'members_only', null, null, $2)`, [hytte, KILDE])).rejects.toThrow();
+          await db.pg.exec("rollback to s");
+        } finally {
+          await db.pg.exec("rollback");
+        }
+      });
     });
 
     describe("midlertidig stengt: statusen følges opp", () => {

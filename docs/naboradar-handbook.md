@@ -1070,7 +1070,7 @@ ikke alt svarer på. Skal det inn senere, hører det sammen med valgt rad, ikke 
 Første friluftskategori. Retningen står i [data-roadmapen](data-roadmap.md#12-friluft-skjult-lokal-innsikt-ikke-en-turapp),
 modellen i [dataarkitekturen](data-architecture.md#5-kanoniske-enheter-eller-bulk-lag).
 
-**Status: hele landet er importert, upublisert.** 1 657 hytter, 1 501 av dem klare til å vises;
+**Status: hele landet er importert, upublisert.** 1 638 hytter, 1 510 av dem klare til å vises;
 resten står bare i sekundærkilden og er skjult til de er kontrollert. Oslomarka med omland er
 kvalitetssikret hytte for hytte. Resten av landet er kontrollert mot Kartverkets egne data, og
 DNT-hyttene (578) er beriket med forening, bestillingslenke og tilgang fra DNTs egne sider — se
@@ -1082,8 +1082,12 @@ egen liste (193) har forvalter, lenke og riktig type og tilgang — se
 [research/hytter-statskog-berikelse.md](research/hytter-statskog-berikelse.md). Fjellstyrehyttene
 (233) har navngitt fjellstyre på 224 og lenke på 209, fra Fjellstyresambandets oversikt og
 fjellstyrenes egne sider — se
-[research/hytter-fjellstyre-berikelse.md](research/hytter-fjellstyre-berikelse.md). «Andre» er
-ikke beriket. Tallene, fylkestabellen og funnene står i
+[research/hytter-fjellstyre-berikelse.md](research/hytter-fjellstyre-berikelse.md). I «Andre»
+er de låste og de betjente hyttene undersøkt (private turisthytter, kystled, bygdeallmenninger,
+jeger- og fiskerforeninger) — se
+[research/hytter-andre-berikelse.md](research/hytter-andre-berikelse.md), som også har status
+mot kriteriene for publisering. Til sammen har 1 195 hytter kontrollert forvalter og 1 171
+offisiell lenke; 20 låste hytter står uten neste steg. Tallene, fylkestabellen og funnene står i
 [research/hytter-nasjonal-import.md](research/hytter-nasjonal-import.md). `npm run qa:hytter`
 kjører regelsjekkene (koordinater, dubletter, lekkasje av avviste eller skjulte hytter,
 overstyring uten kilde) og skal være grønn før publisering.
@@ -1132,6 +1136,7 @@ Tolkningsreglene:
   finnes. «Andre» betyr uspesifisert, og vises ikke som en eier. Kategorien tar også feil:
   Besso står som DNT og er en privat turisthytte; Holmvasshytta i Sunnfjord står som Statskog og
   tilhører KFUK-KFUM. Og private turisthytter med DNT-avtale (Dørålseter) står som «Andre».
+  Dokumenterte feil rettes med `owner_override`, som går foran offentlig; kildens verdi står urørt.
 - **Sengeplasser, sesong og booking vises ikke.** De finnes bare hos DNT/UT.no, som vi ikke
   kan hente fra.
 - **Serveringshytter og gapahuker er utelatt.** N50s «Serveringshytte» er markastuer med
@@ -1214,6 +1219,7 @@ alltid riktig på feltnivå. Den offentlige verdien følger derfor denne priorit
 |---|---|---|---|
 | Type | `type_override` (kontrollert mot forvalteren) | N50 | sekundærkilde |
 | Tilgang | `access_override` | N50 (`locked`) | — |
+| Eier | `owner_override` (bare når forvalterens side viser at kategorien er feil) | N50 (`owner_kind`) | sekundærkilde |
 | Forvalter | `manager_verified` | Turrutebasen | ukjent |
 
 Kildens verdi skrives aldri over. `hut_type`, `locked` og `overnight` er det synken leste, og
@@ -1235,6 +1241,7 @@ Tilgang er en lukket liste (`HUT_ACCESS_KINDS`), ikke fritekst:
 | `code_lock` | Kodelås | bare overstyring |
 | `special_key` | Spesialnøkkel | bare overstyring |
 | `code_or_special_key` | Kodelås eller spesialnøkkel | bare overstyring (DNTs egen merkelapp) |
+| `not_public` | Ikke for allmennheten | bare overstyring. Sier hvem hytta er for, ikke hvordan døra er |
 
 Overnatting følger typen: en overstyrt type tar med seg sin egen definisjon. Bristol står som
 rastebu i N50, men Jevnaker almenning skriver at koia er åpen og at man kan overnatte én natt.
@@ -1245,6 +1252,18 @@ Den er overstyrt til «åpen koie», og vises dermed med «Overnatting».
 vite» på hyttesiden, i en rolig boks, og i den åpne raden i hyttekartet. Den er ikke det samme
 som `contact_note`, som er internt og aldri returneres. Høyst 160 tegn, ingen
 markedsføring, og samme kildekrav som overstyringene.
+
+**Ikke for allmennheten.** Noen hytter i kildene er ikke et tilbud til turgåere: bare for
+medlemmer, skoler eller jegere, eller ikke i utleie. De får tilgangen `not_public`, og merknaden
+sier hvem hytta er for. Da vises «Ikke for allmennheten» som tilgang, hytta står ikke som et
+sted å overnatte, og siden ber ikke om bestilling. Det er noe annet enn midlertidig stengt
+(status) og låst (dør). Verdien settes bare når forvalterens egen side sier det; `qa:hytter`
+feiler hvis merknaden mangler.
+
+**Feil eierkategori.** `owner_override` ligger oppå N50s `owner_kind`, med samme krav til kilde
+som de andre overstyringene. Den brukes bare når en offisiell side viser at kategorien er feil
+(Besso er ikke DNT, Holmvasshytta i Sunnfjord er ikke Statskog). Det er ikke en eiermodell:
+hvem som driver hytta, er forvalteren.
 
 **Midlertidig stengt.** `access_status = 'closed'` settes for hånd når forvalterens side sier
 at hytta er stengt. Hytta vises fortsatt — det er nyttig å vite at den finnes — men med

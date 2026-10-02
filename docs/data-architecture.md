@@ -176,6 +176,8 @@ opprettes før første kartlag som spør på kartutsnitt (se [10](#10-romlige-in
 | Drift | `provider_health`, `recent_sync_runs`, `request_sync`, `scheduler_status` | admin |
 | Hytter | `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search`, `get_hut` | `anon`, via Next-serveren. `security definer`; svarer bare når kategorien `hytte` er publisert eller kalleren er admin |
 | Hytter, internt | `refresh_huts` (`service_role`, etter sync); `hut_review_queue`, `review_hut`, `set_hut_contact`, `set_hut_overrides`, `hut_contact_list`, `hut_contact_summary`, `hut_status_queue`, `review_hut_status` (admin) | — |
+
+Overstyringer på `huts` (aldri skrevet av synken): `type_override`, `access_override` (inkl. `not_public`), `owner_override`, `public_note`, `access_status`. Den offentlige verdien er overstyringen når den finnes, ellers kildens.
 | Research | `research_*`, `save_research_item`, `record_research_review`, `datacenter_*`, `save_datacenter_*` | admin; `is_admin()` sjekkes inne i hver |
 | Views | `admin_research_review_status`, `admin_datacenter_overview`, `admin_datacenter_refresh_status` | bare via funksjonene over |
 

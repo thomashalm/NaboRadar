@@ -43,7 +43,8 @@ const rowSchema = z.object({
   source_updated_at: z.string().nullable(),
   last_seen_at: z.string(),
   sources: z.array(z.string()),
-  access_kind: z.enum(HUT_ACCESS_KINDS),
+  // En verdi denne versjonen ikke kjenner, skal ikke velte hele lista: da er tilgangen ukjent.
+  access_kind: z.enum(HUT_ACCESS_KINDS).catch("unknown"),
   public_note: z.string().nullable(),
   overridden: z.array(z.string()),
   distance_m: z.number().optional(),

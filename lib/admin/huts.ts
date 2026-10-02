@@ -72,6 +72,8 @@ const kontaktSchema = z.object({
   public_note: z.string().nullable(),
   override_source_url: z.string().nullable(),
   override_verified_at: z.string().nullable(),
+  /** Eierkategori lagt oppå kildens, når forvalterens side viser at kategorien er feil. */
+  owner_override: z.string().nullable().optional(),
 });
 
 export type HutContactRow = z.infer<typeof kontaktSchema>;
