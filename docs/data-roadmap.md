@@ -492,8 +492,9 @@ Med 15 km som første trinn fikk Oslo sentrum 21 treff — det er marka, ikke na
 3. Hvem som kontrollerer hyttene som bare finnes i sekundærkilden (anslagsvis 200 nasjonalt).
 4. At N50-synken leser 357 kommunearkiv i stedet for 21 (målt: under ett sekund per kommune).
 
-Databaseveksten er ikke et hinder: piloten la til under 1 MB, og hele landet er anslått til
-3–5 MB av de 500 MB planen har.
+Databaseveksten er ikke et hinder: piloten økte basen fra 132,45 til 132,78 MB (0,33 MB for
+102 kildeposter og 58 hytter), og hele landet — om lag 2 900 kildeposter og 1 750 hytter — er
+anslått til rundt 5 MB av de 500 MB planen har. Spørringene tar 1–15 ms i produksjon.
 
 ---
 
