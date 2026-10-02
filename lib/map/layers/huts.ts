@@ -36,8 +36,9 @@ export const hutsLayer: MapLayer<HutMapFeature[]> = {
       promoteId: "featureId",
       cluster: true,
       clusterRadius: 36,
-      // Fra zoom 9 vises hver hytte for seg: da er avstanden mellom dem større enn markøren.
-      clusterMaxZoom: 8,
+      // Fra zoom 8 vises hver hytte for seg. Det er nivået et utsnitt på 10–20 km får på en
+      // telefon, og der skal en valgt hytte kunne ses som et eget punkt.
+      clusterMaxZoom: 7,
     });
     map.addLayer({
       id: "huts-cluster",
@@ -62,8 +63,10 @@ export const hutsLayer: MapLayer<HutMapFeature[]> = {
         "circle-radius": ["case", selected, 10, 7],
         "circle-color": ["match", ["get", "hutType"], "rest_cabin", HUT_REST_COLOR, HUT_COLOR],
         "circle-opacity": 0.95,
-        "circle-stroke-color": "#ffffff",
-        "circle-stroke-width": 2,
+        // Valgt hytte får mørk ring i tillegg til størrelsen, så den kan skilles fra naboene
+        // også når popupen dekker noe av kartet.
+        "circle-stroke-color": ["case", selected, "#15171b", "#ffffff"],
+        "circle-stroke-width": ["case", selected, 3, 2],
       },
     });
   },

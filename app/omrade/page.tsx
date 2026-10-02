@@ -57,7 +57,7 @@ export default async function AreaPage({ searchParams }: { searchParams: SearchP
         lookupFacts={lookupFacts}
         tiles={getMapTileConfig()}
         skolekrets={<SkolekretsNotis lat={lat} lng={lng} />}
-        friluft={<FriluftSeksjon lat={lat} lng={lng} />}
+        friluft={<FriluftSeksjon lat={lat} lng={lng} label={parsed.data.label} />}
       />
     </AreaShell>
   );

@@ -51,7 +51,9 @@ const rawSchema = z.object({
   navn: z.string().nullable(),
   betjeningsgrad: z.enum(["Betjent", "Selvbetjent", "Ubetjent", "Rastebu", "Serveringshytte", "Gapahuk"]),
   hytteeier: z.enum(["1", "2", "3", "4"]),
-  tilgjengelighet: z.enum(["Låst", "Ulåst"]).nullable(),
+  // Kodelisten «Tilgjengelighet»: Låst = låst og krever forhåndsbooking, Ulåst = ulåst eller
+  // åpnes med DNTs standardnøkkel, Udefinert = ikke aktuelt.
+  tilgjengelighet: z.enum(["Låst", "Ulåst", "Udefinert"]).nullable(),
   oppdateringsdato: z.string().nullable(),
   easting: z.number().finite(),
   northing: z.number().finite(),
@@ -201,7 +203,7 @@ export class KartverketN50HytterProvider implements AreaFeatureProvider {
         ...TYPE[raw.betjeningsgrad]!,
         owner_kind: EIER[raw.hytteeier],
         manager_name: null,
-        locked: raw.tilgjengelighet === null ? null : raw.tilgjengelighet === "Låst",
+        locked: raw.tilgjengelighet === "Låst" ? true : raw.tilgjengelighet === "Ulåst" ? false : null,
         beds: null,
         municipality_number: raw.knr,
         kilde_betjeningsgrad: raw.betjeningsgrad,

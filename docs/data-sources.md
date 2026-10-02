@@ -322,14 +322,22 @@ Undersøkt 2026-10-02. Alt under er testet med faktiske kall der ikke annet stå
 | Tilgang | Filnedlasting. **Ingen WFS** (`wfs.n50` svarer «UKJENT APPLIKASJON»). Ett zip-arkiv per kommune, listet i `https://nedlasting.geonorge.no/geonorge/ATOM-feeds/N50Kartdata_AtomFeedGML.xml` |
 | Objekt | `Bygning` med `bygningstype = 956` og `hytteinformasjon`. Det finnes ingen objekttype «Turisthytte» i gjeldende skjema (20230401) |
 | Antall | 1 880 nasjonalt: Ubetjent 771, Rastebu 461, Gapahuk 243, Selvbetjent 184, Serveringshytte 112, Betjent 109 |
-| Felt | `navn`, `betjeningsgrad`, `hytteeier` (1 DNT, 2 Andre, 3 Fjellstyre, 4 Statskog), `tilgjengelighet` (Låst/Ulåst), `oppdateringsdato`, punkt i UTM 33 |
+| Felt | `navn`, `betjeningsgrad`, `hytteeier` (1 DNT, 2 Andre, 3 Fjellstyre, 4 Statskog), `tilgjengelighet` (Låst = låst og krever forhåndsbooking, Ulåst = ulåst eller åpnes med DNTs standardnøkkel, Udefinert = ikke aktuelt), `oppdateringsdato`, punkt i UTM 33 |
 | Mangler | Sengeplasser, sesong, åpen/stengt, navngitt eier, booking |
 | Oppdatering | Ukentlig |
 | Ekstern ID | **Ingen.** `gml:id` genereres på nytt per eksport: to eksporter av Oslo samme natt hadde 0 av 13 224 felles |
 | Automatisk synk | Ja. Bygningsfilen leses ut av arkivet med delforespørsler (`lib/providers/zip-range.ts`) — Oslo tar 0,2 s |
 
 Kodelistene: [betjeningsgrad](https://register.geonorge.no/sosi-kodelister/kartdata/betjeningsgrad),
-[hytteeier](https://register.geonorge.no/sosi-kodelister/kartdata/hytteeier).
+[hytteeier](https://register.geonorge.no/sosi-kodelister/kartdata/hytteeier),
+[tilgjengelighet](https://register.geonorge.no/sosi-kodelister/kartdata/tilgjengelighet).
+
+Tillegg på hyttesiden, hentet når siden vises og ikke lagret:
+
+| | |
+|---|---|
+| Høyde | Kartverkets høydedata-API, `https://ws.geonorge.no/hoydedata/v1/punkt?koordsys=4258&nord=<lat>&ost=<lng>`. Åpent, CC BY 4.0. Gir terrenghøyden (DTM 1 m) i punktet |
+| Kommune og fylke | `https://ws.geonorge.no/kommuneinfo/v1/fylkerkommuner` — 15 fylker med 357 kommuner |
 
 ### Kartverket – Tur- og friluftsruter, `RuteInfoPunkt` (sekundærkilde)
 

@@ -469,9 +469,16 @@ offisiell lenke når vi har en.
 | Sentralt stedsnavnregister | Bare navn og punkt. Aktuelt som alias-kilde senere |
 
 **Hva vi dermed vet og ikke vet.** Vi har navn, sted, type (betjent, selvbetjent, ubetjent,
-rastebu), eierkategori (DNT, Statskog, fjellstyre, andre) og om døra er låst. Vi har **ikke**
-sengeplasser, sesong, åpen/stengt eller bookinglenke, og viser ingen av delene. «Ulåst» er
-kildens opplysning om døra — ikke et løfte om at hytta er åpen.
+rastebu), eierkategori (DNT, Statskog, fjellstyre, andre) og tilgang (låst og må bestilles på
+forhånd, eller ulåst/åpnes med DNTs standardnøkkel — Kartverkets egen definisjon). Kommune og
+fylke kommer fra kommuneregisteret, og terrenghøyden fra Kartverkets høydemodell. Vi har **ikke**
+sengeplasser, sesong, åpen/stengt eller bookinglenke, og viser ingen av delene. Tilgang er
+kildens opplysning om døra og nøkkelen — ikke et løfte om at hytta er åpen.
+
+**Undersøkt og ikke tatt inn (runde 4).** Stedsnavn i nærheten (Sentralt stedsnavnregister):
+lovlig, men et navn 300 m unna sier ikke noe sikkert om hytta. Nærhet til sti og vei: krever at
+Turrutebasens ruter og vegnettet importeres — det er turstier, som er utenfor rammen. Bilder,
+fasiliteter, sengetall og sesong: finnes bare hos DNT/UT.no.
 
 **Avgrensning — besluttet 02.10.2026.**
 

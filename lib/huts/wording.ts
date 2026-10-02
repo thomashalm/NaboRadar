@@ -47,42 +47,145 @@ export const HUT_OWNER_FILTERS: readonly { value: HutOwnerKind; label: string }[
 
 const km = new Intl.NumberFormat("nb-NO", { maximumFractionDigits: 1 });
 
-/** «7,4 km» — uten «unna», fordi linjen allerede er en oppramsing. */
+/** «7,4 km». Sier ikke hva avstanden er målt fra — det må stå rett ved, se `hutDistanceFrom`. */
 export function formatHutDistance(meters: number): string {
   if (meters < 1000) return `${Math.max(50, Math.round(meters / 50) * 50)} m`;
   return `${km.format(Math.round(meters / 100) / 10)} km`;
 }
 
-/** «Ubetjent hytte · DNT · 7,4 km». Ledd uten kildegrunnlag faller bort. */
-export function hutSummaryLine(hut: { type: HutType; ownerKind: HutOwnerKind; distanceM?: number | null }): string {
-  return [
-    HUT_TYPE_LABELS[hut.type] ?? "Hytte",
-    HUT_OWNER_LABELS[hut.ownerKind],
-    hut.distanceM != null ? formatHutDistance(hut.distanceM) : null,
-  ]
+/**
+ * Stedet en avstand er målt fra, slik det står i teksten: «Storgata 1», ikke hele adressen.
+ *
+ * Regelen for hytter er at en avstand aldri vises uten at det er tydelig hva den er målt fra.
+ * På områdesiden er det adressen i overskriften. I hyttekartet finnes det ikke noe slikt sted
+ * med mindre brukeren kom fra ett — da står navnet i hver avstand.
+ */
+export function hutOriginName(label: string | null | undefined): string {
+  const kort = (label ?? "").split(",")[0]!.trim();
+  if (!kort) return "valgt sted";
+  return kort.length > 40 ? `${kort.slice(0, 39).trimEnd()}…` : kort;
+}
+
+/** «4,2 km fra Storgata 1». */
+export function hutDistanceFrom(meters: number, originName: string): string {
+  return `${formatHutDistance(meters)} fra ${originName}`;
+}
+
+/**
+ * «Ubetjent hytte · DNT · 7,4 km». Ledd uten kildegrunnlag faller bort.
+ *
+ * Med `originName` står stedet i avstanden («7,4 km fra Storgata 1»). Uten er avstanden bare
+ * tallet, og kalleren har ansvaret for at stedet framgår av sammenhengen.
+ */
+export function hutSummaryLine(
+  hut: { type: HutType; ownerKind: HutOwnerKind; distanceM?: number | null },
+  originName?: string,
+): string {
+  const avstand =
+    hut.distanceM == null ? null : originName ? hutDistanceFrom(hut.distanceM, originName) : formatHutDistance(hut.distanceM);
+  return [HUT_TYPE_LABELS[hut.type] ?? "Hytte", HUT_OWNER_LABELS[hut.ownerKind], avstand]
     .filter((ledd): ledd is string => ledd !== null)
     .join(" · ");
 }
 
+/** Hva hytta er beregnet for, slik kilden klassifiserer den. Null når kilden ikke sier noe. */
+export function hutUseLine(hut: { overnight: HutOvernight; beds: number | null }): string | null {
+  if (hut.overnight === "yes") return hut.beds ? `Overnatting · ${hut.beds} sengeplasser` : "Overnatting";
+  if (hut.overnight === "no") return "Rast og dagsbesøk, ikke beregnet for overnatting";
+  return null;
+}
+
 /**
- * Det kilden sier om bruk. Tom liste når den ikke sier noe.
+ * Tilgang, etter Kartverkets kodeliste «Tilgjengelighet» (N50, `hytteinformasjon.tilgjengelighet`):
  *
- * «Ulåst» er kildens opplysning om døra, ikke et løfte om at hytta er åpen i dag — derfor
- * står det som det står, og ikke som «åpen».
+ *   Låst      «Låst og krever forhåndsbooking.»
+ *   Ulåst     «Ulåst eller tilgjengelig med Den Norske Turistforenings standardnøkkel.»
+ *   Udefinert «Irrelevant/ikke aktuell.» — lagres som ukjent og vises ikke.
+ *
+ * «Ulåst» betyr altså ikke at man slipper nøkkel, og ingen av verdiene sier om hytta er åpen
+ * i dag. Ordlyden under sier det kodelisten sier, verken mer eller mindre.
+ * https://register.geonorge.no/sosi-kodelister/kartdata/tilgjengelighet
  */
+export const HUT_ACCESS_LABELS = {
+  locked: "Låst – må bestilles på forhånd",
+  unlocked: "Ulåst, eller åpnes med DNT-nøkkel",
+} as const;
+
+/** Kortformen til kort og lister, der «Tilgang» ikke står foran. */
+const ACCESS_SHORT = { locked: "Låst, bestilles på forhånd", unlocked: "Ulåst eller DNT-nøkkel" } as const;
+
+export const HUT_ACCESS_NOTE =
+  "Tilgang er Kartverkets opplysning om døra og nøkkelen. Den sier ikke om hytta er åpen eller ledig i dag.";
+
+export function hutAccessLine(locked: boolean | null, form: "full" | "short" = "full"): string | null {
+  if (locked === null) return null;
+  return (form === "full" ? HUT_ACCESS_LABELS : ACCESS_SHORT)[locked ? "locked" : "unlocked"];
+}
+
+/** Bruk, tilgang og forvalter på kortform, til kortene på områdesiden. Tom når kilden tier. */
 export function hutDetailLines(hut: {
   overnight: HutOvernight;
   beds: number | null;
   locked: boolean | null;
   managerName: string | null;
 }): string[] {
-  const lines: string[] = [];
-  if (hut.overnight === "yes") lines.push(hut.beds ? `Overnatting · ${hut.beds} sengeplasser` : "Overnatting");
-  else if (hut.overnight === "no") lines.push("Rast og dagsbesøk, ikke beregnet for overnatting");
-  if (hut.locked === true) lines.push("Låst");
-  else if (hut.locked === false) lines.push("Ulåst");
-  if (hut.managerName) lines.push(`Forvaltes av ${hut.managerName}`);
-  return lines;
+  return [hutUseLine(hut), hutAccessLine(hut.locked, "short"), hut.managerName ? `Forvaltes av ${hut.managerName}` : null].filter(
+    (linje): linje is string => linje !== null,
+  );
+}
+
+const grader = new Intl.NumberFormat("nb-NO", { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+
+/** «60,0361° N, 10,6637° Ø». */
+export function formatHutCoordinates(lat: number, lng: number): string {
+  return `${grader.format(lat)}° N, ${grader.format(lng)}° Ø`;
+}
+
+export interface HutFactsInput {
+  type: HutType;
+  ownerKind: HutOwnerKind;
+  managerName: string | null;
+  overnight: HutOvernight;
+  beds: number | null;
+  locked: boolean | null;
+  lat: number;
+  lng: number;
+  municipalityName?: string | null;
+  countyName?: string | null;
+  elevationM?: number | null;
+}
+
+/**
+ * Faktaradene for en hytte. Bare rader med innhold — et felt kilden ikke har, finnes ikke.
+ *
+ * `full` er hyttesiden, som også har fylke, høyde og koordinater. Uten er det kortversjonen
+ * som åpnes i lista i kartet.
+ */
+export function hutFacts(hut: HutFactsInput, full: boolean): [label: string, value: string][] {
+  const rader: [string, string | null | undefined][] = [
+    ["Type", HUT_TYPE_LABELS[hut.type]],
+    ["Eier", HUT_OWNER_LABELS[hut.ownerKind]],
+    ["Forvalter", hut.managerName],
+    ["Bruk", hutUseLine(hut)],
+    ["Tilgang", hutAccessLine(hut.locked)],
+    ["Kommune", hut.municipalityName],
+  ];
+  if (full) {
+    rader.push(
+      // Oslo er både kommune og fylke; da sier fylkesraden ingenting nytt.
+      ["Fylke", hut.countyName !== hut.municipalityName ? hut.countyName : null],
+      // Terrenghøyden i kartpunktet, ikke en oppmålt høyde for bygget — derfor «ca.».
+      ["Høyde", hut.elevationM != null ? `ca. ${hut.elevationM} moh.` : null],
+      ["Koordinater", formatHutCoordinates(hut.lat, hut.lng)],
+    );
+  }
+  return rader.filter((rad): rad is [string, string] => Boolean(rad[1]));
+}
+
+/** «Nittedal, Akershus» — eller bare «Oslo», der kommunen og fylket heter det samme. */
+export function hutPlaceLine(hut: { municipalityName?: string | null; countyName?: string | null }): string | null {
+  const ledd = [hut.municipalityName, hut.countyName !== hut.municipalityName ? hut.countyName : null].filter(Boolean);
+  return ledd.length > 0 ? ledd.join(", ") : null;
 }
 
 /** Hvem lenken går til, slik det står i knappen: «Bestill hos DNT». */
@@ -127,6 +230,7 @@ export function hutCountLine(count: number, radiusM: number, capped: boolean): s
   return `${antall} ${ord} innen ${Math.round(radiusM / 1000)} km`;
 }
 
+/** Forbeholdet. Står på hyttesiden og én gang under kartet — ikke på hvert kort. */
 export const HUT_SOURCE_NOTE =
   "Hyttene er hentet fra Kartverkets kartdata. Sjekk alltid åpningstider, nøkkel og bestilling hos den som driver hytta.";
 

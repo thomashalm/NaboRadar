@@ -75,7 +75,7 @@ export default async function AdminAddressPage({ searchParams }: { searchParams:
         tiles={getMapTileConfig()}
         basePath="/admin/adresse"
         skolekrets={<SkolekretsNotis lat={lat} lng={lng} />}
-        friluft={<FriluftSeksjon lat={lat} lng={lng} />}
+        friluft={<FriluftSeksjon lat={lat} lng={lng} label={parsed.data.label} />}
         internalFeatures={funn ? internalFeatures(funn) : []}
         leadSections={<InternSeksjon funn={funn} radiusM={radius} />}
       />

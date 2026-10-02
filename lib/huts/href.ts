@@ -1,6 +1,15 @@
-/** Lenke til hyttekartet, sentrert på et punkt og eventuelt med én hytte valgt. */
-export function buildHutMapHref(params: { lat: number; lng: number; hutId?: string }): string {
+/**
+ * Lenke til hyttekartet rundt et punkt.
+ *
+ * `from` er navnet på stedet punktet er — adressen på områdesiden, eller en hytte. Bare når
+ * det er med, viser kartet avstander: en avstand uten et navngitt utgangspunkt vises ikke.
+ * `radiusM` er hvor langt ut kartet skal vise fra start, slik at hyttene som ble talt opp der
+ * brukeren kom fra, faktisk er i utsnittet.
+ */
+export function buildHutMapHref(params: { lat: number; lng: number; hutId?: string; from?: string; radiusM?: number }): string {
   const query = new URLSearchParams({ lat: params.lat.toFixed(5), lng: params.lng.toFixed(5) });
+  if (params.from) query.set("fra", params.from);
+  if (params.radiusM) query.set("radius", String(Math.round(params.radiusM / 1000)));
   if (params.hutId) query.set("hytte", params.hutId);
   return `/hytter?${query.toString()}`;
 }

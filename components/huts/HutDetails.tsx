@@ -1,67 +1,106 @@
 import { formatDate } from "@/lib/format";
 import type { Hut } from "@/lib/huts/queries";
-import { HUT_OWNER_LABELS, HUT_TYPE_LABELS, formatHutDistance, hutDetailLines, hutLinks } from "@/lib/huts/wording";
+import { HUT_ACCESS_NOTE, hutFacts, hutLinks } from "@/lib/huts/wording";
+
+const OVERSKRIFT = "text-xs font-semibold tracking-[0.08em] text-muted uppercase";
+
+/** Faktaradene. Bare felt med innhold: kildene har verken pris, ledighet, sesong eller senger. */
+function Fakta({ rader, compact }: { rader: [string, string][]; compact: boolean }) {
+  return (
+    <dl className={`grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 ${compact ? "text-[13px]" : "text-[15px]"}`}>
+      {rader.map(([navn, verdi]) => (
+        <div key={navn} className="contents">
+          <dt className="text-muted">{navn}</dt>
+          <dd className="text-ink">{verdi}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+/** Lenkene til den som driver hytta. NaboRadar gjør ingen bestilling selv. */
+function Lenker({ hut }: { hut: Hut }) {
+  const lenker = hutLinks(hut);
+  if (lenker.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-2">
+      {lenker.map((lenke) => (
+        <a
+          key={lenke.kind}
+          href={lenke.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={
+            lenke.kind === "booking"
+              ? "inline-flex h-9 items-center rounded-lg bg-accent px-3.5 text-[14px] font-medium text-white hover:opacity-90"
+              : "inline-flex h-9 items-center rounded-lg border border-line px-3.5 text-[14px] font-medium text-ink hover:border-line-strong"
+          }
+        >
+          {lenke.label}
+        </a>
+      ))}
+    </div>
+  );
+}
 
 /**
- * Det vi vet om én hytte, og veien videre til den som driver den.
+ * Kortversjonen som åpnes under raden i hyttekartet: fakta og veien videre.
  *
- * Bare felt med innhold vises. Det finnes ingen rad for pris, ledighet, sesong eller
- * sengeplasser: kildene våre har dem ikke, og NaboRadar gjør ingen bestilling — lenkene går
- * til den offisielle siden.
+ * Avstanden står allerede i raden over, med stedet den er målt fra, og gjentas ikke her.
+ * Forbeholdet om åpningstider står heller ikke her — det står én gang under lista og på
+ * hyttesiden.
  */
-export function HutDetails({ hut, compact = false }: { hut: Hut; compact?: boolean }) {
-  const rader: [string, string][] = [];
-  const type = HUT_TYPE_LABELS[hut.type];
-  if (type) rader.push(["Type", type]);
-  const eier = HUT_OWNER_LABELS[hut.ownerKind];
-  if (eier) rader.push(["Eier", eier]);
-  if (hut.managerName) rader.push(["Forvalter", hut.managerName]);
-  for (const linje of hutDetailLines({ ...hut, managerName: null })) {
-    rader.push([linje === "Låst" || linje === "Ulåst" ? "Dør" : "Bruk", linje]);
-  }
-  if (hut.municipalityName) rader.push(["Kommune", hut.municipalityName]);
-  if (hut.distanceM != null) rader.push(["Avstand", formatHutDistance(hut.distanceM)]);
+export function HutSummary({ hut }: { hut: Hut }) {
+  return (
+    <div className="space-y-3">
+      <Fakta rader={hutFacts(hut, false)} compact />
+      <Lenker hut={hut} />
+    </div>
+  );
+}
 
-  const lenker = hutLinks(hut);
+/** Hyttesiden: fakta, offisiell info og kilde, i den rekkefølgen. */
+export function HutDetails({ hut }: { hut: Hut }) {
+  const rader = hutFacts(hut, true);
+  const harLenker = hutLinks(hut).length > 0;
   const oppdatert = formatDate(hut.sourceUpdatedAt);
 
   return (
-    <div>
-      <dl className={`grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 ${compact ? "text-[13px]" : "text-[15px]"}`}>
-        {rader.map(([navn, verdi]) => (
-          <div key={navn + verdi} className="contents">
-            <dt className="text-muted">{navn}</dt>
-            <dd className="text-ink">{verdi}</dd>
-          </div>
-        ))}
-      </dl>
-
-      {lenker.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {lenker.map((lenke) => (
-            <a
-              key={lenke.kind}
-              href={lenke.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={
-                lenke.kind === "booking"
-                  ? "inline-flex h-9 items-center rounded-lg bg-accent px-3.5 text-[14px] font-medium text-white hover:opacity-90"
-                  : "inline-flex h-9 items-center rounded-lg border border-line px-3.5 text-[14px] font-medium text-ink hover:border-line-strong"
-              }
-            >
-              {lenke.label}
-            </a>
-          ))}
+    <div className="space-y-7">
+      <section aria-labelledby="hytte-fakta">
+        <h2 id="hytte-fakta" className={OVERSKRIFT}>
+          Fakta
+        </h2>
+        <div className="mt-2.5">
+          <Fakta rader={rader} compact={false} />
         </div>
+        {hut.locked !== null && <p className="mt-2.5 text-[13px] leading-snug text-muted">{HUT_ACCESS_NOTE}</p>}
+      </section>
+
+      {harLenker && (
+        <section aria-labelledby="hytte-info">
+          <h2 id="hytte-info" className={OVERSKRIFT}>
+            Offisiell info
+          </h2>
+          <div className="mt-2.5">
+            <Lenker hut={hut} />
+          </div>
+          <p className="mt-2.5 text-[13px] leading-snug text-muted">
+            Bestilling, priser og oppdatert informasjon finner du hos den som driver hytta.
+          </p>
+        </section>
       )}
 
-      <p className="mt-3 text-[13px] leading-snug text-muted">
-        Kilde: Kartverket{oppdatert ? ` · oppdatert ${oppdatert}` : ""}.
-        {lenker.length > 0
-          ? " Bestilling og oppdatert informasjon finner du hos den som driver hytta."
-          : " Sjekk åpningstider, nøkkel og bestilling hos den som driver hytta."}
-      </p>
+      <section aria-labelledby="hytte-kilde">
+        <h2 id="hytte-kilde" className={OVERSKRIFT}>
+          Kilde
+        </h2>
+        <p className="mt-2.5 text-[13px] leading-snug text-muted">
+          Kartverket, N50 Kartdata{oppdatert ? ` · oppdatert ${oppdatert}` : ""}.
+          {hut.elevationM != null && " Høyden er terrenghøyden i kartpunktet, fra Kartverkets høydemodell."}
+          {!harLenker && " Sjekk åpningstider, nøkkel og bestilling hos den som driver hytta."}
+        </p>
+      </section>
     </div>
   );
 }

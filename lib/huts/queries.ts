@@ -2,6 +2,7 @@ import "server-only";
 import { z } from "zod";
 import { getDbMode, getReadDb } from "@/lib/db";
 import { DatabaseQueryError } from "@/lib/db/types";
+import { elevationAt } from "@/lib/geo/elevation";
 import { municipalityNames } from "@/lib/geo/municipalities";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { HUT_ACCESS_STATUSES, HUT_OVERNIGHT, HUT_OWNER_KINDS, HUT_TYPES, type HutOwnerKind, type HutType } from "./types";
@@ -55,8 +56,11 @@ export interface Hut {
   sourceUpdatedAt: string | null;
   /** Avstand fra søkepunktet. Bare satt av radiusspørringen. */
   distanceM: number | null;
-  /** Kommunenavnet, når kommuneregisteret svarte. Fylles inn av `withMunicipalityNames`. */
+  /** Kommune- og fylkesnavn, når kommuneregisteret svarte. Fylles inn av `withMunicipalityNames`. */
   municipalityName?: string | null;
+  countyName?: string | null;
+  /** Terrenghøyden ved hytta, fra Kartverkets høydemodell. Bare satt på hyttesiden. */
+  elevationM?: number | null;
 }
 
 function toHut(row: z.infer<typeof rowSchema>): Hut {
@@ -215,7 +219,13 @@ export async function searchHuts(q: string): Promise<Hut[] | null> {
   }
 }
 
-export type HutDetailResult = { status: "ok"; hut: Hut } | { status: "not_found" } | { status: "unavailable" };
+/** Andre hytter som vises på en hytteside. */
+export const HUT_NEIGHBOURS = { count: 5, radiusM: 30_000 } as const;
+
+export type HutDetailResult =
+  | { status: "ok"; hut: Hut; /** De nærmeste andre hyttene, med avstand fra denne. */ nearby: Hut[] }
+  | { status: "not_found" }
+  | { status: "unavailable" };
 
 /** Én hytte, slått opp på de åtte første tegnene i uuid-en (se lib/huts/href.ts). */
 export async function getHut(ref: string): Promise<HutDetailResult> {
@@ -225,11 +235,36 @@ export async function getHut(ref: string): Promise<HutDetailResult> {
     const huts = z.array(rowSchema).parse(rows).map(toHut);
     // To hytter med samme åtte tegn er usannsynlig, men da gjetter vi ikke hvilken som menes.
     if (huts.length !== 1) return { status: "not_found" };
-    const [hut] = await withMunicipalityNames(huts);
-    return { status: "ok", hut: hut! };
+    // Kommunenavn, høyde og nabohytter er tillegg: svarer ikke en av dem, vises siden uten.
+    const [[hut], elevationM, nearby] = await Promise.all([
+      withMunicipalityNames(huts),
+      elevationAt(huts[0]!.lat, huts[0]!.lng),
+      nearestHuts(huts[0]!),
+    ]);
+    return { status: "ok", hut: { ...hut!, elevationM }, nearby };
   } catch (error) {
     console.error("[hytter] get_hut feilet:", error instanceof Error ? error.name : "ukjent");
     return { status: "unavailable" };
+  }
+}
+
+/** Naboene til en hytte: de nærmeste, uten hytta selv. Radene kommer sortert på avstand. */
+export function selectNeighbourHuts(nearest: Hut[], selfId: string): Hut[] {
+  return nearest.filter((other) => other.id !== selfId).slice(0, HUT_NEIGHBOURS.count);
+}
+
+/** De nærmeste andre hyttene. Rene naboer i luftlinje — ingen rangering utover avstand. */
+async function nearestHuts(hut: Hut): Promise<Hut[]> {
+  try {
+    const rows = await hutRpc("huts_near", {
+      lat: hut.lat,
+      lng: hut.lng,
+      radius_m: HUT_NEIGHBOURS.radiusM,
+      max_results: HUT_NEIGHBOURS.count + 1,
+    });
+    return selectNeighbourHuts(z.array(rowSchema).parse(rows ?? []).map(toHut), hut.id);
+  } catch {
+    return [];
   }
 }
 
@@ -239,6 +274,7 @@ export async function withMunicipalityNames(huts: Hut[]): Promise<Hut[]> {
   const names = await municipalityNames();
   return huts.map((hut) => ({
     ...hut,
-    municipalityName: hut.municipalityNumber ? (names.get(hut.municipalityNumber) ?? null) : null,
+    municipalityName: hut.municipalityNumber ? (names.get(hut.municipalityNumber)?.name ?? null) : null,
+    countyName: hut.municipalityNumber ? (names.get(hut.municipalityNumber)?.county ?? null) : null,
   }));
 }

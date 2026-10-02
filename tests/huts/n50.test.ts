@@ -85,6 +85,13 @@ describe("N50: normalisering", () => {
     expect(lat).toBeCloseTo(60.0361, 4);
   });
 
+  it("lagrer «Udefinert» tilgang som ukjent, ikke som ulåst", () => {
+    // Kodelisten: Udefinert = «Irrelevant/ikke aktuell». Det er ikke en opplysning om døra.
+    const { records, rejected } = normaliser(hytte({ navn: "Udefinertbu", grad: "Ubetjent", tilgang: "Udefinert" }));
+    expect(rejected).toEqual([]);
+    expect(records[0]!.attributes.locked).toBeNull();
+  });
+
   it("utelater serveringshytter, gapahuker, hytter uten navn og alt utenfor piloten — som valg, ikke feil", () => {
     const { records, rejected, skipped } = normaliser(
       hytte({ navn: "Ullevålseter", grad: "Serveringshytte" }),

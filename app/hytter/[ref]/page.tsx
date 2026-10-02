@@ -6,7 +6,7 @@ import { HutDetails } from "@/components/huts/HutDetails";
 import { HutPointMap } from "@/components/huts/HutPointMap";
 import { buildHutHref, buildHutMapHref, hutRefFromSlug } from "@/lib/huts/href";
 import { getHut } from "@/lib/huts/queries";
-import { HUT_TYPE_LABELS } from "@/lib/huts/wording";
+import { HUT_TYPE_LABELS, formatHutDistance, hutPlaceLine, hutSummaryLine } from "@/lib/huts/wording";
 import { getMapTileConfig } from "@/lib/map/config";
 
 /**
@@ -49,7 +49,8 @@ export default async function HutPage({ params }: Props) {
       </AreaShell>
     );
   }
-  const { hut } = resultat;
+  const { hut, nearby } = resultat;
+  const undertittel = [HUT_TYPE_LABELS[hut.type], hutPlaceLine(hut)].filter(Boolean).join(" · ");
 
   return (
     <AreaShell>
@@ -61,14 +62,42 @@ export default async function HutPage({ params }: Props) {
             </Link>
           </p>
           <h1 className="mt-1 text-[2rem] leading-tight font-semibold tracking-[-0.03em] text-balance sm:text-4xl">{hut.name}</h1>
-          <div className="mt-6">
+          {undertittel && <p className="mt-1.5 text-[15px] text-muted">{undertittel}</p>}
+          <div className="mt-7">
             <HutDetails hut={hut} />
           </div>
-          <p className="mt-6">
-            <Link href={buildHutMapHref({ lat: hut.lat, lng: hut.lng, hutId: hut.id })} className="text-[15px] font-medium text-accent hover:underline">
-              Se andre hytter i nærheten
-            </Link>
-          </p>
+
+          {nearby.length > 0 && (
+            <section aria-labelledby="hytte-naboer" className="mt-7">
+              <h2 id="hytte-naboer" className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">
+                Andre hytter i nærheten
+              </h2>
+              <p className="mt-1 text-[13px] text-muted">Avstand i luftlinje fra {hut.name}.</p>
+              <ul className="mt-2.5 divide-y divide-line rounded-2xl border border-line bg-surface">
+                {nearby.map((nabo) => (
+                  <li key={nabo.id}>
+                    <Link href={buildHutHref(nabo)} className="flex items-baseline justify-between gap-4 px-4 py-2.5 hover:bg-ink/[0.03]">
+                      <span className="min-w-0">
+                        <span className="block text-[15px] font-medium text-ink">{nabo.name}</span>
+                        <span className="block text-[13px] text-muted">{hutSummaryLine({ ...nabo, distanceM: null })}</span>
+                      </span>
+                      {nabo.distanceM != null && (
+                        <span className="shrink-0 text-[13px] text-muted tabular-nums">{formatHutDistance(nabo.distanceM)}</span>
+                      )}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3">
+                <Link
+                  href={buildHutMapHref({ lat: hut.lat, lng: hut.lng, hutId: hut.id, from: hut.name })}
+                  className="text-[15px] font-medium text-accent hover:underline"
+                >
+                  Se dem i kart
+                </Link>
+              </p>
+            </section>
+          )}
         </section>
         <div className="relative mx-5 mb-10 h-[50vh] min-h-72 overflow-hidden rounded-2xl border border-line sm:mx-8 lg:sticky lg:top-16 lg:m-0 lg:h-[calc(100dvh-4rem)] lg:rounded-none lg:border-0 lg:border-l">
           <HutPointMap hut={hut} tiles={getMapTileConfig()} />

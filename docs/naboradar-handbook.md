@@ -1080,8 +1080,32 @@ Tolkningsreglene:
 
 - **Typen er kildens.** Betjent, selvbetjent, ubetjent og rastebu er N50s egne klasser. Vi har
   ingen «åpen koie» eller «dagsturhytte», fordi ingen kilde skiller dem ut.
-- **«Ulåst» er ikke «åpen».** Kilden sier om døra er låst. Den sier ikke om hytta er i drift,
-  i sesong eller ledig. Feltet `access_status` står derfor på `unknown` for alle hytter.
+- **Tilgang følger Kartverkets kodeliste, ordrett.** Feltet er N50s
+  `hytteinformasjon.tilgjengelighet`, definert i kodelisten
+  [Tilgjengelighet](https://register.geonorge.no/sosi-kodelister/kartdata/tilgjengelighet)
+  («beskriver om hytta er låst eller ulåst»):
+
+  | Kode | Kartverkets definisjon | Hos oss |
+  |---|---|---|
+  | Låst | «Låst og krever forhåndsbooking.» | «Tilgang: Låst – må bestilles på forhånd» |
+  | Ulåst | «Ulåst eller tilgjengelig med Den Norske Turistforenings standardnøkkel.» | «Tilgang: Ulåst, eller åpnes med DNT-nøkkel» |
+  | Udefinert | «Irrelevant/ikke aktuell.» | lagres som ukjent, vises ikke |
+
+  «Ulåst» betyr altså **ikke** at man slipper nøkkel, og derfor skriver vi aldri «ingen nøkkel
+  nødvendig». Ingen av verdiene sier om hytta er i drift, i sesong eller ledig — feltet
+  `access_status` står på `unknown` for alle hytter, og hyttesiden sier det i klartekst under
+  faktaene (`HUT_ACCESS_NOTE`). Ordlyden bor i `lib/huts/wording.ts`.
+- **Avstand vises aldri uten at det er tydelig hva den er målt fra.** På `/omrade` er det
+  adressen i overskriften, og seksjonen sier «Avstand i luftlinje fra adressen». På `/hytter`
+  finnes det ikke noe slikt sted med mindre brukeren kom fra ett: lenken fra områdesiden og fra
+  en hytteside har med `fra=<navn>`, og bare da vises avstand — alltid som «4,2 km fra Storgata
+  1», og med stedet markert i kartet. Uten `fra` vises ingen avstand, og lista sorteres på navn.
+  Kartutsnittet er aldri et utgangspunkt. På hyttesiden står nabohyttenes avstand under
+  «Avstand i luftlinje fra <hytta>».
+- **Høyden er terrenghøyden i kartpunktet.** Den hentes fra Kartverkets åpne høydemodell
+  (`ws.geonorge.no/hoydedata`, CC BY 4.0) når hyttesiden vises, og caches i minnet et døgn. Det
+  er ikke en oppmålt høyde for bygget, så den vises som «ca. 433 moh.». Svarer ikke tjenesten
+  innen tre sekunder, vises ingen høyde.
 - **Overnatting følger klassens definisjon.** Betjent, selvbetjent og ubetjent er
   overnattingshytter i N50; en rastebu er en dagshytte der man kan sove «i et knipetak», og
   vises som «ikke beregnet for overnatting».
@@ -1124,8 +1148,27 @@ leverer lenker.
 tegnene i hyttas uuid. Oppslaget (`get_hut`) skjer på ID-en; navnet er pynt, så lenken overlever
 at hytta bytter navn. Siden er `noindex` så lenge datasettet er en pilot.
 
-«I nærheten» er en trapp på 10, 20 og 30 km, uavhengig av radien brukeren har valgt for resten
-av siden. Se `HUT_NEARBY` i `lib/huts/queries.ts`.
+**Hyttesiden** har fire deler, i fast rekkefølge: fakta (type, eier, forvalter, bruk, tilgang,
+kommune, fylke, høyde, koordinater — bare rader med innhold), offisiell info (lenkene, når vi
+har kontrollerte), kilde, og «Andre hytter i nærheten»: de fem nærmeste andre hyttene innen 30
+km i luftlinje (`HUT_NEIGHBOURS`). Det siste er rene naboer fra `huts_near` — ingen anbefaling
+og ingen rangering utover avstand. Forbeholdet om åpningstider, nøkkel og bestilling står her
+og én gang under lista i hyttekartet, ikke på hvert kort.
+
+**Hyttekartet (`/hytter`)** viser det samme i lista og i kartet, og høyst én hytte er valgt.
+Den valgte raden er åpen med detaljene rett under seg (trekkspill, pil til høyre, blå kant), og
+punktet har mørk ring og popup. Velges en hytte i kartet eller i søket, åpnes raden og rulles
+fram — bare så langt som trengs, og bare når lista står ved siden av kartet; på smal skjerm
+ligger lista under kartet, og siden rulles ikke. Et trykk på den åpne raden lukker den. Kartet
+flytter seg bare når den valgte hytta er utenfor utsnittet, og zoomer aldri: utsnittet er også
+det lista viser, så et valg skal ikke bytte ut lista under brukeren. Flyttes kartet så hytta
+ikke lenger er i utsnittet, er den ikke lenger valgt.
+
+«I nærheten» på `/omrade` er en trapp på 10, 20 og 30 km, uavhengig av radien brukeren har valgt
+for resten av siden — seksjonen sier det selv, så «innen 10 km» ikke leses mot sirkelen i
+kartet. «Se alle i kart» åpner hyttekartet med adressen som utgangspunkt og samme radius
+(`radius=<km>`), så hyttene som ble talt opp, er i utsnittet. Se `HUT_NEARBY` i
+`lib/huts/queries.ts`.
 
 ### Skjenkesteder
 
@@ -1179,8 +1222,8 @@ koder vises ikke, vi gjetter ikke bygningstype), og nærmeste adresse.
 | `/api/geocode` | GET | `q` | Zod: 2–100 tegn etter trim | Kartverket adresser + stedsnavn | Per kilde, delvis svar tillatt | `private, max-age=300`, `no-store` ved delvis svar | 120/min |
 | `/omrade` | GET (side) | `lat`, `lng`, `radius`, `label`, `sortering` | Zod. Ugyldig `lat`/`lng` → feilside. Ugyldig `radius` → standard 1 km. `label` maks 120 tegn, kontrolltegn fjernet | Supabase + direkte oppslag | 8 s (saker), 8 s (DB), 12 s (oppslag) | Dynamisk | 240/min |
 | `/api/hytter` | GET | `bbox` *eller* `kommune` *eller* `q`; `type` og `eier` kan gjentas | Zod: utsnitt innenfor kloden og riktig vei, kommunenummer fire sifre, `q` 2–60 tegn, kjente typer og eiere | Supabase (`huts_*`) | databasens egen | `private, max-age=300` — svaret avhenger av om kalleren er admin | 120/min |
-| `/hytter` | GET (side) | `lat`, `lng`, `hytte` (alle valgfrie) | Zod; ugyldige verdier ignoreres | `/api/hytter` fra klienten | — | Dynamisk, `noindex` så lenge datasettet er en pilot | ingen |
-| `/hytter/[ref]` | GET (side) | `<navn>-<8 heksadesimale tegn>` | Bare ID-delen brukes; alt annet gir 404 | Supabase (`get_hut`) + Kartverkets kommuneregister for navnet | 4 s på kommuneregisteret | Dynamisk, `noindex` | ingen |
+| `/hytter` | GET (side) | `lat`, `lng`, `hytte`, `fra` (navnet på stedet, gir avstand), `radius` (km, 1–50) — alle valgfrie | Zod; ugyldige verdier ignoreres. `fra` maks 120 tegn | `/api/hytter` fra klienten | — | Dynamisk, `noindex` så lenge datasettet er en pilot | ingen |
+| `/hytter/[ref]` | GET (side) | `<navn>-<8 heksadesimale tegn>` | Bare ID-delen brukes; alt annet gir 404 | Supabase (`get_hut`, `huts_near`) + Kartverkets kommuneregister (kommune og fylke) og høydemodell | 4 s på kommuneregisteret, 3 s på høyden; begge er valgfrie og caches et døgn | Dynamisk, `noindex` | ingen |
 | `/admin/hytter` | GET (side) + server actions | `q` | Supabase Auth + `is_admin()`, både i handlingene og i databasefunksjonene | Supabase | — | `private, no-store` | ingen |
 | `/sak/[id]` | GET (side) | uuid + søkekontekst | `get_event` | Supabase | — | Dynamisk | ingen |
 | `/` | GET (side) | — | — | — | — | Statisk, Netlify Durable | ingen |

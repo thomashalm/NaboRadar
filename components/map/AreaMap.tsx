@@ -65,6 +65,12 @@ interface AreaMapProps {
    */
   onViewportChange?: (bounds: LngLatBounds) => void;
   popupFor?: (id: string) => MapPopupContent | null;
+  /**
+   * Om popupen tar tastaturfokus når den åpnes (standard: ja). Slås av der detaljene står i
+   * en liste ved siden av: da skal fokus bli i lista, og siden skal ikke rulle til kartet.
+   * Leses bare når kartet opprettes.
+   */
+  popupTakesFocus?: boolean;
   /** Klientnavigasjon for lenker i popup. */
   onNavigate?: (href: string) => void;
 }
@@ -187,7 +193,13 @@ export function AreaMap(props: AreaMapProps) {
       instance.touchZoomRotate.disableRotation();
       instance.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 
-      const popup = new maplibregl.Popup({ closeButton: true, closeOnClick: false, maxWidth: "280px", offset: 12 });
+      const popup = new maplibregl.Popup({
+        closeButton: true,
+        closeOnClick: false,
+        maxWidth: "280px",
+        offset: 12,
+        focusAfterOpen: latestProps.current.popupTakesFocus ?? true,
+      });
       popup.on("close", () => {
         if (!suppressPopupClose.current) latestProps.current.onSelect?.(null);
       });

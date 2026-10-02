@@ -2,8 +2,19 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-import { HUT_NEARBY, selectNearbyHuts, type Hut } from "@/lib/huts/queries";
-import { formatHutDistance, hutCountLine, hutDetailLines, hutSummaryLine } from "@/lib/huts/wording";
+import { HUT_NEARBY, HUT_NEIGHBOURS, selectNearbyHuts, selectNeighbourHuts, type Hut } from "@/lib/huts/queries";
+import {
+  HUT_ACCESS_LABELS,
+  formatHutDistance,
+  hutAccessLine,
+  hutCountLine,
+  hutDetailLines,
+  hutDistanceFrom,
+  hutFacts,
+  hutOriginName,
+  hutPlaceLine,
+  hutSummaryLine,
+} from "@/lib/huts/wording";
 
 const hytte = (km: number, over: Partial<Hut> = {}): Hut => ({
   id: `h${km}`,
@@ -58,6 +69,18 @@ describe("«i nærheten» for hytter", () => {
   });
 });
 
+describe("andre hytter i nærheten", () => {
+  it("er de nærmeste, uten hytta selv", () => {
+    const rader = [0, 1, 2, 3, 4, 5, 6, 7].map((km) => hytte(km));
+    const naboer = selectNeighbourHuts(rader, "h0");
+    expect(naboer.map((h) => h.id)).toEqual(["h1", "h2", "h3", "h4", "h5"]);
+    expect(naboer).toHaveLength(HUT_NEIGHBOURS.count);
+    // Færre enn fem i nærheten: da vises de som finnes, og ingen fylles på.
+    expect(selectNeighbourHuts([hytte(0), hytte(2)], "h0").map((h) => h.id)).toEqual(["h2"]);
+    expect(selectNeighbourHuts([hytte(0)], "h0")).toEqual([]);
+  });
+});
+
 describe("ordlyd", () => {
   it("setter sammen typen, eieren og avstanden — og dropper det kilden ikke sier", () => {
     expect(hutSummaryLine({ type: "staffed_hut", ownerKind: "dnt", distanceM: 7400 })).toBe("Betjent hytte · DNT · 7,4 km");
@@ -67,11 +90,33 @@ describe("ordlyd", () => {
     expect(formatHutDistance(430)).toBe("450 m");
   });
 
-  it("sier «ulåst», ikke «åpen»", () => {
-    expect(hutDetailLines({ overnight: "yes", beds: null, locked: false, managerName: null })).toEqual(["Overnatting", "Ulåst"]);
+  it("navngir stedet en avstand er målt fra", () => {
+    // Stedet er første ledd av adressen: «Storgata 1», ikke hele adresselinjen.
+    expect(hutOriginName("Storgata 1, 0155 Oslo")).toBe("Storgata 1");
+    expect(hutOriginName("Kobberhaughytta")).toBe("Kobberhaughytta");
+    expect(hutOriginName("  ")).toBe("valgt sted");
+    expect(hutOriginName(null)).toBe("valgt sted");
+    expect(hutOriginName("x".repeat(60))).toHaveLength(40);
+    expect(hutDistanceFrom(4200, "Storgata 1")).toBe("4,2 km fra Storgata 1");
+    expect(hutSummaryLine({ type: "unstaffed_hut", ownerKind: "dnt", distanceM: 4200 }, "Storgata 1")).toBe(
+      "Ubetjent hytte · DNT · 4,2 km fra Storgata 1",
+    );
+    // Uten avstand er det heller ikke noe sted å nevne.
+    expect(hutSummaryLine({ type: "unstaffed_hut", ownerKind: "dnt", distanceM: null }, "Storgata 1")).toBe("Ubetjent hytte · DNT");
+  });
+
+  it("sier det Kartverkets kodeliste sier om tilgang — ikke «åpen», og ikke «ingen nøkkel»", () => {
+    // Låst = «Låst og krever forhåndsbooking». Ulåst = «Ulåst eller tilgjengelig med DNTs standardnøkkel».
+    expect(hutAccessLine(true)).toBe("Låst – må bestilles på forhånd");
+    expect(hutAccessLine(false)).toBe("Ulåst, eller åpnes med DNT-nøkkel");
+    expect(hutAccessLine(null)).toBeNull();
+    for (const tekst of Object.values(HUT_ACCESS_LABELS)) {
+      expect(tekst).not.toMatch(/åpen|stengt|ingen nøkkel|ledig/i);
+    }
+    expect(hutDetailLines({ overnight: "yes", beds: null, locked: false, managerName: null })).toEqual(["Overnatting", "Ulåst eller DNT-nøkkel"]);
     expect(hutDetailLines({ overnight: "yes", beds: 12, locked: true, managerName: "DNT Oslo og Omegn" })).toEqual([
       "Overnatting · 12 sengeplasser",
-      "Låst",
+      "Låst, bestilles på forhånd",
       "Forvaltes av DNT Oslo og Omegn",
     ]);
     expect(hutDetailLines({ overnight: "no", beds: null, locked: null, managerName: null })).toEqual([
@@ -81,6 +126,44 @@ describe("ordlyd", () => {
     expect(hutDetailLines({ overnight: "unknown", beds: null, locked: null, managerName: null })).toEqual([]);
   });
 
+  it("viser bare faktarader med innhold", () => {
+    const hut = {
+      type: "self_service_hut",
+      ownerKind: "dnt",
+      managerName: null,
+      overnight: "yes",
+      beds: null,
+      locked: true,
+      lat: 60.0360956,
+      lng: 10.6636515,
+      municipalityName: "Nittedal",
+      countyName: "Akershus",
+      elevationM: 433,
+    } as const;
+    expect(hutFacts(hut, true)).toEqual([
+      ["Type", "Selvbetjent hytte"],
+      ["Eier", "DNT"],
+      ["Bruk", "Overnatting"],
+      ["Tilgang", "Låst – må bestilles på forhånd"],
+      ["Kommune", "Nittedal"],
+      ["Fylke", "Akershus"],
+      ["Høyde", "ca. 433 moh."],
+      ["Koordinater", "60,0361° N, 10,6637° Ø"],
+    ]);
+    // Oslo er både kommune og fylke: da står det én gang.
+    const oslo = { ...hut, municipalityName: "Oslo", countyName: "Oslo" };
+    expect(hutFacts(oslo, true).map(([navn]) => navn)).not.toContain("Fylke");
+    expect(hutPlaceLine(oslo)).toBe("Oslo");
+    expect(hutPlaceLine(hut)).toBe("Nittedal, Akershus");
+    expect(hutPlaceLine({})).toBeNull();
+    // Kortversjonen i lista har verken fylke, høyde eller koordinater.
+    expect(hutFacts(hut, false).map(([navn]) => navn)).toEqual(["Type", "Eier", "Bruk", "Tilgang", "Kommune"]);
+    // En hytte kilden vet lite om, får få rader — ingen tomme, og ingen «ukjent».
+    const tom = { ...hut, type: "unknown", ownerKind: "other", overnight: "unknown", locked: null, municipalityName: null, countyName: null, elevationM: null } as const;
+    expect(hutFacts(tom, true)).toEqual([["Koordinater", "60,0361° N, 10,6637° Ø"]]);
+    expect(hutFacts(tom, false)).toEqual([]);
+  });
+
   it("teller riktig", () => {
     expect(hutCountLine(1, 30_000, false)).toBe("1 hytte eller koie innen 30 km");
     expect(hutCountLine(9, 10_000, false)).toBe("9 hytter og koier innen 10 km");
@@ -88,7 +171,7 @@ describe("ordlyd", () => {
   });
 });
 
-import { buildHutHref, hutRefFromSlug, hutSlug } from "@/lib/huts/href";
+import { buildHutHref, buildHutMapHref, hutRefFromSlug, hutSlug } from "@/lib/huts/href";
 import { hutLinks } from "@/lib/huts/wording";
 
 describe("lenker ut fra en hytte", () => {
@@ -135,5 +218,18 @@ describe("fast adresse for en hytte", () => {
     expect(hutRefFromSlug("3f2a9c1e")).toBe("3f2a9c1e");
     expect(hutRefFromSlug("saeteren-gard")).toBeNull();
     expect(hutRefFromSlug("saeteren-gard-3F2A9C1E")).toBeNull();
+  });
+});
+
+describe("lenke til hyttekartet", () => {
+  it("har med stedet og radien når kartet skal vise avstand", () => {
+    const href = buildHutMapHref({ lat: 59.91391, lng: 10.75221, from: "Storgata 1, 0155 Oslo", radiusM: 20_000 });
+    const query = new URLSearchParams(href.split("?")[1]);
+    expect(href.startsWith("/hytter?")).toBe(true);
+    expect(Object.fromEntries(query)).toEqual({ lat: "59.91391", lng: "10.75221", fra: "Storgata 1, 0155 Oslo", radius: "20" });
+  });
+
+  it("har ikke med noe sted når det ikke finnes et — da viser kartet ingen avstand", () => {
+    expect(buildHutMapHref({ lat: 60, lng: 10.5 })).toBe("/hytter?lat=60.00000&lng=10.50000");
   });
 });
