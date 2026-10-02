@@ -258,7 +258,7 @@ kvikkleiresone har over 100 000 hjørner, og ville ellers sprengt svaret.
 | `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search` | Hytter og koier: rundt et punkt (inntil 50 km, nærmest først), i et kartutsnitt, i en kommune, og navnesøk. Svarer bare når kategorien `hytte` er publisert, eller kalleren er admin |
 | `get_hut(ref)` | Én hytte, slått opp på de åtte første tegnene i uuid-en. Til den faste hyttesiden |
 | `refresh_huts()` | Kobler kildeposter til hytter og regner de kanoniske feltene på nytt. Kjøres av synken, kun service_role |
-| `hut_review_queue()`, `review_hut()`, `set_hut_links()` | Kontrollkøen, avgjørelsen (godkjenn, avvis, slå sammen) og de offisielle lenkene. Kun innlogget admin |
+| `hut_review_queue()`, `review_hut()`, `set_hut_contact()`, `hut_contact_list()` | Kontrollkøen, avgjørelsen (godkjenn, avvis, slå sammen), og lenker og forvalter med listen over hva låste hytter mangler. Kun innlogget admin |
 | `upsert_events`, `upsert_area_features`, `mark_*_removed` | Skriving, kun service_role |
 | `sync_run_start/finish`, `sync_due`, `claim_next_due_sync`, `claim_sync_request`, `finish_sync_request`, `expire_stale_sync_requests`, `provider_baseline`, `set_alert_state` | Sync-koordinering, kun service_role |
 | `provider_health`, `recent_sync_runs`, `request_sync`, `scheduler_status` | `/admin`, kun innlogget admin |
@@ -302,7 +302,7 @@ Tilgangen er en **positiv, uttømmende liste**, ikke en opprydding i enkelttilfe
 | Rolle | Kan kalle |
 |---|---|
 | `anon` | `features_near`, `features_count_near`, `events_within`, `get_event`, `data_status`, `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search`, `get_hut` |
-| `authenticated` | det samme, pluss `hut_review_queue`, `review_hut`, `set_hut_links`, `is_admin`, `provider_health`, `recent_sync_runs`, `recent_sync_requests`, `request_sync`, `scheduler_status` og research-, review- og datasenterfunksjonene — som alle sjekker `is_admin()` selv |
+| `authenticated` | det samme, pluss `hut_review_queue`, `review_hut`, `set_hut_contact`, `hut_contact_list`, `is_admin`, `provider_health`, `recent_sync_runs`, `recent_sync_requests`, `request_sync`, `scheduler_status` og research-, review- og datasenterfunksjonene — som alle sjekker `is_admin()` selv |
 | `service_role` | alt — sync-workeren |
 | `postgres` | alt — migrasjoner og pg_cron |
 
@@ -1136,13 +1136,54 @@ den. Ledighet, kalender, pris og bestilling finnes ikke, og skal ikke bygges —
 [data-roadmapen](data-roadmap.md#12-friluft-skjult-lokal-innsikt-ikke-en-turapp) og
 [researchen om DNTs booking](research/dnt-booking-ledighet.md).
 
+**Neste steg.** Sier vi at en hytte må bestilles på forhånd, skal vi også si hvor — eller si
+rett ut at vi ikke vet. `hutNextStep` i `lib/huts/wording.ts` gir fire tilstander, og hyttesiden,
+lista i hyttekartet og admin leser alle den samme:
+
+| Tilstand | Vi har | Hyttesiden viser under «Offisiell info» |
+|---|---|---|
+| `booking_link` | kontrollert bestillingsside | Knappen «Bestill hos …». Ingen ekstra tekst |
+| `info_link` | kontrollert infoside | Knappen «Se hos …» og «Oppdatert informasjon om tilgang og bestilling finner du hos forvalteren.» |
+| `manager_only` | bare forvalter | Forvalteren og «Bestilling kreves. NaboRadar har foreløpig ikke en verifisert bestillingslenke.» |
+| `unknown` | ingenting | «Kartverket oppgir at hytta krever forhåndsbooking. NaboRadar har foreløpig ikke funnet en verifisert kontakt- eller bestillingsside.» Tilgangsraden sier da bare «Låst» |
+
+De to siste tekstene gjelder låste hytter. En ulåst hytte uten lenke får ingen seksjon og ingen
+oppfordring: vi peker aldri brukeren til «den som driver hytta» uten å kunne si hvem det er.
+At bestilling kreves (`bookingRequired`, Kartverkets «Låst») er en egen opplysning — den betyr
+ikke at vi kjenner bestillingskanalen, og ingen av delene sier om hytta er åpen eller ledig. En
+hytte publiseres uavhengig av om den har lenke.
+
+**Eier, forvalter og den lenken går til.** Tre forskjellige ting:
+
+- `owner_kind` er Kartverkets eierkategori (DNT, Statskog, fjellstyre, andre). Den vises som
+  «Eier», og brukes aldri som om den var den som tar imot bestillingen. «Fjellstyre» er ikke en
+  bestemt aktør, og «DNT» sier ikke hvilken forening.
+- Forvalteren er `manager_verified` når et menneske har kontrollert den mot en offisiell side,
+  ellers `manager_name` fra Turrutebasen. `huts_public` gir den kontrollerte når den finnes, og
+  synken rører den ikke.
+- Navnet i knappen er stedet lenken går til, lest av adressen (`dnt.no` → «Bestill hos DNT»,
+  `statskog.no`, `inatur.no`), ellers forvalteren, ellers ingen: «Bestill hytta» / «Mer
+  informasjon». Uten lenke er det ingen knapp — heller ikke en deaktivert.
+
 **Lenker.** `booking_url` er en side der man faktisk bestiller; `info_url` er den offisielle
-infosiden. Knappeteksten følger av hva lenken er: «Bestill hos DNT» bare for en bestillingsside,
-ellers «Se hos …» eller «Mer informasjon» (`hutLinks` i `lib/huts/wording.ts`). En lenke kan
-ikke lagres uten `links_verified_at` — databasen har en constraint på det — og settes med
-`set_hut_links` fra `/admin/hytter`. Lenker legges inn for hånd: åpne siden, se at den gjelder
-hytta, lagre. Vi henter ikke DNTs hytteregister for å skaffe ID-er. Ingen av dagens kilder
-leverer lenker.
+infosiden. Lenker og forvalter lagres samlet med `set_hut_contact` fra `/admin/hytter`, sammen
+med et internt notat om hvor de ble kontrollert (`contact_note`, returneres aldri offentlig).
+`links_verified_at` er tidspunktet for kontrollen; databasen nekter en lenke eller en kontrollert
+forvalter uten. Opplysningene legges inn for hånd, én hytte om gangen: åpne den offisielle
+siden, se at den gjelder hytta, lagre. Vi henter ikke DNTs hytteregister, bruker ikke UT.no, og
+bygger ingen adresse etter mønster. Ingen av dagens kilder leverer lenker. Lenkene sjekkes ikke
+automatisk ennå; kontrolltidspunktet står i admin.
+
+`/admin/hytter` viser de låste hyttene med status — «Mangler forvalter», «Mangler
+booking/info», «Infoside finnes», «Lenke komplett» — de som mangler mest først
+(`hut_contact_list`).
+
+**Det Kartverkets «Låst» ikke sier.** Kontrollen av pilotens 15 låste hytter viste at «låst og
+krever forhåndsbooking» dekker flere virkeligheter: utleie av hele hytta etter forespørsel
+(Røkleivhytta), kystledhytter som bestilles etter innlogging, en hytte som bare lånes ut til
+skoler og organisasjoner (Husbergøya), og en som er stengt for vedlikehold på ubestemt tid
+(Solstua). Vi viser ikke noe av dette som egne felt — vi har ingen kilde som holder det ved
+like — men lenken til forvalteren gjør at brukeren finner det.
 
 **Fast adresse.** Hver hytte har siden `/hytter/<navn>-<id>`, der `<id>` er de åtte første
 tegnene i hyttas uuid. Oppslaget (`get_hut`) skjer på ID-en; navnet er pynt, så lenken overlever

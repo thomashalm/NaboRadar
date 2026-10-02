@@ -1,9 +1,11 @@
 "use client";
 
 import { useActionState } from "react";
-import { reviewHutAction, setHutLinksAction, type HutActionState } from "@/app/admin/hytter/actions";
-import { KILDENAVN, type HutLinkRow, type HutReviewCase } from "@/lib/admin/huts";
-import { HUT_OWNER_LABELS, HUT_TYPE_LABELS } from "@/lib/huts/wording";
+import Link from "next/link";
+import { reviewHutAction, setHutContactAction, type HutActionState } from "@/app/admin/hytter/actions";
+import { KILDENAVN, type HutContactRow, type HutReviewCase } from "@/lib/admin/huts";
+import { buildHutHref } from "@/lib/huts/href";
+import { HUT_NEXT_STEP_LABELS, HUT_OWNER_LABELS, HUT_TYPE_LABELS, hutNextStep, type HutNextStepKind } from "@/lib/huts/wording";
 import type { HutOwnerKind, HutType } from "@/lib/huts/types";
 
 const initial: HutActionState = { status: "idle" };
@@ -108,21 +110,45 @@ export function HytteSak({ sak }: { sak: HutReviewCase }) {
   );
 }
 
-/** Offisielle lenker for én hytte. Tomt felt fjerner lenken. */
-export function HytteLenker({ hytte }: { hytte: HutLinkRow }) {
-  const [state, action, pending] = useActionState(setHutLinksAction, initial);
+const STATUSFARGE: Record<HutNextStepKind, string> = {
+  booking_link: "border-line text-muted",
+  info_link: "border-line text-ink",
+  manager_only: "border-plan/40 bg-plan-soft text-plan",
+  unknown: "border-danger/40 bg-danger-soft text-danger",
+};
+
+/**
+ * Kontaktopplysningene for én hytte: bestillingslenke, infoside og forvalter.
+ *
+ * Statusen er den samme som styrer hyttesiden (`hutNextStep`), så det som står her, er det
+ * brukeren ser. Tomt felt fjerner opplysningen. Forvalterfeltet er for navnet en offisiell side
+ * oppgir; står det tomt, brukes navnet fra Turrutebasen når det finnes.
+ */
+export function HytteKontakt({ hytte }: { hytte: HutContactRow }) {
+  const [state, action, pending] = useActionState(setHutContactAction, initial);
   const felt = "mt-0.5 h-9 w-full rounded-lg border border-line bg-surface px-3 text-[13px]";
+  const steg = hutNextStep({ locked: hytte.locked, bookingUrl: hytte.booking_url, infoUrl: hytte.info_url, managerName: hytte.manager_name });
+  const kontrollert = hytte.links_verified_at ? new Date(hytte.links_verified_at).toLocaleDateString("nb-NO") : null;
 
   return (
     <li className="rounded-2xl border border-line bg-surface px-4 py-3.5 sm:px-5">
-      <p className="text-[15px] font-medium text-ink">
-        {hytte.name}{" "}
-        <span className="text-[13px] font-normal text-muted">
-          · {typeNavn(hytte.hut_type)} · {eierNavn(hytte.owner_kind)}
-          {hytte.municipality_number ? ` · kommune ${hytte.municipality_number}` : ""}
-        </span>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <p className="text-[15px] font-medium text-ink">
+          <Link href={buildHutHref(hytte)} className="hover:underline">
+            {hytte.name}
+          </Link>
+        </p>
+        <span className={`rounded-full border px-2 py-0.5 text-[12px] font-medium ${STATUSFARGE[steg.kind]}`}>{HUT_NEXT_STEP_LABELS[steg.kind]}</span>
+        {hytte.locked && <span className="rounded-full border border-line px-2 py-0.5 text-[12px] text-ink">Låst</span>}
+        {!hytte.is_visible && <span className="text-[12px] text-muted">vises ikke før den er godkjent</span>}
+      </div>
+      <p className="mt-0.5 text-[13px] text-muted">
+        {typeNavn(hytte.hut_type)} · {eierNavn(hytte.owner_kind)}
+        {hytte.municipality_number ? ` · kommune ${hytte.municipality_number}` : ""}
+        {hytte.manager_source ? ` · Turrutebasen: ${hytte.manager_source}` : ""}
+        {kontrollert ? ` · kontrollert ${kontrollert}` : ""}
       </p>
-      <form action={action} className="mt-2 grid gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+      <form action={action} className="mt-2 grid gap-2 sm:grid-cols-2">
         <input type="hidden" name="hutId" value={hytte.id} />
         <label className="text-[13px] text-muted">
           Bestilling (en side der man faktisk bestiller)
@@ -132,13 +158,21 @@ export function HytteLenker({ hytte }: { hytte: HutLinkRow }) {
           Offisiell infoside
           <input name="infoUrl" type="url" defaultValue={hytte.info_url ?? ""} placeholder="https://" className={felt} />
         </label>
-        <button type="submit" disabled={pending} className={knapp}>
-          Lagre
-        </button>
+        <label className="text-[13px] text-muted">
+          Forvalter (slik den offisielle siden oppgir)
+          <input name="manager" defaultValue={hytte.manager_verified ?? ""} placeholder={hytte.manager_source ?? ""} maxLength={120} className={felt} />
+        </label>
+        <label className="text-[13px] text-muted">
+          Notat: hvor ble dette kontrollert?
+          <input name="note" defaultValue={hytte.contact_note ?? ""} maxLength={500} className={felt} />
+        </label>
+        <div className="flex items-center gap-3 sm:col-span-2">
+          <button type="submit" disabled={pending} className={knapp}>
+            Lagre
+          </button>
+          <Melding state={state} />
+        </div>
       </form>
-      <div className="mt-1">
-        <Melding state={state} />
-      </div>
     </li>
   );
 }

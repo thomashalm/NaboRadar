@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { HytteLenker, HytteSak } from "@/components/admin/HytteKontroll";
+import { HytteKontakt, HytteSak } from "@/components/admin/HytteKontroll";
 import { IkkeTilgang } from "@/components/admin/IkkeTilgang";
-import { hentHytteKø, søkHytter } from "@/lib/admin/huts";
+import { hentHytteKontakt, hentHytteKø } from "@/lib/admin/huts";
+import { HUT_NEXT_STEP_LABELS, hutNextStep, type HutNextStepKind } from "@/lib/huts/wording";
 import { getAdminSession } from "@/lib/admin/session";
 
 export const metadata: Metadata = { title: "Hytter og koier", robots: { index: false, follow: false } };
@@ -11,11 +12,12 @@ export const dynamic = "force-dynamic";
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 /**
- * Hytter og koier: kontrollkø og offisielle lenker.
+ * Hytter og koier: kontrollkø, og bestilling og kontakt.
  *
  * Synken bygger hyttene av seg selv. Hit kommer bare det et menneske må avgjøre: en hytte som
  * bare står i en sekundærkilde, to som ligger tett, eller kilder som er uenige om typen. Under
- * køen legges de offisielle lenkene inn — for hånd, fordi en lenke ikke skal gjettes.
+ * køen står de låste hyttene med det de mangler av bestillingslenke, infoside og forvalter.
+ * Opplysningene legges inn for hånd, fordi en lenke ikke skal gjettes.
  */
 export default async function AdminHutsPage({ searchParams }: { searchParams: SearchParams }) {
   const session = await getAdminSession();
@@ -23,10 +25,15 @@ export default async function AdminHutsPage({ searchParams }: { searchParams: Se
 
   const raw = (await searchParams).q;
   const q = (Array.isArray(raw) ? raw[0] : raw)?.trim() ?? "";
-  const [{ saker, feil }, treff] = await Promise.all([
+  const [{ saker, feil }, kontakt] = await Promise.all([
     hentHytteKø(session.client),
-    q.length >= 2 ? søkHytter(session.client, q) : Promise.resolve([]),
+    hentHytteKontakt(session.client, q.length >= 2 ? q : null),
   ]);
+  const steg = (hytte: (typeof kontakt.hytter)[number]) =>
+    hutNextStep({ locked: hytte.locked, bookingUrl: hytte.booking_url, infoUrl: hytte.info_url, managerName: hytte.manager_name }).kind;
+  // Tellingen gjelder låste hytter: det er de som lover brukeren noe vi må kunne følge opp.
+  const låste = kontakt.hytter.filter((hytte) => hytte.locked);
+  const antall = (kind: HutNextStepKind) => låste.filter((hytte) => steg(hytte) === kind).length;
 
   return (
     <main className="mx-auto max-w-4xl px-5 py-10">
@@ -61,9 +68,10 @@ export default async function AdminHutsPage({ searchParams }: { searchParams: Se
       </section>
 
       <section className="mt-12">
-        <h2 className="text-lg font-semibold text-ink">Offisielle lenker</h2>
+        <h2 className="text-lg font-semibold text-ink">Bestilling og kontakt</h2>
         <p className="mt-1 max-w-2xl text-[13px] text-muted">
-          Legg bare inn lenker du selv har åpnet og sett at gjelder hytta. Ingen lenke er bedre enn en gjettet.
+          En låst hytte må bestilles på forhånd, og da skal siden si hvor — eller si at vi ikke vet. Legg bare inn lenker du selv
+          har åpnet og sett at gjelder hytta, og forvalteren slik den offisielle siden oppgir. Ingen lenke er bedre enn en gjettet.
         </p>
         <form className="mt-3 flex gap-2" action="/admin/hytter">
           <input
@@ -77,10 +85,21 @@ export default async function AdminHutsPage({ searchParams }: { searchParams: Se
             Søk
           </button>
         </form>
-        {q.length >= 2 && treff.length === 0 && <p className="mt-3 text-[15px] text-muted">Ingen treff på «{q}».</p>}
+        {kontakt.feil && <p className="mt-3 text-[13px] text-danger">Fikk ikke hentet hyttene: {kontakt.feil}</p>}
+        {q.length >= 2 ? (
+          kontakt.hytter.length === 0 && !kontakt.feil && <p className="mt-3 text-[15px] text-muted">Ingen treff på «{q}».</p>
+        ) : (
+          <p className="mt-3 text-[13px] text-ink">
+            {låste.length} låste hytter:{" "}
+            {(["unknown", "manager_only", "info_link", "booking_link"] as const)
+              .map((kind) => `${antall(kind)} ${HUT_NEXT_STEP_LABELS[kind].toLowerCase()}`)
+              .join(" · ")}
+            . De som mangler mest, står først.
+          </p>
+        )}
         <ul className="mt-4 space-y-3">
-          {treff.map((hytte) => (
-            <HytteLenker key={hytte.id} hytte={hytte} />
+          {kontakt.hytter.map((hytte) => (
+            <HytteKontakt key={hytte.id} hytte={hytte} />
           ))}
         </ul>
       </section>

@@ -1,6 +1,6 @@
 import { formatDate } from "@/lib/format";
 import type { Hut } from "@/lib/huts/queries";
-import { HUT_ACCESS_NOTE, hutFacts, hutLinks } from "@/lib/huts/wording";
+import { HUT_ACCESS_NOTE, hutFacts, hutNextStep, type HutLink } from "@/lib/huts/wording";
 
 const OVERSKRIFT = "text-xs font-semibold tracking-[0.08em] text-muted uppercase";
 
@@ -19,8 +19,7 @@ function Fakta({ rader, compact }: { rader: [string, string][]; compact: boolean
 }
 
 /** Lenkene til den som driver hytta. NaboRadar gjør ingen bestilling selv. */
-function Lenker({ hut }: { hut: Hut }) {
-  const lenker = hutLinks(hut);
+function Lenker({ lenker }: { lenker: HutLink[] }) {
   if (lenker.length === 0) return null;
   return (
     <div className="flex flex-wrap gap-2">
@@ -46,23 +45,31 @@ function Lenker({ hut }: { hut: Hut }) {
 /**
  * Kortversjonen som åpnes under raden i hyttekartet: fakta og veien videre.
  *
- * Avstanden står allerede i raden over, med stedet den er målt fra, og gjentas ikke her.
- * Forbeholdet om åpningstider står heller ikke her — det står én gang under lista og på
- * hyttesiden.
+ * Avstanden står allerede i raden over, med stedet den er målt fra, og gjentas ikke her. Må
+ * hytta bestilles og vi ikke har en lenke, står det — heller enn at raden tier om neste steg.
  */
 export function HutSummary({ hut }: { hut: Hut }) {
+  const steg = hutNextStep(hut);
   return (
     <div className="space-y-3">
       <Fakta rader={hutFacts(hut, false)} compact />
-      <Lenker hut={hut} />
+      <Lenker lenker={steg.links} />
+      {steg.links.length === 0 && steg.note && <p className="text-[13px] leading-snug text-muted">{steg.note}</p>}
     </div>
   );
 }
 
-/** Hyttesiden: fakta, offisiell info og kilde, i den rekkefølgen. */
+/**
+ * Hyttesiden: fakta, offisiell info og kilde, i den rekkefølgen.
+ *
+ * «Offisiell info» er neste steg, i fire tilstander (`hutNextStep`): bestillingslenke,
+ * infoside, bare forvalter, eller ingenting kjent. Seksjonen vises ikke når den ikke har noe å
+ * si — en ulåst hytte uten lenke får ingen tom boks og ingen oppfordring til å kontakte noen
+ * vi ikke kan navngi.
+ */
 export function HutDetails({ hut }: { hut: Hut }) {
   const rader = hutFacts(hut, true);
-  const harLenker = hutLinks(hut).length > 0;
+  const steg = hutNextStep(hut);
   const oppdatert = formatDate(hut.sourceUpdatedAt);
 
   return (
@@ -77,17 +84,18 @@ export function HutDetails({ hut }: { hut: Hut }) {
         {hut.locked !== null && <p className="mt-2.5 text-[13px] leading-snug text-muted">{HUT_ACCESS_NOTE}</p>}
       </section>
 
-      {harLenker && (
+      {(steg.links.length > 0 || steg.note) && (
         <section aria-labelledby="hytte-info">
           <h2 id="hytte-info" className={OVERSKRIFT}>
             Offisiell info
           </h2>
-          <div className="mt-2.5">
-            <Lenker hut={hut} />
+          <div className="mt-2.5 space-y-2.5">
+            <Lenker lenker={steg.links} />
+            {steg.kind === "manager_only" && steg.managerName && (
+              <Fakta rader={[["Forvalter", steg.managerName]]} compact={false} />
+            )}
+            {steg.note && <p className="text-[14px] leading-snug text-ink">{steg.note}</p>}
           </div>
-          <p className="mt-2.5 text-[13px] leading-snug text-muted">
-            Bestilling, priser og oppdatert informasjon finner du hos den som driver hytta.
-          </p>
         </section>
       )}
 
@@ -98,7 +106,6 @@ export function HutDetails({ hut }: { hut: Hut }) {
         <p className="mt-2.5 text-[13px] leading-snug text-muted">
           Kartverket, N50 Kartdata{oppdatert ? ` · oppdatert ${oppdatert}` : ""}.
           {hut.elevationM != null && " Høyden er terrenghøyden i kartpunktet, fra Kartverkets høydemodell."}
-          {!harLenker && " Sjekk åpningstider, nøkkel og bestilling hos den som driver hytta."}
         </p>
       </section>
     </div>

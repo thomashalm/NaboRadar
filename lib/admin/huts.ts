@@ -45,24 +45,37 @@ export async function hentHytteKø(client: SupabaseClient): Promise<{ saker: Hut
   return parsed.success ? { saker: parsed.data, feil: null } : { saker: [], feil: "Uventet svar fra hut_review_queue" };
 }
 
-const lenkeSchema = z.object({
+const kontaktSchema = z.object({
   id: z.string(),
   name: z.string(),
   hut_type: z.string(),
   owner_kind: z.string(),
-  municipality_number: z.string().nullable(),
+  locked: z.boolean().nullable(),
+  /** Forvalteren slik den vises: kontrollert, ellers kildens. */
+  manager_name: z.string().nullable(),
+  manager_verified: z.string().nullable(),
+  manager_source: z.string().nullable(),
   booking_url: z.string().nullable(),
   info_url: z.string().nullable(),
+  links_verified_at: z.string().nullable(),
+  contact_note: z.string().nullable(),
+  municipality_number: z.string().nullable(),
+  latitude: z.number(),
+  longitude: z.number(),
+  is_visible: z.boolean(),
 });
 
-export type HutLinkRow = z.infer<typeof lenkeSchema>;
+export type HutContactRow = z.infer<typeof kontaktSchema>;
 
-/** Hytter som passer et navnesøk, med lenkene de har i dag. */
-export async function søkHytter(client: SupabaseClient, q: string): Promise<HutLinkRow[]> {
-  const { data, error } = await client.rpc("huts_search", { q, max_results: 20 });
-  if (error) return [];
-  const parsed = z.array(lenkeSchema).safeParse(data ?? []);
-  return parsed.success ? parsed.data : [];
+/**
+ * Kontaktopplysningene for hytter. Uten søk: låste hytter og de som har fått noe lagt inn, med
+ * de som mangler mest først. Med søk: hyttene som passer navnet.
+ */
+export async function hentHytteKontakt(client: SupabaseClient, q: string | null): Promise<{ hytter: HutContactRow[]; feil: string | null }> {
+  const { data, error } = await client.rpc("hut_contact_list", { p_q: q });
+  if (error) return { hytter: [], feil: error.message };
+  const parsed = z.array(kontaktSchema).safeParse(data ?? []);
+  return parsed.success ? { hytter: parsed.data, feil: null } : { hytter: [], feil: "Uventet svar fra hut_contact_list" };
 }
 
 export const KILDENAVN: Record<string, string> = {

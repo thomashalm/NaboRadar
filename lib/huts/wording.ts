@@ -150,6 +150,8 @@ export interface HutFactsInput {
   locked: boolean | null;
   lat: number;
   lng: number;
+  bookingUrl?: string | null;
+  infoUrl?: string | null;
   municipalityName?: string | null;
   countyName?: string | null;
   elevationM?: number | null;
@@ -167,7 +169,9 @@ export function hutFacts(hut: HutFactsInput, full: boolean): [label: string, val
     ["Eier", HUT_OWNER_LABELS[hut.ownerKind]],
     ["Forvalter", hut.managerName],
     ["Bruk", hutUseLine(hut)],
-    ["Tilgang", hutAccessLine(hut.locked)],
+    // «Må bestilles på forhånd» står i raden bare når vi også kan si hvor eller hos hvem. Vet vi
+    // ingen av delene, står det «Låst», og forklaringen står for seg — se `hutNextStep`.
+    ["Tilgang", hut.locked && hutNextStep({ ...hut, bookingUrl: hut.bookingUrl ?? null, infoUrl: hut.infoUrl ?? null }).kind === "unknown" ? "Låst" : hutAccessLine(hut.locked)],
     ["Kommune", hut.municipalityName],
   ];
   if (full) {
@@ -188,15 +192,26 @@ export function hutPlaceLine(hut: { municipalityName?: string | null; countyName
   return ledd.length > 0 ? ledd.join(", ") : null;
 }
 
-/** Hvem lenken går til, slik det står i knappen: «Bestill hos DNT». */
-const CTA_OWNER: Record<HutOwnerKind, string | null> = {
-  dnt: "DNT",
-  statskog: "Statskog",
-  fjellstyre: "fjellstyret",
-  kommune: "kommunen",
-  other: null,
-  unknown: null,
-};
+/**
+ * Hvem en lenke går til, lest av adressen: «Bestill hos DNT» sier hvor man havner.
+ *
+ * Eierkategorien brukes ikke. Kartverkets «DNT» eller «Statskog» sier hvem som eier hytta, ikke
+ * hvem som tar imot bestillingen, og «Fjellstyre» er ikke en bestemt aktør i det hele tatt.
+ */
+const LINK_PROVIDERS: readonly [host: RegExp, name: string][] = [
+  [/(^|\.)dnt\.no$/, "DNT"],
+  [/(^|\.)statskog\.no$/, "Statskog"],
+  [/(^|\.)inatur\.no$/, "Inatur"],
+];
+
+function linkProvider(url: string): string | null {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return LINK_PROVIDERS.find(([mønster]) => mønster.test(host))?.[1] ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export interface HutLink {
   kind: "booking" | "info";
@@ -208,20 +223,78 @@ export interface HutLink {
  * Lenkene ut fra en hytte, bestilling først.
  *
  * Teksten følger hva lenken faktisk peker til: «Bestill» brukes bare om en side der man
- * bestiller. NaboRadar gjør ingen bestilling selv, og viser verken ledighet eller pris.
+ * bestiller, og navnet er stedet lenken går til — ellers forvalteren. Uten noen av delene er
+ * knappen navnløs. NaboRadar gjør ingen bestilling selv, og viser verken ledighet eller pris.
  */
-export function hutLinks(hut: {
-  bookingUrl: string | null;
-  infoUrl: string | null;
-  ownerKind: HutOwnerKind;
-  managerName: string | null;
-}): HutLink[] {
-  const hvem = CTA_OWNER[hut.ownerKind] ?? hut.managerName;
+export function hutLinks(hut: { bookingUrl: string | null; infoUrl: string | null; managerName: string | null }): HutLink[] {
   const links: HutLink[] = [];
-  if (hut.bookingUrl) links.push({ kind: "booking", href: hut.bookingUrl, label: hvem ? `Bestill hos ${hvem}` : "Bestill" });
-  if (hut.infoUrl) links.push({ kind: "info", href: hut.infoUrl, label: hvem ? `Se hos ${hvem}` : "Mer informasjon" });
+  if (hut.bookingUrl) {
+    const hvem = linkProvider(hut.bookingUrl) ?? hut.managerName;
+    links.push({ kind: "booking", href: hut.bookingUrl, label: hvem ? `Bestill hos ${hvem}` : "Bestill hytta" });
+  }
+  if (hut.infoUrl) {
+    const hvem = linkProvider(hut.infoUrl) ?? hut.managerName;
+    links.push({ kind: "info", href: hut.infoUrl, label: hvem ? `Se hos ${hvem}` : "Mer informasjon" });
+  }
   return links;
 }
+
+/**
+ * Hva vi kan si om neste steg for en hytte.
+ *
+ * Fire tilstander, etter hva vi faktisk vet:
+ *   booking_link  vi har en kontrollert side der man bestiller
+ *   info_link     vi har en kontrollert infoside, men ingen bestillingsside
+ *   manager_only  vi vet hvem som driver hytta, men har ingen kontrollert lenke
+ *   unknown       vi vet verken hvem som driver den eller hvor man går videre
+ *
+ * `bookingRequired` er Kartverkets «Låst» («låst og krever forhåndsbooking»). Det er en egen
+ * opplysning: at bestilling kreves, betyr ikke at vi kjenner bestillingskanalen — og ingen av
+ * delene sier om hytta er åpen eller ledig.
+ */
+export type HutNextStepKind = "booking_link" | "info_link" | "manager_only" | "unknown";
+
+export interface HutNextStep {
+  kind: HutNextStepKind;
+  bookingRequired: boolean;
+  links: HutLink[];
+  managerName: string | null;
+  /** Teksten som står sammen med lenkene, eller i stedet for dem. Null når det ikke er noe å si. */
+  note: string | null;
+}
+
+export const HUT_NEXT_STEP_NOTES = {
+  info: "Oppdatert informasjon om tilgang og bestilling finner du hos forvalteren.",
+  managerOnly: "Bestilling kreves. NaboRadar har foreløpig ikke en verifisert bestillingslenke.",
+  unknown:
+    "Kartverket oppgir at hytta krever forhåndsbooking. NaboRadar har foreløpig ikke funnet en verifisert kontakt- eller bestillingsside.",
+} as const;
+
+export function hutNextStep(hut: {
+  locked: boolean | null;
+  bookingUrl: string | null;
+  infoUrl: string | null;
+  managerName: string | null;
+}): HutNextStep {
+  const bookingRequired = hut.locked === true;
+  const links = hutLinks(hut);
+  const base = { bookingRequired, links, managerName: hut.managerName };
+  // Med en bestillingslenke trengs ingen forklaring: knappen er neste steg.
+  if (hut.bookingUrl) return { ...base, kind: "booking_link", note: null };
+  if (hut.infoUrl) return { ...base, kind: "info_link", note: HUT_NEXT_STEP_NOTES.info };
+  // Uten lenke er det bare noe å si når hytta må bestilles. En ulåst hytte uten lenke får ingen
+  // oppfordring: vi peker ikke brukeren til en aktør vi ikke kan navngi.
+  if (hut.managerName) return { ...base, kind: "manager_only", note: bookingRequired ? HUT_NEXT_STEP_NOTES.managerOnly : null };
+  return { ...base, kind: "unknown", note: bookingRequired ? HUT_NEXT_STEP_NOTES.unknown : null };
+}
+
+/** Kontaktstatusen slik den står i admin. */
+export const HUT_NEXT_STEP_LABELS: Record<HutNextStepKind, string> = {
+  booking_link: "Lenke komplett",
+  info_link: "Infoside finnes",
+  manager_only: "Mangler booking/info",
+  unknown: "Mangler forvalter",
+};
 
 /** «3 hytter og koier innen 15 km». */
 export function hutCountLine(count: number, radiusM: number, capped: boolean): string {
@@ -230,8 +303,8 @@ export function hutCountLine(count: number, radiusM: number, capped: boolean): s
   return `${antall} ${ord} innen ${Math.round(radiusM / 1000)} km`;
 }
 
-/** Forbeholdet. Står på hyttesiden og én gang under kartet — ikke på hvert kort. */
+/** Står én gang under lista i hyttekartet. Hva som gjelder én hytte, står på hyttesiden. */
 export const HUT_SOURCE_NOTE =
-  "Hyttene er hentet fra Kartverkets kartdata. Sjekk alltid åpningstider, nøkkel og bestilling hos den som driver hytta.";
+  "Hyttene er hentet fra Kartverkets kartdata. NaboRadar viser verken ledighet eller åpningstider — se hyttesiden for hvor du går videre.";
 
 export const HUT_ATTRIBUTION = "© Kartverket";

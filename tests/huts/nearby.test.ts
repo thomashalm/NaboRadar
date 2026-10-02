@@ -134,6 +134,7 @@ describe("ordlyd", () => {
       overnight: "yes",
       beds: null,
       locked: true,
+      bookingUrl: "https://hyttebestilling.dnt.no/hytte/1",
       lat: 60.0360956,
       lng: 10.6636515,
       municipalityName: "Nittedal",
@@ -172,33 +173,94 @@ describe("ordlyd", () => {
 });
 
 import { buildHutHref, buildHutMapHref, hutRefFromSlug, hutSlug } from "@/lib/huts/href";
-import { hutLinks } from "@/lib/huts/wording";
+import { HUT_NEXT_STEP_NOTES, hutLinks, hutNextStep } from "@/lib/huts/wording";
 
 describe("lenker ut fra en hytte", () => {
-  const base = { bookingUrl: null, infoUrl: null, ownerKind: "dnt" as const, managerName: null };
+  const base = { bookingUrl: null, infoUrl: null, managerName: null };
 
   it("sier «Bestill» bare om en side der man bestiller", () => {
-    expect(hutLinks({ ...base, bookingUrl: "https://eksempel.no/bestill" })).toEqual([
-      { kind: "booking", href: "https://eksempel.no/bestill", label: "Bestill hos DNT" },
+    expect(hutLinks({ ...base, bookingUrl: "https://hyttebestilling.dnt.no/hytte/1" })).toEqual([
+      { kind: "booking", href: "https://hyttebestilling.dnt.no/hytte/1", label: "Bestill hos DNT" },
     ]);
-    expect(hutLinks({ ...base, infoUrl: "https://eksempel.no/info" })).toEqual([
-      { kind: "info", href: "https://eksempel.no/info", label: "Se hos DNT" },
+    expect(hutLinks({ ...base, infoUrl: "https://www.dnt.no/hytter/x" })).toEqual([
+      { kind: "info", href: "https://www.dnt.no/hytter/x", label: "Se hos DNT" },
     ]);
+  });
+
+  it("navngir stedet lenken går til, ellers forvalteren — aldri eierkategorien", () => {
+    // Lenken går til Inatur, selv om forvalteren er et fjellstyre.
+    expect(hutLinks({ ...base, managerName: "Snåsa fjellstyre", bookingUrl: "https://www.inatur.no/hytte/1" })[0]!.label).toBe("Bestill hos Inatur");
+    expect(hutLinks({ ...base, managerName: "Bondeungdomslaget i Oslo", bookingUrl: "https://www.bul.no/x", infoUrl: "https://www.bul.no/y" }).map((l) => l.label)).toEqual([
+      "Bestill hos Bondeungdomslaget i Oslo",
+      "Se hos Bondeungdomslaget i Oslo",
+    ]);
+    // Uten kjent forvalter og uten kjent nettsted er knappen navnløs.
+    expect(hutLinks({ ...base, bookingUrl: "https://eksempel.no/bestill" })[0]!.label).toBe("Bestill hytta");
+    expect(hutLinks({ ...base, infoUrl: "https://eksempel.no/info" })[0]!.label).toBe("Mer informasjon");
+    // Et domene som bare ligner, er ikke DNT.
+    expect(hutLinks({ ...base, bookingUrl: "https://ikke-dnt.no/x" })[0]!.label).toBe("Bestill hytta");
   });
 
   it("viser begge når begge finnes, bestilling først", () => {
-    const lenker = hutLinks({ ...base, ownerKind: "statskog", bookingUrl: "https://a.no", infoUrl: "https://b.no" });
+    const lenker = hutLinks({ ...base, bookingUrl: "https://www.statskog.no/a", infoUrl: "https://www.statskog.no/b" });
     expect(lenker.map((l) => l.label)).toEqual(["Bestill hos Statskog", "Se hos Statskog"]);
-  });
-
-  it("bruker forvalternavnet når eierkategorien ikke sier hvem, og ellers ingen navn", () => {
-    expect(hutLinks({ ...base, ownerKind: "other", managerName: "Lunner Almenning", infoUrl: "https://b.no" })[0]!.label).toBe("Se hos Lunner Almenning");
-    expect(hutLinks({ ...base, ownerKind: "other", infoUrl: "https://b.no" })[0]!.label).toBe("Mer informasjon");
-    expect(hutLinks({ ...base, ownerKind: "unknown", bookingUrl: "https://a.no" })[0]!.label).toBe("Bestill");
   });
 
   it("viser ingenting når vi ikke har en lenke", () => {
     expect(hutLinks(base)).toEqual([]);
+  });
+});
+
+describe("neste steg for en hytte", () => {
+  const base = { locked: true, bookingUrl: null, infoUrl: null, managerName: null };
+
+  it("bestillingslenke: knappen er neste steg, uten ekstra tekst", () => {
+    const steg = hutNextStep({ ...base, bookingUrl: "https://hyttebestilling.dnt.no/hytte/1", managerName: "DNT Oslo og Omegn" });
+    expect(steg).toMatchObject({ kind: "booking_link", bookingRequired: true, note: null });
+    expect(steg.links.map((l) => l.label)).toEqual(["Bestill hos DNT"]);
+  });
+
+  it("infoside uten bestillingslenke: viser til forvalteren", () => {
+    const steg = hutNextStep({ ...base, infoUrl: "https://friluftsklubben.no/hyttene/Solstua", managerName: "Friluftsklubben i Oslo" });
+    expect(steg.kind).toBe("info_link");
+    expect(steg.links.map((l) => l.label)).toEqual(["Se hos Friluftsklubben i Oslo"]);
+    expect(steg.note).toBe(HUT_NEXT_STEP_NOTES.info);
+  });
+
+  it("bare forvalter: sier at bestilling kreves, og at vi mangler lenken", () => {
+    const steg = hutNextStep({ ...base, managerName: "Oslofjordens Friluftsråd" });
+    expect(steg).toMatchObject({ kind: "manager_only", managerName: "Oslofjordens Friluftsråd", links: [] });
+    expect(steg.note).toBe("Bestilling kreves. NaboRadar har foreløpig ikke en verifisert bestillingslenke.");
+  });
+
+  it("ingenting kjent: sier det rett ut, og peker ikke til en ukjent aktør", () => {
+    const steg = hutNextStep(base);
+    expect(steg).toMatchObject({ kind: "unknown", bookingRequired: true, links: [] });
+    expect(steg.note).toMatch(/^Kartverket oppgir at hytta krever forhåndsbooking\./);
+    expect(steg.note).not.toMatch(/den som driver/);
+  });
+
+  it("ulåst hytte uten lenke får ingen oppfordring", () => {
+    expect(hutNextStep({ ...base, locked: false })).toMatchObject({ kind: "unknown", bookingRequired: false, note: null });
+    expect(hutNextStep({ ...base, locked: null, managerName: "Lunner Almenning" })).toMatchObject({ kind: "manager_only", note: null });
+    // En ulåst hytte kan likevel ha en bestillingslenke.
+    expect(hutNextStep({ ...base, locked: false, bookingUrl: "https://hyttebestilling.dnt.no/hytte/2" })).toMatchObject({
+      kind: "booking_link",
+      bookingRequired: false,
+    });
+  });
+
+  it("ingen av tekstene sier noe om åpen, stengt eller ledig", () => {
+    for (const tekst of Object.values(HUT_NEXT_STEP_NOTES)) expect(tekst).not.toMatch(/åpen|stengt|ledig|full/i);
+  });
+
+  it("tilgangsraden lover ikke bestilling når vi ikke vet hvor", () => {
+    const hut = { type: "unstaffed_hut", ownerKind: "other", managerName: null, overnight: "yes", beds: null, locked: true, lat: 60, lng: 10 } as const;
+    const tilgang = (h: Parameters<typeof hutFacts>[0]) => hutFacts(h, true).find(([navn]) => navn === "Tilgang")?.[1];
+    expect(tilgang(hut)).toBe("Låst");
+    expect(tilgang({ ...hut, managerName: "Bondeungdomslaget i Oslo" })).toBe("Låst – må bestilles på forhånd");
+    expect(tilgang({ ...hut, bookingUrl: "https://www.bul.no/x" })).toBe("Låst – må bestilles på forhånd");
+    expect(tilgang({ ...hut, locked: false })).toBe("Ulåst, eller åpnes med DNT-nøkkel");
   });
 });
 

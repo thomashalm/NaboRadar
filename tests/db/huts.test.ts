@@ -368,7 +368,9 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
       const hytte = await id("name = 'Kobberhaughytta'");
       for (const email of [null, "noen@example.com"]) {
         expect(await flere(email, [`select review_hut('${hytte}', 'approve')`])).toBe("NEKTET");
-        expect(await flere(email, [`select set_hut_links('${hytte}', 'https://eksempel.no/bestill', null)`])).toBe("NEKTET");
+        expect(await flere(email, [`select set_hut_contact('${hytte}', 'https://eksempel.no/bestill', null, null, null)`])).toBe("NEKTET");
+        // Adminlisten svarer tomt for andre enn admin, også for en innlogget bruker.
+        expect(await flere(email, [`select id from hut_contact_list()`])).toEqual(email ? [] : "NEKTET");
       }
     });
 
@@ -443,19 +445,84 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
       const hytte = await id("name = 'Kobberhaughytta'");
       await expect(db.pg.query(`update huts set booking_url = 'https://eksempel.no/x' where id = $1`, [hytte])).rejects.toThrow(/huts_links_er_kontrollert/);
       const rad = (await flere<{ booking_url: string; info_url: string | null }>(ADMIN, [
-        `select set_hut_links('${hytte}', ' https://eksempel.no/bestill ', '')`,
+        `select set_hut_contact('${hytte}', ' https://eksempel.no/bestill ', '', '', '')`,
         `select booking_url, info_url from get_hut('${hytte.slice(0, 8)}')`,
       ])) as { booking_url: string; info_url: string | null }[];
       expect(rad).toEqual([{ booking_url: "https://eksempel.no/bestill", info_url: null }]);
       // Bare https, og tomme felt fjerner lenkene igjen.
-      expect(await flere(ADMIN, [`select set_hut_links('${hytte}', 'http://eksempel.no', null)`])).toBe("NEKTET");
+      expect(await flere(ADMIN, [`select set_hut_contact('${hytte}', 'http://eksempel.no', null, null, null)`])).toBe("NEKTET");
       const tomt = (await flere<{ kontrollert: boolean }>(ADMIN, [
-        `select set_hut_links('${hytte}', 'https://eksempel.no/bestill', null)`,
-        `select set_hut_links('${hytte}', '', null)`,
+        `select set_hut_contact('${hytte}', 'https://eksempel.no/bestill', null, null, null)`,
+        `select set_hut_contact('${hytte}', '', null, null, null)`,
         `select links_verified_at is not null as kontrollert from huts where id = '${hytte}'`,
       ])) as unknown;
       // Admin har ikke tabelltilgang; at kallet nektes er selve poenget.
       expect(tomt).toBe("NEKTET");
+    });
+
+    it("en kontrollert forvalter går foran kildens, og overlever synken", async () => {
+      const hytte = await id("name = 'Kobberhaughytta'");
+      // Som en lenke kan forvalteren ikke settes uten at noen har gått god for den.
+      await expect(db.pg.query(`update huts set manager_verified = 'Noen' where id = $1`, [hytte])).rejects.toThrow(/huts_forvalter_er_kontrollert/);
+      await db.pg.exec("begin");
+      try {
+        await db.pg.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ role: "authenticated", email: ADMIN })]);
+        await db.pg.query(`select set_hut_contact($1, '', '', ' DNT Oslo og Omegn ', 'Kontrollert mot foreningens side')`, [hytte]);
+        const les = async () =>
+          (await db.pg.query<{ manager_name: string | null }>(`select manager_name from huts_public where id = $1`, [hytte])).rows[0]!.manager_name;
+        expect(await les()).toBe("DNT Oslo og Omegn");
+        // Synken skriver bare kildens felt. Den kontrollerte forvalteren står.
+        await db.pg.exec("select * from refresh_huts()");
+        expect(await les()).toBe("DNT Oslo og Omegn");
+        const rad = (await db.pg.query<{ manager_verified: string; contact_note: string; kontrollert: boolean; reviewed_by: string }>(
+          `select manager_verified, contact_note, links_verified_at is not null as kontrollert, reviewed_by from huts where id = $1`,
+          [hytte],
+        )).rows[0]!;
+        expect(rad).toEqual({ manager_verified: "DNT Oslo og Omegn", contact_note: "Kontrollert mot foreningens side", kontrollert: true, reviewed_by: ADMIN });
+        // Tømmes alt, er det ikke lenger noe som er kontrollert — og notatet går med.
+        await db.pg.query(`select set_hut_contact($1, '', '', '', 'står igjen?')`, [hytte]);
+        const tom = (await db.pg.query<{ manager_verified: string | null; contact_note: string | null; kontrollert: boolean }>(
+          `select manager_verified, contact_note, links_verified_at is not null as kontrollert from huts where id = $1`,
+          [hytte],
+        )).rows[0]!;
+        expect(tom).toEqual({ manager_verified: null, contact_note: null, kontrollert: false });
+      } finally {
+        await db.pg.exec("rollback");
+      }
+    });
+
+    it("adminlisten viser låste hytter med det de mangler, og notatet lekker ikke ut", async () => {
+      await db.pg.exec("begin");
+      try {
+        await db.pg.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ role: "authenticated", email: ADMIN })]);
+        // Testhyttene er ulåste; to av dem gjøres låste her.
+        await db.pg.exec(`update huts set locked = (name in ('Kobberhaughytta', 'Tømtehytta')) where archived_at is null`);
+        const låst = await id("name = 'Kobberhaughytta'");
+        const liste = async (q: string | null = null) =>
+          (await db.pg.query<{ id: string; name: string; locked: boolean | null; booking_url: string | null; contact_note: string | null }>(
+            `select id, name, locked, booking_url, contact_note from hut_contact_list($1)`,
+            [q],
+          )).rows;
+        const før = await liste();
+        // Uten søk: bare låste hytter og de som har fått noe lagt inn.
+        expect([...new Set(før.map((h) => h.name))].sort()).toEqual(["Kobberhaughytta", "Tømtehytta"]);
+        await db.pg.query(`select set_hut_contact($1, 'https://eksempel.no/bestill', '', 'Eksempellaget', 'internt notat')`, [låst]);
+        const etter = await liste();
+        expect(etter.find((h) => h.id === låst)).toMatchObject({ booking_url: "https://eksempel.no/bestill", contact_note: "internt notat" });
+        // De som mangler lenke, står før de som har.
+        expect(etter).toHaveLength(før.length);
+        expect(etter.at(-1)!.name).toBe("Kobberhaughytta");
+        // Med søk: treff på navn, også ulåste.
+        const ulåst = (await db.pg.query<{ name: string }>(`select name from huts where locked is false and archived_at is null and rejected_at is null order by name limit 1`)).rows[0]!.name;
+        expect((await liste(ulåst)).map((h) => h.name)).toContain(ulåst);
+        // Notatet er internt: ingen offentlig funksjon returnerer det.
+        const offentlig = (await db.pg.query<Record<string, unknown>>(`select * from get_hut($1)`, [låst.slice(0, 8)])).rows[0]!;
+        expect(Object.keys(offentlig)).not.toContain("contact_note");
+        expect(Object.keys(offentlig)).not.toContain("manager_verified");
+        expect(offentlig.manager_name).toBe("Eksempellaget");
+      } finally {
+        await db.pg.exec("rollback");
+      }
     });
 
     it("slår opp én hytte på ID-delen av adressen", async () => {

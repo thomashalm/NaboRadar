@@ -63,7 +63,8 @@ async function main() {
     // Kontrollkøen for hytter: admin-only, med is_admin() inne i funksjonen.
     "hut_review_queue",
     "review_hut",
-    "set_hut_links",
+    "set_hut_contact",
+    "hut_contact_list",
     ...RESEARCH,
     ...REVIEW,
     ...DATACENTER,

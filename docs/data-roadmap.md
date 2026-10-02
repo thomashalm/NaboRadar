@@ -506,7 +506,36 @@ i stedsnavnregisteret som hotell. Kontrollen ender i godkjent, avvist eller slå
 når den er åpnet og kontrollert av et menneske, kommer rett fra en kilde vi kan bruke, eller er
 bygget av en stabil ID vi lovlig har. Vi henter ikke DNTs hytteregister for å skaffe ID-er, og
 vi gjetter ikke adresser. Ingen lenke er bedre enn en gal. Ingen av kildene vi bruker i dag
-leverer lenker, så de legges inn for hånd i `/admin/hytter`; tre pilothytter har fått en.
+leverer lenker, så de legges inn for hånd i `/admin/hytter`.
+
+**Låste hytter og neste steg (runde 5).** Kartverkets «Låst» betyr «låst og krever
+forhåndsbooking». Da må siden også si hvor man bestiller, eller si at vi ikke vet. I piloten
+var 15 av 58 hytter låste, og ingen hadde lenke. Etter manuell kontroll av hver enkelt har 12
+en bestillingsside, 2 bare en infoside (Husbergøya lånes bare ut til skoler og organisasjoner;
+Solstua er stengt for vedlikehold), og 1 står uten noe (Breimåsahytta — ingen offisiell side
+funnet). Ingen av de 14 eierne kunne gjettes fra eierkategorien: Røkleivhytta eies av
+Bondeungdomslaget i Oslo, Sellanrå av Friluftsklubben i Oslo, ni er kystledhytter hos
+Oslofjordens Friluftsråd.
+
+Nasjonalt, talt i N50 uten import (1 524 hytter av typene vi tar inn):
+
+| Tilgang | Antall | DNT | Statskog | Fjellstyre | Andre |
+|---|---|---|---|---|---|
+| Låst | 409 | 22 | 92 | 156 | 139 |
+| Ulåst | 1 115 | 553 | 137 | 80 | 345 |
+| Udefinert | 0 | | | | |
+
+402 av de 409 låste er ubetjente; 127 ligger i Trøndelag og 110 i Innlandet. Turrutebasen har
+et punkt innen 300 m for 204 av dem, men feltet for vedlikeholdsansvarlig gjentar som regel
+bare kategorien («Fjellstyre», «Statskog») — et konkret navn finnes for rundt 28. Ingen kilde
+gir lenker. Ved nasjonal import vil altså rundt 380 låste hytter stå i tilstanden «ingenting
+kjent», og vise det ærlig.
+
+Strategi: manglende lenke blokkerer ikke publisering. Berikelsen gjøres for hånd, i bolker
+etter forvalter heller enn hytte for hytte — én forvalter har ofte ett nettsted med en side
+per hytte (slik Oslofjordens Friluftsråd har). Rekkefølge: Statskog (92, én aktør), de største
+fjellstyrene, DNT (22), så «Andre» etter hvor ofte hyttene vises. Vi bygger ikke integrasjoner
+mot Inatur, Statskog eller DNT, og ingen automatisk lenkesjekk ennå.
 
 **Pilot.** Oslomarka med omland (10,3–11,1° Ø, 59,75–60,3° N, 21 kommuner): 55 poster fra N50
 og 47 fra Turrutebasen ble til 58 hytter, 55 av dem synlige, 8 til manuell kontroll. Mot DNT

@@ -45,32 +45,42 @@ export async function reviewHutAction(_prev: HutActionState, formData: FormData)
   return { status: "ok", message: action === "approve" ? "Godkjent." : action === "reject" ? "Avvist." : "Slått sammen." };
 }
 
-const lenker = z.object({
+const kontakt = z.object({
   hutId: z.uuid(),
-  // Tomt felt fjerner lenken. Bare https: det er eneste databasen godtar.
+  // Tomt felt fjerner opplysningen. Bare https: det er eneste databasen godtar.
   bookingUrl: z.union([z.literal(""), z.url({ protocol: /^https$/ })]),
   infoUrl: z.union([z.literal(""), z.url({ protocol: /^https$/ })]),
+  manager: z.union([z.literal(""), z.string().min(2).max(120)]),
+  note: z.string().max(500),
 });
 
-/** Lagrer de offisielle lenkene på en hytte. Den som lagrer, går god for at de peker riktig. */
-export async function setHutLinksAction(_prev: HutActionState, formData: FormData): Promise<HutActionState> {
+/**
+ * Lagrer lenkene og forvalteren på en hytte. Den som lagrer, går god for at lenkene gjelder
+ * hytta og at forvalteren er den den offisielle siden oppgir.
+ */
+export async function setHutContactAction(_prev: HutActionState, formData: FormData): Promise<HutActionState> {
   const session = await getAdminSession();
   if (session.state !== "admin") return { status: "error", message: "Ikke autorisert." };
 
-  const parsed = lenker.safeParse({
+  const tekst = (navn: string) => String(formData.get(navn) ?? "").trim();
+  const parsed = kontakt.safeParse({
     hutId: formData.get("hutId"),
-    bookingUrl: String(formData.get("bookingUrl") ?? "").trim(),
-    infoUrl: String(formData.get("infoUrl") ?? "").trim(),
+    bookingUrl: tekst("bookingUrl"),
+    infoUrl: tekst("infoUrl"),
+    manager: tekst("manager"),
+    note: tekst("note"),
   });
-  if (!parsed.success) return { status: "error", message: "Lenkene må være fullstendige https-adresser." };
+  if (!parsed.success) return { status: "error", message: "Lenkene må være fullstendige https-adresser, og forvalteren minst to tegn." };
 
-  const { error } = await session.client.rpc("set_hut_links", {
+  const { error } = await session.client.rpc("set_hut_contact", {
     p_hut_id: parsed.data.hutId,
     p_booking_url: parsed.data.bookingUrl,
     p_info_url: parsed.data.infoUrl,
+    p_manager: parsed.data.manager,
+    p_note: parsed.data.note,
   });
   if (error) return { status: "error", message: error.message };
 
   revalidatePath("/admin/hytter");
-  return { status: "ok", message: "Lenkene er lagret." };
+  return { status: "ok", message: "Lagret." };
 }
