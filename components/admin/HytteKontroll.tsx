@@ -166,6 +166,10 @@ export function HytteKontakt({ hytte }: { hytte: HutContactRow }) {
           Notat: hvor ble dette kontrollert?
           <input name="note" defaultValue={hytte.contact_note ?? ""} maxLength={500} className={felt} />
         </label>
+        <label className="text-[13px] text-muted sm:col-span-2">
+          Andre navn (kommaskilt) — navnet forvalteren bruker når det ikke er Kartverkets
+          <input name="aliases" defaultValue={hytte.aliases.join(", ")} className={felt} />
+        </label>
         <div className="flex items-center gap-3 sm:col-span-2">
           <button type="submit" disabled={pending} className={knapp}>
             Lagre

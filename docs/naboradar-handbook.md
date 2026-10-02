@@ -1169,7 +1169,13 @@ hytte publiseres uavhengig av om den har lenke.
 infosiden. Lenker og forvalter lagres samlet med `set_hut_contact` fra `/admin/hytter`, sammen
 med et internt notat om hvor de ble kontrollert (`contact_note`, returneres aldri offentlig).
 `links_verified_at` er tidspunktet for kontrollen; databasen nekter en lenke eller en kontrollert
-forvalter uten. Opplysningene legges inn for hånd, én hytte om gangen: åpne den offisielle
+forvalter uten. Notatet kan stå alene: «ingen offisiell side funnet, disse kildene er sjekket»
+er også et resultat, og skal ikke måtte gjøres på nytt.
+
+**Andre navn.** Det kanoniske navnet følger Kartverket. Bruker forvalteren et annet —
+«Bekkensten» for Bekkenstein, «Store Tømtehytta» for Tømtehytta, «Styrbord - Gressholmen» —
+legges det i `aliases` fra samme skjema. Navnesøket finner dem. Synken bygger `alt_names` på
+nytt fra kildepostene hver gang, og rører ikke `aliases`. Opplysningene legges inn for hånd, én hytte om gangen: åpne den offisielle
 siden, se at den gjelder hytta, lagre. Vi henter ikke DNTs hytteregister, bruker ikke UT.no, og
 bygger ingen adresse etter mønster. Ingen av dagens kilder leverer lenker. Lenkene sjekkes ikke
 automatisk ennå; kontrolltidspunktet står i admin.
@@ -1177,6 +1183,11 @@ automatisk ennå; kontrolltidspunktet står i admin.
 `/admin/hytter` viser de låste hyttene med status — «Mangler forvalter», «Mangler
 booking/info», «Infoside finnes», «Lenke komplett» — de som mangler mest først
 (`hut_contact_list`).
+
+**Kontrollen av piloten.** Alle 58 hyttene er slått opp mot forvalterens egen side; matrisen,
+klassene og de åpne sakene står i [research/hytter-pilot-kildekontroll.md](research/hytter-pilot-kildekontroll.md).
+Det viktigste funnet: «Ulåst» betyr ikke fri bruk. DNT Oslo og Omegn krever forhåndsbestilling
+på alle ubetjente hytter i marka, så bestillingslenken er like viktig der som for låste hytter.
 
 **Det Kartverkets «Låst» ikke sier.** Kontrollen av pilotens 15 låste hytter viste at «låst og
 krever forhåndsbooking» dekker flere virkeligheter: utleie av hele hytta etter forespørsel

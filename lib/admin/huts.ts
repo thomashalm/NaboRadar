@@ -59,6 +59,8 @@ const kontaktSchema = z.object({
   info_url: z.string().nullable(),
   links_verified_at: z.string().nullable(),
   contact_note: z.string().nullable(),
+  /** Andre navn lagt inn for hånd, typisk forvalterens. */
+  aliases: z.array(z.string()),
   municipality_number: z.string().nullable(),
   latitude: z.number(),
   longitude: z.number(),
@@ -68,7 +70,8 @@ const kontaktSchema = z.object({
 export type HutContactRow = z.infer<typeof kontaktSchema>;
 
 /**
- * Kontaktopplysningene for hytter. Uten søk: låste hytter og de som har fått noe lagt inn, med
+ * Kontaktopplysningene for hytter. Uten søk: låste hytter og de som har fått noe lagt inn
+ * (lenke, forvalter eller notat), med
  * de som mangler mest først. Med søk: hyttene som passer navnet.
  */
 export async function hentHytteKontakt(client: SupabaseClient, q: string | null): Promise<{ hytter: HutContactRow[]; feil: string | null }> {

@@ -52,6 +52,8 @@ const kontakt = z.object({
   infoUrl: z.union([z.literal(""), z.url({ protocol: /^https$/ })]),
   manager: z.union([z.literal(""), z.string().min(2).max(120)]),
   note: z.string().max(500),
+  // Kommaskilt i skjemaet. Navn forvalteren bruker når det ikke er Kartverkets.
+  aliases: z.array(z.string().min(2).max(80)).max(10),
 });
 
 /**
@@ -69,8 +71,9 @@ export async function setHutContactAction(_prev: HutActionState, formData: FormD
     infoUrl: tekst("infoUrl"),
     manager: tekst("manager"),
     note: tekst("note"),
+    aliases: tekst("aliases").split(",").map((navn) => navn.trim()).filter(Boolean),
   });
-  if (!parsed.success) return { status: "error", message: "Lenkene må være fullstendige https-adresser, og forvalteren minst to tegn." };
+  if (!parsed.success) return { status: "error", message: "Lenkene må være fullstendige https-adresser, og forvalter og andre navn minst to tegn." };
 
   const { error } = await session.client.rpc("set_hut_contact", {
     p_hut_id: parsed.data.hutId,
@@ -78,6 +81,7 @@ export async function setHutContactAction(_prev: HutActionState, formData: FormD
     p_info_url: parsed.data.infoUrl,
     p_manager: parsed.data.manager,
     p_note: parsed.data.note,
+    p_aliases: parsed.data.aliases,
   });
   if (error) return { status: "error", message: error.message };
 

@@ -479,13 +479,39 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
           [hytte],
         )).rows[0]!;
         expect(rad).toEqual({ manager_verified: "DNT Oslo og Omegn", contact_note: "Kontrollert mot foreningens side", kontrollert: true, reviewed_by: ADMIN });
-        // Tømmes alt, er det ikke lenger noe som er kontrollert — og notatet går med.
-        await db.pg.query(`select set_hut_contact($1, '', '', '', 'står igjen?')`, [hytte]);
-        const tom = (await db.pg.query<{ manager_verified: string | null; contact_note: string | null; kontrollert: boolean }>(
-          `select manager_verified, contact_note, links_verified_at is not null as kontrollert from huts where id = $1`,
-          [hytte],
-        )).rows[0]!;
-        expect(tom).toEqual({ manager_verified: null, contact_note: null, kontrollert: false });
+        // Et notat kan stå alene: «ingen offisiell side funnet» er også en kontroll.
+        await db.pg.query(`select set_hut_contact($1, '', '', '', 'Ingen offisiell side funnet')`, [hytte]);
+        const les2 = async () =>
+          (await db.pg.query<{ manager_verified: string | null; contact_note: string | null; kontrollert: boolean }>(
+            `select manager_verified, contact_note, links_verified_at is not null as kontrollert from huts where id = $1`,
+            [hytte],
+          )).rows[0]!;
+        expect(await les2()).toEqual({ manager_verified: null, contact_note: "Ingen offisiell side funnet", kontrollert: true });
+        // Tømmes alt, er det ikke lenger noe som er kontrollert.
+        await db.pg.query(`select set_hut_contact($1, '', '', '', '')`, [hytte]);
+        expect(await les2()).toEqual({ manager_verified: null, contact_note: null, kontrollert: false });
+      } finally {
+        await db.pg.exec("rollback");
+      }
+    });
+
+    it("et navn lagt inn for hånd kan søkes på, og overlever synken", async () => {
+      const hytte = await id("name = 'Kobberhaughytta'");
+      await db.pg.exec("begin");
+      try {
+        await db.pg.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ role: "authenticated", email: ADMIN })]);
+        const treff = async (q: string) => (await db.pg.query<{ id: string }>(`select id from huts_search($1)`, [q])).rows.map((r) => r.id);
+        expect(await treff("Kobberhaugen storstue")).toEqual([]);
+        await db.pg.query(`select set_hut_contact($1, '', '', '', 'Forvalterens navn', array[' Kobberhaugen storstue ', 'x', 'Kobberhaugen storstue'])`, [hytte]);
+        // Trimmet, uten dubletter, og uten navn som er for korte til å være navn.
+        expect((await db.pg.query<{ aliases: string[] }>(`select aliases from huts where id = $1`, [hytte])).rows[0]!.aliases).toEqual(["Kobberhaugen storstue"]);
+        expect(await treff("Kobberhaugen storstue")).toEqual([hytte]);
+        // Synken bygger alt_names på nytt fra kildene. De manuelle navnene står i egen kolonne.
+        await db.pg.exec("select * from refresh_huts()");
+        expect(await treff("kobberhaugen stor")).toEqual([hytte]);
+        expect((await db.pg.query<{ id: string }>(`select id from hut_contact_list('storstue')`)).rows.map((r) => r.id)).toEqual([hytte]);
+        // Det kanoniske navnet er uendret.
+        expect((await db.pg.query<{ name: string }>(`select name from huts where id = $1`, [hytte])).rows[0]!.name).toBe("Kobberhaughytta");
       } finally {
         await db.pg.exec("rollback");
       }
@@ -519,6 +545,7 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
         const offentlig = (await db.pg.query<Record<string, unknown>>(`select * from get_hut($1)`, [låst.slice(0, 8)])).rows[0]!;
         expect(Object.keys(offentlig)).not.toContain("contact_note");
         expect(Object.keys(offentlig)).not.toContain("manager_verified");
+        expect(Object.keys(offentlig)).not.toContain("aliases");
         expect(offentlig.manager_name).toBe("Eksempellaget");
       } finally {
         await db.pg.exec("rollback");
