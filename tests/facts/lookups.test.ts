@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { distanceToGeometry } from "@/lib/geo/distance";
 import { NveHoyspentDistribusjonLookup, NveKvikkleireAktsomhetLookup } from "@/lib/facts/lookups/nve";
-import { FlystoyLookup, ldenInterval, StoyvarselVegLookup, StrategiskStoyLookup } from "@/lib/facts/lookups/stoy";
+import { ldenInterval, StoyvarselVegLookup, StrategiskStoyLookup } from "@/lib/facts/lookups/stoy";
 
 const CTX = { lat: 59.92992, lng: 10.71488, radiusM: 1000 };
 
@@ -99,22 +99,7 @@ describe("T-1442 støysoner", () => {
     expect(await new StoyvarselVegLookup(jsonFetch(() => ({ features: [] }))).run(CTX)).toEqual([]);
   });
 
-  it("leser flystøy fra GML-svaret", async () => {
-    const gml = `<?xml version="1.0"?><wfs:FeatureCollection xmlns:wfs="x" xmlns:app="y">
-      <app:Støy><app:støysonekategori>R</app:støysonekategori><app:støykildenavn>ENGM</app:støykildenavn><app:beregnetÅr>2022</app:beregnetÅr></app:Støy>
-    </wfs:FeatureCollection>`;
-    const fetchImpl = vi.fn(async () => new Response(gml, { status: 200 })) as unknown as typeof fetch;
-    const [hit] = await new FlystoyLookup(fetchImpl).run({ lat: 60.1976, lng: 11.1004, radiusM: 1000 });
-    expect(hit).toMatchObject({ subtype: "stoysone_fly_t1442", contains: true, attributes: { sone: "rod", lufthavn: "ENGM", beregnetAar: 2022 } });
-
-    const empty = vi.fn(async () => new Response("<wfs:FeatureCollection xmlns:wfs='x'/>", { status: 200 })) as unknown as typeof fetch;
-    expect(await new FlystoyLookup(empty).run(CTX)).toEqual([]);
-  });
-
-  it("kaster ved HTTP-feil, slik at kilden merkes som utilgjengelig", async () => {
-    const failing = vi.fn(async () => new Response("nope", { status: 500 })) as unknown as typeof fetch;
-    await expect(new FlystoyLookup(failing).run(CTX)).rejects.toThrow();
-  });
+  // Flystøy (Avinor) er testet i tests/facts/stormflo-flystoy.test.ts.
 });
 
 describe("distanceToGeometry", () => {

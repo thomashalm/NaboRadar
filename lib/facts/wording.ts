@@ -109,8 +109,10 @@ export const SOURCES: Record<string, SourceInfo> = {
     owner: "Kartverket",
     licenseName: "NLOD",
     licenseUrl: "https://data.norge.no/nlod/no/1.0",
+    // Kartverkets publikumskart. Svaret vårt er de samme kartlagene, og skal kunne slås opp der.
+    url: "https://kartverket.no/til-sjos/se-havniva/kart",
     method:
-      "Beregnet av Kartverket fra terrengmodell og vannstandsstatistikk. Viser hvilket areal som kan stå under vann ved et nivå, ikke hva som skjer med bygningen.",
+      "Beregnet av Kartverket fra terrengmodell og vannstandsstatistikk, samme kartlag som «Se havnivå i kart». Viser hvilket areal som kan stå under vann ved et nivå, ikke hva som skjer med bygningen. Et punkt som ligger i sjøen etter Kartverkets kystlinje, får ingen stormflovurdering.",
   },
   "nve-nettanlegg": {
     name: "Nettanlegg",
@@ -176,8 +178,10 @@ export const SOURCES: Record<string, SourceInfo> = {
     owner: "Avinor",
     licenseName: "Åpne data",
     licenseUrl: "https://kartkatalog.geonorge.no/metadata/1489f7f8-40c8-4dc4-83b6-bcf277b56506",
+    // Avinors eget støysonekart. Geonorge-tjenesten vi spør, gir samme sone (ADR 015).
+    url: "https://experience.arcgis.com/experience/ed39c47ac2df499f8926b69866c0eadc",
     method:
-      "Støysoner etter retningslinje T-1442, modellberegnet for lufthavnen, ikke målt ved boligen.",
+      "Støysoner etter retningslinje T-1442, modellberegnet for lufthavnen, ikke målt ved boligen. Beregningsåret er året trafikkgrunnlaget gjelder, ofte et prognoseår — ikke når beregningen ble gjort. Dekker Avinors lufthavner; Forsvarets flyplasser (f.eks. Ørland) er ikke med.",
   },
 };
 
@@ -748,7 +752,9 @@ export function describeFact(input: {
       const aar = num(a.beregnetAar);
       return {
         headline: `${sone === "rød" ? "Rød" : "Gul"} flystøysone (T-1442)`,
-        details: [[str(a.lufthavn), aar ? `beregnet ${aar}` : null].filter(Boolean).join(" · ")].filter(Boolean),
+        // «Beregningsår» er SOSI-spesifikasjonens eget ord: året trafikkgrunnlaget gjelder, ikke når
+        // beregningen ble gjort. Lufthavnen er navnet fra lib/facts/lufthavner.ts, aldri ICAO-koden.
+        details: [[str(a.lufthavn), aar ? `beregningsår ${aar}` : null].filter(Boolean).join(" · ")].filter(Boolean),
         caveat: null,
         compact: { headline: `${sone === "rød" ? "Rød" : "Gul"} flystøysone`, context: STOY_FORBEHOLD_VED_PUNKTET },
       };

@@ -315,7 +315,7 @@ Tilgangen er en **positiv, uttømmende liste**, ikke en opprydding i enkelttilfe
 | Rolle | Kan kalle |
 |---|---|
 | `anon` | `features_near`, `features_count_near`, `events_within`, `get_event`, `data_status`, `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search`, `get_hut`, `hut_index`, `hut_municipality_counts` |
-| `authenticated` | det samme, pluss `hut_review_queue`, `review_hut`, `set_hut_contact`, `set_hut_overrides`, `hut_contact_list`, `hut_contact_summary`, `hut_status_queue`, `review_hut_status`, `is_admin`, `provider_health`, `recent_sync_runs`, `recent_sync_requests`, `request_sync`, `scheduler_status` og research-, review- og datasenterfunksjonene — som alle sjekker `is_admin()` selv |
+| `authenticated` | det samme, pluss `hut_review_queue`, `review_hut`, `set_hut_contact`, `set_hut_overrides`, `hut_contact_list`, `hut_contact_summary`, `hut_status_queue`, `review_hut_status`, `is_admin`, `provider_health`, `recent_sync_runs`, `recent_sync_requests`, `request_sync`, `scheduler_status`, `lookup_source_status` og research-, review- og datasenterfunksjonene — som alle sjekker `is_admin()` selv |
 | `service_role` | alt — sync-workeren |
 | `postgres` | alt — migrasjoner og pg_cron |
 
@@ -350,6 +350,7 @@ fjernet.
 |---|---|---|
 | `providers`, `events`, `event_documents`, `area_features`, `area_feature_categories`, `huts`, `hut_sources` | ingen | ingen |
 | `admin_users`, `sync_runs`, `sync_requests`, `admin_research_*` | ingen | SELECT bak `is_admin()` |
+| `lookup_source_status` | ingen | ingen — lest gjennom `lookup_source_status()`, skrevet bare av service role |
 | `watched_areas` | ingen | eget innhold, `user_id = auth.uid()` |
 | `notifications` | ingen | via eierskap til `watched_areas` |
 
@@ -406,6 +407,13 @@ sesjonen, og kjører kun på `/admin`.
 **Admin kan:** se helsetilstand per provider, dataalder, antall objekter, siste feil, de siste
 kjøringene, scheduler-status (jobb, tidsplan, siste kjøring, siste HTTP-status), og legge
 «Kjør sync nå» / «Kjør full sync» i kø.
+
+**Direkte oppslag** (flom, radon, stormflo, støy …) synkes ikke, og har derfor sin egen tabell på
+`/admin`: siste sjekk, siste OK, siste feil og hvor lenge kilden har feilet sammenhengende. Sync-jobben
+kjører `npm run lookups:check` hvert 15. minutt (eget steg med `continue-on-error`), som spør hver kilde
+mot et fast punkt i Bjørvika og lagrer utfallet med `record_lookup_check` (bare service role) i
+`lookup_source_status`. `/admin` leser `lookup_source_status()` (tom for alle som ikke er admin). Det
+finnes ingen anonym skrivevei.
 
 ### De tre admin-verktøyene
 
@@ -861,11 +869,11 @@ For store til å synke, eller svarer bare på «ligger punktet innenfor?».
 | Kvikkleire-aktsomhet | NVE (aktsomhetskart 2024) | Marin leire i skrånende terreng | Ingen dekning → ingen uttalelse. «Utenfor aktsomhetsområde» ville vært misvisende |
 | Strategisk støykartlegging | Miljødirektoratet | Lden ved søkepunktet | Modellberegnet, kartlagt 2022 |
 | Støysoner veg | Statens vegvesen | Gul/rød sone langs veg | Geonorge blokkerer punktfilter, så Vegvesenets egen tjeneste brukes |
-| Støysoner fly | Avinor | Gul/rød sone rundt lufthavn | — |
+| Støysoner fly | Avinor | Gul/rød sone rundt Avinors 44 lufthavner | Geonorge-WMS `wms.stoylufthavn`, `GetFeatureInfo` i EPSG:4326 (lat,lon). Lufthavnens navn fra `lib/facts/lufthavner.ts`, aldri ICAO-koden. Forsvarets flyplasser (Ørland m.fl.) er ikke med. [ADR 015](adr/015-publikumsprodukt-wms-og-kildefeil.md) |
 | Flomsoner og flomaktsomhet | NVE | Kartlagt flomsone og aktsomhetsområde for flom | Ett `identify`-kall dekker alle gjentaksintervallene. Analyseområdet avgjør om «utenfor sone» kan sies |
 | Skredfaresoner og skredaktsomhet | NVE | Kartlagt faresone, jord-/flomskred, snø-/steinskred | Faresone (utredet) skilles alltid fra aktsomhet (screening) |
 | Radonaktsomhet | NGU og DSA | Modellert aktsomhetsgrad for området | NGUs publiserte kart, fire klasser. `GetFeatureInfo` gir ekte punkt-i-polygon. Aldri framstilt som måling i boligen |
-| Stormflo og havnivå | Kartverket | 20- og 200-årsnivå i dag, 200-årsnivå med havnivå 2100 | WFS med `Intersects` og `resulttype=hits`: ekte punkt-i-polygon på ~50 byte |
+| Stormflo og havnivå | Kartverket | 20- og 200-årsnivå i dag, 200-årsnivå med havnivå 2100 | WMS `wms.stormflo_havniva` — samme lag som «Se havnivå i kart» — ett `GetFeatureInfo` for alle lagene, i detaljmålestokk. Punkt i sjøen gir ingen uttalelse. [ADR 015](adr/015-publikumsprodukt-wms-og-kildefeil.md) |
 | Høyspent distribusjonsnett | NVE | Distribusjonsnett | For stort til synk |
 
 ### Grunntjenester
@@ -975,7 +983,7 @@ Ingen av dem blir «høy fare», «flomfarlig bolig» eller en samlet risikoscor
 | **Flom** | NVE `Flomsoner2` (lag 0 analyseområde, 13–22 sonene) og `Flomaktsomhet` (lag 1 sone, lag 2 dekning) | Flomsoner: utvalgte vassdrag. Aktsomhet: landsdekkende | Utenfor analyseområdet sier vi ingenting. Innenfor sier vi «utenfor kartlagt flomsone» — ikke «ingen flomfare» |
 | **Skred** | NVE `Skredfaresoner3` (lag 0 kartleggingsområde, 6–8 samlet, 10/14/18/22 per type), `JordFlomskredAktsomhet` **lag 1**, `SkredSnoSteinAkt` (lag 0 sone, lag 1 dekning) | Faresoner: utredede områder. Aktsomhet: landsdekkende | Ingen uttalelse. Flatt terreng gir ingen rader |
 | **Radon** | NGU WMS `RadonWMS2`, laget `Radon_aktsomhet` — tjenesten bak geo.ngu.no/kart/radon. Punktoppslag med `GetFeatureInfo` | Landsdekkende | Kartet dekker ikke punktet. Ikke at radon er utelukket |
-| **Stormflo** | Kartverket WFS `wfs.stormflo_havniva` | Kyst | Ingen uttalelse i innlandet |
+| **Stormflo** | Kartverket WMS `wms.stormflo_havniva` (lagene `stormflo20ar_klimaarna`, `stormflo200ar_klimaarna`, `stormflo200ar_klimaar2100`; port `stormfloovreestimat_klimaar2150`; sjø `middelhoyvann_klimaarna`). Til 2026-10-03: WFS `wfs.stormflo_havniva` | Kyst | Ingen uttalelse i innlandet, høyt over sjøen eller i sjøen |
 | **Kvikkleire** | Uendret: synkede soner + aktsomhetskart som direkte oppslag | Se over | Uendret |
 
 Alle fem er **NLOD**.
@@ -986,9 +994,10 @@ Alle fem er **NLOD**.
   — lavest gjentaksintervall — er hovedlinjen, resten står under «Detaljer».
 - **Skred:** 1/100, 1/1000 og 1/5000, som følger sikkerhetsklassene i byggteknisk forskrift.
 - **Stormflo:** 20- og 200-årsnivå med dagens havnivå, og 200-årsnivå med havnivå i 2100. 500-,
-  1000-års- og øvre-estimat-scenarioene vises **ikke** — de gjør ikke svaret mer brukbart, og hvert
-  scenario koster en forespørsel. `Middelhøyvann` er utelatt fordi det er normal vannstand, ikke en
-  hendelse.
+  1000-års- og øvre-estimat-scenarioene vises **ikke** — de gjør ikke svaret mer brukbart. Det
+  tilsvarer F1 og F2, «Nå» og «2100», i Kartverkets «Se havnivå i kart». `Middelhøyvann` vises ikke,
+  men brukes som sjø/land-kontroll: stormfloflatene dekker sjøen også, og et punkt innenfor dagens
+  middel høyvann får ingen stormflovurdering.
 
 #### Punkt-i-polygon, ikke nærhet
 
@@ -1007,6 +1016,12 @@ Begge ville passert en enhetstest, og begge er verdt å huske:
 2. **Kartverkets `Dekningsområde` dekker praktisk talt hele landet.** Brukt som port ga det «ikke
    berørt av kartlagte stormflonivåer» på Elverum og i Lillestrøm. Porten er nå det ytterste
    scenarioet kilden har (øvre estimat 2150): treffer ikke det, er adressen ikke i spill.
+
+3. **Stormflolagene svarer tomt i for grov målestokk.** Scenariolagene i WMS-en har
+   `MaxScaleDenominator` 80 000; et `GetFeatureInfo` med for stort utsnitt gir **tomt svar** også midt
+   i en oversvømt flate. Utsnittet er derfor ±0,00005° på 3×3 piksler (`lib/facts/lookups/wms.ts`).
+   Og svarblokken heter ikke alltid som laget vi spør etter (Avinor: `stoylufthavn_layer`, ikke
+   `stoylufthavn_wms_layer`) — en enhetstest med påfunnet svar fanget det ikke; nettverkstesten gjorde.
 
 `npm run qa:naturfare` kjører ti kjente adresser mot de ekte tjenestene og skriver ut hva hver av
 dem gir. For radon sammenlignes klassen mot NGUs publiserte kart, og skriptet avslutter med
@@ -1656,6 +1671,15 @@ timeout og fallback:
 | Databasefakta | 8 s | `features_near`, `features_count_near` |
 | Direkte oppslag | 12 s | NVE-aktsomhet, støy, distribusjonsnett |
 
+**Direkte oppslag caches per kilde** (`lib/facts/lookup-runner.ts`), fem minutter per punkt og radius.
+Feiler én kilde, caches de andre likevel, og neste besøk spør bare den som feilet. En kilde som nettopp
+feilet, får 30 sekunders pause per serverinstans: den rapporteres som «svarte ikke» med en gang i
+stedet for at hvert besøk venter på tidsavbruddet. **Bare et gyldig svar kan bety «ingen treff».**
+Tidsavbrudd, HTTP-feil, HTML-feilsider og WMS-unntak er kildefeil, og vises som «Disse kildene svarte
+ikke akkurat nå …» — aldri som fravær. Ingen kilde skjules automatisk. Målt 2026-10-03 med stormflo
+og flystøy nede: før 7,0–7,1 s per besøk, også varme; etter 0,1–0,4 s på varme besøk med null
+eksterne kall ([research](research/stormflo-flystoy-kildegjennomgang.md)).
+
 `withTimeout()` løser alltid med en fallback — den kaster aldri. Sidekomponenten venter ikke på noe;
 den lager tre løfter og sender dem til klienten, der `<Suspense>` og `use()` tar imot dem
 etter hvert.
@@ -2146,6 +2170,7 @@ npm run sync:status                                  # helsetilstand per provide
 npm run sync:dibk                                    # full DiBK-sync (-- --mode=incremental)
 npm run sync:area                                    # full sync av områdefakta
 npm run huts:elevation                               # lagre terrenghøyde for hytter som mangler den
+npm run lookups:check                                # sjekk de direkte oppslagskildene og lagre status for /admin
 npm run alerts:check                                 # vurder helse og send varsel (-- --dry-run)
 ```
 

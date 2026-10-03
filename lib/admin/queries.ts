@@ -40,8 +40,21 @@ export interface SchedulerStatus {
   minutesSinceLastRun: number | null;
 }
 
+/** Én rad fra lookup_source_status(): de direkte oppslagene på /omrade, sjekket av sync-jobben. */
+export interface LookupSourceStatus {
+  lookup_id: string;
+  name: string;
+  last_checked_at: string;
+  last_ok_at: string | null;
+  last_error_at: string | null;
+  last_error: string | null;
+  failing_since: string | null;
+  consecutive_failures: number;
+}
+
 export interface AdminOverview {
   health: ProviderHealth[];
+  lookups: LookupSourceStatus[];
   runs: SyncRunRow[];
   /** Siste manuelle forespørsler, gruppert per provider-id. */
   requests: Map<string, SyncRequestHistoryRow[]>;
@@ -63,11 +76,12 @@ function withMinutes(status: SchedulerStatus | null, now: Date): SchedulerStatus
  * Feiler én spørring, vises resten — admin skal ikke stå uten oversikt fordi én del er nede.
  */
 export async function loadAdminOverview(client: SupabaseClient, now = new Date()): Promise<AdminOverview> {
-  const [healthResult, runsResult, schedulerResult, requestsResult] = await Promise.all([
+  const [healthResult, runsResult, schedulerResult, requestsResult, lookupsResult] = await Promise.all([
     client.rpc("provider_health"),
     client.rpc("recent_sync_runs", { p_limit: 40 }),
     client.rpc("scheduler_status"),
     client.rpc("recent_sync_requests", { p_limit: 5 }),
+    client.rpc("lookup_source_status"),
   ]);
 
   const errors: string[] = [];
@@ -75,6 +89,7 @@ export async function loadAdminOverview(client: SupabaseClient, now = new Date()
   if (runsResult.error) errors.push(`recent_sync_runs: ${runsResult.error.message}`);
   if (schedulerResult.error) errors.push(`scheduler_status: ${schedulerResult.error.message}`);
   if (requestsResult.error) errors.push(`recent_sync_requests: ${requestsResult.error.message}`);
+  if (lookupsResult.error) errors.push(`lookup_source_status: ${lookupsResult.error.message}`);
 
   const requests = new Map<string, SyncRequestHistoryRow[]>();
   for (const rad of (requestsResult.data ?? []) as SyncRequestHistoryRow[]) {
@@ -85,6 +100,7 @@ export async function loadAdminOverview(client: SupabaseClient, now = new Date()
 
   return {
     health: assessAll((healthResult.data ?? []) as ProviderHealthRow[], now),
+    lookups: (lookupsResult.data ?? []) as LookupSourceStatus[],
     runs: (runsResult.data ?? []) as SyncRunRow[],
     requests,
     scheduler: withMinutes(((schedulerResult.data ?? []) as SchedulerStatus[])[0] ?? null, now),

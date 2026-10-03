@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { NveHoyspentDistribusjonLookup, NveKvikkleireAktsomhetLookup } from "@/lib/facts/lookups/nve";
+import { KartverketStormfloLookup } from "@/lib/facts/lookups/naturfare";
 import { FlystoyLookup, StoyvarselVegLookup, StrategiskStoyLookup } from "@/lib/facts/lookups/stoy";
 import { areaFeatureProviders } from "@/lib/providers/area-registry";
 
@@ -45,6 +46,23 @@ describe.skipIf(!enabled)("områdefakta – kilder (nettverk)", { timeout: 120_0
     expect(hits).toHaveLength(1);
     expect(["rod", "gul"]).toContain(hits[0]!.attributes.sone);
     expect(await new FlystoyLookup().run(MAJORSTUEN)).toEqual([]);
+  });
+
+  it("flystøy: lufthavnens navn, ikke ICAO-koden", async () => {
+    const [hit] = await new FlystoyLookup().run(GARDERMOEN);
+    expect(hit!.attributes.lufthavn).toBe("Oslo lufthavn, Gardermoen");
+  });
+
+  /** Punktene fra kildegjennomgangen 2026-10-03 (docs/research/stormflo-flystoy-kildegjennomgang.md). */
+  it("stormflo: lavt på land treffer, sjø og høyt gir ingenting", async () => {
+    const lavt = await new KartverketStormfloLookup().run({ lat: 59.9054, lng: 10.7548, radiusM: 1000 }); // Bjørvika, 0,7 m
+    expect(lavt).toHaveLength(1);
+    expect(lavt[0]!.attributes.gjentaksintervallAr).toBe(20);
+    const bryggen = await new KartverketStormfloLookup().run({ lat: 60.3976, lng: 5.3239, radiusM: 1000 }); // bare 2100
+    expect(bryggen[0]!.attributes).toMatchObject({ gjentaksintervallAr: null, framtidigGjentaksintervallAr: 200 });
+    expect(await new KartverketStormfloLookup().run({ lat: 60.3896, lng: 5.299, radiusM: 1000 })).toEqual([]); // i sjøen, Laksevåg
+    expect(await new KartverketStormfloLookup().run({ lat: 60.3942, lng: 5.3444, radiusM: 1000 })).toEqual([]); // Fløyen
+    expect(await new KartverketStormfloLookup().run(MAJORSTUEN)).toEqual([]);
   });
 
   it("høyspent distribusjonsnett: svarer, og gir avstand når linje finnes", async () => {

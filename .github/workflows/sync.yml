@@ -118,6 +118,14 @@ jobs:
         if: ${{ steps.config.outputs.configured == 'true' }}
         run: npm run alerts:check
 
+      # De direkte oppslagene på /omrade (flom, radon, stormflo, støy …) synkes ikke. Her spørres
+      # hver kilde én gang, og utfallet lagres for /admin. En kilde som er nede, skal aldri gjøre
+      # syncen rød — derfor continue-on-error.
+      - name: Oppslagskilder
+        if: ${{ steps.config.outputs.configured == 'true' }}
+        continue-on-error: true
+        run: npm run lookups:check
+
       # En ping som ikke kommer fram skal ikke gjøre en vellykket sync rød — da ville vi
       # sendt /fail for en kjøring som gikk bra. Blir pingen borte over tid, fanger
       # Healthchecks det opp med sin egen timeout.

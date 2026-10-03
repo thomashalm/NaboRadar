@@ -7,6 +7,7 @@ import {
   loadAdminOverview,
   type SchedulerStatus,
   type SyncRequestHistoryRow,
+  type LookupSourceStatus,
   type SyncRunRow,
 } from "@/lib/admin/queries";
 import { beskrivRequest, datoOgKlokke, feilErFortsattRelevant, trygtFeilutdrag } from "@/lib/sync/request-state";
@@ -66,7 +67,7 @@ export default async function AdminPage() {
     );
   }
 
-  const { health, runs, requests, scheduler, errors } = await loadAdminOverview(session.client);
+  const { health, lookups, runs, requests, scheduler, errors } = await loadAdminOverview(session.client);
   /*
    * Køtallet hentes i samme runde som driftsstatusen og feiler stille. Admin-navigasjonen skal
    * ikke bli treg, og et manglende tall er bedre enn en side som ikke laster.
@@ -125,6 +126,12 @@ export default async function AdminPage() {
 
       <h2 className="mt-12 text-lg font-semibold">Siste kjøringer</h2>
       <RunsTable runs={runs} />
+
+      <h2 className="mt-12 text-lg font-semibold">Direkte oppslag</h2>
+      <p className="mt-1 text-sm text-muted">
+        Kildene /omrade spør per søk. Sync-jobben sjekker hver av dem hvert 15. minutt mot et fast punkt.
+      </p>
+      <LookupTable lookups={lookups} />
 
       <h2 className="mt-12 text-lg font-semibold">Kilder uten tidsplan</h2>
       <p className="mt-1 text-sm text-muted">
@@ -315,6 +322,43 @@ function SchedulerCard({ scheduler }: { scheduler: SchedulerStatus | null }) {
         )}
       </div>
     </>
+  );
+}
+
+/** Status for de direkte oppslagene. Rødt bare når siste sjekk feilet. */
+function LookupTable({ lookups }: { lookups: LookupSourceStatus[] }) {
+  if (lookups.length === 0) return <p className="mt-3 text-sm text-muted">Ingen sjekker registrert ennå.</p>;
+  return (
+    <div className="mt-3 overflow-x-auto rounded-2xl border border-line bg-surface">
+      <table className="w-full text-left text-sm whitespace-nowrap">
+        <thead className="text-muted">
+          <tr>
+            <Th>Kilde</Th>
+            <Th>Status</Th>
+            <Th>Sist sjekket</Th>
+            <Th>Sist OK</Th>
+            <Th>Siste feil</Th>
+          </tr>
+        </thead>
+        <tbody>
+          {lookups.map((l) => (
+            <tr key={l.lookup_id} className="border-t border-line align-top">
+              <Td>
+                {l.name} <span className="font-mono text-xs text-muted">{l.lookup_id}</span>
+              </Td>
+              <Td className={l.failing_since ? "font-medium text-danger" : ""}>
+                {l.failing_since ? `Feiler siden ${dateTime(l.failing_since)} (${l.consecutive_failures} på rad)` : "OK"}
+              </Td>
+              <Td>{dateTime(l.last_checked_at)}</Td>
+              <Td>{dateTime(l.last_ok_at)}</Td>
+              <Td className="max-w-md whitespace-normal text-[13px] text-muted">
+                {l.last_error ? `${dateTime(l.last_error_at)} · ${l.last_error}` : "–"}
+              </Td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

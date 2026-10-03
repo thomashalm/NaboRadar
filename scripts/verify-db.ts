@@ -60,6 +60,8 @@ async function main() {
     "recent_sync_requests",
     "request_sync",
     "scheduler_status",
+    // Driftsobservasjon for de direkte oppslagene: admin-only, tom for alle andre.
+    "lookup_source_status",
     // Kontrollkøen for hytter: admin-only, med is_admin() inne i funksjonen.
     "hut_review_queue",
     "review_hut",

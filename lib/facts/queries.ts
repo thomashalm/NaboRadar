@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { TtlCache } from "@/lib/cache";
+import { createLookupRunner, type LookupResult } from "./lookup-runner";
 import { getDbMode, getReadDb } from "@/lib/db";
 import { formatDistance, formatRadius } from "@/lib/format";
 import {
@@ -13,7 +13,6 @@ import {
   type AreaSection,
 } from "@/types/area-feature";
 import { areaLookups } from "./lookups";
-import type { LookupHit } from "./lookups/types";
 import {
   ANLEGG_TYPE_LABEL,
   describeAnleggSummary,
@@ -183,15 +182,8 @@ export type AreaFactsResult =
 /** Intern markør for «denne kilden skal ikke hentes nå», så den ikke telles som en feil. */
 class SkipSource extends Error {}
 
-/** Direkte oppslag caches kort, slik at bytte av radius ikke gir nye kall mot kildene. */
-const lookupCache = new TtlCache<LookupResult[]>(5 * 60 * 1000, 200);
-const LOOKUP_BUDGET_MS = 8_000;
-
-interface LookupResult {
-  lookupId: string;
-  category: AreaCategory;
-  hits: LookupHit[];
-}
+/** Direkte oppslag: cache og pause per kilde (se lib/facts/lookup-runner.ts). */
+const lookupRunner = createLookupRunner(areaLookups);
 
 function distanceLabel(distanceM: number | null, contains: boolean): string {
   if (contains) return "Ved søkepunktet";
@@ -793,32 +785,7 @@ export function placeFacts(rows: FactRow[], radiusM: number, antallPerKategori: 
 }
 
 async function runLookups(lat: number, lng: number, radiusM: number): Promise<{ results: LookupResult[]; failed: string[] }> {
-  const key = `${lat.toFixed(4)},${lng.toFixed(4)},${radiusM}`;
-  const cached = lookupCache.get(key);
-  if (cached) return { results: cached, failed: [] };
-
-  const signal = AbortSignal.timeout(LOOKUP_BUDGET_MS);
-  const settled = await Promise.allSettled(
-    areaLookups.map(async (lookup) => ({
-      lookupId: lookup.id,
-      category: lookup.category,
-      hits: await lookup.run({ lat, lng, radiusM, signal }),
-    })),
-  );
-
-  const results: LookupResult[] = [];
-  const failed: string[] = [];
-  settled.forEach((outcome, index) => {
-    if (outcome.status === "fulfilled") results.push(outcome.value);
-    else {
-      const lookup = areaLookups[index]!;
-      failed.push(lookup.id);
-      console.warn(`[facts] ${lookup.id} svarte ikke: ${outcome.reason instanceof Error ? outcome.reason.name : "ukjent"}`);
-    }
-  });
-
-  // Bare komplette resultater caches.
-  if (failed.length === 0) lookupCache.set(key, results);
+  const { results, failed } = await lookupRunner.run(lat, lng, radiusM);
   return { results, failed };
 }
 

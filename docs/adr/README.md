@@ -33,6 +33,7 @@ ADR-er skrives ikke for spacing, tekststørrelse, små copy-endringer eller vanl
 | [012](012-hut-seo-and-crawlers.md) | Hytter i søk og AI-søk: indeksering, canonical, faktatekst, robots | Aktiv | 2026-10-03 |
 | [013](013-privacy-and-cookies.md) | Personvern og cookies: privat prosjekt, ingen samtykkebanner | Aktiv | 2026-10-03 |
 | [014](014-county-pages-and-sitemap.md) | Fylkessider som eneste landingsnivå for hytter; sitemap uten kunstig lastmod | Aktiv | 2026-10-03 |
+| [015](015-publikumsprodukt-wms-og-kildefeil.md) | Spør etter det etaten viser publikum (stormflo, flystøy); kildefeil er ikke «ingen treff»; delvis cache | Aktiv | 2026-10-03 |
 
 ## Mal
 

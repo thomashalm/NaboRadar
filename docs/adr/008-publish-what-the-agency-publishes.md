@@ -2,6 +2,9 @@
 
 **Status:** Aktiv · 2026-09-27 (radon), utvidet til en generell port 2026-10-02 (hytter). Nedtegnet 2026-10-03.
 
+> **2026-10-03:** Generalisert i [ADR 015](015-publikumsprodukt-wms-og-kildefeil.md) etter samme funn for
+> stormflo og flystøy: publikumskartene bruker WMS-er, ikke WFS-ene vi spurte.
+
 ## Bakgrunn
 **Radon.** NGU har to radonprodukter samtidig: det publiserte kartet (WMS `RadonWMS2`, lag
 `Radon_aktsomhet`, 2014-modellen, lenket fra ngu.no) og en nyere «versjon 2» (OGC API Features

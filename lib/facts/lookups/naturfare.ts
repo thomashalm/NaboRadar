@@ -1,6 +1,6 @@
 import { ArcgisClient } from "@/lib/providers/arcgis";
-import { fetchGml } from "@/lib/providers/gml";
 import type { AreaLookup, LookupContext, LookupHit } from "./types";
+import { wmsPunktoppslag } from "./wms";
 
 /**
  * Naturfare rundt en adresse: flom, skred, radon og stormflo.
@@ -34,7 +34,12 @@ const SKREDFARESONER = "https://kart.nve.no/enterprise/rest/services/Skredfareso
 /** Karttjenesten bak geo.ngu.no/kart/radon — det radonkartet NGU publiserer til publikum. */
 const RADON_WMS = "https://geo.ngu.no/mapserver/RadonWMS2";
 const RADON_LAG = "Radon_aktsomhet";
-const STORMFLO_WFS = "https://wfs.geonorge.no/skwms1/wfs.stormflo_havniva";
+/**
+ * WMS-en bak Kartverkets «Se havnivå i kart» (kartverket.no/til-sjos/se-havniva/kart). Fram til
+ * 2026-10-03 brukte vi WFS-en `wfs.stormflo_havniva`; se ADR 015 og
+ * docs/research/stormflo-flystoy-kildegjennomgang.md for hvorfor den ble byttet.
+ */
+const STORMFLO_WMS = "https://wms.geonorge.no/skwms1/wms.stormflo_havniva";
 
 /**
  * Flomsonelagene, ett per gjentaksintervall.
@@ -329,29 +334,33 @@ export class NguRadonLookup implements AreaLookup {
  *
  * Scenarioene er valgt for en boligkjøper, ikke for fullstendighet: 20 år (skjer ofte), 200 år
  * (nivået plan- og bygningsregelverket bruker for bolig) og 200 år med havnivå for 2100 (samme
- * hendelse senere i husets levetid). 500-, 1000-års og øvre-estimat-scenarioene utelates — de
- * gjør ikke svaret mer brukbart, og hvert scenario koster en forespørsel.
+ * hendelse senere i husets levetid) — sikkerhetsklasse F1 og F2 «Nå» og «2100» i Kartverkets
+ * publikumskart. 1000-års og øvre estimat vises ikke; øvre estimat for 2150 brukes bare som port.
  *
- * `Middelhøyvann` er bevisst ikke med: det er normal vannstand, ikke en hendelse.
- *
- * Teknisk: WFS med `Intersects`-filter og `resulttype=hits`. Det gir ekte punkt-i-polygon og et
- * svar på ~50 byte. Samme spørring med geometri ga 3,2 MB, som ikke hører hjemme i et adressesøk.
+ * Teknisk: ett `GetFeatureInfo`-kall mot WMS-en Kartverkets publikumskart bruker, med alle lagene
+ * samtidig, i detaljmålestokk (se ./wms.ts). Lagnavnene er WMS-ens, ikke WFS-ens.
  */
 const STORMFLO_SCENARIOER = [
-  { type: "Stormflo20År_KlimaÅrNå", ar: 20, klimaAr: null },
-  { type: "Stormflo200År_KlimaÅrNå", ar: 200, klimaAr: null },
-  { type: "Stormflo200År_KlimaÅr2100", ar: 200, klimaAr: 2100 },
+  { lag: "stormflo20ar_klimaarna", ar: 20, klimaAr: null },
+  { lag: "stormflo200ar_klimaarna", ar: 200, klimaAr: null },
+  { lag: "stormflo200ar_klimaar2100", ar: 200, klimaAr: 2100 },
 ] as const;
 
 /**
  * Det ytterste scenarioet kilden har, brukt som port for om adressen er i spill i det hele tatt.
  *
- * `Dekningsområde` viste seg å dekke praktisk talt hele landet: QA ga «ikke berørt av kartlagte
- * stormflonivåer» på Grünerløkka, i Lillestrøm og på Elverum, som er støy og ikke opplysning.
- * Treffer ikke øvre estimat for 2150 heller, ligger adressen for høyt eller for langt fra sjøen,
- * og da sier vi ingenting.
+ * `dekningsomrade` dekker praktisk talt hele landet (også Elverum), og svarer dessuten bare i
+ * oversiktsmålestokk. Treffer ikke øvre estimat for 2150 heller, ligger adressen for høyt eller
+ * for langt fra sjøen, og da sier vi ingenting.
  */
-const STORMFLO_YTTERSTE = "StormfloØvreEstimat_KlimaÅr2150";
+const STORMFLO_YTTERSTE = "stormfloovreestimat_klimaar2150";
+
+/**
+ * Sjøen innenfor dagens middel høyvann. Stormfloflatene dekker også sjøen, så et punkt ute i
+ * vannet treffer alle scenarier — også 20-års i dag. Det er ikke en landadresse som kan bli
+ * oversvømt, og da sier vi ingenting om stormflo.
+ */
+const STORMFLO_SJO = "middelhoyvann_klimaarna";
 
 export class KartverketStormfloLookup implements AreaLookup {
   readonly id = "kartverket-stormflo";
@@ -362,15 +371,24 @@ export class KartverketStormfloLookup implements AreaLookup {
   constructor(private readonly fetchImpl: typeof fetch = fetch) {}
 
   async run({ lat, lng, signal }: LookupContext): Promise<LookupHit[]> {
-    const [iSpill, ...scenarioer] = await Promise.all([
-      this.treff(STORMFLO_YTTERSTE, lat, lng, signal),
-      ...STORMFLO_SCENARIOER.map((s) => this.treff(s.type, lat, lng, signal)),
-    ]);
+    // Kaster ved feil og ugyldig svar: da er kilden nede, ikke adressen trygg.
+    const treff = await wmsPunktoppslag({
+      url: STORMFLO_WMS,
+      layers: [STORMFLO_SJO, STORMFLO_YTTERSTE, ...STORMFLO_SCENARIOER.map((s) => s.lag)],
+      crs: "CRS:84",
+      lat,
+      lng,
+      retry: LOOKUP_RETRY,
+      signal,
+      fetchImpl: this.fetchImpl,
+    });
 
+    // Punktet ligger i sjøen etter Kartverkets egen kystlinje.
+    if (treff.has(STORMFLO_SJO)) return [];
     // Ikke engang det ytterste scenarioet treffer: adressen er ikke i spill. Ingen uttalelse.
-    if (!iSpill) return [];
+    if (!treff.has(STORMFLO_YTTERSTE)) return [];
 
-    const berort = STORMFLO_SCENARIOER.filter((_, i) => scenarioer[i]);
+    const berort = STORMFLO_SCENARIOER.filter((s) => treff.has(s.lag));
     if (berort.length === 0) {
       return [
         {
@@ -399,30 +417,6 @@ export class KartverketStormfloLookup implements AreaLookup {
         contains: true,
       },
     ];
-  }
-
-  /** Ett `resulttype=hits`-kall: sant når punktet ligger i minst én flate av denne typen. */
-  private async treff(typeName: string, lat: number, lng: number, signal?: AbortSignal): Promise<boolean> {
-    const filter =
-      `<fes:Filter xmlns:fes="http://www.opengis.net/fes/2.0" xmlns:gml="http://www.opengis.net/gml/3.2">` +
-      `<fes:Intersects><fes:ValueReference>app:område</fes:ValueReference>` +
-      `<gml:Point srsName="urn:ogc:def:crs:EPSG::4326"><gml:pos>${lat} ${lng}</gml:pos></gml:Point>` +
-      `</fes:Intersects></fes:Filter>`;
-    const params = new URLSearchParams({
-      service: "WFS",
-      version: "2.0.0",
-      request: "GetFeature",
-      typeNames: `app:${typeName}`,
-      resulttype: "hits",
-      filter,
-    });
-    const xml = await fetchGml(`${STORMFLO_WFS}?${params.toString()}`, {
-      retry: { timeoutMs: LOOKUP_RETRY.timeoutMs, maxRetries: LOOKUP_RETRY.maxRetries, baseDelayMs: LOOKUP_RETRY.baseDelayMs },
-      signal,
-      fetchImpl: this.fetchImpl,
-    });
-    const match = /numberMatched="(\d+)"/.exec(xml);
-    return match !== null && Number(match[1]) > 0;
   }
 }
 

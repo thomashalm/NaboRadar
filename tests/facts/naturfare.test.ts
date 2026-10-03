@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  KartverketStormfloLookup,
   NguRadonLookup,
   NveFlomLookup,
   NveSkredLookup,
@@ -34,14 +33,6 @@ function arcgisFake(perService: Record<string, number[]>): typeof fetch {
 }
 
 /** Svar på WFS `resulttype=hits` for de typene testen vil ha treff i. */
-function wfsFake(treff: string[]): typeof fetch {
-  return (async (input: RequestInfo | URL) => {
-    const url = decodeURIComponent(String(input));
-    const antall = treff.some((t) => url.includes(`app:${t}`)) ? 1 : 0;
-    const xml = `<?xml version="1.0"?><wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0" numberMatched="${antall}" numberReturned="0"/>`;
-    return new Response(xml, { status: 200, headers: { "content-type": "application/xml" } });
-  }) as typeof fetch;
-}
 
 /**
  * Svarer som NGUs publikumskart: GetFeatureInfo med GML, der `aktsomhetgrad` er tallkoden som
@@ -259,34 +250,7 @@ describe("regresjon: Langmyrgrenda 26C", () => {
 });
 
 describe("stormflo", () => {
-  it("oppgir strengeste nivå i dag og det framtidige separat", async () => {
-    const hits = await new KartverketStormfloLookup(
-      wfsFake([
-        "StormfloØvreEstimat_KlimaÅr2150",
-        "Stormflo20År_KlimaÅrNå",
-        "Stormflo200År_KlimaÅrNå",
-        "Stormflo200År_KlimaÅr2100",
-      ]),
-    ).run(ctx);
-    expect(hits[0]!.subtype).toBe("stormflo");
-    expect(hits[0]!.attributes.gjentaksintervallAr).toBe(20);
-    expect(hits[0]!.attributes.framtidigGjentaksintervallAr).toBe(200);
-    expect(hits[0]!.attributes.framtidigAr).toBe(2100);
-  });
-
-  /**
-   * Regresjon: `Dekningsområde` dekker praktisk talt hele landet, så det kunne ikke brukes som
-   * port. QA ga «ikke berørt av kartlagte stormflonivåer» på Grünerløkka, i Lillestrøm og på
-   * Elverum. Porten er nå det ytterste scenarioet kilden har.
-   */
-  it("sier «ikke berørt» bare når adressen er i spill, og ingenting i innlandet", async () => {
-    const naerSjoen = await new KartverketStormfloLookup(wfsFake(["StormfloØvreEstimat_KlimaÅr2150"])).run(ctx);
-    expect(naerSjoen.map((h) => h.subtype)).toEqual(["stormflo_utenfor"]);
-    // Dekningsområde alene skal ikke utløse noe: det treffer også langt inne i landet.
-    const innlandet = await new KartverketStormfloLookup(wfsFake(["Dekningsområde"])).run(ctx);
-    expect(innlandet).toEqual([]);
-  });
-
+  // Oppslaget mot WMS-en er testet i tests/facts/stormflo-flystoy.test.ts. Her: ordlyden.
   it("sier ikke at eiendommen er trygg", () => {
     const tekst = describeFact({ subtype: "stormflo_utenfor", title: "", attributes: {}, contains: false })!;
     expect(tekst.headline).toBe("Ikke berørt av kartlagte stormflonivåer");
