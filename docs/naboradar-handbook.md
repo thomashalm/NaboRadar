@@ -1825,6 +1825,25 @@ hjemme i samme henvendelse til kommunen.
 Verifisert på ekte data: 0 av 36 776 `area_features` har felter som ligner personopplysninger, og
 0 av 3 139 dokumenter har blokkert type eller tittel.
 
+**Besøkende, cookies og personvernsiden.** NaboRadar er et privat, ikke-kommersielt prosjekt;
+behandlingsansvarlig er Thomas Halmø, kontakt `kontakt@naboradar.no` (`lib/site.ts`). Ingen
+foretak, ingen org.nr. og ingen adresse på siden. Gjennomgang 3. oktober 2026, i kode og mot
+produksjon:
+
+- Vanlige besøkende får ingen cookies, og `localStorage`/`sessionStorage` brukes ikke. Eneste
+  cookie er Supabase-innloggingen på `/admin`, som er strengt nødvendig. Derfor intet
+  samtykkebanner og ingen egen cookieside.
+- Ingen analyse, sporing, tredjepartsskript eller iframes. Skrift og MapLibre ligger på eget domene.
+- Nettleseren snakker bare med naboradar.no og `cache.kartverket.no` (kartfliser, ser IP-en).
+- Serveren sender søketekst til Kartverket og koordinater til Geonorge, NVE, NGU,
+  Miljødirektoratet og Statens vegvesen. Svar caches ti minutter i minnet.
+- Netlify har tekniske logger med IP og URL, inkludert `label` på `/omrade`. Netlify deltar i
+  EU-U.S. Data Privacy Framework.
+
+`/personvern` beskriver akkurat dette. Kommer det analyse, innbygd innhold, kontoer eller varsler
+for vanlige brukere, må både teksten og spørsmålet om samtykke vurderes på nytt. Bunnteksten
+(`components/SiteFooter.tsx`) ligger i rot-layouten og vises ikke på `/admin` og `/dev`.
+
 ---
 
 ## 25. Kjente begrensninger og akseptert risiko

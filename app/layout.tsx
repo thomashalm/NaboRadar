@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
+import { SiteFooter } from "@/components/SiteFooter";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "swap" });
@@ -43,7 +44,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="nb" className={geist.variable}>
-      <body className="min-h-dvh font-sans">{children}</body>
+      <body className="flex min-h-dvh flex-col font-sans">
+        {children}
+        <SiteFooter />
+      </body>
     </html>
   );
 }

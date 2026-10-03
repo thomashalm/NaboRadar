@@ -60,7 +60,7 @@ export const revalidate = 300;
 export default async function HomePage() {
   const visHytter = await hutsArePublic();
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex flex-1 flex-col">
       <script
         type="application/ld+json"
         // Ren, statisk JSON bygget av oss — ingen brukerdata inn hit.
@@ -143,10 +143,6 @@ export default async function HomePage() {
           </section>
         </div>
       </main>
-
-      <footer className="mx-auto w-full max-w-6xl px-5 py-6 text-xs text-muted sm:px-8">
-        Stedsdata og kart © Kartverket
-      </footer>
     </div>
   );
 }

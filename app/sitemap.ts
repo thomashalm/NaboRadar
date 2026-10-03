@@ -22,6 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: new URL("/", SITE_URL).toString(), lastModified: nå, changeFrequency: "weekly", priority: 1 },
     { url: new URL("/skolekrets", SITE_URL).toString(), lastModified: nå, changeFrequency: "monthly", priority: 0.8 },
     { url: new URL("/tilfluktsrom", SITE_URL).toString(), lastModified: nå, changeFrequency: "monthly", priority: 0.8 },
+    { url: new URL("/personvern", SITE_URL).toString(), changeFrequency: "yearly", priority: 0.2 },
     ...(hytter.length > 0
       ? [{ url: new URL("/hytter", SITE_URL).toString() }, ...hytter.map((hut) => ({ url: new URL(buildHutHref(hut), SITE_URL).toString() }))]
       : []),
