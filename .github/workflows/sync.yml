@@ -118,6 +118,14 @@ jobs:
         if: ${{ steps.config.outputs.configured == 'true' }}
         run: npm run alerts:check
 
+      # Tiltakstype og formål for nye eller endrede plansaker: leser planinitiativ og varsel fra
+      # DiBK og trekker ut én setning med faste tekstmønstre (lib/plans). Som regel er det ingenting
+      # å gjøre. En PDF som ikke lar seg lese skal aldri gjøre syncen rød — derfor continue-on-error.
+      - name: Plansaker
+        if: ${{ steps.config.outputs.configured == 'true' }}
+        continue-on-error: true
+        run: npm run plans:enrich -- --limit=60
+
       # De direkte oppslagene på /omrade (flom, radon, stormflo, støy …) synkes ikke. Her spørres
       # hver kilde én gang, og utfallet lagres for /admin. En kilde som er nede, skal aldri gjøre
       # syncen rød — derfor continue-on-error.

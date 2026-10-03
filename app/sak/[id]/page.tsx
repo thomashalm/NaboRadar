@@ -7,13 +7,14 @@ import { areaParamsSchema, buildAreaHref } from "@/lib/area-params";
 import {
   DOCUMENT_TYPE_LABELS,
   EVENT_DATE_LABELS,
-  EVENT_TYPE_LABELS,
   PROVIDER_SOURCE_NAMES,
   documentFormatLabel,
 } from "@/lib/events/labels";
 import { getEventDetail, type EventDetail } from "@/lib/events/queries";
 import { formatArea, formatDate, formatDistance } from "@/lib/format";
 import { getMapTileConfig } from "@/lib/map/config";
+import { formaalFor, tiltakLabel, tiltakstypeFor } from "@/lib/plans/visning";
+import { TILTAKSTYPE_LABELS } from "@/lib/plans/tiltakstype";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -92,7 +93,7 @@ export default async function EventPage({ params, searchParams }: Props) {
         {backHref && <BackLink href={backHref} label={backLabel} />}
 
         <header className="mt-6">
-          <p className="text-xs font-semibold tracking-[0.08em] text-plan uppercase">{EVENT_TYPE_LABELS[event.type]}</p>
+          <p className="text-xs font-semibold tracking-[0.08em] text-plan uppercase">{tiltakLabel(event)}</p>
           <h1 className="mt-2 text-[2rem] leading-tight font-semibold tracking-[-0.03em] text-balance [overflow-wrap:anywhere] sm:text-[2.5rem]">
             {event.title}
           </h1>
@@ -116,6 +117,7 @@ export default async function EventPage({ params, searchParams }: Props) {
           />
         </div>
 
+        <PurposeSection event={event} />
         <AboutSection event={event} contextLabel={context ? backLabel : null} />
         <DocumentsSection event={event} />
         <SourceSection event={event} />
@@ -132,12 +134,51 @@ function BackLink({ href, label }: { href: string; label: string }) {
   );
 }
 
+/**
+ * Formålet, ordrett fra saksdokumentet. Vises bare når synken fant en ren setning; ellers står
+ * tittelen alene, og dokumentene ligger lenger ned.
+ */
+function PurposeSection({ event }: { event: EventDetail }) {
+  const formaal = formaalFor(event);
+  if (!formaal) return null;
+  const dokument = event.documents.find((d) => d.externalId !== null && d.externalId === event.attributes.formaalDokumentId);
+  const kilde = DOCUMENT_TYPE_LABELS[event.attributes.formaalDokumenttype ?? ""]?.toLowerCase() ?? "saksdokumentene";
+  return (
+    <section aria-labelledby="purpose-heading" className="mt-12">
+      <h2 id="purpose-heading" className="text-xl font-semibold tracking-tight">
+        Formål
+      </h2>
+      <blockquote className="mt-4 border-l-2 border-plan pl-4 text-[17px] leading-relaxed text-ink [overflow-wrap:anywhere]">
+        «{formaal}»
+      </blockquote>
+      <p className="mt-3 text-[13px] leading-relaxed text-muted">
+        Sitert fra{" "}
+        {dokument ? (
+          <a href={dokument.url} target="_blank" rel="noopener noreferrer" className="font-medium text-accent hover:underline">
+            {kilde}
+            <span className="sr-only"> (åpnes hos kilden i ny fane)</span>
+          </a>
+        ) : (
+          kilde
+        )}
+        , hentet ut med faste tekstmønstre. Tall og mengder er utelatt og markert med […]. Vi vet ikke om planen senere er
+        vedtatt, endret eller lagt bort.
+      </p>
+    </section>
+  );
+}
+
 function AboutSection({ event, contextLabel }: { event: EventDetail; contextLabel: string | null }) {
   const rows: [string, string][] = [];
   if (event.distanceM !== null && contextLabel) {
     rows.push([`Avstand fra ${contextLabel}`, event.distanceM < 1 ? "Omfatter stedet" : formatDistance(event.distanceM).replace(" unna", "")]);
   }
+  // Typen står som merkelapp øverst. Her sies det hva den bygger på, når den finnes.
+  const tiltak = tiltakstypeFor(event);
+  if (tiltak !== "annet") rows.push(["Tiltakstype", `${TILTAKSTYPE_LABELS[tiltak]} (lest av tittel og formål)`]);
   if (event.attributes.plantype) rows.push(["Plantype", event.attributes.plantype]);
+  const planId = event.attributes.planId?.trim();
+  if (planId && /[0-9a-z]/i.test(planId)) rows.push(["Plan-ID", planId]);
   if (event.municipalityName || event.municipalityNumber) {
     rows.push(["Kommunenummer", [event.municipalityNumber, event.municipalityName].filter(Boolean).join(" · ")]);
   }
@@ -166,8 +207,8 @@ function AboutSection({ event, contextLabel }: { event: EventDetail; contextLabe
         ))}
       </dl>
       <p className="mt-3 text-[13px] leading-relaxed text-muted">
-        Beregnet planområde er regnet ut av NaboRadar fra kartgrensen, og er ikke et offisielt oppgitt areal. Kilden oppgir
-        ikke om planarbeidet fortsatt pågår.
+        Beregnet planområde er regnet ut av NaboRadar fra kartgrensen, og er ikke et offisielt oppgitt areal. Kilden har
+        bare varselet om oppstart: vi vet ikke om planen senere er vedtatt, endret eller lagt bort.
       </p>
     </section>
   );

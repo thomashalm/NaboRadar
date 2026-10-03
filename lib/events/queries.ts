@@ -2,6 +2,7 @@ import { z } from "zod";
 import { getDbMode, getReadDb } from "@/lib/db";
 import { DEFAULT_ANNOUNCED_WITHIN_MONTHS } from "@/lib/geo/constants";
 import type { EventDocumentView } from "@/types/document";
+import { sorterEtterRelevans } from "@/lib/plans/visning";
 import type { AreaEvent, AreaSort } from "@/types/event";
 import { EVENT_TYPES } from "@/types/event";
 
@@ -154,7 +155,9 @@ export async function getAreaEvents(params: {
       }),
       db.rpc<{ provider_id: string; last_success_at: string | null }>("data_status"),
     ]);
-    const events = mergeRepeatedAnnouncements(z.array(areaRowSchema).parse(rows).map(toAreaEvent));
+    const sammenslått = mergeRepeatedAnnouncements(z.array(areaRowSchema).parse(rows).map(toAreaEvent));
+    // Standardrekkefølgen er relevans (lib/plans/visning.ts). «Nyeste» er databasens rekkefølge.
+    const events = params.sort === "newest" ? sammenslått : sorterEtterRelevans(sammenslått);
     const dataUpdatedAt =
       status.map((s) => s.last_success_at).filter((d): d is string => d !== null).sort().at(-1) ?? null;
     return { status: "ok", events, announcedSince, dataUpdatedAt };
@@ -165,6 +168,8 @@ export async function getAreaEvents(params: {
 
 const documentSchema = z.object({
   id: z.string(),
+  // Kildens dokument-ID. Mangler i svar fra en database som ikke er migrert ennå.
+  external_id: z.string().optional(),
   type: z.string(),
   title: z.string(),
   url: z.string(),
@@ -223,6 +228,7 @@ export async function getEventDetail(
         municipalityName: row.municipality_name,
         documents: row.documents.map((d) => ({
           id: d.id,
+          externalId: d.external_id ?? null,
           type: d.type,
           title: d.title,
           url: d.url,

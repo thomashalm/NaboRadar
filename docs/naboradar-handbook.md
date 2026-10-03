@@ -840,7 +840,7 @@ testdetaljer og eksempelresponser.
 
 | Kilde | Leverandør | Brukes til | Geometri | Rader | Lisens | Begrensninger |
 |---|---|---|---|---|---|---|
-| Planlegging igangsatt | DiBK | Varslede planoppstarter | Polygon/multipolygon | 1 552 events, 3 139 dokumenter | NLOD 2.0 | Ingen formål, status eller sluttdato i kilden. Kun kommunenummer, ikke navn |
+| Planlegging igangsatt | DiBK | Varslede planoppstarter | Polygon/multipolygon | 1 563 events, 5 633 dokumenter (2026-10-03) | NLOD 2.0 | Ingen formål, status eller sluttdato i kilden. Kun kommunenummer, ikke navn |
 | Forurenset grunn | Miljødirektoratet | Registrerte lokaliteter | Polygon | 15 943 | NLOD 2.0 | **Internt fra 2026-10-03**, vises bare i admin. Påvirkningsgrad er myndighetens vurdering, ikke en måling |
 | Industri med utslippstillatelse | Miljødirektoratet | Industri- og avfallsanlegg | Punkt | 866 | NLOD 1.0 | Kun anlegg med tillatelse. Ikke hovedkontorer |
 | Kartlagte kvikkleiresoner | NVE | Undersøkte soner | Polygon | 4 873 | NLOD 1.0 | Generalisert til ~1 m ved henting; største sone har 125 000 hjørner |
@@ -955,7 +955,40 @@ Hele poenget er at NaboRadar ikke skal si mer enn kilden gjør.
 ### Planer
 
 - **Planoppstart ≠ aktiv plan.** Kilden har verken status eller sluttdato, så vi sier bare
-  «Planoppstart varslet …» og antyder aldri at arbeidet pågår.
+  «Varslet …» og antyder aldri at arbeidet pågår. Forbeholdet står én gang over lista: «Vi vet ikke
+  om planene senere er vedtatt, endret eller lagt bort.» Ordet «aktiv» brukes ikke.
+- **Dekning:** bare varsler fra private forslagsstillere (foretak og privatpersoner), fra mai 2024.
+  Kommunale og statlige planer er ikke komplett dekket. Vedtatte planer og byggesaker er ikke med.
+  Tom tilstand sier derfor «Ingen varslede planoppstarter fra private forslagsstillere innen …», og
+  «Kilde og metode» sier at manglende treff ikke betyr at ingenting planlegges.
+- **Tiltakstype og formål** (Planer og saker v2, trinn 1, [ADR 016](adr/016-plansaker-deterministisk-uttrekk-og-relevans.md)):
+  - Synken henter dokumenttypene `ref-data-as-pdf`, `PlanomraadePdf`, `ReferatOppstartsmoete`,
+    `Planinitiativ` og `Planvarsel`. Andre typer («Annet», «Planprogram», kart i SOSI/GML) er ikke
+    vurdert og hentes ikke. Berørte parter hentes aldri.
+  - `npm run plans:enrich` (steget «Plansaker» i sync-jobben) leser tekstlaget i PDF-ene og lagrer
+    resultatet i `event_enrichment`. Dokumentteksten lagres aldri. Reglene har versjonsnummer
+    (`PLAN_PARSER_VERSION`); endres det, leses alle saker på nytt.
+  - **Formålet** er én setning, ordrett fra dokumentet, i denne rekkefølgen:
+    1. en eksplisitt formålssetning i skjemafeltet «Hensikten med planarbeidet» i varselet,
+    2. en eksplisitt formålssetning i planinitiativet,
+    3. en eksplisitt formålssetning i varselet, deretter i referatet fra oppstartsmøtet,
+    4. første setning i skjemafeltet, som den står.
+
+    Kuttede setninger, innholdsløse setninger («i tråd med overordnet plan», «se vedlegg») og
+    tekstlag med tapte ligaturer forkastes. Finnes ingen ren setning, vises ingenting i stedet.
+  - **Tall fra fri tekst vises ikke.** Mengder i sitatet erstattes med «[…]». Gnr/bnr, husnummer,
+    vegnummer og årstall blir stående. Ingen uttrekk av antall boliger, etasjer, BRA, høyder eller
+    parkeringsplasser.
+  - **Tiltakstypen** kommer fra en ordliste (`lib/plans/tiltakstype.ts`): tittelen først, så
+    formålets hovedledd. Gateadresser er ikke signaler. Peker signalene to veier, blir typen
+    «Planarbeid». En mindre endring av en gjeldende plan vises som «Planendring».
+  - **Rekkefølgen** («Mest relevant») er en regel, ikke en poengsum (`lib/plans/visning.ts`):
+    1. stedet ligger i planområdet, eller et nytt planarbeid har kant innen 300 m,
+    2. øvrige saker,
+    3. planendringer mer enn 500 m unna.
+
+    Innenfor hver gruppe: avstand i trinn på 100 m, kjent tiltakstype før ukjent, større planområde
+    før mindre, nyeste først.
 - Gjentatte varsler for samme plan slås sammen på `kommunenummer:planId`, men **kun når planId
   faktisk inneholder et tegn** (`/[0-9a-z]/i`). Kilden bruker `-` som plassholder, og uten den
   sjekken ble ubeslektede saker slått sammen.
@@ -1837,8 +1870,8 @@ Alle seksjoner følger samme form:
   de radene som faktisk kan velges. Mekanismen ligger i `components/area/map-selection.tsx` som en
   liten kontekst, og er **generell**: den gjelder alle grupper, ikke én type. Rader uten
   kartobjekt er ikke klikkbare og får ingen markør
-- **Tomtilstander er én linje.** «Ingen varslede planoppstarter innen 500 m siste 24 måneder ·
-  Se 3 km» — ikke en stor stiplet boks. Forbeholdet om at kilden ikke sier om planarbeidet pågår
+- **Tomtilstander er én linje.** «Ingen varslede planoppstarter fra private forslagsstillere innen
+  500 m siste 24 måneder · Se 3 km» — ikke en stor stiplet boks. Forbeholdet om at kilden ikke sier om planarbeidet pågår
   vises bare når det finnes en sak å ta forbehold om
 - **Maks to linjer før brukeren må åpne.** Støy vises som «Støy fra veitrafikk · Lden 65–69 dB» /
   «Ved søkepunktet · modellberegnet, ikke målt ved boligen»; kortene bak utvideren har dB-nivået
@@ -2017,7 +2050,8 @@ Ting vi vet om og bevisst ikke har løst nå.
 | **Fem skolekretser mangler organisasjonsnummer** | Manglerud, Munkerud, Nordseter, Rosenholm og Vestli finnes ikke i Geonorge-laget vi synker skoler fra. Da viser vi navnet uten kobling |
 | **Omsorgstilbud dekker i hovedsak Oslo** | Bygget på kommunens egen publisering. Helsenorge gir nasjonal dekning for spesialisthelsetjeneste, men ikke for kommunale sykehjem, omsorgsboliger og bofellesskap. Ingen nasjonal kilde finnes, og Enhetsregisteret skal ikke brukes til formålet — se seksjon 23 |
 | **Sykehus og omsorgstilbud er kuraterte filer** | Reverifiseres med scripts, ikke live-synk |
-| **DiBK mangler formål, status og sluttdato** | Vi viser bare at oppstart er varslet |
+| **DiBK mangler formål, status og sluttdato som felt** | Formålet siteres fra dokumentene der det lar seg trekke ut (rundt to av tre saker). Status etter varselet er ukjent, og det sier vi |
+| **DiBK har bare varsler fra private forslagsstillere, fra mai 2024** | Tom tilstand og «Kilde og metode» sier det. Kommunale og statlige planer mangler |
 | **DiBK gir kommunenummer, ikke navn** | Detaljsiden viser nummeret |
 | **Inkrementell DiBK-sync fanger ikke planer med `oppdateringsdato = null`** | Nattlig full sync dekker det |
 | **Kvikkleiregeometri generalisert til ~1 m** | Største sone har 125 000 hjørner |
@@ -2217,6 +2251,7 @@ npm run sync:dibk                                    # full DiBK-sync (-- --mode
 npm run sync:area                                    # full sync av områdefakta
 npm run huts:elevation                               # lagre terrenghøyde for hytter som mangler den
 npm run lookups:check                                # sjekk de direkte oppslagskildene og lagre status for /admin
+npm run plans:enrich                                 # les planinitiativ og varsel for nye plansaker (tiltakstype og formål)
 npm run alerts:check                                 # vurder helse og send varsel (-- --dry-run)
 ```
 

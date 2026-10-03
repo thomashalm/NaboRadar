@@ -40,7 +40,9 @@ describe("DibkPlanningStartedProvider.fetch — full", () => {
     await collect(new DibkPlanningStartedProvider(fetchImpl, TEST_RETRY), { mode: "full" });
     const docRequests = requests.filter((u) => u.pathname.endsWith("plandokument/items"));
     expect(docRequests.map((u) => u.searchParams.get("dokumenttype")).sort()).toEqual([
+      "Planinitiativ",
       "PlanomraadePdf",
+      "Planvarsel",
       "ReferatOppstartsmoete",
       "ref-data-as-pdf",
     ]);

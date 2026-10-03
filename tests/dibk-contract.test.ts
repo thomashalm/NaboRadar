@@ -42,6 +42,15 @@ describe("dokument-allowlist", () => {
     expect(isAllowedDocument({ ...pdf, dokumenttype: "ref-data-as-pdf" })).toBe(true);
     expect(isAllowedDocument({ ...pdf, dokumenttype: "PlanomraadePdf" })).toBe(true);
     expect(isAllowedDocument({ ...pdf, dokumenttype: "ReferatOppstartsmoete" })).toBe(true);
+    // Lagt til for Planer og saker v2: dokumentene som sier hva saken gjelder.
+    expect(isAllowedDocument({ ...pdf, dokumenttype: "Planinitiativ" })).toBe(true);
+    expect(isAllowedDocument({ ...pdf, dokumenttype: "Planvarsel" })).toBe(true);
+  });
+
+  it("blokkerer typer som ikke er vurdert, også sammensatte", () => {
+    for (const dokumenttype of ["Annet", "Planprogram", "PlanomraadeSosi", "Annet,Planinitiativ", "KartDetaljert"]) {
+      expect(isAllowedDocument({ ...pdf, dokumenttype }), dokumenttype).toBe(false);
+    }
   });
 
   it("blokkerer berørte parter slik den faktisk ser ut i kilden", () => {

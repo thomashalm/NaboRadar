@@ -32,6 +32,8 @@ interface EventFeedProps {
 }
 
 const MONTHS = DEFAULT_ANNOUNCED_WITHIN_MONTHS;
+/** Kilden har bare varselet. Hva som skjedde etterpå, står ikke der. */
+export const STATUS_FORBEHOLD = "Vi vet ikke om planene senere er vedtatt, endret eller lagt bort.";
 /** Hvor mange saker som vises når gruppen åpnes. Resten ligger bak «Se alle saker». */
 const PREVIEW = 3;
 
@@ -99,8 +101,10 @@ function EventFeedBody(props: EventFeedProps) {
         ) : result.events.length === 0 ? (
           // Ingenting å vise er ikke et funn, og skal ikke ta plass som ett. Én linje, med
           // veien videre på samme linje.
+          // Sier nøyaktig hva som er kontrollert. «Ingen planer» ville vært feil: kilden har bare
+          // varsler fra private forslagsstillere. Resten står i «Kilde og metode».
           <p className="text-[15px] leading-relaxed text-muted">
-            Ingen varslede planoppstarter innen {formatRadius(radius)} siste {MONTHS} måneder
+            Ingen varslede planoppstarter fra private forslagsstillere innen {formatRadius(radius)} siste {MONTHS} måneder
             {radius < 3000 && (
               <>
                 {" · "}
@@ -132,6 +136,8 @@ function EventFeedBody(props: EventFeedProps) {
             </summary>
 
             <div className="px-5 pb-4">
+              {/* Én gang for hele lista, ikke på hvert kort. */}
+              <p className="text-[13px] leading-relaxed text-muted">{STATUS_FORBEHOLD}</p>
               {result.events.length > 1 && (
                 <div className="mb-3 flex justify-end">
                   <SortToggle sort={sort} hrefForSort={hrefForSort} onNavigate={onNavigate} />
@@ -177,11 +183,24 @@ function EventFeedBody(props: EventFeedProps) {
           <summary className="cursor-pointer text-[13px] font-medium text-muted hover:text-ink">
             Kilde og metode
           </summary>
-          <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
-            Kilde: Direktoratet for byggkvalitet (NLOD 2.0). Sist hentet {formatDate(result.dataUpdatedAt)}.
-            {result.events.length > 0 &&
-              " Kilden oppgir ikke om planarbeidet fortsatt pågår — datoen viser når oppstart ble varslet."}
-          </p>
+          <div className="mt-1.5 flex flex-col gap-1.5 text-[13px] leading-relaxed text-muted">
+            <p>
+              Kilde: Direktoratet for byggkvalitet, «Planlegging igangsatt» (NLOD 2.0). Sist hentet{" "}
+              {formatDate(result.dataUpdatedAt)}.
+            </p>
+            <p>
+              Kilden har varsler om planoppstart fra private forslagsstillere, fra mai 2024. Kommunale og statlige planer
+              er ikke komplett dekket, og vedtatte planer og byggesaker er ikke med. At vi ikke finner noe, betyr derfor
+              ikke at ingenting planlegges.
+            </p>
+            {result.events.length > 0 && (
+              <p>
+                Tiltakstypen er lest av sakens tittel og formål med faste regler. Formålet er sitert ordrett fra
+                planinitiativet eller varselet; tall og mengder er utelatt og markert med […]. Sakene er sortert etter
+                om stedet ligger i planområdet, avstand, type tiltak, planområdets størrelse og dato.
+              </p>
+            )}
+          </div>
         </details>
       )}
     </>
@@ -249,7 +268,8 @@ function SortToggle({
   onNavigate: (href: string) => void;
 }) {
   const options: { value: AreaSort; label: string }[] = [
-    { value: "distance", label: "Nærmest" },
+    // «distance» er relevansrekkefølgen: i planområdet og nærmest først (lib/plans/visning.ts).
+    { value: "distance", label: "Mest relevant" },
     { value: "newest", label: "Nyeste" },
   ];
   return (

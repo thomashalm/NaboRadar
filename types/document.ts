@@ -19,5 +19,7 @@ export interface EventDocument extends NormalizedDocument {
   eventId: string;
 }
 
-/** Dokument slik detaljsiden viser det (uten externalId). */
-export type EventDocumentView = Pick<EventDocument, "id" | "type" | "title" | "url" | "mimeType" | "documentDate">;
+/** Dokument slik detaljsiden viser det. `externalId` brukes til å peke ut dokumentet formålet er sitert fra. */
+export type EventDocumentView = Pick<EventDocument, "id" | "type" | "title" | "url" | "mimeType" | "documentDate"> & {
+  externalId: string | null;
+};

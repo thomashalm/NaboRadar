@@ -23,6 +23,7 @@
     "sync:status": "tsx scripts/sync-status.ts",
     "alerts:check": "tsx scripts/alert-check.ts",
     "lookups:check": "tsx scripts/lookup-check.ts",
+    "plans:enrich": "tsx scripts/enrich-plans.ts",
     "research:seed": "tsx scripts/seed-research.ts",
     "review:backfill": "tsx scripts/research-review-backfill.ts",
     "fix:dsb-identitet": "tsx scripts/fix-dsb-identity.ts",
@@ -57,6 +58,7 @@
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
+    "unpdf": "^1.8.1",
     "vitest": "^5.0.1",
     "yaml": "^2.9.1"
   },

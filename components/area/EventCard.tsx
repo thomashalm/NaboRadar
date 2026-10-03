@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { forwardRef } from "react";
-import { EVENT_CARD_DATE_LABELS, EVENT_TYPE_LABELS } from "@/lib/events/labels";
-import { formatArea, formatDate, formatDistance } from "@/lib/format";
+import { EVENT_CARD_DATE_LABELS } from "@/lib/events/labels";
+import { formatDate, formatDistance } from "@/lib/format";
+import { kortFormaal } from "@/lib/plans/formaal";
+import { formaalFor, tiltakLabel } from "@/lib/plans/visning";
 import type { AreaEvent } from "@/types/event";
 
 interface EventCardProps {
@@ -12,15 +14,19 @@ interface EventCardProps {
 }
 
 /**
- * Viser kun det kilden faktisk sier: navn, type, dato, plantype — pluss avstand og
- * areal vi har beregnet selv (merket som beregnet). Ingen tolkning av hva som skal bygges.
+ * Ett kort per plansak: hva slags tiltak, tittelen, formålet slik dokumentene sier det, og
+ * avstand og dato på én linje.
+ *
+ * Tiltakstypen og formålet er trukket ut under synk med faste regler (lib/plans). Formålet er et
+ * sitat. Finnes det ikke, står tittelen alene: vi skriver ikke en erstatning. Tall fra fri tekst
+ * vises ikke. Plantype, planområdets størrelse og dokumentene ligger på sakssiden.
  */
 export const EventCard = forwardRef<HTMLElement, EventCardProps>(function EventCard(
   { event, href, selected, onSelect },
   ref,
 ) {
   const date = formatDate(event.announcedAt);
-  const plantype = event.attributes.plantype;
+  const formaal = formaalFor(event);
   return (
     <article
       ref={ref}
@@ -29,12 +35,7 @@ export const EventCard = forwardRef<HTMLElement, EventCardProps>(function EventC
         selected ? "border-plan shadow-float ring-1 ring-plan" : "border-line hover:border-line-strong"
       }`}
     >
-      <div className="flex items-baseline justify-between gap-3">
-        <span className="text-xs font-semibold tracking-[0.08em] text-plan uppercase">
-          {EVENT_TYPE_LABELS[event.type]}
-        </span>
-        <span className="shrink-0 text-sm text-muted">{formatDistance(event.distanceM)}</span>
-      </div>
+      <span className="text-xs font-semibold tracking-[0.08em] text-plan uppercase">{tiltakLabel(event)}</span>
       {/* H4: kortet står under seksjonsoverskriften «Planer og saker» (H3). */}
       <h4 className="mt-1.5 text-[17px] leading-snug font-semibold tracking-tight text-ink">
         <button
@@ -49,18 +50,17 @@ export const EventCard = forwardRef<HTMLElement, EventCardProps>(function EventC
           {event.title}
         </button>
       </h4>
-      {date && (
-        <p className="mt-1 text-[15px] text-muted">
-          {EVENT_CARD_DATE_LABELS[event.type]} {date}
+      {formaal && (
+        // Ordrett fra saksdokumentet. Anførselstegnene sier at dette er kildens ord, ikke våre.
+        <p className="mt-1 text-[15px] leading-snug text-ink [overflow-wrap:anywhere]">
+          <span className="text-muted">Formål: </span>«{kortFormaal(formaal)}»
         </p>
       )}
-      {(plantype || event.computedAreaM2) && (
-        <p className="mt-0.5 text-[15px] text-muted">
-          {[plantype, event.computedAreaM2 ? `Beregnet planområde: ${formatArea(event.computedAreaM2)}` : null]
-            .filter(Boolean)
-            .join(" · ")}
-        </p>
-      )}
+      <p className="mt-1 text-[15px] text-muted">
+        {[formatDistance(event.distanceM), date ? `${EVENT_CARD_DATE_LABELS[event.type]} ${date}` : null]
+          .filter(Boolean)
+          .join(" · ")}
+      </p>
       {event.earlier && event.earlier.count > 0 && (
         // Samme plan er varslet flere ganger. Vi viser det nyeste varselet og sier fra om resten.
         <p className="mt-1 text-[13px] text-muted">

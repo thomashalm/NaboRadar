@@ -34,6 +34,8 @@ export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   "ref-data-as-pdf": "Varsel om oppstart av planarbeid",
   PlanomraadePdf: "Kart over planområdet",
   ReferatOppstartsmoete: "Referat fra oppstartsmøte",
+  Planinitiativ: "Planinitiativ",
+  Planvarsel: "Varsel om oppstart",
 };
 
 export function documentFormatLabel(mimeType: string | null): string | null {

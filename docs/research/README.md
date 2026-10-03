@@ -42,6 +42,8 @@ publisert 2026-10-02 ([ADR 009](../adr/009-public-admin-security-model.md)).
 ### Eiendom og områdedata
 | Fil | Dato | Kort |
 |---|---|---|
+| [planer-og-saker-v2.md](planer-og-saker-v2.md) | 2026-10-03 | Planer og saker: kilder, livssyklus og test av 74 saker. Trinn 1 bygget samme dag ([ADR 016](../adr/016-plansaker-deterministisk-uttrekk-og-relevans.md)): formål i 60 %, tiltakstype i 56 % av 1 563 saker |
+| [dibk-henvendelse-utkast.md](dibk-henvendelse-utkast.md) | 2026-10-03 | Utkast til e-post til DiBK om Nasjonal planbase, høringstjenester og Oslo-dekning. Ikke sendt |
 | [stormflo-flystoy-kildegjennomgang.md](stormflo-flystoy-kildegjennomgang.md) | 2026-10-03 | WFS-ene for stormflo og flystøy nede (Geonorge-bakmaskiner); etatenes publikumskart, semantikk og QA mot dem. Byttet til WMS samme dag ([ADR 015](../adr/015-publikumsprodukt-wms-og-kildefeil.md)) |
 | [eiendomshistorikk-feasibility.md](eiendomshistorikk-feasibility.md) | 2026-09-27 | Byggesakshistorikk per eiendom. Ren research |
 | [eiendomskort.md](eiendomskort.md) | 2026-10-03 | Eiendomskort: åpne felt, juss for byggeår/BRA/salg, QA av 49 adresser, DB-måling av nasjonal adresse → bygning (46–1 306 MB). **Kortet er ikke bygget, avventer.** Samme dag rettet: bygningstyper fra SSB KLASS 31 og eiendomskartet flyttet fra WFS til Eiendom-API + WMS |
