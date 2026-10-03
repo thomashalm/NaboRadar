@@ -44,6 +44,10 @@ const DEKKER = [
   ["Støy", "Beregnede støysoner fra veg, fly og strategisk støykartlegging."],
   ["Infrastruktur", "Transformatorstasjoner og kraftledninger fra NVE."],
   ["Nærområdet", "Skoler, barnehager, sykehus, omsorgstilbud, industri og steder med skjenkebevilling."],
+  // De to under sto tidligere som egne seksjoner med hver sin lenke. Lenkene ligger nå i «Utforsk
+  // mer»; her står bare det områdesiden faktisk viser.
+  ["Skolekrets i Oslo", "Hvilket veiledende inntaksområde for barneskole en adresse i Oslo ligger i."],
+  ["Tilfluktsrom", "Offentlige tilfluktsrom i nærheten, med avstand og antall plasser, fra Sivilforsvarets data."],
 ] as const;
 
 /** Siste rad i «Hva NaboRadar viser». Står bare når hyttekategorien er publisert. */
@@ -130,33 +134,6 @@ export default async function HomePage() {
                 </div>
               ))}
             </dl>
-          </section>
-
-          <section className="mt-12" aria-labelledby="skolekrets">
-            <h2 id="skolekrets" className="text-xl font-semibold tracking-[-0.02em]">
-              Skolekrets i Oslo
-            </h2>
-            <p className="mt-3 leading-relaxed text-muted">
-              For adresser i Oslo viser vi også hvilket veiledende inntaksområde for barneskole adressen ligger i.{" "}
-              <Link href="/skolekrets" className="text-accent hover:underline">
-                Finn hvilken skole adressen tilhører
-              </Link>
-              .
-            </p>
-          </section>
-
-          <section className="mt-12" aria-labelledby="tilfluktsrom">
-            <h2 id="tilfluktsrom" className="text-xl font-semibold tracking-[-0.02em]">
-              Offentlige tilfluktsrom
-            </h2>
-            <p className="mt-3 leading-relaxed text-muted">
-              Vi viser også de offentlige tilfluktsrommene i nærheten, med avstand og antall plasser, fra
-              Sivilforsvarets egne data.{" "}
-              <Link href="/tilfluktsrom" className="text-accent hover:underline">
-                Finn offentlige tilfluktsrom nær en adresse
-              </Link>
-              .
-            </p>
           </section>
         </div>
       </main>
