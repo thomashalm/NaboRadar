@@ -87,16 +87,31 @@ export default async function HomePage() {
 
           <p className="mt-6 text-sm text-muted">Offentlige data. Forklart enkelt.</p>
 
-          {/* En sekundær inngang. Adressesøket over er fortsatt det siden handler om. Polstringen
-              gir en trykkflate på rundt 44 px uten at lenken ser større ut; den negative margen
-              holder avstanden til slagordet på omtrent 20 px. */}
-          {visHytter && (
-            <p className="mt-2 text-[15px]">
-              <Link href="/hytter" className="inline-block py-3 text-accent hover:underline">
-                Se hytter og koier i hele Norge →
-              </Link>
-            </p>
-          )}
+          {/* Sekundær navigasjon til de tre spesialverktøyene. Adressesøket over er fortsatt det
+              siden handler om: rene lenker, ingen kort og ingen forklaringstekst. Hver lenke er en
+              trykkflate på 44 px. Hyttelenken følger publiseringen av kategorien. */}
+          <nav aria-labelledby="utforsk-mer" className="mt-10">
+            <h2 id="utforsk-mer" className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">
+              Utforsk mer
+            </h2>
+            <ul className="mt-2 flex flex-col">
+              {[
+                // Skolekrets dekker foreløpig bare Oslo, og lenketeksten skal si det.
+                ["/skolekrets", "Finn skolekrets i Oslo"],
+                ["/tilfluktsrom", "Finn tilfluktsrom"],
+                ...(visHytter ? [["/hytter", "Se hytter og koier"]] : []),
+              ].map(([href, tekst]) => (
+                <li key={href}>
+                  <Link
+                    href={href!}
+                    className="inline-flex min-h-11 items-center text-[15px] whitespace-nowrap text-accent hover:underline"
+                  >
+                    {tekst} <span aria-hidden="true" className="ml-1">→</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
           <section className="mt-20" aria-labelledby="dekker">
             <h2 id="dekker" className="text-xl font-semibold tracking-[-0.02em]">
