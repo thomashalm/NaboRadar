@@ -19,6 +19,23 @@ kjente begrensninger.
 Ikke oppdater håndboken for små copy-endringer, vanlig styling eller trivielle bugfikser uten
 systempåvirkning.
 
+## Dokumentasjon: håndbok, research og ADR
+
+Research- og arkitekturrunder dokumenteres **i samme commit som selve endringen**. For hver
+oppgave som berører en ny datakilde eller lisens, research som påvirker produktet (også «vi bygger
+det ikke»), en heuristikk eller terskel, et viktig QA-funn, en datakvalitetsregel, arkitektur,
+sikkerhet, offentlig/privat lesing, caching, SEO/AEO, robots/crawlere, personvern/cookies eller et
+viktig produktvalg, skal du selv vurdere og oppdatere:
+
+- **`docs/naboradar-handbook.md`** — hvis dagens løsning er endret. Rett det som ikke lenger er sant.
+- **`docs/research/<tema>.md`** — hvis noe ble undersøkt. Ta med kilder, metode, testutvalg,
+  negative funn og hva vi bevisst ikke gjorde. Slett aldri negative funn eller historikk.
+- **`docs/adr/NNN-*.md`** — hvis det ble tatt en viktig beslutning med reelle alternativer. Erstatt,
+  ikke skriv om, en ADR som ikke lenger gjelder.
+
+Malene og reglene står i [docs/README.md](docs/README.md), [docs/adr/README.md](docs/adr/README.md)
+og [docs/research/README.md](docs/research/README.md).
+
 ## Nye datakategorier
 
 Før en ny datakategori bygges — provider, research eller hybrid — skal den vurderes mot

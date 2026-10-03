@@ -440,7 +440,8 @@ fjellstyrer og kartdata, og ingen viser dem samlet rundt en adresse.
 
 | Kategori | Status | Modell |
 |---|---|---|
-| **Hytter og koier** | Runde 1: pilot i Oslomarka, upublisert | Kanonisk tabell (`huts`) over kildeposter |
+| **Hytter og koier** | Lansert 02.10.2026, hele landet (startet som pilot i Oslomarka) | Kanonisk tabell (`huts`) over kildeposter |
+| Geografiske filtre for hytter («Ved sjøen», «Ved vann», «På fjellet») | undersøkt 03.10.2026, **ikke bygget** — stedssøk ble prioritert, og fjellregelen målte «over tregrensen». Se [researchen](research/hytter-geografiske-filtre.md) | beregnede fakta per hytte, hvis det tas opp igjen |
 | Fiskevann og fiskearter | mulig senere | ikke vurdert |
 | Multepotensial | mulig senere | ikke vurdert |
 | Lekeplasser, parker, vanlige turstier, badeplasser, generelle POI-er | ikke prioritert | — |

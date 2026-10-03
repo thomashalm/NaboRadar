@@ -12,7 +12,12 @@ hva som er vurdert og forkastet, og beslutningsregelen nye datakategorier måles
 objekter — står i [dataarkitekturen](data-architecture.md).** Les den før et nytt datasett tas inn.
 
 Sist kryssjekket mot repoet: **2026-09-25**. Databasekapitlene (6, 7, 12, 27) ble oppdatert
-2026-10-02 etter gjennomgangen av dataarkitekturen.
+2026-10-02 etter gjennomgangen av dataarkitekturen. Hyttedelen, §34 og §24 ble kryssjekket
+2026-10-03.
+
+**Hva vi bestemte og hvorfor står i [ADR-ene](adr/README.md); hva vi undersøkte står i
+[research](research/README.md).** Oversikten over all dokumentasjon er [docs/README.md](README.md),
+og regelen for hva som dokumenteres hvor, er [§38](#38-dokumentasjon).
 
 > ## Vedlikehold av dokumentet
 >
@@ -21,6 +26,9 @@ Sist kryssjekket mot repoet: **2026-09-25**. Databasekapitlene (6, 7, 12, 27) bl
 > secrets, deploy, større produktprinsipper eller kjente begrensninger.
 >
 > **Ikke oppdater** for copy-endringer, styling eller trivielle bugfikser uten systempåvirkning.
+>
+> Håndboka beskriver dagens løsning. Historikk og forkastede spor hører hjemme i research og ADR
+> — se [§38](#38-dokumentasjon).
 
 ---
 
@@ -47,6 +55,7 @@ Sist kryssjekket mot repoet: **2026-09-25**. Databasekapitlene (6, 7, 12, 27) bl
 [35. Privat research](#35-privat-research) ·
 [36. Research lifecycle](#36-research-lifecycle-freshness-og-review-kø) ·
 [37. Datasenter-enrichment](#37-datasenter-enrichment-og-refresh) ·
+[38. Dokumentasjon](#38-dokumentasjon) ·
 [Data-roadmap (eget dokument)](data-roadmap.md) · [Dataarkitektur (eget dokument)](data-architecture.md)
 
 ---
@@ -84,6 +93,9 @@ Disse følger vi allerede, og de er synlige i koden.
 
 | Prinsipp | Hvordan det håndheves |
 |---|---|
+| **Adresse-først, ikke en turapp** | Alt tar utgangspunkt i en adresse eller et sted. Friluftsdata tas bare inn når de gir lokal innsikt som er vanskelig å få andre steder. Bestilling og ledighet ligger hos den som driver hytta — [ADR 006](adr/006-address-first-not-a-trail-app.md) |
+| **Kildene kan være kaotiske. Kjernemodellen skal ikke være det.** | Kildeposter og kanoniske enheter holdes adskilt, kildens verdi skrives aldri over, og rettelser ligger oppå med kilde — [ADR 007](adr/007-chaotic-sources-stable-core.md) |
+| **Vis det etaten selv publiserer** | Offentlig visning bruker etatens publiserte produkt, ikke nyeste tekniske endepunkt, og nasjonale lag kontrolleres før publisering — [ADR 008](adr/008-publish-what-the-agency-publishes.md) |
 | **Offentlig etterprøvbare kilder** | Hver provider har `license` og kildelenke. Ingenting scrapes fra lukkede systemer — se [ADR 004](adr/004-no-scraping-oslo.md) |
 | **Tydelig proveniens** | Hvert funn viser kilde, år og lenke. Sentralt register i `lib/facts/wording.ts` |
 | **Ikke overtolk data** | Vi bruker kildens egne klasser og ord. «Aktsomhet» er ikke «fare». Mangler kilden et felt, finner vi ikke på ett |
@@ -1111,8 +1123,9 @@ så `getHutsInBbox` henter `huts_in_bbox` side for side.
 
 Tolkningsreglene:
 
-- **Typen er kildens.** Betjent, selvbetjent, ubetjent og rastebu er N50s egne klasser. Vi har
-  ingen «åpen koie» eller «dagsturhytte», fordi ingen kilde skiller dem ut.
+- **Typen er kildens.** Betjent, selvbetjent, ubetjent og rastebu er N50s egne klasser. «Åpen
+  koie» og «dagsturhytte» finnes bare som kontrollert overstyring (`type_override`), når
+  forvalterens egen side sier det — ingen kilde skiller dem ut i bulk.
 - **Tilgang følger Kartverkets kodeliste, ordrett.** Feltet er N50s
   `hytteinformasjon.tilgjengelighet`, definert i kodelisten
   [Tilgjengelighet](https://register.geonorge.no/sosi-kodelister/kartdata/tilgjengelighet)
@@ -1125,9 +1138,10 @@ Tolkningsreglene:
   | Udefinert | «Irrelevant/ikke aktuell.» | lagres som ukjent, vises ikke |
 
   «Ulåst» betyr altså **ikke** at man slipper nøkkel, og derfor skriver vi aldri «ingen nøkkel
-  nødvendig». Ingen av verdiene sier om hytta er i drift, i sesong eller ledig — feltet
-  `access_status` står på `unknown` for alle hytter, og hyttesiden sier det i klartekst under
-  faktaene (`HUT_ACCESS_NOTE`). Ordlyden bor i `lib/huts/wording.ts`.
+  nødvendig». Ingen av verdiene sier om hytta er i drift, i sesong eller ledig. `access_status` står på
+  `unknown` med mindre en admin har satt «midlertidig stengt» fra forvalterens side (se under),
+  og hyttesiden sier i klartekst at tilgang ikke er det samme som åpen eller ledig
+  (`HUT_ACCESS_NOTE`). Ordlyden bor i `lib/huts/wording.ts`.
 - **Avstand vises aldri uten at det er tydelig hva den er målt fra.** På `/omrade` er det
   adressen i overskriften, og seksjonen sier «Avstand i luftlinje fra adressen». På `/hytter`
   finnes det ikke noe slikt sted med mindre brukeren kom fra ett: lenken fra områdesiden og fra
@@ -1839,7 +1853,9 @@ hjemme i samme henvendelse til kommunen.
 Verifisert på ekte data: 0 av 36 776 `area_features` har felter som ligner personopplysninger, og
 0 av 3 139 dokumenter har blokkert type eller tittel.
 
-**Besøkende, cookies og personvernsiden.** NaboRadar er et privat, ikke-kommersielt prosjekt;
+**Besøkende, cookies og personvernsiden.** Beslutningen står i
+[ADR 013](adr/013-privacy-and-cookies.md), og gjennomgangen i
+[research/personvern-cookies-audit.md](research/personvern-cookies-audit.md). NaboRadar er et privat, ikke-kommersielt prosjekt;
 behandlingsansvarlig er Thomas Halmø, kontakt `kontakt@naboradar.no` (`lib/site.ts`). Ingen
 foretak, ingen org.nr. og ingen adresse på siden. Gjennomgang 3. oktober 2026, i kode og mot
 produksjon:
@@ -2113,7 +2129,9 @@ select name, created_at from vault.secrets;
 
 ## 31. Viktige arkitekturbeslutninger
 
-Kort ADR-form. De formelle ADR-ene ligger i [docs/adr/](adr/).
+Kort ADR-form. De formelle ADR-ene ligger i [docs/adr/](adr/README.md), med indeks. De nyeste
+(005–013) dekker hyttesidenes cache og høyde, adresse-først, kildemodellen, etatens publiserte
+produkt, sikkerhetsmodellen, hyttekildene, tilgangssemantikken, SEO/crawlere og personvern.
 
 **Hvorfor pg_cron + GitHub Actions**
 GitHubs `schedule` er best effort — målt 11 av ~165 forventede kjøringer over 41 timer. pg_cron fyrer
@@ -2251,6 +2269,9 @@ Google. Det skillet styrer alt under.
 | `/` | **Ja** | `/` | Forklarer hva tjenesten dekker, i tekst |
 | `/skolekrets` | **Ja** | `/skolekrets` | Landingsside for et reelt søkebehov |
 | `/tilfluktsrom` | **Ja** | `/tilfluktsrom` | Samme — offentlige tilfluktsrom nær en adresse |
+| `/hytter` | **Ja** | `/hytter` for alle parametervarianter (`?hytte=`, `lat`/`lng`, `fra`, `radius`) | Hyttekartet. Parametrene er tilstand, ikke egne sider |
+| `/hytter/[ref]` | **Ja**, unntatt `not_public` (`noindex, follow`) | Adressen med gjeldende navn | Én side per offentlig hytte, med fakta i HTML-en. Se [ADR 012](adr/012-hut-seo-and-crawlers.md) |
+| `/personvern` | **Ja** | `/personvern` | Personvernerklæringen |
 | `/sak/[id]` | **Ja** | `/sak/[id]` uten kontekst | Ekte, unikt offentlig innhold per plansak |
 | `/omrade` | **Nei** — `noindex, follow` | `/omrade` | Ett oppslag per adresse. Hver kombinasjon av lat, lng, radius, label og sortering er en ny URL |
 | `/admin` | **Nei** — `noindex, nofollow` | | Driftsside |
@@ -2272,20 +2293,43 @@ Skulle saksidene vise seg å bli vurdert som tynt innhold, er det én linje å s
   `https://naboradar.no` som standard. Uten den blir canonical og OpenGraph relative, og da
   ignoreres de.
 - **`robots.txt`** genereres av `app/robots.ts` og peker på sitemap og host.
-- **`sitemap.xml`** genereres av `app/sitemap.ts` og inneholder bare `/` og `/skolekrets`.
-  `/tilfluktsrom` og saksidene oppdages via lenker, ikke via sitemap — over tusen URL-er der ville
-  vært støy. `/skolekrets` og `/tilfluktsrom` står i sitemapet.
-- **Strukturerte data**: `WebSite` og `WebApplication` på forsiden, som JSON-LD. Ingen
+- **`sitemap.xml`** genereres av `app/sitemap.ts` (revalidert hver time) og inneholder `/`,
+  `/skolekrets`, `/tilfluktsrom`, `/personvern`, `/hytter` og hver hytte en anonym besøkende kan
+  se, unntatt `not_public` (ca. 1 500). Saksidene oppdages via lenker, ikke via sitemap.
+  Kjent svakhet: `lastmod` på de faste sidene settes til «nå» ved hver generering, og sier
+  derfor ingenting.
+- **Strukturerte data**: `WebSite` og `WebApplication` på forsiden, og `Place` (navn,
+  koordinater, kommune) på hyttesidene, som JSON-LD. Ingen
   `FAQPage` — vi har ingen synlig FAQ. Ingen `SearchAction` — søket vårt tar koordinater, ikke
   en fritekststreng, så en søke-URL-mal ville lovet noe som ikke virker. **Schema skal alltid
   matche det som faktisk står på siden.**
 - **Språk**: `lang="nb"` på `<html>`, `og:locale: nb_NO`.
 
-### AI-søk
+### AI-søk og crawlertilgang
 
-Ingen søkerobot er blokkert — heller ikke OAI-SearchBot eller PerplexityBot. De leser vanlig
-HTML og følger samme `robots.txt` som Googlebot, og der står `Allow: /` for alt utenom
-`/admin`, `/dev` og `/api/`.
+`robots.txt` har én regel for alle: `Allow: /` utenom `/admin`, `/dev` og `/api/`. Ingen
+søkerobot er blokkert — heller ikke OAI-SearchBot (ChatGPT-søk) eller PerplexityBot.
+
+**GPTBot (OpenAIs innhenting til modelltrening) er også tillatt, men bare fordi ingen regel
+nevner den.** Det er ikke en aktiv beslutning: om innholdet skal kunne brukes til modelltrening,
+avgjøres separat fra om tjenesten skal kunne finnes i AI-søk. Se
+[ADR 012](adr/012-hut-seo-and-crawlers.md). Legges det inn en egen regel for én robot, gjelder
+ikke fellesregelen for den lenger, og utelukkelsene må gjentas.
+
+Ingen bot-beskyttelse eller JS-utfordring står foran sidene. Netlifys grense på antall kall
+gjelder bare `/api/*` (120/min) og `/omrade` (240/min) — se [17. Rate limiting](#17-rate-limiting).
+Kontrollert 2026-10-03 med OAI-SearchBot, GPTBot, ChatGPT-User og Googlebot: 200 på alle sider,
+og 40 hyttesider etter hverandre uten 429 ([research/ai-sok-aeo-audit.md](research/ai-sok-aeo-audit.md)).
+
+**Caching per flate**, kort (detaljene står i [16. Endepunkter](#16-endepunkter)):
+
+| Flate | Cache |
+|---|---|
+| `/`, `/skolekrets`, `/tilfluktsrom`, `/personvern` | Statisk; forsiden revalideres hvert 5. minutt |
+| `/hytter/[ref]` | ISR i en time, tømmes av `/admin/hytter` ([ADR 005](adr/005-cached-public-hut-pages.md)) |
+| `/hytter`, `/omrade`, `/sak/[id]` | Dynamisk, ingen delt cache |
+| `sitemap.xml` | Revalideres hver time |
+| `/api/*` | Bare nettleserens egen cache, eller `no-store` |
 
 Det som gjør innholdet lett å sitere er ikke triks, men det samme som gjør det lett å lese:
 alt er server-renderet og finnes i HTML-en (også skolekretsnotisen, verifisert), kilden står
@@ -2306,6 +2350,10 @@ Dette er ikke gjort, og kan ikke gjøres fra repoet:
 
 Bing Webmaster Tools kan importere oppsettet fra Search Console, og dekker samtidig flere
 AI-søkeroboter.
+
+Status 2026-10-03: DNS for `naboradar.no` har en `google-site-verification`-TXT-post, så
+verifiseringen er trolig påbegynt. Om sitemapen er sendt inn i Search Console eller Bing, kan
+ikke ses fra repoet.
 
 ---
 
@@ -3069,3 +3117,34 @@ neste. `research:seed --review` passer ikke for slike runder: det skriver en rev
 funn i fila, også de som ikke ble kontrollert. Statusendringer registreres derfor gjennom
 `record_research_review_unchecked` med `new_status` og `research_run_id`, og speiles i
 `funn.ts` før seeden kjøres.
+
+---
+
+## 38. Dokumentasjon
+
+Dokumentasjonen er prosjektets hukommelse. Om et år skal det gå an å se hva vi undersøkte, hvilke
+kilder vi brukte, hva vi fant, hva vi valgte bort, hvorfor, og hva som skal til for å vurdere det
+på nytt. Inngangen er [docs/README.md](README.md).
+
+| Del | Innhold | Regel |
+|---|---|---|
+| Håndboka (denne fila) | Hvordan løsningen fungerer **nå** | Rettes når noe ikke lenger er sant. Ikke en forskningslogg |
+| [`docs/research/`](research/README.md) | Én fil per undersøkelse: kilder, lisens, metode, testutvalg, funn, **negative funn**, begrensninger, beslutning, åpne spørsmål | Historikk. Ikke slett negative funn eller forkastede spor; marker heller «erstattet» med dato |
+| [`docs/adr/`](adr/README.md) | Viktige beslutninger: alternativer, valgt løsning, begrunnelse, konsekvenser, ulemper, hva som utløser ny vurdering | Erstattes med en ny ADR, skrives ikke om. Ikke for trivielle ting |
+
+**Dokumenteres i samme commit som endringen** når oppgaven innebærer:
+
+- ny ekstern datakilde eller lisensvurdering,
+- research som påvirker produktet, også beslutningen om å **ikke** bygge noe etter research,
+- ny heuristikk eller terskel, viktig QA-funn, datakvalitetsregel,
+- arkitekturendring, sikkerhetsendring, endring i offentlig/privat lesing,
+- caching-strategi, SEO/AEO-beslutning, robots/crawler-beslutning,
+- personvern- eller cookiebeslutning,
+- viktig produktvalg med reelle avveininger.
+
+For hver slik endring vurderes: må håndboka rettes? Trengs en researchfil? Trengs en ADR? Ikke
+for spacing, tekststørrelse, små copy-endringer eller vanlige bugfikser.
+
+Skill fakta (målt, testet, sitert) fra vurderinger og beslutninger. Bevar usikkerhet, og ikke
+overdriv kompletthet eller datakvalitet. Lenk heller enn å kopiere store tekstblokker mellom
+håndbok, research og ADR.

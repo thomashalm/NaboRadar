@@ -1,5 +1,10 @@
 # AI-søk / AEO: gjennomgang og oppfølging
 
+> **Status 2026-10-03:** forbedring 1 (faste og raske hyttesider) er gjort, se
+> [ADR 005](../adr/005-cached-public-hut-pages.md). Forbedring 2–5 er ikke gjort. Beslutningene om
+> indeksering, canonical og robots (OAI-SearchBot tillatt, GPTBot ikke avgjort) står i
+> [ADR 012](../adr/012-hut-seo-and-crawlers.md).
+
 Målet er at NaboRadar skal være lett å finne, forstå og sitere i AI-søk (ChatGPT search og lignende) uten tynne SEO-sider.
 Gjennomgangen ble gjort 2026-10-03 mot produksjon, med OpenAI- og Google-robotenes user-agent, rå HTML uten JavaScript og
 tellinger i databasen.

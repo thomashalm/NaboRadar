@@ -1,6 +1,6 @@
 # ADR 005: Hyttesidene leses anonymt, caches i en time, og høyden lagres ved sync
 
-**Status:** Akseptert · 2026-10-03
+**Status:** Aktiv · 2026-10-03
 
 ## Kontekst
 AI-søk-gjennomgangen ([research/ai-sok-aeo-audit.md](../research/ai-sok-aeo-audit.md)) fant tre svakheter ved de 1 504
@@ -13,6 +13,16 @@ offentlige hyttesidene:
   hytte fikk noen ganger høyde og andre ganger ikke.
 
 Søkemotorer og AI-søk skal se det samme som mennesker, og samme hytte skal gi samme side hver gang.
+
+## Alternativer vurdert
+- **Beholde cookie-klienten og cache med `Vary: Cookie`** — avvist. Netlify og Next ville cachet
+  per cookie, og en admins visning kunne i verste fall blitt delt.
+- **Ny offentlig RPC eller ny view** — unødvendig. `get_hut` og `huts_near` svarer allerede bare for
+  offentlige hytter når de kalles anonymt.
+- **Cache høyden lenger i minnet eller i en egen cache** — avvist. Det fjerner ikke avhengigheten av
+  en ekstern tjeneste ved visning, og serverløse instanser deler ikke minne.
+- **Bygge alle 1 504 sider ved deploy** — avvist. Det gjør hver deploy tregere og belaster
+  databasen, uten gevinst over å lage siden ved første besøk.
 
 ## Beslutning
 - **Egen offentlig lesesti.** `getHut` og nabohyttene leser med den anonyme klienten (publishable key, ingen cookies), via de
@@ -45,6 +55,17 @@ Admin-forhåndsvisning på de offentlige sidene trengs ikke etter lanseringen. S
   og et punkt som likevel får kurver, slås opp alene.
 - Ved en kommunereform må øyeblikksbildet av kommuneregisteret hentes på nytt.
 
+## Kjente ulemper
+- Ingen direkte tømming fra synken: et nytt navn eller en ny posisjon fra Kartverket synes først
+  etter inntil en time.
+- `stale-while-revalidate`: den første besøkende etter en time får forrige versjon.
+- Én hytte (Kutjaure Fjällstuga) har ingen høyde, fordi den ligger utenfor dekningen.
+
 ## Revurderes når
 Hyttesidene trenger innhold som er ulikt per bruker, eller synken skal kunne tømme cachen direkte (krever et eget,
 autentisert revalideringsendepunkt).
+
+## Relatert
+[research/ai-sok-aeo-audit.md](../research/ai-sok-aeo-audit.md) (måling før/etter og høyde-QA) ·
+[ADR 009](009-public-admin-security-model.md) · [ADR 012](012-hut-seo-and-crawlers.md) ·
+`supabase/migrations/20261029000000_hut_elevation.sql`
