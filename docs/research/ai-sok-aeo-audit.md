@@ -180,6 +180,19 @@ Disse negative funnene står fortsatt. De er grunnen til at bare fylkesnivået e
 Én databasespørring per fylkesside. Kommuneregisteret ligger i Nexts datacache (et døgn) med
 øyeblikksbilde som reserve.
 
+### Produksjon etter deploy (commit `1364c8a`)
+- Samme QA mot naboradar.no: 15 fylker, 1 475 lenkede hytter, 0 dubletter, 0 skjulte. Antall og
+  kommuner var identiske med databasen. Alle 1 475 hyttelenker ga 200.
+- **Crawlere:** `/hytter`, seks fylkessider, en hytteside, `sitemap.xml` og `robots.txt` ga 200 for
+  Googlebot, OAI-SearchBot og ChatGPT-User. Ingen 403, 429 eller JS-utfordring.
+- **Rå HTML:** `/hytter` har 15 fylkeslenker. Fylkessidene har alle sine hyttelenker (Innlandet
+  348, Trøndelag 210, Vestland 179, Troms 79, Oslo 9, Finnmark 42). Hyttesiden lenker til fylket.
+- **Cache:** første visning etter deploy tok 0,15–1,40 s. Cachet svarte på 0,22–0,45 s
+  (`Netlify Durable; hit; ttl≈3600`).
+- **Store bokstaver:** `/hytter/fylke/Trondelag` og `/INNLANDET` gir 404 i produksjon. Avviket
+  lokalt skyldtes macOS-filsystemet.
+- **Sitemap:** 1 524 URL-er, 15 fylker, ingen `lastmod`, `priority` eller `changefreq`.
+
 ### Begrensninger
 - 29 hytter uten kommune står ikke på noen fylkesside. De gjettes ikke inn i et fylke.
 - HTML-en er stor for de største fylkene, fordi Next serialiserer innholdet to ganger. Komprimert
