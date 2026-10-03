@@ -20,6 +20,15 @@ export const EVENT_DATE_LABELS: Record<EventType, string> = {
   public_hearing: "Publisert",
 };
 
+/**
+ * Datoformulering på kortet i saklista, der typen allerede står som merkelapp over tittelen.
+ * «PLANOPPSTART» + «Varslet 1. desember 2025», ikke «Planoppstart varslet» én gang til.
+ */
+export const EVENT_CARD_DATE_LABELS: Record<EventType, string> = {
+  ...EVENT_DATE_LABELS,
+  planning_started: "Varslet",
+};
+
 /** Visningsnavn for DiBK-dokumenttyper på allowlisten. */
 export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   "ref-data-as-pdf": "Varsel om oppstart av planarbeid",

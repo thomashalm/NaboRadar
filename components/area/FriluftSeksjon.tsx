@@ -43,7 +43,7 @@ async function FriluftInnhold({ lat, lng, label }: { lat: number; lng: number; l
           </p>
           {/* Hytter har sin egen radius. Uten denne linjen leses «innen 10 km» mot sirkelen i kartet. */}
           <p className="px-4 pt-0.5 text-[13px] leading-snug text-muted">
-            Avstand i luftlinje fra adressen. Hytter vises i en større radius enn sirkelen i kartet.
+            Luftlinje fra adressen, i større radius enn resten av siden.
           </p>
           <ul className="mt-2 divide-y divide-line">
             {resultat.cards.map((hut) => (

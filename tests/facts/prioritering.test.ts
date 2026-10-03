@@ -119,12 +119,15 @@ describe("rekkefølge på kategoriene", () => {
     expect(labels).not.toContain("Miljø");
   });
 
-  it("samler industri og anlegg under «Nærområdet», med nøytral ingress", () => {
+  it("samler industri og anlegg under «Nærområdet», uten ingress som gjentar navnet", () => {
     const naer = AREA_SECTIONS.find((s) => s.id === "naeromradet")!;
     expect(naer.label).toBe("Nærområdet");
     expect(naer.categories).toContain("industri");
-    expect(naer.intro).toBeTruthy();
-    expect([naer.label, naer.intro].join(" ")).not.toMatch(/risiko|farlig|uønsket|oppmerksom|advarsel/i);
+    expect(naer.intro).toBeNull();
+  });
+
+  it("har ingen seksjonsingress som gjentar seksjonsnavnet eller bærer metode", () => {
+    for (const seksjon of AREA_SECTIONS) expect(seksjon.intro, seksjon.id).toBeNull();
   });
 
   it("lar «Nærområdet» utvides med nye typer uten ny UI-logikk", () => {

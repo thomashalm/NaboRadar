@@ -47,11 +47,13 @@ describe("Infrastruktur som kompakt gruppe", () => {
     const gruppe = infrastrukturCluster(alnabru, 1000)!;
     expect(gruppe.sectionId).toBe("infrastruktur");
     expect(gruppe.label).toBe("Infrastruktur");
-    expect(gruppe.summary).toBe("12 registreringer innen 1 km");
+    // Typene med eget navn, ikke «12 registreringer».
+    expect(gruppe.summary).toBe("5 transformatorstasjoner og 7 kraftlinjer innen 1 km");
   });
 
-  it("bøyer tallet riktig for én registrering", () => {
-    expect(infrastrukturCluster([stasjon("A", 100)], 500)!.summary).toBe("1 registrering innen 500 m");
+  it("bøyer tallet riktig for én av en type", () => {
+    expect(infrastrukturCluster([stasjon("A", 100)], 500)!.summary).toBe("1 transformatorstasjon innen 500 m");
+    expect(infrastrukturCluster([stasjon("A", 100), ledning("B", 200)], 500)!.summary).toBe("1 transformatorstasjon og 1 kraftlinje innen 500 m");
   });
 
   it("grupperer transformatorstasjoner og kraftlinjer hver for seg", () => {
@@ -181,7 +183,7 @@ describe("Grunnforhold som kompakt gruppe", () => {
   it("løfter det som gjelder søkepunktet i sammendraget", () => {
     const gruppe = grunnforholdCluster([aktsomhet, sone("Alnabru", 0, true), sone("Smalvollveien", 890)], 1000)!;
     expect(gruppe.summary).toBe(
-      "Kvikkleiresone ved søkepunktet · Aktsomhetsområde ved søkepunktet · 2 kartlagte kvikkleiresoner innen 1 km",
+      "Kvikkleiresone ved søkepunktet · Aktsomhetsområde for kvikkleireskred ved søkepunktet · 2 kartlagte kvikkleiresoner innen 1 km",
     );
   });
 
@@ -190,8 +192,12 @@ describe("Grunnforhold som kompakt gruppe", () => {
     expect(gruppe.summary).toBe("1 kartlagt kvikkleiresone innen 1 km");
   });
 
-  it("oppsummerer aktsomhetsområde alene", () => {
-    expect(grunnforholdCluster([aktsomhet], 500)!.summary).toBe("Aktsomhetsområde ved søkepunktet");
+  it("oppsummerer aktsomhetsområde alene, med hva det gjelder", () => {
+    expect(grunnforholdCluster([aktsomhet], 500)!.summary).toBe("Aktsomhetsområde for kvikkleireskred ved søkepunktet");
+  });
+
+  it("har seksjonens eget navn, så første synlige linje er funnet og ikke en mellomoverskrift", () => {
+    expect(grunnforholdCluster([aktsomhet], 500)!.label).toBe("Naturfare");
   });
 
   it("presenterer friskmeldt område som det det er", () => {
@@ -303,8 +309,8 @@ describe("kompaktformen kommer fra formuleringsregisteret", () => {
       contains: true,
     });
     expect(full?.compact?.headline).toBe("Støy fra veitrafikk · Lden 55–59 dB");
-    expect(full?.compact?.context).toBe("Ved søkepunktet · modellberegnet");
-    // Den fulle overskriften er uendret.
-    expect(full?.headline).toBe("Beregnet støy fra veitrafikk ved søkepunktet: Lden 55–59 dB");
+    expect(full?.compact?.context).toBe("Ved søkepunktet · modellberegnet, ikke målt ved boligen");
+    // «Ved søkepunktet» står som avstand på kortet, ikke i overskriften.
+    expect(full?.headline).toBe("Beregnet støy fra veitrafikk: Lden 55–59 dB");
   });
 });

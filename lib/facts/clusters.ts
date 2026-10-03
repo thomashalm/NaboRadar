@@ -2,6 +2,7 @@ import {
   describeClusterToggle,
   describeGrunnforholdSummary,
   describeInfrastrukturSummary,
+  STOY_FORBEHOLD,
 } from "./wording";
 import { formatRadius } from "@/lib/format";
 import type { AreaFact } from "@/types/area-feature";
@@ -95,7 +96,15 @@ export function infrastrukturCluster(facts: AreaFact[], radiusM: number): FactCl
     sectionId: "infrastruktur",
     id: "infrastruktur",
     label: "Infrastruktur",
-    summary: describeInfrastrukturSummary({ total: sortert.length, radiusLabel: formatRadius(radiusM) }),
+    summary: describeInfrastrukturSummary({
+      total: sortert.length,
+      radiusLabel: formatRadius(radiusM),
+      deler: INFRA_LISTS.map((spec) => ({
+        ental: spec.ental,
+        flertall: spec.flertall,
+        antall: sortert.filter((fact) => spec.subtypes.includes(fact.subtype)).length,
+      })),
+    }),
     facts: [],
     lists,
     overview: null,
@@ -123,6 +132,13 @@ export function grunnforholdCluster(facts: AreaFact[], radiusM: number): FactClu
     stormflo: "stormflonivå",
   };
   const AKTSOMHET = new Set(["flom_aktsomhet", "skred_jord_flom_aktsomhet", "skred_sno_stein_aktsomhet"]);
+  // Hva aktsomhetsområdet gjelder, med kildens ord. Kvikkleire telles med når den er ved punktet.
+  const AKTSOMHET_FOR: Record<string, string> = {
+    kvikkleire_aktsomhet: "kvikkleireskred",
+    flom_aktsomhet: "flom",
+    skred_jord_flom_aktsomhet: "jord- og flomskred",
+    skred_sno_stein_aktsomhet: "snø- og steinskred",
+  };
 
   const summary = describeGrunnforholdSummary({
     aktsomhetVedPunkt: sortert.some((fact) => fact.subtype === "kvikkleire_aktsomhet"),
@@ -138,7 +154,10 @@ export function grunnforholdCluster(facts: AreaFact[], radiusM: number): FactClu
       ),
     ],
     aktsomhetsomrader: sortert.filter((fact) => AKTSOMHET.has(fact.subtype)).length,
-    radonLinje: sortert.find((fact) => fact.subtype === "radon_aktsomhet")?.compact?.headline ?? null,
+    // Radonkortets egen overskrift, med «i området»: linjen står nå alene som første svar, og
+    // skal si hvor aktsomheten gjelder.
+    radonLinje: sortert.find((fact) => fact.subtype === "radon_aktsomhet")?.headline ?? null,
+    aktsomhetTyper: [...new Set(sortert.flatMap((fact) => (AKTSOMHET_FOR[fact.subtype] ? [AKTSOMHET_FOR[fact.subtype]!] : [])))],
   });
 
   const forside = sortert.slice(0, CLUSTER_PREVIEW);
@@ -147,9 +166,10 @@ export function grunnforholdCluster(facts: AreaFact[], radiusM: number): FactClu
   return {
     sectionId: "grunnforhold",
     id: "grunnforhold",
-    // Seksjonen heter «Naturfare», og gruppen er den eneste i seksjonen. Merkelappen sier derfor
-    // hva radene gjelder, ikke seksjonsnavnet om igjen.
-    label: "Ved adressen og i nærheten",
+    // Gruppen er hele seksjonen. Med seksjonens eget navn vises ingen egen merkelapp over
+    // oppsummeringen (se ClusterDetails), og første synlige linje blir selve funnet. «Ved
+    // søkepunktet» står i oppsummeringen der det gjelder.
+    label: "Naturfare",
     summary,
     facts: forside,
     lists: [],
@@ -205,9 +225,7 @@ export function stoyCluster(facts: AreaFact[], radiusM: number): FactCluster | n
     label: flere
       ? `${sortert.length} støykilder ${forste.contains ? "ved søkepunktet" : `innen ${formatRadius(radiusM)}`}`
       : (kort?.headline ?? forste.headline),
-    summary: flere
-      ? "Modellberegnet, ikke målt ved boligen"
-      : (kort?.context ?? forste.distanceLabel),
+    summary: flere ? STOY_FORBEHOLD : (kort?.context ?? forste.distanceLabel),
     facts: sortert,
     lists: [],
     overview: null,

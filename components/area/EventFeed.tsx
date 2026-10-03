@@ -35,9 +35,16 @@ const MONTHS = DEFAULT_ANNOUNCED_WITHIN_MONTHS;
 /** Hvor mange saker som vises når gruppen åpnes. Resten ligger bak «Se alle saker». */
 const PREVIEW = 3;
 
-function countLabel(n: number, radius: number) {
+/**
+ * «2 varslede planoppstarter innen 1 km». Er alle sakene planoppstarter — som i dag, med DiBK som
+ * eneste kilde — sier linjen hva de er. Kommer det andre typer, faller den tilbake på «saker».
+ */
+function countLabel(events: readonly { type: string }[], radius: number) {
+  const n = events.length;
   if (n === 0) return "Ingen saker i området";
-  return `${n} ${n === 1 ? "sak" : "saker"} innen ${formatRadius(radius)}`;
+  const planoppstarter = events.every((e) => e.type === "planning_started");
+  const ord = planoppstarter ? (n === 1 ? "varslet planoppstart" : "varslede planoppstarter") : n === 1 ? "sak" : "saker";
+  return `${n} ${ord} innen ${formatRadius(radius)}`;
 }
 
 export function EventFeed(props: EventFeedProps) {
@@ -120,8 +127,8 @@ function EventFeedBody(props: EventFeedProps) {
             onToggle={(event) => onExpandedChange(event.currentTarget.open)}
           >
             <summary className="cursor-pointer px-5 py-3.5">
-              <span className="text-[15px] font-medium text-ink">{countLabel(result.events.length, radius)}</span>
-              <span className="mt-0.5 block text-[13px] text-muted">Planoppstart varslet siste {MONTHS} måneder</span>
+              <span className="text-[15px] font-medium text-ink">{countLabel(result.events, radius)}</span>
+              <span className="mt-0.5 block text-[13px] text-muted">Siste {MONTHS} måneder</span>
             </summary>
 
             <div className="px-5 pb-4">

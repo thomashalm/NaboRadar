@@ -213,7 +213,7 @@ describe("radon", () => {
     const hits = await new NguRadonLookup(radonFake("1", "Moderat til lav aktsomhet")).run(ctx);
     const tekst = describeFact({ subtype: "radon_aktsomhet", title: hits[0]!.title, attributes: hits[0]!.attributes, contains: true })!;
     // NGU: «Kartet kan ikke benyttes til å forutsi radonkonsentrasjonen i enkeltbygninger.»
-    expect(tekst.details.join(" ")).toContain("ikke en måling eller detaljert vurdering av den enkelte tomten");
+    expect(tekst.details).toEqual(["Aktsomhet for området, ikke en måling i boligen. Faktisk radonnivå kan bare fastslås ved måling."]);
     // Hovedkortet skal være kort — forbeholdene hører under detaljer.
     expect(tekst.headline.length).toBeLessThan(60);
   });
@@ -303,7 +303,12 @@ describe("naturfare samlet", () => {
   it("ligger i én seksjon sammen med kvikkleire", () => {
     const seksjon = AREA_SECTIONS.find((s) => s.id === "grunnforhold")!;
     expect(seksjon.label).toBe("Naturfare");
-    expect(seksjon.intro).toContain("Aktsomhetsområder");
+    // Ingen ingress over hvert resultat. Skillet mellom kartlagt sone og aktsomhetsområde står
+    // én gang ved kildene, og i funnet der det betyr noe.
+    expect(seksjon.intro).toBeNull();
+    expect(SOURCES["nve-flom"]!.method).toMatch(/kartlagt flomsone.*aktsomhetsområde/i);
+    expect(SOURCES["nve-skred"]!.method).toMatch(/kartlagt skredfaresone.*aktsomhetsområde/i);
+    expect(SOURCES["nve-kvikkleire-aktsomhet"]!.method).toContain("oversiktskart");
     expect(LOOKUP_CATEGORIES).toContain("grunnforhold");
   });
 

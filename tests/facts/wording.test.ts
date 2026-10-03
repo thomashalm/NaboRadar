@@ -159,11 +159,17 @@ describe("støy", () => {
   it("viser dB-intervall og skiller strategisk kartlegging fra T-1442", () => {
     const strategisk = describe_("stoy_strategisk_veg", { niva: "55–59 dB" }, true)!;
     expect(strategisk.headline).toContain("Lden 55–59 dB");
-    expect(strategisk.details.join(" ")).toContain("strategisk støykartlegging");
+    // Metode og kartleggingsår står én gang i «Kilder og metode», ikke på hvert kort.
+    expect(strategisk.details).toEqual([]);
+    expect(SOURCES["mdir-stoy-strategisk"]!.method).toContain("EU-støydirektivet, kartlagt 2022");
+    // «Ved søkepunktet» står som avstand på kortet og i kortformen — ikke en gang til i overskriften.
+    expect(strategisk.headline).not.toContain("søkepunktet");
+    expect(strategisk.compact!.context).toBe("Ved søkepunktet · modellberegnet, ikke målt ved boligen");
 
     const varsel = describe_("stoysone_veg_t1442", { sone: "gul", kilde: "ERF-veger", prognoseAar: 2040 }, true)!;
-    expect(varsel.headline).toContain("gul støysone");
-    expect(varsel.caveat).toContain("ikke skal brukes til detaljvurdering av enkeltboliger");
+    expect(varsel.headline).toBe("Gul støysone for veitrafikk (T-1442)");
+    // Statens vegvesens eget forbehold er en egenskap ved kartet, og står ved kilden.
+    expect(SOURCES["svv-stoysone-veg"]!.method).toContain("ikke skal brukes til detaljvurdering av enkeltboliger");
   });
 
   it("uten dB-verdi vises ingenting", () => {
@@ -190,9 +196,10 @@ describe("forurenset grunn", () => {
     expect(majorstuen().headline).toBe("Majorstuen skole");
   });
 
-  it("sier tydelig om søkepunktet ligger innenfor eller utenfor", () => {
-    expect(majorstuen(false).details[0]).toBe("Søkepunktet ligger utenfor lokaliteten.");
+  it("sier tydelig fra når søkepunktet ligger innenfor, og gjentar ikke avstanden når det ligger utenfor", () => {
     expect(majorstuen(true).details[0]).toBe("Søkepunktet ligger innenfor denne lokaliteten.");
+    // Utenfor: avstanden ved navnet («130 m unna») sier det; ingen egen linje på hvert kort.
+    expect(majorstuen(false).details.join(" ")).not.toMatch(/søkepunktet/i);
   });
 
   it("antyder aldri at eiendommen det søkes på er forurenset", () => {
@@ -202,16 +209,15 @@ describe("forurenset grunn", () => {
     expect(majorstuen(false).details.join(" ")).not.toMatch(/registrert .*her\b/i);
   });
 
-  it("sier eksplisitt at kilden ikke oppgir forurensningstype", () => {
-    expect(majorstuen().details).toContain("Kilden oppgir ikke hvilken type forurensning som er registrert.");
+  it("sier eksplisitt at kilden ikke oppgir forurensningstype — én gang, ved kilden", () => {
+    expect(SOURCES["mdir-forurenset-grunn"]!.method).toContain("Kilden oppgir ikke hvilken type forurensning som er registrert.");
+    expect(majorstuen().details.join(" ")).not.toContain("Kilden oppgir ikke");
   });
 
   it("holder hovedteksten kort og uten kildekoder", () => {
     const details = majorstuen().details;
     expect(details).toEqual([
-      "Søkepunktet ligger utenfor lokaliteten.",
       "Tilstanden er vurdert som ikke akseptabel, og det er behov for tiltak. Undersøkelser er igangsatt.",
-      "Kilden oppgir ikke hvilken type forurensning som er registrert.",
     ]);
     expect(details.join(" ")).not.toMatch(/påvirkningsgrad|undersøkelseIgangsatt|forurensetGrunn/);
   });
@@ -219,8 +225,9 @@ describe("forurenset grunn", () => {
   it("flytter kildens koder, arealbruk og årstall under «Detaljer»", () => {
     expect(majorstuen().technical).toEqual([
       "Påvirkningsgrad 3 – ikke akseptabel tilstand, behov for tiltak",
-      "Lokalitetstype: forurensetGrunn",
-      "Prosesstatus: undersøkelseIgangsatt",
+      // Kildens koder oversatt — ingen «forurensetGrunn» eller «undersøkelseIgangsatt» i UI-et.
+      "Lokalitetstype: forurenset grunn",
+      "Status: undersøkelser er igangsatt",
       "Arealbruk: offentlig eller privat tjenesteytelse",
       "3\u00a0300 m²",
       "registrert 2019",
@@ -236,8 +243,9 @@ describe("forurenset grunn", () => {
     expect(majorstuen().details.join(" ")).not.toContain("Registrert som");
   });
 
-  it("sier ikke noe om naboeiendommer", () => {
-    expect(majorstuen().caveat).toContain("ikke nødvendigvis hele eiendommen eller naboeiendommene");
+  it("sier ikke noe om naboeiendommer — forbeholdet står én gang, ved kilden", () => {
+    expect(SOURCES["mdir-forurenset-grunn"]!.method).toContain("ikke nødvendigvis hele eiendommen eller naboeiendommene");
+    expect(majorstuen().caveat).toBeNull();
   });
 
   it("gjentar ikke «uavklart» både som grad og som prosesstatus", () => {

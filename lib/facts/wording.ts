@@ -41,6 +41,11 @@ export interface SourceInfo {
   licenseUrl: string;
   /** Etatens egen publiserte kartside, når den finnes, slik at svaret kan etterprøves der. */
   url?: string;
+  /**
+   * Det som gjelder hele datasettet: metode, definisjoner og hva kilden ikke oppgir. Står én gang
+   * i «Kilder og metode», i stedet for på hvert kort eller i en seksjonsingress.
+   */
+  method?: string;
 }
 
 /** Kilde per provider/lookup. Vises alltid sammen med faktaene. */
@@ -50,6 +55,8 @@ export const SOURCES: Record<string, SourceInfo> = {
     owner: "Miljødirektoratet",
     licenseName: "NLOD 2.0",
     licenseUrl: "https://data.norge.no/nlod/no/2.0",
+    method:
+      "Kilden oppgir ikke hvilken type forurensning som er registrert. En registrering gjelder lokaliteten i Miljødirektoratets database, ikke nødvendigvis hele eiendommen eller naboeiendommene.",
   },
   "mdir-industri-tillatelse": {
     name: "Industri med utslippstillatelse",
@@ -62,24 +69,32 @@ export const SOURCES: Record<string, SourceInfo> = {
     owner: "NVE",
     licenseName: "NLOD",
     licenseUrl: "https://data.norge.no/nlod/no/1.0",
+    method:
+      "En kartlagt sone betyr at NVE har utredet forholdene på stedet. Klassifiseringen gjelder hele sonen, ikke den enkelte eiendom.",
   },
   "nve-kvikkleire-aktsomhet": {
     name: "Aktsomhetskart for kvikkleireskred",
     owner: "NVE",
     licenseName: "NLOD",
     licenseUrl: "https://data.norge.no/nlod/no/1.0",
+    method:
+      "Et aktsomhetsområde er et oversiktskart som sier at forholdene bør undersøkes nærmere — ikke at kvikkleire er påvist eller at noe vil skje.",
   },
   "nve-flom": {
     name: "Flomsoner og aktsomhetsområde for flom",
     owner: "NVE",
     licenseName: "NLOD",
     licenseUrl: "https://data.norge.no/nlod/no/1.0",
+    method:
+      "En kartlagt flomsone er beregnet av NVE for et bestemt vassdrag. Et aktsomhetsområde er et landsdekkende oversiktskart som sier at forholdene bør undersøkes nærmere.",
   },
   "nve-skred": {
     name: "Skredfaresoner og aktsomhetsområder for skred",
     owner: "NVE",
     licenseName: "NLOD",
     licenseUrl: "https://data.norge.no/nlod/no/1.0",
+    method:
+      "En kartlagt skredfaresone er en utredning på stedet. Et aktsomhetsområde er et landsdekkende oversiktskart, modellert fra terreng, som sier at forholdene bør undersøkes nærmere.",
   },
   "ngu-radon-aktsomhet": {
     name: "Radon – aktsomhetsområder",
@@ -94,6 +109,8 @@ export const SOURCES: Record<string, SourceInfo> = {
     owner: "Kartverket",
     licenseName: "NLOD",
     licenseUrl: "https://data.norge.no/nlod/no/1.0",
+    method:
+      "Beregnet av Kartverket fra terrengmodell og vannstandsstatistikk. Viser hvilket areal som kan stå under vann ved et nivå, ikke hva som skjer med bygningen.",
   },
   "nve-nettanlegg": {
     name: "Nettanlegg",
@@ -143,18 +160,24 @@ export const SOURCES: Record<string, SourceInfo> = {
     owner: "Miljødirektoratet",
     licenseName: "NLOD",
     licenseUrl: "https://data.norge.no/nlod/no/1.0",
+    method:
+      "Strategisk støykartlegging etter EU-støydirektivet, kartlagt 2022. Modellberegning for området, ikke måling ved boligen.",
   },
   "svv-stoysone-veg": {
     name: "Støyvarselkart for veg",
     owner: "Statens vegvesen",
     licenseName: "NLOD",
     licenseUrl: "https://data.norge.no/nlod/no/1.0",
+    method:
+      "Støysoner etter retningslinje T-1442. Statens vegvesen oppgir at støyvarselkartet ikke skal brukes til detaljvurdering av enkeltboliger.",
   },
   "avinor-stoysone-fly": {
     name: "Flystøysoner",
     owner: "Avinor",
     licenseName: "Åpne data",
     licenseUrl: "https://kartkatalog.geonorge.no/metadata/1489f7f8-40c8-4dc4-83b6-bcf277b56506",
+    method:
+      "Støysoner etter retningslinje T-1442, modellberegnet for lufthavnen, ikke målt ved boligen.",
   },
 };
 
@@ -297,9 +320,10 @@ function forurensetGrunn(input: { title: string; attributes: AreaAttributes; con
   const { title, attributes: a, contains, externalId } = input;
   const details: string[] = [];
 
-  // Første linje er alltid hvor registreringen ligger i forhold til søkepunktet. Uten den kan
-  // et lokalitetsnavn som er en gateadresse leses som at adressen brukeren søkte på er forurenset.
-  details.push(contains ? "Søkepunktet ligger innenfor denne lokaliteten." : "Søkepunktet ligger utenfor lokaliteten.");
+  // Ligger søkepunktet inne i lokaliteten, er det det viktigste kortet sier, og det står først.
+  // Ligger det utenfor, sier avstanden ved navnet det samme («130 m unna»), og en egen linje ville
+  // bare gjentatt den på hvert kort.
+  if (contains) details.push("Søkepunktet ligger innenfor denne lokaliteten.");
 
   // Lokalitetstypen sier noe reelt når den ikke bare er «forurenset grunn» — deponi, skytebane, skipsverft.
   const type = str(a.lokalitetType);
@@ -318,8 +342,8 @@ function forurensetGrunn(input: { title: string; attributes: AreaAttributes; con
   const tilstand = TILSTANDSKLASSE_TEXT[str(a.tilstandsklasse) ?? ""];
   if (tilstand) details.push(`Høyeste registrerte tilstandsklasse: ${tilstand}.`);
 
-  // Stofflistene ligger ikke i kildens åpne data, og for mange lokaliteter finnes de ikke i det hele tatt.
-  details.push("Kilden oppgir ikke hvilken type forurensning som er registrert.");
+  // At kilden ikke oppgir stofftype, og at registreringen gjelder lokaliteten og ikke hele
+  // eiendommen, gjelder hele datasettet. Det står én gang i «Kilder og metode» (SOURCES.method).
 
   const arealbruk = AREALBRUK_TEXT[str(a.arealbruk) ?? ""];
   const areal = num(a.arealM2);
@@ -330,12 +354,12 @@ function forurensetGrunn(input: { title: string; attributes: AreaAttributes; con
     // hvor registreringen ligger i forhold til søkepunktet.
     headline: title,
     details,
-    caveat:
-      "Registreringen gjelder denne lokaliteten i Miljødirektoratets database, ikke nødvendigvis hele eiendommen eller naboeiendommene.",
+    caveat: null,
+    // Kildens koder oversatt. En kode vi ikke har oversettelse for, vises ikke rått.
     technical: [
       PAAVIRKNINGSGRAD_TEKNISK[str(a.paavirkningsgrad) ?? ""] ?? null,
-      str(a.lokalitetType) ? `Lokalitetstype: ${str(a.lokalitetType)}` : null,
-      str(a.prosessStatus) ? `Prosesstatus: ${str(a.prosessStatus)}` : null,
+      LOKALITET_TYPE_SETNING[str(a.lokalitetType) ?? ""] ? `Lokalitetstype: ${LOKALITET_TYPE_SETNING[str(a.lokalitetType)!]}` : null,
+      PROSESS_STATUS_SETNING[str(a.prosessStatus) ?? ""] ? `Status: ${PROSESS_STATUS_SETNING[str(a.prosessStatus)!]!.replace(/\.$/, "").toLowerCase()}` : null,
       arealbruk ? `Arealbruk: ${arealbruk.charAt(0).toLowerCase()}${arealbruk.slice(1)}` : null,
       areal !== null && areal > 0 ? formatArea(areal) : null,
       aar ? `registrert ${aar}` : null,
@@ -389,6 +413,12 @@ function kvikkleireSone(title: string, a: AreaAttributes, contains: boolean): Fa
     caveat: null,
   };
 }
+
+/**
+ * Støyens ene forbehold. Står én gang, i oppsummeringen av støygruppen — ikke på hvert kort.
+ */
+export const STOY_FORBEHOLD = "Modellberegnet, ikke målt ved boligen";
+const STOY_FORBEHOLD_VED_PUNKTET = `Ved søkepunktet · ${STOY_FORBEHOLD.charAt(0).toLowerCase()}${STOY_FORBEHOLD.slice(1)}`;
 
 /**
  * Bygger teksten for ett faktum. Ukjent subtype gir null, slik at UI-et heller viser
@@ -530,11 +560,9 @@ export function describeFact(input: {
       return {
         headline: label !== null ? `${label} radonaktsomhet i området` : "Radonaktsomhet i området",
         details: [
-          // Dette er den viktigste setningen i hele naturfaredelen, og den er ikke valgfri.
-          "Dette er ikke en måling i boligen. Faktisk radonnivå kan bare fastslås ved måling.",
-          // NGU sier det selv: «Kartet kan ikke benyttes til å forutsi radonkonsentrasjonen i
-          // enkeltbygninger.» Da skal vi ikke la kortet framstå som en vurdering av tomten.
-          "Kartet viser aktsomhet i området og er ikke en måling eller detaljert vurdering av den enkelte tomten.",
+          // Dette er den viktigste setningen i hele naturfaredelen, og den er ikke valgfri. Den
+          // sier begge deler NGU sier: kartet er aktsomhet for området, og bare måling gir nivået.
+          "Aktsomhet for området, ikke en måling i boligen. Faktisk radonnivå kan bare fastslås ved måling.",
         ],
         compact: {
           headline: label !== null ? `${label} radonaktsomhet` : "Radonaktsomhet",
@@ -693,10 +721,12 @@ export function describeFact(input: {
       if (!level) return null;
       const kortKilde = subtype === "stoy_strategisk_veg" ? "veitrafikk" : "bane";
       return {
-        headline: `Beregnet støy fra ${kilde} ved søkepunktet: Lden ${level}`,
-        details: ["Fra strategisk støykartlegging etter EU-støydirektivet, kartlagt 2022."],
-        caveat: "Dette er en modellberegning for området, ikke en måling ved boligen.",
-        compact: { headline: `Støy fra ${kortKilde} · Lden ${level}`, context: "Ved søkepunktet · modellberegnet" },
+        // «Ved søkepunktet» står som avstand på kortet, og forbeholdet i gruppens oppsummering.
+        // Metode og kartleggingsår står i «Kilder og metode».
+        headline: `Beregnet støy fra ${kilde}: Lden ${level}`,
+        details: [],
+        caveat: null,
+        compact: { headline: `Støy fra ${kortKilde} · Lden ${level}`, context: STOY_FORBEHOLD_VED_PUNKTET },
       };
     }
 
@@ -704,12 +734,12 @@ export function describeFact(input: {
       const sone = a.sone === "rod" ? "rød" : "gul";
       const aar = num(a.prognoseAar);
       return {
-        headline: `Søkepunktet ligger i ${sone} støysone for veitrafikk (T-1442)`,
+        headline: `${sone === "rød" ? "Rød" : "Gul"} støysone for veitrafikk (T-1442)`,
         details: [
           [str(a.kilde), aar ? `prognoseår ${aar}` : null].filter(Boolean).join(" · ") || "Statens vegvesens støyvarselkart.",
         ],
-        caveat: "Statens vegvesen oppgir at støyvarselkartet ikke skal brukes til detaljvurdering av enkeltboliger.",
-        compact: { headline: `${sone === "rød" ? "Rød" : "Gul"} støysone for veitrafikk`, context: "Ved søkepunktet · modellberegnet (T-1442)" },
+        caveat: null,
+        compact: { headline: `${sone === "rød" ? "Rød" : "Gul"} støysone for veitrafikk`, context: STOY_FORBEHOLD_VED_PUNKTET },
       };
     }
 
@@ -717,10 +747,10 @@ export function describeFact(input: {
       const sone = a.sone === "rod" ? "rød" : "gul";
       const aar = num(a.beregnetAar);
       return {
-        headline: `Søkepunktet ligger i ${sone} flystøysone (T-1442)`,
+        headline: `${sone === "rød" ? "Rød" : "Gul"} flystøysone (T-1442)`,
         details: [[str(a.lufthavn), aar ? `beregnet ${aar}` : null].filter(Boolean).join(" · ")].filter(Boolean),
-        caveat: "Sonene er modellberegnet for lufthavnen, ikke målt ved boligen.",
-        compact: { headline: `${sone === "rød" ? "Rød" : "Gul"} flystøysone`, context: "Ved søkepunktet · modellberegnet (T-1442)" },
+        caveat: null,
+        compact: { headline: `${sone === "rød" ? "Rød" : "Gul"} flystøysone`, context: STOY_FORBEHOLD_VED_PUNKTET },
       };
     }
 
@@ -861,6 +891,12 @@ export function describeGrunnforholdSummary(input: {
   /** Antall aktsomhetsområder ved punktet utover kvikkleire. */
   aktsomhetsomrader?: number;
   /**
+   * Hva aktsomhetsområdene gjelder, med kildens ord: «flom», «jord- og flomskred». Når den er
+   * satt, navngis typene i stedet for bare å telles — «Aktsomhetsområde for flom» sier mer enn
+   * «Aktsomhetsområde».
+   */
+  aktsomhetTyper?: string[];
+  /**
    * Radonlinjen, gjenbrukt fra radonkortets egen kortform («Meget høy radonaktsomhet»).
    *
    * Sendes som ferdig tekst framfor som klasse, fordi AreaFact er visningsformen og ikke bærer
@@ -884,20 +920,28 @@ export function describeGrunnforholdSummary(input: {
         ? `Kartlagt ${liste([...(input.soneVedPunkt ? ["kvikkleiresone"] : []), ...andreSoner])} ved søkepunktet`
         : null;
 
+  const typer = input.aktsomhetTyper ?? [];
   const deler = [
     soneDel,
-    aktsomhet === 1
-      ? "Aktsomhetsområde ved søkepunktet"
-      : aktsomhet > 1
-        ? `${aktsomhet} aktsomhetsområder ved søkepunktet`
-        : null,
+    typer.length === 1
+      ? `Aktsomhetsområde for ${typer[0]} ved søkepunktet`
+      : typer.length > 1
+        ? `Aktsomhetsområder for ${liste(typer)} ved søkepunktet`
+        : aktsomhet === 1
+          ? "Aktsomhetsområde ved søkepunktet"
+          : aktsomhet > 1
+            ? `${aktsomhet} aktsomhetsområder ved søkepunktet`
+            : null,
     input.utredetVedPunkt ? "Utredet: ikke fare for områdeskred ved søkepunktet" : null,
     radon !== null ? radon.charAt(0).toLowerCase() + radon.slice(1) : null,
     input.soner > 0
       ? `${input.soner} ${input.soner === 1 ? "kartlagt kvikkleiresone" : "kartlagte kvikkleiresoner"} innen ${input.radiusLabel}`
       : null,
   ].filter((del): del is string => del !== null);
-  return deler.join(" · ");
+  // Linjen står alene som første svar i seksjonen, så den begynner med stor bokstav også når
+  // radon er det eneste funnet.
+  const linje = deler.join(" · ");
+  return linje.charAt(0).toUpperCase() + linje.slice(1);
 }
 
 /** «a», «a og b», «a, b og c». */
@@ -906,9 +950,24 @@ function liste(ord: string[]): string {
   return `${ord.slice(0, -1).join(", ")} og ${ord[ord.length - 1]}`;
 }
 
-/** Oppsummeringen på «Infrastruktur». Typene har lange navn, så vi teller dem samlet. */
-export function describeInfrastrukturSummary(input: { total: number; radiusLabel: string }): string {
-  return `${input.total} ${input.total === 1 ? "registrering" : "registreringer"} innen ${input.radiusLabel}`;
+/**
+ * Oppsummeringen på «Infrastruktur»: hva som er der, med typens eget navn — «3
+ * transformatorstasjoner», «2 transformatorstasjoner og 1 kraftlinje». En type uten navn telles
+ * som «registrering», så summen alltid stemmer.
+ */
+export function describeInfrastrukturSummary(input: {
+  total: number;
+  radiusLabel: string;
+  deler?: readonly { ental: string; flertall: string; antall: number }[];
+}): string {
+  const deler = (input.deler ?? []).filter((del) => del.antall > 0);
+  const navngitt = deler.reduce((sum, del) => sum + del.antall, 0);
+  const rest = input.total - navngitt;
+  const ord = [
+    ...deler.map((del) => `${del.antall} ${del.antall === 1 ? del.ental : del.flertall}`),
+    ...(rest > 0 ? [`${rest} ${rest === 1 ? "registrering" : "registreringer"}`] : []),
+  ];
+  return `${liste(ord)} innen ${input.radiusLabel}`;
 }
 
 export const OPPVEKST_CAVEAT =

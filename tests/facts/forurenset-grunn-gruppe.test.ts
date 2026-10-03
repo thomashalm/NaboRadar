@@ -109,7 +109,8 @@ describe("Forurenset grunn offentlig", () => {
     const kort = resultat.cluster.facts[0]!;
     expect(kort.headline).toBe("Gammel bensinstasjon");
     expect(kort.details.join(" ")).toContain("ikke akseptabel, og det er behov for tiltak");
-    expect(kort.caveat).toContain("ikke nødvendigvis hele eiendommen");
+    // Forbeholdet om at registreringen gjelder lokaliteten står én gang, i «Kilder og metode».
+    expect(kort.caveat).toBeNull();
     expect(resultat.cluster.summary).toBe("1 med behov for tiltak");
   });
 

@@ -1680,11 +1680,16 @@ Effekten er målt: første synlige innhold gikk fra **4 970 ms til 55 ms** (Oslo
 
 1. **Nærområdet**
 2. **Støy**
-3. **Grunnforhold**
+3. **Naturfare** (seksjons-id `grunnforhold`)
 4. **Infrastruktur**
 5. **Planer og saker**
 6. **Forurenset grunn**
 7. **Tilfluktsrom**
+8. **Friluft i nærheten** (hytter og koier)
+
+Over seksjonene står bare adressen (H1), radiusvelgeren, «Endre sted» og skolekretsen. Det
+finnes ingen synlig mellomoverskrift eller ingress over funnene; en skjult H2 («Funn i området»)
+holder overskriftsnivåene riktige for skjermlesere.
 
 Rekkefølgen følger **hvor nær funnet er adressen selv**. Nærområdet står først fordi det er det
 mest umiddelbart forståelige svaret, og fordi det nesten alltid har innhold. Så det som beskriver
@@ -1696,6 +1701,29 @@ løftes «Forurenset grunn» øverst.
 
 Det finnes **ingen** hovedseksjon som heter Naboklager, Lokale saker eller lignende. Slike saker
 hører hjemme som undertyper under «Planer og saker» hvis de noen gang bygges. Dette er testet.
+
+### Tekstregelen
+
+Gjelder alle seksjoner på `/omrade` (innført 2026-10-03):
+
+- **Seksjonstittelen er kategorien.** Ingen undertittel eller ingress som gjentar den. I dag har
+  ingen seksjon ingress (`intro: null` i `AREA_SECTIONS`, testet).
+- **Første synlige linje er selve funnet**, og kan leses alene: «5 transformatorstasjoner og 7
+  kraftlinjer innen 1 km», «Aktsomhetsområde for flom ved søkepunktet · moderat til lav
+  radonaktsomhet i området», «2 varslede planoppstarter innen 1 km». Navngi typen, ikke
+  «registreringer».
+- **Radien står ved funnet** der den er relevant. Den står ikke i en overskrift over siden.
+- **Et tolkningsforbehold står én gang**, der det endrer hvordan funnet skal forstås: «Modellberegnet,
+  ikke målt ved boligen» (støy), «Aktsomhet for området, ikke en måling i boligen» (radon),
+  «landsdekkende oversikt, ikke en beregning for stedet» (flomaktsomhet), «Veiledende» (skolekrets).
+- **Det som gjelder hele datasettet** — metode, kartleggingsår, definisjoner og hva kilden ikke
+  oppgir — står i «Kilder og metode» (`SOURCES[id].method` i `lib/facts/wording.ts`), ikke på
+  hvert kort. Plansakenes forbehold står i seksjonens egen «Kilde og metode».
+- **Tomtilstand er én linje.**
+- **Ingen rå kildekoder** i UI-et, heller ikke under «Detaljer». Kodene oversettes
+  («Status: tiltak er igangsatt»), eller utelates.
+- **Ikke forklaring fordi det er plass.** Kilden står på kortet; gruppens kildelinje vises bare
+  når den ikke allerede står der.
 
 ### Seksjonsrammen
 
@@ -1743,9 +1771,9 @@ Alle seksjoner følger samme form:
   Se 3 km» — ikke en stor stiplet boks. Forbeholdet om at kilden ikke sier om planarbeidet pågår
   vises bare når det finnes en sak å ta forbehold om
 - **Maks to linjer før brukeren må åpne.** Støy vises som «Støy fra veitrafikk · Lden 65–69 dB» /
-  «Ved søkepunktet · modellberegnet»; metode, kartleggingsår, forbehold og kilde ligger bak
-  utvideren med uendret ordlyd. Kortformen kommer fra formuleringsregisteret, ikke fra UI-et, og
-  er samme påstand med færre ord
+  «Ved søkepunktet · modellberegnet, ikke målt ved boligen»; kortene bak utvideren har dB-nivået
+  og kilden, og metode og kartleggingsår står i «Kilder og metode». Kortformen kommer fra
+  formuleringsregisteret, ikke fra UI-et, og er samme påstand med færre ord
 
 Grenser: 3 i forhåndsvisning, maks 30 i en liste, 150 hentede skjenkesteder, maks 30 kartmarkører
 for servering. Når listen er kuttet, brukes databasens eget antall i teksten — så «566 steder» er

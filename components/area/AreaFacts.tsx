@@ -72,12 +72,13 @@ export function AreaFacts({
       aria-busy={pending}
       className="mt-9"
     >
-      <h2 id="facts-heading" className="text-xl font-semibold tracking-tight">
-        Hva bør du vite om området?
+      {/*
+        Bare for skjermlesere. Seksjonene under er H3, og hovedinnholdet trenger en H2 over dem.
+        Synlig sa den det samme som adressen og radiusvelgeren rett over.
+      */}
+      <h2 id="facts-heading" className="sr-only">
+        Funn i området
       </h2>
-      <p className="mt-0.5 text-sm text-muted">
-        Registrerte forhold innen {formatRadius(radius)}, fra offentlige kilder.
-      </p>
 
       <div
         className={`mt-4 transition-opacity ${pending ? "pointer-events-none opacity-40" : ""}`}
@@ -311,10 +312,6 @@ function Kildelinjer({
         <p className="font-medium text-ink">
           Ingen registrerte forhold i kildene våre innen {formatRadius(radius)}.
         </p>
-        <p className="mt-1 text-muted">
-          Vi viser støysoner, kvikkleire, forurenset grunn, kraftanlegg og
-          anlegg med utslippstillatelse. Flere kilder kommer.
-        </p>
       </Notice>
     );
   }
@@ -362,6 +359,11 @@ function Kildelinjer({
                   <span className="block text-muted">
                     {source.owner} · {source.licenseName}
                   </span>
+                  {source.method && (
+                    <span className="mt-0.5 block text-muted">
+                      {source.method}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -596,8 +598,11 @@ function ClusterDetails({
             <OverviewDetails overview={cluster.overview} />
           </div>
         )}
-        {/* Oversikten oppgir sin egen kilde; da skal den ikke stå to ganger. */}
-        {cluster.sourceName !== cluster.overview?.sourceName && (
+        {/*
+          Kortene og oversikten oppgir sin egen kilde. Står alle gruppens kilder allerede der,
+          skal de ikke stå én gang til nederst.
+        */}
+        {!kilderStårAllerede(cluster) && (
           <p className="mt-2 text-[13px] text-muted">
             Kilde: {cluster.sourceName}
           </p>
@@ -605,6 +610,14 @@ function ClusterDetails({
       </div>
     </details>
   );
+}
+
+function kilderStårAllerede(cluster: FactCluster): boolean {
+  const viste = new Set([
+    ...cluster.facts.map((fact) => fact.sourceName),
+    ...(cluster.overview ? cluster.overview.sourceName.split(" · ") : []),
+  ]);
+  return cluster.sourceName.split(" · ").every((kilde) => viste.has(kilde));
 }
 
 /**

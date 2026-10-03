@@ -65,10 +65,9 @@ export const AREA_SECTIONS: readonly AreaSection[] = [
   {
     id: "naeromradet",
     label: "Nærområdet",
-    // Nøytral ramme: dette er hva som finnes, ikke hva som er bra eller dårlig.
-    // Kort nok til én linje på mobil. Forbeholdet om at vi ikke vurderer stedene står samlet
-    // i «Kilder og metode» nederst, i stedet for i hver seksjonsingress.
-    intro: "Offentlig registrerte steder i nærheten.",
+    // Ingen ingress: undergruppene (skoler og barnehager, helse og omsorg …) sier selv hva
+    // seksjonen er. Forbeholdet om at vi ikke vurderer stedene står i «Kilder og metode».
+    intro: null,
     categories: ["oppvekst", "helse", "omsorg", "servering", "industri"],
   },
   { id: "stoy", label: "Støy", intro: null, categories: ["stoy"] },
@@ -79,13 +78,16 @@ export const AREA_SECTIONS: readonly AreaSection[] = [
    * og kategorien i databasen heter det samme. Det er merkelappen brukeren ser som er endret,
    * fordi kvikkleiresoner, flomsoner og radonaktsomhet er naturfare — ikke byggegrunn generelt.
    *
-   * Ingressen finnes fordi hele seksjonen hviler på ett skille: et aktsomhetsområde er et
-   * screeningkart, en kartlagt sone er en utredning. Sies det ikke her, må det sies i hver rad.
+   * Seksjonen hviler på ett skille: et aktsomhetsområde er et screeningkart, en kartlagt sone er
+   * en utredning. Det sies i hvert funn der det betyr noe («Aktsomhetsområde for flom», og i
+   * kortet: «landsdekkende oversikt, ikke en beregning for stedet»), og den generelle
+   * definisjonen står i «Kilder og metode» (SOURCES.method). Ingen ingress som gjentar det over
+   * hvert resultat, også når resultatet bare er radon.
    */
   {
     id: "grunnforhold",
     label: "Naturfare",
-    intro: "Kartlagte soner sier at forholdene er utredet på stedet. Aktsomhetsområder er oversiktskart som sier at de bør undersøkes nærmere.",
+    intro: null,
     categories: ["grunnforhold"],
   },
   { id: "infrastruktur", label: "Infrastruktur", intro: null, categories: ["infrastruktur"] },

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { forwardRef } from "react";
-import { EVENT_DATE_LABELS, EVENT_TYPE_LABELS } from "@/lib/events/labels";
+import { EVENT_CARD_DATE_LABELS, EVENT_TYPE_LABELS } from "@/lib/events/labels";
 import { formatArea, formatDate, formatDistance } from "@/lib/format";
 import type { AreaEvent } from "@/types/event";
 
@@ -35,7 +35,8 @@ export const EventCard = forwardRef<HTMLElement, EventCardProps>(function EventC
         </span>
         <span className="shrink-0 text-sm text-muted">{formatDistance(event.distanceM)}</span>
       </div>
-      <h3 className="mt-1.5 text-[17px] leading-snug font-semibold tracking-tight text-ink">
+      {/* H4: kortet står under seksjonsoverskriften «Planer og saker» (H3). */}
+      <h4 className="mt-1.5 text-[17px] leading-snug font-semibold tracking-tight text-ink">
         <button
           type="button"
           onClick={(e) => {
@@ -47,10 +48,10 @@ export const EventCard = forwardRef<HTMLElement, EventCardProps>(function EventC
         >
           {event.title}
         </button>
-      </h3>
+      </h4>
       {date && (
         <p className="mt-1 text-[15px] text-muted">
-          {EVENT_DATE_LABELS[event.type]} {date}
+          {EVENT_CARD_DATE_LABELS[event.type]} {date}
         </p>
       )}
       {(plantype || event.computedAreaM2) && (
