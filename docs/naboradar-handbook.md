@@ -851,7 +851,7 @@ testdetaljer og eksempelresponser.
 | Omsorgstilbud | Oslo kommune + Helsenorge | Sykehjem, helsehus, behandlings- og botilbud | Punkt | 367 | NLOD 2.0 | **Kurert liste** i `data/omsorgstilbud.json`. Foreløpig i hovedsak Oslo. Kun steder ansvarlig myndighet selv publiserer med navn og adresse |
 | Skjenkebevillinger | Næringsetaten, Oslo kommune | Serverings- og skjenkesteder | Punkt | 1 406 | **Lisens ikke oppgitt av kilden** | Kun Oslo. Bør avklares med Næringsetaten |
 | Skolekretser | Plan- og bygningsetaten, Oslo kommune | Veiledende inntaksområde for barneskole | Polygon | 105 | **Lisens ikke avklart** — tjenesten oppgir «Copyright Plan- og bygningsetaten» | Kun Oslo, kun barnetrinn. Kilden har ingen datostempling, og grensene revideres hver høst |
-| Offentlige tilfluktsrom | Sivilforsvaret / DSB, via Geonorge-WFS | Tilfluktsrom i nærheten, med antall plasser | Punkt | 556 | **NLOD 1.0** — «Åpne data», «Ugradert» | Hele Norge. Kilden gir ikke areal, type eller status |
+| Offentlige tilfluktsrom | Sivilforsvaret / DSB, landsdekkende nedlastingsfil fra Geonorge (GML) | Tilfluktsrom i nærheten, med antall plasser | Punkt | 556 | **NLOD 1.0** — «Åpne data», «Ugradert» | Hele Norge. Kilden gir ikke areal, type eller status |
 
 Hyttekildene står for seg, fordi radene deres er kildeposter og ikke det som vises:
 
@@ -1118,6 +1118,21 @@ ikke alt svarer på. Skal det inn senere, hører det sammen med valgt rad, ikke 
 
 ### Tilfluktsrom
 
+- **Kilden er den landsdekkende nedlastingsfila, ikke WFS-en** (fra 2026-10-04).
+  `https://nedlasting.geonorge.no/geonorge/Samfunnssikkerhet/TilfluktsromOffentlige/GML/Samfunnssikkerhet_0000_Norge_25833_TilfluktsromOffentlige_GML.zip`
+  — utgitt av DSB, NLOD 1.0, bygget på nytt hver natt, og distribusjonen datasettets metadata
+  peker på. WFS-en (`wfs.geonorge.no/skwms1/wfs.tilfluktsrom_offentlige`) svarte HTTP 500 og er
+  ikke lenger i bruk, heller ikke som reserve: én kilde skriver til datasettet.
+- **Fila valideres før noe skrives.** Tom fil, manglende nøkkelfelt (`romnr`, `posisjon`,
+  `plasser`, `adresse` i under 90 % av rommene), annet koordinatsystem enn EPSG:25833, eller
+  koordinater som ikke er meter i Norge, er en feil — ikke «0 rom». Kjøringen feiler, og ingenting
+  skrives eller markeres som fjernet. Helsesjekken gjør samme nedlasting og validering.
+- **Rom som mangler i et gyldig uttrekk** markeres som fjernet av den vanlige avstemmingen. Fila
+  er et komplett nasjonalt uttrekk, så det er riktig — men vakten stopper avstemmingen hvis
+  antallet faller mer enn 30 % (`lib/sync/guards.ts`). Ingen egen regel for tilfluktsrom.
+- **Koordinatene er UTM 33 for hele landet** og regnes om med Krüger-rekkene
+  (`utm33ToWgs84Exact`). Den korte rekkeutviklingen i `utm33ToWgs84` bommer med inntil 42 m i
+  Finnmark og skal ikke brukes på landsdekkende filer.
 - **Kun offentlige.** Datasettet heter «Tilfluktsrom – Offentlige», og det er hele avgrensningen:
   private tilfluktsrom publiseres ikke av DSB. Det finnes ingen private rader å filtrere bort.
 - **`plasser` er rommets dimensjonering**, ikke ledige plasser i dag. Vi skriver «Dimensjonert

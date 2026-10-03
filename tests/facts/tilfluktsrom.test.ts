@@ -150,7 +150,8 @@ describe("normalisering fra DSB", () => {
     romnr: "776",
     plasser: "400",
     adresse: "Trimv. 09 - Borre Idrettspark (off)",
-    posisjon: { Point: { pos: "59.404915 10.462108" } },
+    // Slik fila har det: øst og nord i UTM 33.
+    posisjon: { Point: { pos: "242485.0000218585 6593925.999916838", "@srsName": "urn:ogc:def:crs:EPSG::25833" } },
     datauttaksdato: "2026-09-24T23:40:59.369",
     ...over,
   });
@@ -191,6 +192,15 @@ describe("normalisering fra DSB", () => {
     const [lng, lat] = records[0]!.geometry.coordinates as [number, number];
     expect(lat).toBeCloseTo(59.4049, 3);
     expect(lng).toBeCloseTo(10.4621, 3);
+  });
+
+  it("regner om nøyaktig også langt fra sone 33", () => {
+    // Kaigaten 8 i Vardø (romnr 1681), 31° øst. Den korte rekkeutviklingen bommet med 42 m her.
+    const vardo = feature({ romnr: "1681", posisjon: { Point: { pos: "1097495.4329697369 7887147.414813985" } } });
+    const [lng, lat] = provider.normalize({ features: [vardo], documents: [] }).records[0]!.geometry.coordinates as [number, number];
+    // Posisjonen Geonorges WFS ga for samme rom i EPSG:4326.
+    expect(lng).toBeCloseTo(31.102779, 5);
+    expect(lat).toBeCloseTo(70.37256, 5);
   });
 
   it("lagrer plasser som tall, og null når kilden oppgir 0", () => {

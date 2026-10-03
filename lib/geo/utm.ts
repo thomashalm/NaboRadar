@@ -70,3 +70,59 @@ function utmToWgs84([easting, northing]: readonly [number, number], centralMerid
 
   return [(lng * 180) / Math.PI, (lat * 180) / Math.PI];
 }
+
+/**
+ * ETRS89 / UTM sone 33N (EPSG:25833) → lengde- og breddegrad, nøyaktig i hele landet.
+ *
+ * `utm33ToWgs84` over er en kort rekkeutvikling rundt sentralmeridianen. Den holder for data som
+ * ligger i eller nær sonen, men landsdekkende filer i UTM 33 dekker fra 4° til 31° øst. Målt mot
+ * DSBs 556 tilfluktsrom (2026-10-04) bommet den med over 1 m på 88 rom og med 42 m i Vardø.
+ *
+ * Dette er Krügers rekker i tredje flattrykning `n` (Karney 2011), til fjerde orden. De er
+ * nøyaktige til under en millimeter flere tusen kilometer fra sentralmeridianen. Målt mot de
+ * samme 556 rommene: største avvik fra posisjonene Geonorges WFS ga i EPSG:4326 er 6 cm — det
+ * samme som PostGIS' st_transform gir, altså kildens egen avrunding og ikke omregningen.
+ *
+ * @param coordinate `[easting, northing]` i meter. @returns `[lengdegrad, breddegrad]`.
+ */
+export function utm33ToWgs84Exact([easting, northing]: readonly [number, number]): [number, number] {
+  const n = F / (2 - F);
+  const n2 = n * n;
+  const n3 = n2 * n;
+  const n4 = n3 * n;
+  // Rektifiserende radius, og koeffisientene for den inverse rekken.
+  const rectifying = (A / (1 + n)) * (1 + n2 / 4 + n4 / 64);
+  const beta = [
+    n / 2 - (2 * n2) / 3 + (37 * n3) / 96 - n4 / 360,
+    n2 / 48 + n3 / 15 - (437 * n4) / 1440,
+    (17 * n3) / 480 - (37 * n4) / 840,
+    (4397 * n4) / 161_280,
+  ];
+
+  const xi = northing / (K0 * rectifying);
+  const eta = (easting - FALSE_EASTING) / (K0 * rectifying);
+  let xiPrime = xi;
+  let etaPrime = eta;
+  beta.forEach((b, index) => {
+    const k = 2 * (index + 1);
+    xiPrime -= b * Math.sin(k * xi) * Math.cosh(k * eta);
+    etaPrime -= b * Math.cos(k * xi) * Math.sinh(k * eta);
+  });
+
+  // Konform breddegrad, så geodetisk breddegrad ved iterasjon (konvergerer på få runder).
+  const tauPrime = Math.sin(xiPrime) / Math.hypot(Math.sinh(etaPrime), Math.cos(xiPrime));
+  const e = Math.sqrt(E2);
+  let tau = tauPrime;
+  for (let i = 0; i < 8; i++) {
+    const sigma = Math.sinh(e * Math.atanh((e * tau) / Math.hypot(1, tau)));
+    const guess = tau * Math.hypot(1, sigma) - sigma * Math.hypot(1, tau);
+    const delta =
+      ((tauPrime - guess) / Math.hypot(1, guess)) * ((1 + (1 - E2) * tau * tau) / ((1 - E2) * Math.hypot(1, tau)));
+    tau += delta;
+    if (Math.abs(delta) < 1e-14) break;
+  }
+
+  const lat = Math.atan(tau);
+  const lng = ZONE_33_CENTRAL_MERIDIAN + Math.atan2(Math.sinh(etaPrime), Math.cos(xiPrime));
+  return [(lng * 180) / Math.PI, (lat * 180) / Math.PI];
+}

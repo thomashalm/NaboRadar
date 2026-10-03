@@ -93,6 +93,15 @@ den vi bør følge, ikke en tjeneste merket «Under arbeid».
 - Forsvarsbyggs soner tas inn (egen runde).
 - WFS-ene blir den formelt anbefalte distribusjonen igjen og gir samme svar som publikumskartene.
 
+## Tillegg 2026-10-04: synkede datasett følger samme prinsipp
+
+Beslutningen over gjelder direkte oppslag. For datasett vi synker gjelder det tilsvarende: der
+utgiveren legger ut en ferdig landsdekkende fil, er den sync-kilden — ikke en WFS over de samme
+dataene. Første tilfelle er offentlige tilfluktsrom, flyttet fra Geonorge-WFS til DSBs
+nedlastingsfil etter at WFS-en hadde svart HTTP 500 i over en uke. Fila valideres før skriving,
+og det er ingen reserve mot WFS-en. Se
+[research/tilfluktsrom-naermeste-rom.md](../research/tilfluktsrom-naermeste-rom.md).
+
 ## Relatert
 [ADR 008](008-publish-what-the-agency-publishes.md) · [ADR 009](009-public-admin-security-model.md) ·
 [research/stormflo-flystoy-kildegjennomgang.md](../research/stormflo-flystoy-kildegjennomgang.md) ·

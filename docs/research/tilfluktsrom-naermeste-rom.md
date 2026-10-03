@@ -132,9 +132,94 @@ Lokalt mot produksjonsdata, 2026-10-03.
   tilbake/fram, skolekrets). Innholdet er kontrollert på begge bredder. Mekanismen er den samme
   på mobil, men bør ses på en telefon.
 - Fordelingen er målt på et rutenett av adresser, ikke vektet etter hvor folk bor.
-- Kildens WFS var nede. Syncen har ikke kjørt siden 2026-09-26, men dataene er identiske med
-  dagens uttrekk. Blir feilen stående, bør syncen kunne lese nedlastingsfilen
-  ([ADR 015](../adr/015-publikumsprodukt-wms-og-kildefeil.md)).
+- Kildens WFS var nede, og syncen hadde ikke kjørt siden 2026-09-26. Løst 2026-10-04: syncen
+  leser nå nedlastingsfila, se «Kildebytte» under.
+
+## Kildebytte 2026-10-04: fra WFS til nedlastingsfil
+
+WFS-en svarte fortsatt HTTP 500, og provideren sto med `last_error: HttpError: HTTP 500`. Syncen
+ble flyttet til den landsdekkende nedlastingsfila. Dette er en robusthetsendring: ingen endring i
+UI, radius eller oppslag.
+
+### Kilden
+
+| | |
+|---|---|
+| URL | `https://nedlasting.geonorge.no/geonorge/Samfunnssikkerhet/TilfluktsromOffentlige/GML/Samfunnssikkerhet_0000_Norge_25833_TilfluktsromOffentlige_GML.zip` |
+| Utgiver | Direktoratet for samfunnssikkerhet og beredskap (eier og utgiver i Geonorge-metadata) |
+| Distribusjon | «Geonorge nedlastning» er distribusjonen metadataposten oppgir. Fila står også i datasettets ATOM-feed (`…/ATOM-feeds/TilfluktsromOffentlige_AtomFeedGML.xml`), som er laget for maskinell henting |
+| Lisens | NLOD 1.0. «Åpne data», «Ugradert», «Ingen begrensninger på bruk er oppgitt» |
+| Oppdatering | Metadata: «Etter behov», «Kontinuerlig oppdatert». Fila bygges på nytt hver natt (`last-modified` 2026-10-02 23:43 UTC, `datauttaksdato` 2026-10-03T01:40:56) |
+| Format | Zip med én GML 3.2-fil, EUREF89 UTM sone 33 (EPSG:25833). Finnes også som GeoJSON, FGDB og PostGIS, og i UTM 32 og 35 |
+
+Samme datasett-ID (`dbae9aae-…`) som WFS-en, altså like autoritativ. WFS-en var en tjeneste over
+de samme dataene. Ingen tredjepart er involvert.
+
+### Feltmapping
+
+| Fila | Vår modell | Merknad |
+|---|---|---|
+| `romnr` | `external_id`, `attributes.romnummer` | Stabil ID. Unik på alle 556 |
+| `adresse` | `title`, `attributes.sted` | Stedsbeskrivelse, ikke ren adresse |
+| `plasser` | `attributes.plasser` | 0 lagres som null |
+| `posisjon` (UTM 33) | `geom` (punkt, WGS84) | Regnes om med Krüger-rekker, sju desimaler |
+| `identifikasjon.lokalId` | brukes ikke | Ny for hvert uttrekk |
+| `datauttaksdato`, `opphav` | brukes ikke | Uttrekkstidspunkt, ikke endringsdato |
+| kommune | finnes ikke | Verken i fila eller i WFS-en. Ikke gjettet |
+| status / type | finnes ikke | Verken i fila eller i WFS-en |
+
+Fila har nøyaktig de samme feltene som WFS-en ga. Den eneste forskjellen er koordinatsystemet.
+
+### Funn underveis: omregningen fra UTM 33
+
+Repoets `utm33ToWgs84` er en kort rekkeutvikling rundt 15° øst. På landsdekkende data bommet den
+med over 1 m på 88 av 556 rom, og med 42 m i Vardø (31° øst). Ny `utm33ToWgs84Exact`
+(Krüger-rekker) gir største avvik 6 cm mot posisjonene WFS-en ga — det samme som PostGIS'
+`st_transform`. Den gamle funksjonen er ikke endret, fordi andre datasett bruker den.
+
+### Nasjonal QA ved byttet
+
+Fila mot produksjonsdatabasen, koblet på `romnr`, rett før sync:
+
+| | |
+|---|---|
+| Rom i fila / unike romnummer | 556 / 556 |
+| Aktive i databasen | 556 |
+| Nye i fila / borte fra fila | 0 / 0 |
+| Avvik i plasser / stedsbeskrivelse | 0 / 0 |
+| Største koordinatavvik | 0,06 m |
+| Rom med over 1 m avvik | 0 |
+
+Første sync fra fila: 556 hentet, 0 avvist, 0 nye, **550 oppdatert**, 6 uendret, 0 fjernet.
+Oppdateringene er posisjonen alene, flyttet inntil 6,3 cm (median 3,3 cm). ID, navn, attributter,
+kildelenke, aktiv-status og `first_seen_at` er uendret på alle 556. Andre sync rett etter:
+**556 uendret** — samme fil gir samme data.
+
+### Regresjons-QA
+
+`features_near` som anon, 500 m / 1 km / 3 km og de tre nærmeste innen 10 km, før og etter:
+
+| Sted | Antall 500 m / 1 km / 3 km | Nærmeste rom |
+|---|---|---|
+| Langmyrgrenda 26C | 0 / 0 / 0 | Bentsegt 21-25, 3 287 m, 250 plasser |
+| Karl Johans gate 1 | 4 / 7 / 31 | Fred Olsensgt 11, 105 m, 300 plasser |
+| Majorstuen | 3 / 5 / 24 | Majorstuveien 38, 111 m, 555 plasser |
+| Stovner | 0 / 0 / 0 | Skårerhallen, 4 933 m, 4 000 plasser |
+| Bergen | 2 / 6 / 12 | Sydnestunnelen, 208 m, 3 500 plasser |
+| Trondheim | 4 / 4 / 6 | Westermannsveita 4, 205 m, 630 plasser |
+| Bodø | 2 / 3 / 6 | Rensås Nord, 357 m, 500 plasser |
+| Finse | 0 / 0 / 0 | ingen innen 10 km |
+
+Samme rom, samme rekkefølge, samme antall og samme plasser i alle 32 oppslag. Én avstand endret
+seg i meteren: T-banen Stortinget stasjon fra Karl Johans gate 1, 450 → 451 m (rå-avstanden lå
+på avrundingsgrensen). Siden viser «450 m unna» både før og etter.
+
+### Sletting og reserve
+
+- Et gyldig, komplett uttrekk får markere rom som fjernet. Det er den vanlige avstemmingen, med
+  vakten som stopper ved over 30 % fall. Ingen egen regel.
+- Ingen reserve mot WFS-en. Den gamle adressen står her som historikk:
+  `https://wfs.geonorge.no/skwms1/wfs.tilfluktsrom_offentlige`, typenavn `app:Tilfluktsrom`.
 
 ## Hva vi bevisst ikke gjorde
 
