@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { getHutsInBbox, getHutsInMunicipality, searchHuts, withMunicipalityNames, type Hut } from "@/lib/huts/queries";
+import { searchPlaces } from "@/lib/huts/places";
+import type { HutPlace } from "@/lib/huts/suggestions";
 import { HUT_OWNER_KINDS, HUT_TYPES } from "@/lib/huts/types";
 
 /**
@@ -9,7 +11,7 @@ import { HUT_OWNER_KINDS, HUT_TYPES } from "@/lib/huts/types";
  * Tre måter å spørre på, én om gangen:
  *   ?bbox=vest,sør,øst,nord   hyttene i et kartutsnitt
  *   ?kommune=0301             hyttene i en kommune
- *   ?q=kobberhaug             navnesøk
+ *   ?q=kobberhaug             navnesøk: hytter, og steder fra Kartverkets stedsnavn
  * `type` og `eier` kan gjentas og snevrer inn de to første.
  *
  * Ruten er en tynn mellommann: grensene på utsnitt og antall håndheves i databasen, og
@@ -17,7 +19,7 @@ import { HUT_OWNER_KINDS, HUT_TYPES } from "@/lib/huts/types";
  */
 export type HutApiResponse =
   | { huts: Hut[]; total: number; truncated: boolean }
-  | { hits: Hut[] }
+  | { hits: Hut[]; places: HutPlace[] }
   | { error: "invalid_query" | "unavailable" };
 
 const liste = <T extends string>(verdier: readonly T[]) =>
@@ -48,8 +50,8 @@ export async function GET(request: NextRequest) {
   if (q !== null) {
     const parsed = z.string().trim().min(2).max(60).safeParse(q);
     if (!parsed.success) return ugyldig();
-    const hits = await searchHuts(parsed.data);
-    return hits === null ? nede() : NextResponse.json<HutApiResponse>({ hits: await withMunicipalityNames(hits) }, OK);
+    const [hits, places] = await Promise.all([searchHuts(parsed.data), searchPlaces(parsed.data, request.signal)]);
+    return hits === null ? nede() : NextResponse.json<HutApiResponse>({ hits: await withMunicipalityNames(hits), places }, OK);
   }
 
   const kommune = params.get("kommune");

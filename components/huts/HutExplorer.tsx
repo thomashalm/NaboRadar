@@ -7,6 +7,7 @@ import { AreaMap, type MapPopupContent } from "@/components/map/AreaMap";
 import type { HutApiResponse } from "@/app/api/hytter/route";
 import type { LngLatBounds } from "@/lib/geo/bounds";
 import { distanceMeters, radiusBounds } from "@/lib/geo/radius";
+import { rankSuggestions, suggestionSubtitle, type HutPlace } from "@/lib/huts/suggestions";
 import { buildHutHref } from "@/lib/huts/href";
 import type { Hut } from "@/lib/huts/queries";
 import type { HutOwnerKind, HutType } from "@/lib/huts/types";
@@ -24,6 +25,8 @@ const NORGE: LngLatBounds = [
 ];
 /** Utsnittet rundt et sted siden åpnes med, når lenken hit ikke sier noe annet. */
 const START_RADIUS_M = 15_000;
+/** Utsnittet rundt et valgt sted fra søket. */
+const PLACE_RADIUS_M = 20_000;
 /** En hytte som ligger i selve utgangspunktet, er utgangspunktet — den får ingen avstand. */
 const SAME_PLACE_M = 25;
 /** Fra denne bredden står kartet ved siden av lista (Tailwind `lg`). */
@@ -227,6 +230,14 @@ export function HutExplorer({ tiles, center, originName, radiusM, initialHutId }
     setFit({ bounds: radiusBounds(hit.lat, hit.lng, 3000), key: `treff:${hit.id}` });
   }, []);
 
+  // Et sted gir bare et punkt, ikke en utstrekning. 20 km rundt punktet tar med hyttene i og
+  // rundt en by eller et tettsted. Ingen hytte velges: lista viser det som er i utsnittet.
+  const goToPlace = useCallback((place: HutPlace) => {
+    pendingSelect.current = null;
+    setSelectedId(null);
+    setFit({ bounds: radiusBounds(place.lat, place.lng, PLACE_RADIUS_M), key: `sted:${place.id}` });
+  }, []);
+
   const toggle = <T,>(list: T[], value: T): T[] => (list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
 
   return (
@@ -238,7 +249,7 @@ export function HutExplorer({ tiles, center, originName, radiusM, initialHutId }
           Turisthytter, ubetjente hytter og rastebuer. Flytt kartet for å se et annet område.
         </p>
 
-        <HutSearch q={q} onChange={setQ} onSelect={goToHit} />
+        <HutSearch q={q} onChange={setQ} onSelectHut={goToHit} onSelectPlace={goToPlace} />
 
         <fieldset className="mt-5">
           <legend className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">Type</legend>
@@ -381,9 +392,22 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
   );
 }
 
-/** Navnesøk. Et treff flytter kartet dit og velger hytta. Treffene har ingen avstand. */
-function HutSearch({ q, onChange, onSelect }: { q: string; onChange: (q: string) => void; onSelect: (hit: Hut) => void }) {
-  const [hits, setHits] = useState<Hut[] | null>(null);
+/**
+ * Ett søkefelt for både hytter og steder. Et hyttetreff flytter kartet dit og velger hytta; et
+ * sted flytter kartet dit og viser hyttene i utsnittet. Rekkefølgen: se lib/huts/suggestions.ts.
+ */
+function HutSearch({
+  q,
+  onChange,
+  onSelectHut,
+  onSelectPlace,
+}: {
+  q: string;
+  onChange: (q: string) => void;
+  onSelectHut: (hit: Hut) => void;
+  onSelectPlace: (place: HutPlace) => void;
+}) {
+  const [svar, setSvar] = useState<{ term: string; hits: Hut[]; places: HutPlace[] } | null>(null);
   // Et søk som ikke fikk svar, er ikke det samme som et søk uten treff.
   const [failed, setFailed] = useState(false);
 
@@ -397,13 +421,13 @@ function HutSearch({ q, onChange, onSelect }: { q: string; onChange: (q: string)
         .then((body) => {
           const ok = "hits" in body;
           setFailed(!ok);
-          setHits(ok ? body.hits : []);
+          setSvar(ok ? { term, hits: body.hits, places: body.places ?? [] } : { term, hits: [], places: [] });
         })
         .catch((error: unknown) => {
           // Et avbrutt kall er et nytt tastetrykk, ikke en feil.
           if (error instanceof DOMException && error.name === "AbortError") return;
           setFailed(true);
-          setHits([]);
+          setSvar({ term, hits: [], places: [] });
         });
     }, 250);
     return () => {
@@ -412,40 +436,43 @@ function HutSearch({ q, onChange, onSelect }: { q: string; onChange: (q: string)
     };
   }, [q]);
 
-  // Treffene gjelder bare så lenge søkeordet er langt nok; et tømt felt viser ingen liste.
-  const synlige = q.trim().length < 2 ? null : hits;
+  // Forslagene gjelder bare søkeordet de ble hentet for. Et svar på et eldre søkeord vises ikke
+  // mens det nye hentes — da kunne man trykke på et forslag til noe annet enn det som står i feltet.
+  const term = q.trim();
+  const forslag = term.length < 2 || !svar || svar.term !== term ? null : rankSuggestions(svar.term, svar.hits, svar.places);
 
   return (
     <div className="mt-5">
       <label htmlFor="hyttesok" className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">
-        Søk etter hytte
+        Søk etter hytte eller sted
       </label>
       <input
         id="hyttesok"
         type="search"
         value={q}
         onChange={(event) => onChange(event.target.value)}
-        placeholder="Navn på hytte eller koie"
+        placeholder="Navn på hytte, koie eller sted"
         autoComplete="off"
         className="mt-2 block w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-[15px] text-ink placeholder:text-muted focus:border-accent focus:outline-none"
       />
-      {synlige !== null && (
+      {forslag !== null && (
         <ul className="mt-1 divide-y divide-line rounded-xl border border-line bg-surface">
-          {synlige.length === 0 && (
+          {forslag.length === 0 && (
             <li className="px-3.5 py-2 text-[13px] text-muted">{failed ? "Søket svarte ikke. Prøv igjen." : "Ingen treff."}</li>
           )}
-          {synlige.map((hit) => (
-            <li key={hit.id}>
+          {forslag.map((treff) => (
+            <li key={treff.kind === "hut" ? `hytte:${treff.hut.id}` : `sted:${treff.place.id}`}>
               <button
                 type="button"
                 className="block w-full px-3.5 py-2 text-left hover:bg-ink/[0.03]"
                 onClick={() => {
-                  onSelect(hit);
+                  if (treff.kind === "hut") onSelectHut(treff.hut);
+                  else onSelectPlace(treff.place);
                   onChange("");
                 }}
               >
-                <span className="block text-[15px] text-ink">{hit.name}</span>
-                <span className="block text-[13px] text-muted">{hutSummaryLine(hit)}</span>
+                <span className="block text-[15px] text-ink">{treff.kind === "hut" ? treff.hut.name : treff.place.name}</span>
+                <span className="block text-[13px] text-muted">{suggestionSubtitle(treff)}</span>
               </button>
             </li>
           ))}

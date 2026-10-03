@@ -1294,6 +1294,13 @@ skoler og organisasjoner (Husbergøya), og en som er stengt for vedlikehold på 
 (Solstua). Vi viser ikke noe av dette som egne felt — vi har ingen kilde som holder det ved
 like — men lenken til forvalteren gjør at brukeren finner det.
 
+**Søk etter hytte eller sted.** Søkefeltet på `/hytter` gir både hytter (`huts_search`) og steder
+fra Kartverkets stedsnavn — den samme geokoderen som adressesøket på forsiden, men uten adresser.
+`/api/hytter?q=` returnerer begge i ett svar. Et sted gir bare et punkt, så kartet viser 20 km
+rundt det, og ingen hytte velges. Rekkefølgen står i `lib/huts/suggestions.ts`: hvor godt navnet
+treffer først, hytta før stedet ved likt treff, og et sted som er samme hytte (Spiterstulen er
+også «Turisthytte» i stedsnavnregisteret) vises bare som hytte.
+
 **Navnesøk.** `huts_search` søker i navnet og i alle andre navn (`alt_names` fra sekundærkilden
 og `aliases` lagt inn for hånd). Søket tåler o for ø, a for å og e/ae for æ, begge veier:
 Kartverket følger lokal skrivemåte («Aursjobu», men «Aursjøhytta»), og den som søker vet ikke
