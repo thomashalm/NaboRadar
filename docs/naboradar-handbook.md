@@ -1135,10 +1135,15 @@ Tolkningsreglene:
   1», og med stedet markert i kartet. Uten `fra` vises ingen avstand, og lista sorteres på navn.
   Kartutsnittet er aldri et utgangspunkt. På hyttesiden står nabohyttenes avstand under
   «Avstand i luftlinje fra <hytta>».
-- **Høyden er terrenghøyden i kartpunktet.** Den hentes fra Kartverkets åpne høydemodell
-  (`ws.geonorge.no/hoydedata`, CC BY 4.0) når hyttesiden vises, og caches i minnet et døgn. Det
-  er ikke en oppmålt høyde for bygget, så den vises som «ca. 433 moh.». Svarer ikke tjenesten
-  innen tre sekunder, vises ingen høyde.
+- **Høyden er terrenghøyden i kartpunktet.** Den kommer fra Kartverkets åpne høydemodell
+  (`ws.geonorge.no/hoydedata`, CC BY 4.0) og lagres per hytte i `huts.terrain_elevation_m`,
+  sammen med modellens datakilde (`dtm1`, `innsjohoyde` …), tidspunktet og posisjonen den gjelder.
+  Den beregnes etter hyttesynken for nye og flyttede hytter, og med `npm run huts:elevation` —
+  aldri når siden vises. En feil skriver ingenting; forrige verdi står. Det er ikke en oppmålt
+  høyde for bygget, så den vises avrundet som «ca. 433 moh.». Høydemodellen slås opp ti punkter
+  om gangen: i kall på 50 punkter spredt over landet svarer den med høydekurver i stedet for
+  terrengmodellen for mange av dem (opptil 20 m feil, målt 2026-10-03). Et punkt som likevel får
+  kurver, slås opp alene. Se [ADR 005](adr/005-cached-public-hut-pages.md).
 - **Overnatting følger klassens definisjon.** Betjent, selvbetjent og ubetjent er
   overnattingshytter i N50; en rastebu er en dagshytte der man kan sove «i et knipetak», og
   vises som «ikke beregnet for overnatting».
@@ -1301,6 +1306,15 @@ skoler og organisasjoner (Husbergøya), og en som er stengt for vedlikehold på 
 (Solstua). Vi viser ikke noe av dette som egne felt — vi har ingen kilde som holder det ved
 like — men lenken til forvalteren gjør at brukeren finner det.
 
+**Hyttesiden er lik for alle og caches.** `/hytter/[ref]` leser anonymt (publishable key, uten
+brukerens cookies) gjennom `get_hut` og `huts_near`, og caches som ISR i en time. En innlogget
+admin ser den samme siden som alle andre; skjulte og avviste hytter kontrolleres i `/admin/hytter`.
+Hver handling der tømmer hyttesidene (`revalidatePath("/hytter/[ref]", "page")`), så endringen
+synes ved neste besøk. Endringer fra synken synes innen en time. Svarer ikke databasen, kaster
+siden en feil i stedet for å vise en halv side, og forrige versjon står. Kommune og fylke kommer
+fra Kartverkets register (cachet et døgn) med et øyeblikksbilde i koden som reserve. Kartet,
+søket og `/api/hytter` leser fortsatt med brukerens sesjon. Se [ADR 005](adr/005-cached-public-hut-pages.md).
+
 **Valgt hytte i adressen.** Velges en hytte i kartet, lista eller søket, blir adressen
 `/hytter?hytte=aursjobu-a4fbf722` — samme nøkkel som hyttesiden. Den skrives med
 `history.replaceState`, så et valg ikke blir et nytt steg i historikken, og den fjernes når
@@ -1416,9 +1430,9 @@ koder vises ikke, vi gjetter ikke bygningstype), og nærmeste adresse.
 | `/api/eiendom` | GET | `lat`, `lng` | Zod: `lat` 57–72, `lng` 4–32. Alt annet → 400 | Geonorge WFS ×2 + adresse-API | 8 s totalt, 6 s per kall, 1 retry | `private, max-age=60` + 10 min serverside | 120/min |
 | `/api/geocode` | GET | `q` | Zod: 2–100 tegn etter trim | Kartverket adresser + stedsnavn | Per kilde, delvis svar tillatt | `private, max-age=300`, `no-store` ved delvis svar | 120/min |
 | `/omrade` | GET (side) | `lat`, `lng`, `radius`, `label`, `sortering` | Zod. Ugyldig `lat`/`lng` → feilside. Ugyldig `radius` → standard 1 km. `label` maks 120 tegn, kontrolltegn fjernet | Supabase + direkte oppslag | 8 s (saker), 8 s (DB), 12 s (oppslag) | Dynamisk | 240/min |
-| `/api/hytter` | GET | `bbox` *eller* `kommune` *eller* `q`; `type` og `eier` kan gjentas | Zod: utsnitt innenfor kloden og riktig vei, kommunenummer fire sifre, `q` 2–60 tegn, kjente typer og eiere | Supabase (`huts_*`) | databasens egen | `private, max-age=300` — svaret avhenger av om kalleren er admin | 120/min |
-| `/hytter` | GET (side) | `lat`, `lng`, `hytte`, `fra` (navnet på stedet, gir avstand), `radius` (km, 1–50) — alle valgfrie | Zod; ugyldige verdier ignoreres. `fra` maks 120 tegn | `/api/hytter` fra klienten | — | Dynamisk, `noindex` så lenge datasettet er en pilot | ingen |
-| `/hytter/[ref]` | GET (side) | `<navn>-<8 heksadesimale tegn>` | Bare ID-delen brukes; alt annet gir 404 | Supabase (`get_hut`, `huts_near`) + Kartverkets kommuneregister (kommune og fylke) og høydemodell | 4 s på kommuneregisteret, 3 s på høyden; begge er valgfrie og caches et døgn | Dynamisk, `noindex` | ingen |
+| `/api/hytter` | GET | `bbox` *eller* `kommune` *eller* `q`; `type` og `eier` kan gjentas | Zod: utsnitt innenfor kloden og riktig vei, kommunenummer fire sifre, `q` 2–60 tegn, kjente typer og eiere | Supabase (`huts_*`) + stedsnavn | databasens egen | `private, no-store` | 120/min |
+| `/hytter` | GET (side) | `lat`, `lng`, `hytte`, `fra` (navnet på stedet, gir avstand), `radius` (km, 1–50) — alle valgfrie | Zod; ugyldige verdier ignoreres. `fra` maks 120 tegn | `/api/hytter` fra klienten | — | Dynamisk, indekseres, canonical `/hytter` | ingen |
+| `/hytter/[ref]` | GET (side) | `<navn>-<8 heksadesimale tegn>` | Bare ID-delen brukes; alt annet gir 404 | Supabase anonymt (`get_hut` med lagret høyde, `huts_near`) + Kartverkets kommuneregister | 4 s på kommuneregisteret, med øyeblikksbilde som reserve; feiler databasen, kastes en feil som ikke caches | ISR: `s-maxage=3600, stale-while-revalidate`; tømmes av `/admin/hytter`. Indekseres (ikke `not_public`) | ingen |
 | `/admin/hytter` | GET (side) + server actions | `q` | Supabase Auth + `is_admin()`, både i handlingene og i databasefunksjonene | Supabase | — | `private, no-store` | ingen |
 | `/sak/[id]` | GET (side) | uuid + søkekontekst | `get_event` | Supabase | — | Dynamisk | ingen |
 | `/` | GET (side) | — | — | — | — | Statisk, Netlify Durable | ingen |
@@ -2075,6 +2089,7 @@ npm run sync:worker -- --provider=<id> --force       # godta datafall og kjør r
 npm run sync:status                                  # helsetilstand per provider
 npm run sync:dibk                                    # full DiBK-sync (-- --mode=incremental)
 npm run sync:area                                    # full sync av områdefakta
+npm run huts:elevation                               # lagre terrenghøyde for hytter som mangler den
 npm run alerts:check                                 # vurder helse og send varsel (-- --dry-run)
 ```
 
@@ -2160,6 +2175,13 @@ ikke publiseres.
 `lib/ai/types.ts` finnes som typer, ingenting mer. Et sammendrag som overtolker en kilde er verre
 enn ingen sammendrag, og hele produktet hviler på at vi ikke sier mer enn kilden gjør. Når det
 eventuelt bygges: on-demand, cachet per `(event_id, content_hash)`, aldri på `raw_data` ukritisk.
+
+**Hvorfor hyttesidene leses anonymt og caches, og høyden lagres ved sync**
+[ADR 005](adr/005-cached-public-hut-pages.md). Siden skal være lik for mennesker, søkemotorer og
+admin, svare raskt og vise samme fakta hver gang. Den anonyme lesestien bruker de samme RPC-ene
+som før — ingen nye grants. Admin-endringer tømmer cachen med `revalidatePath`; synken slår
+gjennom innen en time. Høyden er en egenskap ved punktet og lagres med posisjonen den gjelder,
+i stedet for å hentes live med tre sekunders frist.
 
 **Hvorfor ikke scraping av Oslo byggesak**
 [ADR 004](adr/004-no-scraping-oslo.md). Ingen dokumentert offentlig API, og scraping av en

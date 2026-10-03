@@ -208,6 +208,13 @@ export async function runSync<TRecord>(
       progress({ phase: "reconcile", message: `${provider.postSyncFn}: ${tekst}` });
       if (etter?.flagged) result.warnings.push(`${etter.flagged} hytter venter på manuell kontroll.`);
     }
+    if (provider.afterSync && verdict.allowReconcile) {
+      try {
+        progress({ phase: "reconcile", message: await provider.afterSync(db) });
+      } catch (error) {
+        result.warnings.push(`Etterarbeid feilet: ${error instanceof Error ? error.message : "ukjent"}`.slice(0, 300));
+      }
+    }
 
     result.status = verdict.suspicious ? "suspicious" : result.failed > 0 ? "partial" : "success";
   } catch (error) {

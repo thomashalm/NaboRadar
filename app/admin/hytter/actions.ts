@@ -5,6 +5,16 @@ import { z } from "zod";
 import { getAdminSession } from "@/lib/admin/session";
 import { HUT_ACCESS_OVERRIDES, HUT_OWNER_OVERRIDES, HUT_TYPE_OVERRIDES } from "@/lib/huts/types";
 
+/**
+ * Hyttesidene caches i en time (app/hytter/[ref]/page.tsx). En endring her skal synes med en
+ * gang, så alle hyttesidene merkes som utdaterte — de lages på nytt ved neste besøk. Hele ruten
+ * og ikke én adresse: en kontroll kan endre naboenes sider også (en sammenslått eller avvist
+ * hytte står i «Andre hytter i nærheten»), og det er sjelden nok til at det ikke koster noe.
+ */
+function revalidateHutPages() {
+  revalidatePath("/hytter/[ref]", "page");
+}
+
 export type HutActionState = { status: "idle" } | { status: "ok"; message: string } | { status: "error"; message: string };
 
 const avgjørelse = z.object({
@@ -43,6 +53,7 @@ export async function reviewHutAction(_prev: HutActionState, formData: FormData)
   if (error) return { status: "error", message: error.message };
 
   revalidatePath("/admin/hytter");
+  revalidateHutPages();
   return { status: "ok", message: action === "approve" ? "Godkjent." : action === "reject" ? "Avvist." : "Slått sammen." };
 }
 
@@ -87,6 +98,7 @@ export async function setHutContactAction(_prev: HutActionState, formData: FormD
   if (error) return { status: "error", message: error.message };
 
   revalidatePath("/admin/hytter");
+  revalidateHutPages();
   return { status: "ok", message: "Lagret." };
 }
 
@@ -141,6 +153,7 @@ export async function setHutOverridesAction(_prev: HutActionState, formData: For
   if (error) return { status: "error", message: error.message };
 
   revalidatePath("/admin/hytter");
+  revalidateHutPages();
   return { status: "ok", message: noeSatt ? "Lagret." : "Overstyringene er fjernet." };
 }
 
@@ -175,5 +188,6 @@ export async function reviewHutStatusAction(_prev: HutActionState, formData: For
   if (error) return { status: "error", message: error.message };
 
   revalidatePath("/admin/hytter");
+  revalidateHutPages();
   return { status: "ok", message: parsed.data.action === "reopened" ? "Statusen er fjernet." : `Ny kontroll om ${parsed.data.reviewDays} dager.` };
 }

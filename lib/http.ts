@@ -15,6 +15,12 @@ export interface FetchJsonOptions {
   baseDelayMs?: number;
   signal?: AbortSignal;
   fetchImpl?: typeof fetch;
+  /**
+   * Sekunder svaret kan gjenbrukes i Next sin datacache. Uten: aldri cachet (`no-store`).
+   * Må settes på kall som gjøres fra en side som caches (ISR): et `no-store`-kall der gjør at
+   * Next avbryter visningen med «static to dynamic at runtime». Utenfor Next ignoreres den.
+   */
+  revalidate?: number;
 }
 
 function isRetryable(error: unknown): boolean {
@@ -32,7 +38,7 @@ function sleep(ms: number) {
  * Timeout per forsøk, eksponentiell backoff med jitter, aldri retry på 4xx.
  */
 export async function fetchJson(url: string, options: FetchJsonOptions): Promise<unknown> {
-  const { timeoutMs, retries = 0, baseDelayMs = 200, signal, fetchImpl = fetch } = options;
+  const { timeoutMs, retries = 0, baseDelayMs = 200, signal, fetchImpl = fetch, revalidate } = options;
 
   for (let attempt = 0; ; attempt++) {
     try {
@@ -40,7 +46,7 @@ export async function fetchJson(url: string, options: FetchJsonOptions): Promise
       const response = await fetchImpl(url, {
         headers: { Accept: "application/json" },
         signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
-        cache: "no-store",
+        ...(revalidate === undefined ? { cache: "no-store" as const } : { next: { revalidate } }),
       });
       if (!response.ok) throw new HttpError(response.status, url);
       return await response.json();

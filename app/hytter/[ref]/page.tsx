@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import { AreaShell } from "@/components/area/AreaShell";
 import { HutDetails } from "@/components/huts/HutDetails";
 import { HutPointMap } from "@/components/huts/HutPointMap";
@@ -19,12 +20,30 @@ import { getMapTileConfig } from "@/lib/map/config";
  * Indekseres. Bare hytter som vises offentlig har en side: avviste, skjulte og upubliserte gir
  * 404 (`get_hut` svarer ikke for dem), og 404 er noindex. En hytte som ikke er for allmennheten,
  * har en side, men er noindex og står ikke i sitemapen: den skal ikke promoteres som turhytte.
+ *
+ * Caches (ISR): siden lages første gang noen ber om den, og lages på nytt i bakgrunnen når den
+ * er eldre enn en time. Endringer i /admin/hytter tømmer cachen med en gang (revalidatePath i
+ * app/admin/hytter/actions.ts). Det går fordi alt på siden leses anonymt og er likt for alle —
+ * også for en innlogget admin. Svarer ikke databasen, kastes en feil: en feilet visning caches
+ * ikke, og en eldre side blir stående til neste forsøk.
  */
 type Props = { params: Promise<{ ref: string }> };
 
+export const revalidate = 3600;
+
+/** Ingen sider bygges på forhånd; hver hytte lages og caches første gang den blir besøkt. */
+export function generateStaticParams() {
+  return [];
+}
+
+/** Metadata og side deler samme oppslag. */
+const hentHytte = cache((ref: string) => getHut(ref));
+
 async function hent(params: Props["params"]) {
   const ref = hutRefFromSlug((await params).ref);
-  return ref ? getHut(ref) : ({ status: "not_found" } as const);
+  const resultat = ref ? await hentHytte(ref) : ({ status: "not_found" } as const);
+  if (resultat.status === "unavailable") throw new Error("Hytta kunne ikke hentes");
+  return resultat;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -55,17 +74,7 @@ function strukturerteData(hut: Hut) {
 
 export default async function HutPage({ params }: Props) {
   const resultat = await hent(params);
-  if (resultat.status === "not_found") notFound();
-  if (resultat.status === "unavailable") {
-    return (
-      <AreaShell>
-        <main className="mx-auto max-w-xl px-5 pt-[12vh] pb-24 sm:px-8">
-          <h1 className="text-3xl font-semibold tracking-[-0.03em]">Vi får ikke hentet hytta akkurat nå.</h1>
-          <p className="mt-3 text-lg text-muted">Prøv igjen om litt.</p>
-        </main>
-      </AreaShell>
-    );
-  }
+  if (resultat.status !== "ok") notFound();
   const { hut, nearby } = resultat;
   const undertittel = [HUT_TYPE_LABELS[hut.type], hutPlaceLine(hut)].filter(Boolean).join(" · ");
 

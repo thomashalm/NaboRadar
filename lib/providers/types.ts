@@ -1,3 +1,4 @@
+import type { Db } from "@/lib/db/types";
 import type { EventType, NormalizedEvent } from "@/types/event";
 import type { NormalizedAreaFeature } from "@/types/area-feature";
 
@@ -103,6 +104,13 @@ export interface DataProvider<TRecord = NormalizedEvent> {
    * feilet, og heller ikke når reconciliation ble hoppet over — da er bildet av kilden ufullstendig.
    */
   readonly postSyncFn?: string;
+
+  /**
+   * Etterarbeid som trenger nettverk, etter `postSyncFn`: hyttekildene lagrer terrenghøyden for
+   * nye og flyttede hytter. Kjøres på samme vilkår som `postSyncFn`. Feiler den, blir det en
+   * advarsel, ikke en feilet sync — dataene fra kilden er skrevet uansett.
+   */
+  afterSync?(db: Db): Promise<string>;
 }
 
 /** Hva som startet kjøringen. */

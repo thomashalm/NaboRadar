@@ -18,6 +18,7 @@
     "db:push": "node scripts/db-push.mjs",
     "db:verify": "tsx scripts/verify-db.ts",
     "sync:area": "tsx scripts/sync-area.ts",
+    "huts:elevation": "tsx scripts/hut-elevation.ts",
     "sync:worker": "tsx scripts/sync-worker.ts",
     "sync:status": "tsx scripts/sync-status.ts",
     "alerts:check": "tsx scripts/alert-check.ts",

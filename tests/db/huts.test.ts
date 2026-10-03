@@ -919,4 +919,58 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
       expect(lille.nearby![0]!.distance_m).toBeLessThan(30);
     });
   });
+
+  describe("terrenghøyde lagret per hytte (migrasjon 20261029000000)", () => {
+    type Venter = { id: string; latitude: number; longitude: number };
+    const venter = async () => (await db.pg.query<Venter>(`select * from huts_needing_elevation(5000)`)).rows;
+    const lagre = async (rader: unknown[]) => (await db.pg.query<{ n: number }>(`select set_hut_elevations($1::jsonb) as n`, [JSON.stringify(rader)])).rows[0]!.n;
+    const offentligHøyde = async (hytte: string) =>
+      ((await som<{ terrain_elevation_m: number | null }>("anon", `select terrain_elevation_m from get_hut('${hytte.slice(0, 8)}')`)) as { terrain_elevation_m: number | null }[])[0]?.terrain_elevation_m;
+
+    it("bare synken kan lese køen og skrive høyder", async () => {
+      for (const sql of ["select * from huts_needing_elevation(10)", `select set_hut_elevations('[]'::jsonb)`]) {
+        expect(await som("anon", sql)).toBe("NEKTET");
+        expect(await som("authenticated", sql, "drift@example.com")).toBe("NEKTET");
+      }
+    });
+
+    it("lagrer høyden for posisjonen den ble slått opp for, og hyttesiden leser den", async () => {
+      await db.pg.exec("begin");
+      try {
+        const hytte = (await db.pg.query<{ id: string }>(`select id from huts where name = 'Kobberhaughytta'`)).rows[0]!.id;
+        const rad = (await venter()).find((r) => r.id === hytte)!;
+        expect(rad).toBeDefined();
+        expect(await offentligHøyde(hytte)).toBeNull();
+
+        expect(await lagre([{ id: hytte, lat: rad.latitude, lng: rad.longitude, elevation_m: 433, source: "dtm1" }])).toBe(1);
+        expect(await offentligHøyde(hytte)).toBe(433);
+        expect((await venter()).some((r) => r.id === hytte)).toBe(false);
+        const lagret = (await db.pg.query<{ terrain_elevation_source: string }>(`select terrain_elevation_source from huts where id = $1`, [hytte])).rows[0]!;
+        expect(lagret.terrain_elevation_source).toBe("dtm1");
+
+        // En hytte som er flyttet etter oppslaget, får ikke en høyde for et annet sted.
+        expect(await lagre([{ id: hytte, lat: rad.latitude + 0.01, lng: rad.longitude, elevation_m: 999, source: "dtm1" }])).toBe(0);
+        expect(await offentligHøyde(hytte)).toBe(433);
+
+        // Synken flytter hytta: den skal beregnes på nytt, og forrige verdi står til da.
+        await db.pg.query(`update huts set geom = extensions.st_translate(geom, 0, 0.001) where id = $1`, [hytte]);
+        expect((await venter()).some((r) => r.id === hytte)).toBe(true);
+        expect(await offentligHøyde(hytte)).toBe(433);
+
+        // Høydemodellen svarte uten verdi: lagret som kontrollert, uten høyde, og ikke i køen igjen.
+        const flyttet = (await venter()).find((r) => r.id === hytte)!;
+        expect(await lagre([{ id: hytte, lat: flyttet.latitude, lng: flyttet.longitude, elevation_m: null, source: null }])).toBe(1);
+        expect(await offentligHøyde(hytte)).toBeNull();
+        expect((await venter()).some((r) => r.id === hytte)).toBe(false);
+      } finally {
+        await db.pg.exec("rollback");
+      }
+    });
+
+    it("arkiverte hytter står ikke i køen", async () => {
+      const arkiverte = (await db.pg.query<{ id: string }>(`select id from huts where archived_at is not null`)).rows.map((r) => r.id);
+      const kø = new Set((await venter()).map((r) => r.id));
+      expect(arkiverte.some((id) => kø.has(id))).toBe(false);
+    });
+  });
 });

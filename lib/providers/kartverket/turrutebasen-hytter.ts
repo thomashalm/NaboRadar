@@ -10,6 +10,8 @@ import type {
 } from "@/lib/providers/types";
 import { DEFAULT_RETRY_POLICY, type HttpRetryPolicy } from "@/lib/sync/types";
 import type { AreaAttributes, NormalizedAreaFeature } from "@/types/area-feature";
+import type { Db } from "@/lib/db/types";
+import { formatHutElevationResult, refreshHutElevations } from "@/lib/huts/elevation-sync";
 
 /**
  * Hytter fra Kartverkets Tur- og friluftsruter («Turrutebasen») — sekundærkilden.
@@ -91,6 +93,11 @@ export class KartverketTurrutebasenHytterProvider implements AreaFeatureProvider
   readonly defaultStatus = "active" as const;
   readonly statusReason = "Hele landet.";
   readonly postSyncFn = HUT_REFRESH_FN;
+
+  /** Terrenghøyden for nye og flyttede hytter (se lib/huts/elevation-sync.ts). */
+  async afterSync(db: Db): Promise<string> {
+    return formatHutElevationResult(await refreshHutElevations(db, { pauseMs: 200 }));
+  }
 
   constructor(
     private readonly fetchImpl: typeof fetch = fetch,

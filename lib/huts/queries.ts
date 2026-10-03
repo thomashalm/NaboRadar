@@ -2,7 +2,6 @@ import "server-only";
 import { z } from "zod";
 import { getDbMode, getReadDb } from "@/lib/db";
 import { DatabaseQueryError, type Db } from "@/lib/db/types";
-import { elevationAt } from "@/lib/geo/elevation";
 import { municipalityNames } from "@/lib/geo/municipalities";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
@@ -20,10 +19,15 @@ import {
 /**
  * Lesing av hytter og koier. Alt går gjennom huts_*-funksjonene i databasen.
  *
- * Kallet gjøres med brukerens egen sesjon, ikke med den anonyme klienten resten av
- * områdesiden bruker. Grunnen er pilotfasen: funksjonene svarer bare når kategorien er
- * publisert — eller når kalleren er admin. Slik kan en innlogget admin se og kontrollere
- * hyttene på de vanlige sidene før noen andre gjør det, uten en egen admin-visning.
+ * To lesestier:
+ *
+ *   - Hyttesiden (`getHut`) leser alltid anonymt, uten brukerens cookies. Da er siden lik for
+ *     alle — mennesker, søkemotorer og admin — og kan caches. Funksjonene svarer bare for hytter
+ *     som vises offentlig.
+ *   - Kartet, søket og nærområdet leser med brukerens egen sesjon. Det var slik en admin kunne
+ *     se hyttene før lansering; de sidene caches ikke, så det koster ingenting å beholde det.
+ *
+ * Skjulte og avviste hytter kontrolleres i /admin/hytter, ikke på de offentlige sidene.
  */
 
 const rowSchema = z.object({
@@ -50,6 +54,8 @@ const rowSchema = z.object({
   overridden: z.array(z.string()),
   distance_m: z.number().optional(),
   total: z.coerce.number().optional(),
+  // Bare get_hut gir høyden. Den er lagret per hytte, ikke slått opp ved visning.
+  terrain_elevation_m: z.number().nullable().optional(),
 });
 
 export interface Hut {
@@ -78,7 +84,7 @@ export interface Hut {
   /** Kommune- og fylkesnavn, når kommuneregisteret svarte. Fylles inn av `withMunicipalityNames`. */
   municipalityName?: string | null;
   countyName?: string | null;
-  /** Terrenghøyden ved hytta, fra Kartverkets høydemodell. Bare satt på hyttesiden. */
+  /** Terrenghøyden ved hytta, fra Kartverkets høydemodell, lagret ved sync. Bare satt på hyttesiden. */
   elevationM?: number | null;
 }
 
@@ -102,6 +108,7 @@ function toHut(row: z.infer<typeof rowSchema>): Hut {
     lng: row.longitude,
     sourceUpdatedAt: row.source_updated_at,
     distanceM: row.distance_m ?? null,
+    ...(row.terrain_elevation_m !== undefined ? { elevationM: row.terrain_elevation_m } : {}),
   };
 }
 
@@ -123,6 +130,15 @@ async function hutRpc(fn: string, args: Record<string, unknown>, fra = 0): Promi
   }
   // Lokalt finnes ingen slik grense: første kall gir alt, og det er ikke noe mer å hente.
   if (fra > 0) return [];
+  const db = await getReadDb();
+  return db ? db.rpc<unknown>(fn, args) : null;
+}
+
+/**
+ * Anonym lesing for de offentlige hyttesidene: publishable key, ingen cookies. Svaret er det
+ * samme for alle, og siden kan derfor caches. Feil kastes, så en mislykket visning aldri caches.
+ */
+async function publicHutRpc(fn: string, args: Record<string, unknown>): Promise<unknown[] | null> {
   const db = await getReadDb();
   return db ? db.rpc<unknown>(fn, args) : null;
 }
@@ -304,21 +320,23 @@ export type HutDetailResult =
   | { status: "not_found" }
   | { status: "unavailable" };
 
-/** Én hytte, slått opp på de åtte første tegnene i uuid-en (se lib/huts/href.ts). */
+/**
+ * Én hytte, slått opp på de åtte første tegnene i uuid-en (se lib/huts/href.ts).
+ *
+ * Leser anonymt (se `publicHutRpc`): hyttesiden er den samme for alle og caches. Alt på siden
+ * kommer fra databasen eller et register med reserve, så samme hytte gir samme side hver gang.
+ * Svarer ikke databasen — heller ikke for nabohyttene — er svaret `unavailable`, ikke en
+ * halv side som blir liggende i cachen.
+ */
 export async function getHut(ref: string): Promise<HutDetailResult> {
   try {
-    const rows = await hutRpc("get_hut", { p_ref: ref });
+    const rows = await publicHutRpc("get_hut", { p_ref: ref });
     if (rows === null) return { status: "unavailable" };
     const huts = z.array(rowSchema).parse(rows).map(toHut);
     // To hytter med samme åtte tegn er usannsynlig, men da gjetter vi ikke hvilken som menes.
     if (huts.length !== 1) return { status: "not_found" };
-    // Kommunenavn, høyde og nabohytter er tillegg: svarer ikke en av dem, vises siden uten.
-    const [[hut], elevationM, nearby] = await Promise.all([
-      withMunicipalityNames(huts),
-      elevationAt(huts[0]!.lat, huts[0]!.lng),
-      nearestHuts(huts[0]!),
-    ]);
-    return { status: "ok", hut: { ...hut!, elevationM }, nearby };
+    const [[hut], nearby] = await Promise.all([withMunicipalityNames(huts), nearestHuts(huts[0]!)]);
+    return { status: "ok", hut: { ...hut!, elevationM: huts[0]!.elevationM ?? null }, nearby };
   } catch (error) {
     console.error("[hytter] get_hut feilet:", error instanceof Error ? error.name : "ukjent");
     return { status: "unavailable" };
@@ -332,17 +350,13 @@ export function selectNeighbourHuts(nearest: Hut[], selfId: string): Hut[] {
 
 /** De nærmeste andre hyttene. Rene naboer i luftlinje — ingen rangering utover avstand. */
 async function nearestHuts(hut: Hut): Promise<Hut[]> {
-  try {
-    const rows = await hutRpc("huts_near", {
-      lat: hut.lat,
-      lng: hut.lng,
-      radius_m: HUT_NEIGHBOURS.radiusM,
-      max_results: HUT_NEIGHBOURS.count + 1,
-    });
-    return selectNeighbourHuts(z.array(rowSchema).parse(rows ?? []).map(toHut), hut.id);
-  } catch {
-    return [];
-  }
+  const rows = await publicHutRpc("huts_near", {
+    lat: hut.lat,
+    lng: hut.lng,
+    radius_m: HUT_NEIGHBOURS.radiusM,
+    max_results: HUT_NEIGHBOURS.count + 1,
+  });
+  return selectNeighbourHuts(z.array(rowSchema).parse(rows ?? []).map(toHut), hut.id);
 }
 
 /** Setter kommunenavn på hyttene. Svarer ikke registeret, står navnet tomt. */

@@ -1,0 +1,102 @@
+# AI-søk / AEO: gjennomgang og oppfølging
+
+Målet er at NaboRadar skal være lett å finne, forstå og sitere i AI-søk (ChatGPT search og lignende) uten tynne SEO-sider.
+Gjennomgangen ble gjort 2026-10-03 mot produksjon, med OpenAI- og Google-robotenes user-agent, rå HTML uten JavaScript og
+tellinger i databasen.
+
+## Funn (2026-10-03)
+
+**Robots.** Én regel for alle roboter: alt tillatt unntatt `/admin`, `/dev` og `/api/`.
+
+- OAI-SearchBot (ChatGPT-søk) og ChatGPT-User er tillatt.
+- GPTBot (modelltrening) er også tillatt via samme regel. Det er ikke endret, og skal avgjøres separat.
+- En egen regel for OAI-SearchBot endrer ingenting i praksis. Hvis den legges til, må utelukkelsene gjentas i den.
+
+**Tilgang.** Ingen svarte 403 eller 429, og ingen JS-utfordring:
+
+- `/`, `/hytter`, `/personvern`, `/skolekrets`, `robots.txt`, `sitemap.xml` og hyttesider ga 200 for OAI-SearchBot, GPTBot,
+  ChatGPT-User og Googlebot.
+- 40 hyttesider hentet rett etter hverandre ga 40 × 200.
+- Grensen på antall kall gjelder bare `/api/*` og `/omrade`.
+
+**Server-rendret innhold.** Hyttesidene har alt i HTML-en: H1, type, kommune og fylke, «Kort om hytta», Fakta som
+definisjonsliste, «Viktig å vite», offisielle lenker, kilde med dato og fem nabohytter med lenker. Unntak:
+
+- `/hytter` har ingen hytter eller lenker i HTML-en. Lista lastes i nettleseren, så de 1 504 hyttesidene nås bare via
+  sitemapen og nabolenkene.
+- Hyttesidene var `no-store` og tok 0,5–3,9 s.
+- Høyden ble hentet live og manglet av og til.
+
+**Strukturerte data.** `Place` med navn, koordinater og kommune er riktig og nøkternt. Mulige forbedringer er `url`/`@id`,
+fylke som område over kommunen, og `BreadcrumbList` når fylkessider finnes. Ikke `LodgingBusiness`, `Offer`, `Rating` eller
+`FAQPage`.
+
+**Oversiktssider.** 1 504 offentlige hytter i 15 fylker; hvert fylke har mellom 9 (Oslo) og 348 (Innlandet). 115 av 277 kommuner
+har bare 1–2 hytter. Fylkessider gir en reell lenkestruktur. Sider per kommune, per type for hele landet og «nær sted» blir tynne.
+
+**Forbedringer, i prioritert rekkefølge:**
+
+1. Faste og raske hyttesider.
+2. Fylkessider for hytter.
+3. Server-rendret fylkesoversikt på `/hytter`.
+4. Små rettelser i JSON-LD.
+5. Riktig `lastmod` i sitemapen, og sitemapen sendt til Bing Webmaster Tools.
+
+## Runde 1: faste og raske hyttesider (2026-10-03)
+
+Beslutningen står i [ADR 005](../adr/005-cached-public-hut-pages.md). Kort fortalt:
+
+- Hyttesiden leser anonymt og caches som ISR i en time.
+- `/admin/hytter` tømmer cachen ved hver endring.
+- Høyden lagres per hytte etter synken (`terrain_elevation_m`) i stedet for å hentes live.
+- Kommuneregisteret har et øyeblikksbilde som reserve.
+
+### Høyde: backfill og kontroll
+
+- **Backfill.** Alle 1 653 ikke-arkiverte hytter. 1 645 fikk terrengmodellen (`dtm1`), 6 innsjøhøyde og 1 høydekurver. 1 hytte er
+  uten høyde (Kutjaure Fjällstuga, utenfor dekning i Sverige).
+- **Funn underveis.** I kall på 50 punkter spredt over landet svarte høydemodellen med høydekurver i stedet for `dtm1` for 949
+  av hyttene, med avvik på opptil 23 m (Fløterhytta: 129 mot 106). Med 1–20 punkter per kall gir den `dtm1`. Vi slår nå opp ti
+  om gangen, og et punkt som likevel får kurver, slås opp alene. De 973 hyttene uten `dtm1` ble beregnet på nytt.
+- **Kontroll mot enkeltpunkt-API-et**, altså samme kall som hyttesiden brukte før, og samme avrunding: 52 hytter, 0 avvik.
+  Utvalget var de 10 laveste (0–1 moh., kyst), de 10 høyeste (opptil 2 227 moh., Surtningssue), 12 nord for 68,5° N, kyst- og
+  fjellhytter og 8 som først fikk høydekurver.
+- **Kontroll mot høydene fra forrige runde** (enkeltpunkt, 1 510 hytter): 1 509 like. Avviket er Grovaskarsbu, 1106 mot 1100.
+  Høydemodellen gir 1100 i dag (`dtm1`).
+
+### Ytelse
+
+**Før**, i produksjon med `Cache-Control: private, no-store`. Netlify cachet ingenting (Durable `bypass`, Edge `miss`):
+
+| Hytte | 1. kall | 2.–4. kall |
+|---|---|---|
+| Aursjobu | 1,89 s | 0,78–1,16 s |
+| Spiterstulen | 1,33 s | 0,72–1,18 s |
+| Fulehuk | 0,90 s | 0,75–0,82 s |
+| Glitterheim | 1,10 s | 0,53–0,77 s |
+| Vardfjellkåta | 0,92 s | 0,74–0,96 s |
+| Hindsæter | 0,65 s | 0,51–0,74 s |
+| Skjult hytte (Grønlia, avvist) | 404, 0,62 s | 404, 0,40–0,62 s |
+
+Åtte tilfeldige hytter, første kall: 0,87–1,85 s. I gjennomgangen tidligere samme dag: 0,8–3,9 s.
+
+**Etter, lokalt** (`next start` mot produksjonsdata): første visning 0,18–0,82 s (`x-nextjs-cache: MISS`), deretter 2 ms (`HIT`).
+Høyden var med hver gang. En forespørsel med cookie fikk samme cachede side. Produksjonstallene etter deploy står i rapporten
+for runden.
+
+### Sikkerhet
+
+Kontrollert i produksjon:
+
+- **Anonymt og innlogget uten admin:** ingen tilgang til `huts`, `hut_sources` eller `huts_public`, og heller ikke til
+  `huts_needing_elevation` eller `set_hut_elevations`.
+- **`get_hut`:** returnerer bare offentlige felt pluss høyden. Ingen `contact_note`, `override_source_url` eller kontrollfelt.
+- **Skjulte hytter:** avviste og ubekreftede gir tomt svar.
+- **Admin:** kan fortsatt liste, se kontrollkøen og overstyre.
+- **`db:verify`:** ingen avvik.
+
+### Begrensninger
+
+- Endringer fra synken synes på hyttesidene innen en time. Det er ingen direkte tømming fra GitHub Actions.
+- Ved en kommunereform må `lib/geo/kommuner-snapshot.json` hentes på nytt.
+- Stale-while-revalidate: den første besøkende etter en time får forrige versjon, mens ny lages i bakgrunnen.
