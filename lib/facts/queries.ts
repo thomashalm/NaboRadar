@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createLookupRunner, type LookupResult } from "./lookup-runner";
 import { getDbMode, getReadDb, type Db } from "@/lib/db";
 import { formatDistance, formatRadius } from "@/lib/format";
+import { MAX_RADIUS_M } from "@/lib/geo/constants";
 import {
   AREA_CATEGORIES,
   AREA_SECTIONS,
@@ -18,9 +19,12 @@ import {
   describeAnleggSummary,
   describeClusterSummary,
   describeClusterToggle,
+  describeTilfluktsromIngen,
   describeTilfluktsromLine,
+  describeTilfluktsromNaermeste,
   describeTilfluktsromSummary,
   TILFLUKTSROM_CAVEAT,
+  TILFLUKTSROM_UTILGJENGELIG,
   describePlaceLine,
   HELSE_CAVEAT,
   OPPVEKST_CAVEAT,
@@ -135,6 +139,14 @@ export interface FactCluster {
   overview: SectionOverview | null;
   caveat: string | null;
   sourceName: string;
+  /** Vis gruppen åpen. Brukes når gruppen er selve svaret på det brukeren søkte etter. */
+  defaultOpen?: boolean;
+  /**
+   * Ingenting innen valgt radius. Da er det ingen gruppe å åpne — bare én linje, og eventuelt
+   * lenken til de nærmeste rommene. `nearestLink` er satt bare når lenken faktisk fører til et
+   * treff.
+   */
+  emptyNote?: { text: string; nearestLink: boolean } | null;
 }
 
 /** Et objekt som skal tegnes i kartet. Flate eller punkt, avhengig av kilden. */
@@ -324,7 +336,7 @@ const mapFeatureFromRow = (row: FactRow): AreaMapFeature[] =>
  *
  * Eksportert for test — hva som vises og hvordan det formuleres er produktlogikk.
  */
-export function shelterFacts(rows: FactRow[], radiusM: number) {
+export function shelterFacts(rows: FactRow[], radiusM: number, defaultOpen = false) {
   const sorted = [...rows].sort(byRelevance);
   if (sorted.length === 0) return null;
 
@@ -356,9 +368,111 @@ export function shelterFacts(rows: FactRow[], radiusM: number) {
     overview: null,
     caveat: TILFLUKTSROM_CAVEAT,
     sourceName: sourceNames(sorted),
+    defaultOpen,
   };
 
   return { cluster, mapFeatures: sorted.flatMap(mapFeatureFromRow) };
+}
+
+/** Hvor mange av de nærmeste rommene spesialverktøyet viser når ingen ligger innen radius. */
+export const NEAREST_SHELTER_COUNT = 3;
+
+/**
+ * Hvor langt ut vi leter etter nærmeste rom: 10 km, samme grense som lesefunksjonen har.
+ *
+ * Satt etter fordelingen, ikke etter skjønn. Målt 2026-10-03 på 327 adresser spredt over hele
+ * Oslo: 17 % har et offentlig tilfluktsrom innen 1 km, 61 % innen 3 km, 93 % innen 5 km og 100 %
+ * innen 10 km (lengst: Sørkedalen, 7,3 km). Trinnvis leting — 1, 3, 5, 10 km — ville gitt samme
+ * svar med flere spørringer: databasen sorterer på avstand, så ett oppslag ut til 10 km finner
+ * de nærmeste direkte.
+ */
+export const NEAREST_SHELTER_RADIUS_M = MAX_RADIUS_M;
+
+const SHELTER_PROVIDER_ID = "dsb-tilfluktsrom";
+
+/**
+ * Tilfluktsrom-seksjonen når ingen rom ligger innen valgt radius.
+ *
+ * To visninger av samme oppslag:
+ *
+ * - `/omrade` følger valgt radius. Den sier at ingen ligger innenfor, og lenker til de nærmeste.
+ *   Den lister dem ikke — siden skal ikke late som om noe 3 km unna ligger innen 1 km.
+ * - Spesialverktøyet `/tilfluktsrom` (`showNearest`) skal alltid svare. Det viser de nærmeste
+ *   rommene, tydelig merket som utenfor valgt radius.
+ *
+ * `nearest` er rommene innen NEAREST_SHELTER_RADIUS_M, nærmest først. Er den tom, finnes det
+ * ingen offentlige rom innen 10 km: da står seksjonen bare i spesialverktøyet, med den grensen
+ * i teksten. Rommene tegnes ikke i kartet, som er zoomet til valgt radius.
+ *
+ * Eksportert for test — hva som vises og hvordan det formuleres er produktlogikk.
+ */
+export function shelterFactsOutsideRadius(
+  nearest: FactRow[],
+  radiusM: number,
+  showNearest: boolean,
+): { cluster: FactCluster } | null {
+  const sorted = [...nearest].sort(byRelevance).slice(0, NEAREST_SHELTER_COUNT);
+  if (sorted.length === 0 && !showNearest) return null;
+
+  const kilde = SOURCES[SHELTER_PROVIDER_ID];
+  const base = {
+    sectionId: "tilfluktsrom",
+    id: "tilfluktsrom",
+    label: "Tilfluktsrom",
+    facts: [],
+    overview: null,
+    sourceName: kilde ? `${kilde.name} (${kilde.owner})` : "",
+  } satisfies Partial<FactCluster>;
+
+  if (sorted.length === 0) {
+    const text = `${describeTilfluktsromIngen(formatRadius(NEAREST_SHELTER_RADIUS_M))}.`;
+    return { cluster: { ...base, summary: text, lists: [], caveat: null, emptyNote: { text, nearestLink: false } } };
+  }
+
+  const ingen = describeTilfluktsromIngen(formatRadius(radiusM));
+  if (!showNearest) {
+    return {
+      cluster: { ...base, summary: ingen, lists: [], caveat: null, emptyNote: { text: `${ingen}.`, nearestLink: true } },
+    };
+  }
+
+  return {
+    cluster: {
+      ...base,
+      summary: ingen,
+      lists: [
+        {
+          id: "naermeste-offentlige-tilfluktsrom",
+          label: describeTilfluktsromNaermeste(formatRadius(radiusM)),
+          toggleLabel: null,
+          items: sorted.map((row) => ({ ...overviewItem(row, describeTilfluktsromLine(row.attributes)), href: null })),
+          previewCount: NEAREST_SHELTER_COUNT,
+          total: sorted.length,
+        },
+      ],
+      caveat: TILFLUKTSROM_CAVEAT,
+      defaultOpen: true,
+    },
+  };
+}
+
+/** Oppslaget etter nærmeste rom feilet. Seksjonen sier det, i stedet for å stå tom eller mangle. */
+function shelterFactsUnavailable(): { cluster: FactCluster } {
+  const text = TILFLUKTSROM_UTILGJENGELIG;
+  return {
+    cluster: {
+      sectionId: "tilfluktsrom",
+      id: "tilfluktsrom",
+      label: "Tilfluktsrom",
+      summary: text,
+      facts: [],
+      lists: [],
+      overview: null,
+      caveat: null,
+      sourceName: "",
+      emptyNote: { text, nearestLink: false },
+    },
+  };
 }
 
 /** Om en registrering fortjener et eget kort, eller bare hører hjemme i oversikten. */
@@ -751,6 +865,11 @@ export async function getAreaFacts(params: {
    * sender sin innloggede klient, fordi upubliserte kategorier bare returneres til admin.
    */
   db?: Db;
+  /**
+   * Søket kom fra /tilfluktsrom: vis de nærmeste rommene også når de ligger utenfor valgt
+   * radius. Se shelterFactsOutsideRadius.
+   */
+  nearestShelters?: boolean;
 }): Promise<AreaFactsResult> {
   const { lat, lng, radius, sources: sourceSet = "all", contaminatedScope = "ingen" } = params;
   const brukDb = sourceSet !== "lookups";
@@ -759,6 +878,9 @@ export async function getAreaFacts(params: {
   let antallPerKategori: Partial<Record<AreaCategory, number>> = {};
   let contaminatedTruncated = false;
   let dbFailed: string | null = null;
+  /** Nærmeste tilfluktsrom innen 10 km. Hentes bare når ingen ligger innen valgt radius. */
+  let nearestShelterRows: FactRow[] = [];
+  let nearestSheltersFailed = false;
 
   try {
     if (!brukDb) throw new SkipSource();
@@ -790,6 +912,25 @@ export async function getAreaFacts(params: {
     const contaminated = z.array(rowSchema).parse(contaminatedRaw);
     rows = [...contaminated, ...z.array(rowSchema).parse(serveringRaw), ...z.array(rowSchema).parse(otherRaw)];
     contaminatedTruncated = contaminated.length >= FEATURE_LIMIT;
+    // Samme lesefunksjon og samme datasett som resten — bare med større radius og tre treff.
+    // Feiler dette ene oppslaget, skal ikke resten av siden falle med det. Men seksjonen sier
+    // at den ikke kunne hentes: en teknisk feil skal ikke leses som «ingen rom».
+    if (!rows.some((row) => row.category === "tilfluktsrom")) {
+      try {
+        nearestShelterRows = z.array(rowSchema).parse(
+          await db.rpc<unknown>("features_near", {
+            lat,
+            lng,
+            radius_m: NEAREST_SHELTER_RADIUS_M,
+            categories: ["tilfluktsrom"],
+            max_results: NEAREST_SHELTER_COUNT,
+          }),
+        );
+      } catch (error) {
+        nearestSheltersFailed = true;
+        console.error("[facts] nærmeste tilfluktsrom feilet:", error instanceof Error ? error.message.slice(0, 200) : "ukjent");
+      }
+    }
     antallPerKategori = Object.fromEntries(
       z
         .array(z.object({ category: z.enum(AREA_CATEGORIES), antall: z.coerce.number() }))
@@ -851,9 +992,23 @@ export async function getAreaFacts(params: {
     }
   }
 
-  const shelterRows = rows.filter((r) => r.category === "tilfluktsrom");
+  // Normalt er de nærmeste utenfor radius. Ligger de innenfor likevel, var hovedspørringen
+  // kuttet av radgrensen — da er de vanlige treff, og vises som det.
+  const shelterRows = [
+    ...rows.filter((r) => r.category === "tilfluktsrom"),
+    ...nearestShelterRows.filter((r) => r.distance_m <= radius),
+  ];
+  if (shelterRows.length === 0 && brukDb && !dbFailed) {
+    const result = nearestSheltersFailed
+      ? shelterFactsUnavailable()
+      : shelterFactsOutsideRadius(nearestShelterRows, radius, params.nearestShelters ?? false);
+    if (result) {
+      clusters.push(result.cluster);
+      if (!nearestSheltersFailed) usedSources.add(SHELTER_PROVIDER_ID);
+    }
+  }
   if (shelterRows.length > 0) {
-    const result = shelterFacts(shelterRows, radius);
+    const result = shelterFacts(shelterRows, radius, params.nearestShelters ?? false);
     if (result) {
       clusters.push(result.cluster);
       mapFeatures.push(...result.mapFeatures);

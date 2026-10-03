@@ -30,6 +30,8 @@ export interface AreaViewInput {
   contaminatedScope?: ContaminatedScope;
   /** Klienten de lagrede dataene leses med. Admin sender sin innloggede klient. */
   db?: Db;
+  /** Søket kom fra /tilfluktsrom: vis de nærmeste rommene også utenfor valgt radius. */
+  nearestShelters?: boolean;
 }
 
 /**
@@ -37,13 +39,13 @@ export interface AreaViewInput {
  * mens de direkte oppslagene bruker opptil fem sekunder. Ingen await her — siden sendes med
  * adresse, radius, kart og layout med én gang, og hver kilde strømmer inn når den er ferdig.
  */
-export function buildAreaView({ lat, lng, radius, sort, contaminatedScope = "ingen", db }: AreaViewInput) {
+export function buildAreaView({ lat, lng, radius, sort, contaminatedScope = "ingen", db, nearestShelters }: AreaViewInput) {
   return {
     events: withTimeout(getAreaEvents({ lat, lng, radius, sort }), EVENT_TIMEOUT_MS, () => ({
       status: "unavailable" as const,
       devReason: `Tidsavbrudd etter ${EVENT_TIMEOUT_MS} ms`,
     })),
-    storedFacts: withTimeout(getAreaFacts({ lat, lng, radius, sources: "db", contaminatedScope, db }), DB_TIMEOUT_MS, () => ({
+    storedFacts: withTimeout(getAreaFacts({ lat, lng, radius, sources: "db", contaminatedScope, db, nearestShelters }), DB_TIMEOUT_MS, () => ({
       status: "unavailable" as const,
       devReason: `Tidsavbrudd etter ${DB_TIMEOUT_MS} ms`,
     })),

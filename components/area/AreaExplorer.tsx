@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import type { PropertyLookupResult } from "@/lib/property/types";
 import { AreaMap, type MapPopupContent } from "@/components/map/AreaMap";
-import { buildAreaHref, buildEventHref, type AreaBasePath } from "@/lib/area-params";
+import { buildAreaHref, buildEventHref, buildToolHref, type AreaBasePath, type AreaTool } from "@/lib/area-params";
 import { EVENT_DATE_LABELS } from "@/lib/events/labels";
 import type { AreaEventsResult } from "@/lib/events/queries";
 import type { AreaFactsResult, AreaMapFeature } from "@/lib/facts/queries";
@@ -50,6 +50,8 @@ interface AreaExplorerProps {
    * teksten i HTML-en uten at denne klientkomponenten må kjenne til oppslaget.
    */
   skolekrets?: React.ReactNode;
+  /** Spesialverktøyet søket kom fra (/tilfluktsrom, /skolekrets). Følger med når radius endres. */
+  tool?: AreaTool;
   /** «Friluft i nærheten», rendret på serveren. Står sist blant seksjonene. Se AreaFacts. */
   friluft?: React.ReactNode;
   /**
@@ -156,6 +158,7 @@ export function AreaExplorer({
   lookupFacts: lookupFactsPromise,
   tiles,
   skolekrets,
+  tool,
   friluft,
   leadSections,
   extraSections,
@@ -207,8 +210,8 @@ export function AreaExplorer({
       : null;
 
   const context = useMemo(
-    () => ({ lat, lng, radius, label: urlLabel, sort, basePath }),
-    [lat, lng, radius, urlLabel, sort, basePath],
+    () => ({ lat, lng, radius, label: urlLabel, sort, basePath, tool }),
+    [lat, lng, radius, urlLabel, sort, basePath, tool],
   );
   const navigate = useCallback(
     (href: string) => startTransition(() => router.replace(href, { scroll: false })),
@@ -415,6 +418,7 @@ export function AreaExplorer({
           lookupFacts={lookupFactsPromise}
           radius={radius}
           pending={pending}
+          nearestShelterHref={buildToolHref({ ...context, tool: "tilfluktsrom" })}
           friluft={friluft}
           saker={
           <EventFeed

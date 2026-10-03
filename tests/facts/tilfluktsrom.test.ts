@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { shelterFacts } from "@/lib/facts/queries";
+import type { Db } from "@/lib/db";
+import {
+  getAreaFacts,
+  NEAREST_SHELTER_COUNT,
+  NEAREST_SHELTER_RADIUS_M,
+  shelterFacts,
+  shelterFactsOutsideRadius,
+} from "@/lib/facts/queries";
 import {
   describeMapLines,
   describeTilfluktsromLine,
@@ -207,5 +214,112 @@ describe("normalisering fra DSB", () => {
     const { records, rejected } = provider.normalize({ features: [feature({ lokalId: null })], documents: [] });
     expect(rejected).toEqual([]);
     expect(records[0]!.externalId).toBe("776");
+  });
+});
+
+/**
+ * Regresjon: Langmyrgrenda 26C, Oslo (2026-10-03).
+ *
+ * Søk fra /tilfluktsrom ga en resultatside uten noe om tilfluktsrom. Dataene var riktige — alle
+ * 556 rom i databasen var identiske med Sivilforsvarets uttrekk samme dag. Nærmeste rom,
+ * Bentsegt 21-25, ligger 3 287 m unna: utenfor 1 km, og utenfor 3 km også. Seksjonen falt bort
+ * fordi «ingen innen radius» ble behandlet som «ingenting å vise».
+ */
+describe("ingen rom innen radius", () => {
+  const LANGMYRGRENDA = { lat: 59.96646, lng: 10.74715 };
+  const naermeste = [rom("Bentsegt 21-25", 3287, 250), rom("Kingosgt 17", 4063, 260), rom("Vøyensvingen 4", 4087, 300)];
+
+  /** Databasen slik den svarer for Langmyrgrenda: tomt innen radius, tre rom innen 10 km. */
+  function db(svar: { naermeste?: Row[]; feilPaaNaermeste?: boolean } = {}) {
+    const kall: { radius: number; categories: unknown; max: unknown }[] = [];
+    const impl: Db = {
+      kind: "supabase",
+      async rpc<T>(fn: string, args: Record<string, unknown> = {}) {
+        if (fn !== "features_near") return [] as T[];
+        const radius = args.radius_m as number;
+        kall.push({ radius, categories: args.categories, max: args.max_results });
+        const bareTilfluktsrom = JSON.stringify(args.categories) === JSON.stringify(["tilfluktsrom"]);
+        if (!bareTilfluktsrom) return [] as T[];
+        if (svar.feilPaaNaermeste) throw new Error("timeout");
+        return (svar.naermeste ?? naermeste).filter((r) => r.distance_m <= radius) as unknown as T[];
+      },
+    };
+    return { impl, kall };
+  }
+
+  const seksjon = async (params: { radius: number; nearestShelters?: boolean }, database = db()) => {
+    const svar = await getAreaFacts({ ...LANGMYRGRENDA, sources: "db", db: database.impl, ...params });
+    if (svar.status !== "ok") throw new Error("forventet ok");
+    return { svar, cluster: svar.groups.find((g) => g.sectionId === "tilfluktsrom")?.clusters[0] ?? null };
+  };
+
+  it("spesialverktøyet viser de nærmeste rommene, merket som utenfor radius", async () => {
+    const { svar, cluster } = await seksjon({ radius: 1000, nearestShelters: true });
+    expect(cluster!.summary).toBe("Ingen offentlige tilfluktsrom innen 1 km");
+    expect(cluster!.emptyNote).toBeUndefined();
+    expect(cluster!.defaultOpen).toBe(true);
+    expect(cluster!.lists[0]!.label).toBe("Nærmeste offentlige tilfluktsrom – utenfor 1 km");
+    expect(cluster!.lists[0]!.items.map((i) => [i.title, i.distanceLabel, i.subtitle])).toEqual([
+      ["Bentsegt 21-25", "3,3 km unna", "Dimensjonert for 250 personer"],
+      ["Kingosgt 17", "4,1 km unna", "Dimensjonert for 260 personer"],
+      ["Vøyensvingen 4", "4,1 km unna", "Dimensjonert for 300 personer"],
+    ]);
+    expect(cluster!.caveat).toBe(TILFLUKTSROM_CAVEAT);
+    expect(cluster!.sourceName).toContain("Sivilforsvaret");
+    expect(svar.sources.map((k) => k.name)).toContain("Offentlige tilfluktsrom");
+    // Kartet er zoomet til valgt radius. Rom utenfor tegnes ikke som om de lå innenfor.
+    expect(svar.mapFeatures).toEqual([]);
+  });
+
+  it("gjelder også 3 km: nærmeste rom ligger 3,3 km unna", async () => {
+    const { cluster } = await seksjon({ radius: 3000, nearestShelters: true });
+    expect(cluster!.summary).toBe("Ingen offentlige tilfluktsrom innen 3 km");
+    expect(cluster!.lists[0]!.label).toBe("Nærmeste offentlige tilfluktsrom – utenfor 3 km");
+  });
+
+  it("/omrade følger valgt radius: sier at ingen ligger innenfor, og lenker til de nærmeste", async () => {
+    const { cluster } = await seksjon({ radius: 1000 });
+    expect(cluster!.emptyNote).toEqual({ text: "Ingen offentlige tilfluktsrom innen 1 km.", nearestLink: true });
+    // Rommene listes ikke — /omrade later ikke som om noe 3 km unna ligger innen 1 km.
+    expect(cluster!.lists).toEqual([]);
+    expect(JSON.stringify(cluster)).not.toContain("Bentsegt");
+  });
+
+  it("sier aldri «ingen tilfluktsrom» uten radius", async () => {
+    for (const nearestShelters of [true, false]) {
+      const { cluster } = await seksjon({ radius: 1000, nearestShelters });
+      expect(JSON.stringify(cluster)).not.toMatch(/Ingen (offentlige )?tilfluktsrom(?! innen)/);
+    }
+  });
+
+  it("bruker samme lesefunksjon med 10 km og tre treff — ingen egen datavei", async () => {
+    const database = db();
+    await seksjon({ radius: 1000, nearestShelters: true }, database);
+    expect(database.kall.filter((k) => JSON.stringify(k.categories) === JSON.stringify(["tilfluktsrom"]))).toEqual([
+      { radius: NEAREST_SHELTER_RADIUS_M, categories: ["tilfluktsrom"], max: NEAREST_SHELTER_COUNT },
+    ]);
+    expect(NEAREST_SHELTER_RADIUS_M).toBe(10_000);
+  });
+
+  it("bygd uten rom innen 10 km: verktøyet sier det, /omrade viser ingen seksjon", async () => {
+    const tom = () => db({ naermeste: [] });
+    const verktoy = await seksjon({ radius: 1000, nearestShelters: true }, tom());
+    expect(verktoy.cluster!.emptyNote).toEqual({ text: "Ingen offentlige tilfluktsrom innen 10 km.", nearestLink: false });
+    expect((await seksjon({ radius: 1000 }, tom())).cluster).toBeNull();
+  });
+
+  it("teknisk feil leses ikke som «ingen rom», og tar ikke resten av siden med seg", async () => {
+    for (const nearestShelters of [true, false]) {
+      const { svar, cluster } = await seksjon({ radius: 1000, nearestShelters }, db({ feilPaaNaermeste: true }));
+      expect(svar.status).toBe("ok");
+      expect(cluster!.emptyNote).toEqual({ text: "Kunne ikke hente tilfluktsrom akkurat nå.", nearestLink: false });
+      expect(JSON.stringify(cluster)).not.toMatch(/Ingen/);
+    }
+  });
+
+  it("rom innen radius vises som før, og åpnes når søket kom fra verktøyet", () => {
+    expect(shelterFacts([rom("A", 100)], 1000)!.cluster.defaultOpen).toBe(false);
+    expect(shelterFacts([rom("A", 100)], 1000, true)!.cluster.defaultOpen).toBe(true);
+    expect(shelterFactsOutsideRadius([], 1000, false)).toBeNull();
   });
 });

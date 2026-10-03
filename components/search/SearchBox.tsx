@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import type { GeocodeResponse } from "@/app/api/geocode/route";
-import { buildAreaHref, type AreaBasePath } from "@/lib/area-params";
+import { buildAreaHref, buildToolHref, type AreaBasePath, type AreaTool } from "@/lib/area-params";
 import type { SearchLocation } from "@/lib/geocoding/types";
 
 /** Må samsvare med MIN_QUERY_LENGTH på serveren. */
@@ -24,9 +24,14 @@ interface SearchBoxProps {
   onNavigate?: (href: string) => void;
   /** Hvilken resultatvisning søket skal lande på. Standard er den offentlige. */
   basePath?: AreaBasePath;
+  /**
+   * Satt på spesialsidene (/tilfluktsrom, /skolekrets): søket lander på verktøyets seksjon i
+   * resultatet, ikke øverst. Forsiden setter den ikke, og lander øverst som før.
+   */
+  tool?: AreaTool;
 }
 
-export function SearchBox({ radius, size = "compact", autoFocus, onSelected, onNavigate, basePath }: SearchBoxProps) {
+export function SearchBox({ radius, size = "compact", autoFocus, onSelected, onNavigate, basePath, tool }: SearchBoxProps) {
   const router = useRouter();
   const id = useId();
   const inputId = `${id}-input`;
@@ -86,7 +91,8 @@ export function SearchBox({ radius, size = "compact", autoFocus, onSelected, onN
   function select(location: SearchLocation) {
     setOpen(false);
     setQuery(location.label);
-    const href = buildAreaHref({ lat: location.latitude, lng: location.longitude, radius, label: location.label, basePath });
+    const context = { lat: location.latitude, lng: location.longitude, radius, label: location.label, basePath };
+    const href = tool ? buildToolHref({ ...context, tool }) : buildAreaHref(context);
     if (onNavigate) onNavigate(href);
     else {
       setNavigating(true);

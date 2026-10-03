@@ -44,7 +44,7 @@ export default function SkolekretsPage() {
         </p>
 
         <div className="mt-8">
-          <SearchBox radius={DEFAULT_RADIUS_M} size="large" />
+          <SearchBox radius={DEFAULT_RADIUS_M} size="large" tool="skolekrets" />
         </div>
 
         <section className="mt-14">

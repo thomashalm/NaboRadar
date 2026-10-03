@@ -1142,8 +1142,51 @@ ikke alt svarer på. Skal det inn senere, hører det sammen med valgt rad, ikke 
 - **`datauttaksdato` brukes ikke som `sourceUpdatedAt`.** Den er tidspunktet uttrekket ble kjørt, med
   millisekunder, og sier ingenting om rommet. Feltet inngår i innholdshashen, så å ta det med ville
   gjort hver sync til 556 «updated» uten at noe var endret.
-- Seksjonen ligger **sist**, og faller bort når det ikke er treff — som alle andre seksjoner.
-  Vi skriver ikke «ingen tilfluktsrom her», som ville lest som en påstand om områdets beredskap.
+- Seksjonen ligger **sist**. Vi skriver aldri «ingen tilfluktsrom» uten radius — det ville lest
+  som en påstand om områdets beredskap, mens det vi vet bare er en avstand.
+
+#### `/tilfluktsrom` viser nærmeste offentlige rom, `/omrade` følger valgt radius
+
+Regelen fra 2026-10-03. Samme datasett og samme lesefunksjon (`features_near`), to visninger:
+
+| | Rom innen valgt radius | Ingen innen radius, men innen 10 km | Ingen innen 10 km |
+|---|---|---|---|
+| **`/omrade`** (vanlig søk) | Gruppen med rommene, som før | «Ingen offentlige tilfluktsrom innen 1 km.» + lenken «Finn nærmeste offentlige tilfluktsrom →» | Seksjonen vises ikke |
+| **Søk fra `/tilfluktsrom`** (`vis=tilfluktsrom`) | Samme gruppe, åpen | «Ingen offentlige tilfluktsrom innen 1 km», og de tre nærmeste under «Nærmeste offentlige tilfluktsrom – utenfor 1 km» | «Ingen offentlige tilfluktsrom innen 10 km.» |
+
+- `/omrade` lister ikke rom utenfor radien, og de tegnes ikke i kartet. Siden skal ikke late som
+  om noe 3 km unna ligger innen 1 km. Hovedradiene er uendret: 500 m, 1 km, 3 km.
+- Spesialverktøyet skal alltid svare. De nærmeste rommene er merket som utenfor valgt radius, og
+  forbeholdet om at et rom i nærheten ikke er en anvisning står som før.
+- **10 km er satt etter fordelingen, ikke etter skjønn.** Av 327 adresser spredt over hele Oslo har
+  17 % et offentlig rom innen 1 km, 61 % innen 3 km, 93 % innen 5 km og 100 % innen 10 km (lengst:
+  7,3 km). Databasen sorterer på avstand, så ett oppslag ut til 10 km finner de nærmeste direkte —
+  trinnvis leting (1, 3, 5, 10 km) ville gitt samme svar med flere spørringer.
+- Oppslaget etter nærmeste rom gjøres bare når ingen ligger innen radius. Feiler det, sier
+  seksjonen «Kunne ikke hente tilfluktsrom akkurat nå.» — resten av siden står, og feilen leses
+  ikke som «ingen rom».
+- Bakgrunn, rotårsak og QA: [research/tilfluktsrom-naermeste-rom.md](research/tilfluktsrom-naermeste-rom.md).
+
+#### Deep-link fra spesialverktøyene
+
+Søk fra `/tilfluktsrom` og `/skolekrets` lander på verktøyets egen del av resultatsiden:
+`/omrade?…&vis=tilfluktsrom#tilfluktsrom` og `/omrade?…&vis=skolekrets#skolekrets`. Søk fra
+forsiden har verken parameter eller anker, og lander øverst som før.
+
+- **Ankeret** (`#tilfluktsrom`, `#skolekrets`) sier hvor siden skal lande. Det ser bare
+  nettleseren. ID-ene er faste og semantiske, ikke komponent-ID-er.
+- **Parameteren** (`vis`) sier hva serveren skal svare med: de nærmeste rommene utenfor radius,
+  og dekningsmeldingen for skolekrets utenfor Oslo. Ukjent verdi gir den vanlige siden.
+- Landingen gjøres av `DeepLinkTarget` når målet monteres — altså når dataene er lastet og målet
+  finnes i DOM. Ingen tidsfrist. Mens seksjonene over fylles inn, holdes målet på plass av en
+  ResizeObserver uten animasjon; første gang brukeren ruller, trykker eller taster, slipper vi.
+  `scroll-margin-top` holder målet under den faste topplinjen.
+- Er målet sammenleggbart, åpnes akkurat det. Ingen andre grupper åpnes.
+- Radius- og sorteringslenkene beholder `vis`, men ikke ankeret: å bytte radius skal ikke flytte
+  siden.
+- Skolekrets utenfor Oslo: notisen vises ellers ikke, men kommer søket fra `/skolekrets`, står
+  «Skolekrets vises foreløpig bare for adresser i Oslo. …» på ankeret. Svarer ikke kilden, står
+  det — de to er ikke det samme.
 
 ### Hytter og koier
 
@@ -2044,7 +2087,7 @@ Ting vi vet om og bevisst ikke har løst nå.
 | **Fem av seks research-kategorier er ikke bygget** | Datasenter/industri, omsorg/bofellesskap, forsvar/militært, større prosjekter og notater mangler både datamodell og innhold. To av dem berører data vi bevisst har valgt å ikke samle — se seksjon 23 og discovery-notatene. Sømmen `extraSections` står klar |
 | **Skolekretser dekker bare Oslo, og bare barnetrinnet** | Ingen nasjonal kilde finnes: Geonorge har to skolekrets-datasett i hele landet, begge fra Halden. Hver kommune publiserer sitt eget |
 | **Tilfluktsrom har ikke areal, type eller status** | DSBs datasett har dem ikke. Vi viser romnummer, stedsbeskrivelse, plasser og posisjon |
-| **Tilfluktsromseksjonen faller bort uten treff** | 556 rom i hele landet betyr at de fleste adresser ikke har noen i nærheten. En fast «ingen funnet»-linje ville vært støy, og lest som en påstand om områdets beredskap |
+| **`/omrade` lister ikke tilfluktsrom utenfor valgt radius** | Den sier at ingen ligger innenfor, og lenker til de nærmeste. Uten rom innen 10 km vises seksjonen ikke: 556 rom i hele landet betyr at mange adresser ikke har noen i nærheten, og en fast linje ville vært støy |
 | **Skolekretsenes lisens er ikke avklart** | Tjenesten oppgir «Copyright Plan- og bygningsetaten i Oslo kommune». Tredje Oslo-kilde uten åpen lisens — bør avklares samlet |
 | **Skolekretsene har ingen datostempling** | Grensene revideres hver høst, og innholdshashen i sync-laget er vårt eneste signal om at det har skjedd |
 | **Fem skolekretser mangler organisasjonsnummer** | Manglerud, Munkerud, Nordseter, Rosenholm og Vestli finnes ikke i Geonorge-laget vi synker skoler fra. Da viser vi navnet uten kobling |

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { areaParamsSchema, buildAreaHref } from "@/lib/area-params";
+import { areaParamsSchema, buildAreaHref, buildToolHref } from "@/lib/area-params";
 import { formatRadius } from "@/lib/format";
 import { DEFAULT_RADIUS_M, RADIUS_OPTIONS_M } from "@/lib/geo/constants";
 import { circlePolygon, distanceMeters, radiusBounds } from "@/lib/geo/radius";
@@ -72,6 +72,36 @@ describe("/omrade query-parametre", () => {
     expect(areaParamsSchema.parse({ lat: "59.9", lng: "10.7", sortering: "tull" }).sortering).toBe("distance");
     const href = buildAreaHref({ ...SOGNSVANN, radius: 1000, sort: "newest" });
     expect(new URL(href, "http://x").searchParams.get("sortering")).toBe("nyeste");
+  });
+});
+
+describe("deep-link fra spesialverktøyene", () => {
+  it("søk fra /tilfluktsrom og /skolekrets lander på verktøyets seksjon", () => {
+    for (const tool of ["tilfluktsrom", "skolekrets"] as const) {
+      const href = buildToolHref({ ...SOGNSVANN, radius: 1000, label: "Sognsvann", tool });
+      const url = new URL(href, "http://x");
+      expect(url.pathname).toBe("/omrade");
+      expect(url.hash).toBe(`#${tool}`);
+      expect(areaParamsSchema.parse(Object.fromEntries(url.searchParams)).vis).toBe(tool);
+    }
+  });
+
+  it("vanlig søk har verken anker eller vis-parameter", () => {
+    const href = buildAreaHref({ ...SOGNSVANN, radius: 1000, label: "Sognsvann" });
+    expect(href).not.toContain("#");
+    expect(href).not.toContain("vis=");
+    expect(areaParamsSchema.parse(Object.fromEntries(new URL(href, "http://x").searchParams)).vis).toBeUndefined();
+  });
+
+  it("radiusbytte beholder verktøyet, men ikke ankeret — siden skal ikke hoppe", () => {
+    const href = buildAreaHref({ ...SOGNSVANN, radius: 3000, tool: "tilfluktsrom" });
+    expect(new URL(href, "http://x").searchParams.get("vis")).toBe("tilfluktsrom");
+    expect(href).not.toContain("#");
+  });
+
+  it("ukjent vis-verdi gir den vanlige resultatsiden", () => {
+    expect(areaParamsSchema.parse({ lat: "59.9", lng: "10.7", vis: "forurenset-grunn" }).vis).toBeUndefined();
+    expect(areaParamsSchema.parse({ lat: "59.9", lng: "10.7", vis: ["skolekrets", "x"] }).vis).toBe("skolekrets");
   });
 });
 

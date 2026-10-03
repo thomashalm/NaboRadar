@@ -150,6 +150,15 @@ export const SOURCES: Record<string, SourceInfo> = {
     licenseName: "NLOD 2.0",
     licenseUrl: "https://data.norge.no/nlod/no/2.0",
   },
+  // Manglet fram til 2026-10-03: gruppen sto med en tom «Kilde:», og datasettet var ikke med i
+  // «Kilder og metode». NLOD krever at kilden navngis.
+  "dsb-tilfluktsrom": {
+    name: "Offentlige tilfluktsrom",
+    owner: "Sivilforsvaret / Direktoratet for samfunnssikkerhet og beredskap",
+    licenseName: "NLOD",
+    licenseUrl: "https://data.norge.no/nlod/no/1.0",
+    url: "https://kartkatalog.geonorge.no/metadata/tilfluktsrom-offentlige/dbae9aae-10e7-4b75-8d67-7f0e8828f3d8",
+  },
   "oslo-skjenkebevilling": {
     name: "Skjenkebevillinger i Oslo",
     owner: "Næringsetaten, Oslo kommune",
@@ -986,6 +995,24 @@ export function describeTilfluktsromSummary(input: { total: number; radiusLabel:
     : `${input.total} offentlige tilfluktsrom innen ${input.radiusLabel}`;
 }
 
+/**
+ * Ingenting innen valgt radius. Radien står alltid i setningen: «Ingen tilfluktsrom» alene ville
+ * vært en påstand om området, mens dette bare er en påstand om avstanden.
+ */
+export function describeTilfluktsromIngen(radiusLabel: string): string {
+  return `Ingen offentlige tilfluktsrom innen ${radiusLabel}`;
+}
+
+/** Overskriften over de nærmeste rommene når de ligger utenfor valgt radius. */
+export function describeTilfluktsromNaermeste(radiusLabel: string): string {
+  return `Nærmeste offentlige tilfluktsrom – utenfor ${radiusLabel}`;
+}
+
+/** Oppslaget feilet. Ikke det samme som at det ikke finnes rom. */
+export const TILFLUKTSROM_UTILGJENGELIG = "Kunne ikke hente tilfluktsrom akkurat nå.";
+
+export const TILFLUKTSROM_NAERMESTE_LENKE = "Finn nærmeste offentlige tilfluktsrom";
+
 export const TILFLUKTSROM_CAVEAT =
   "Avstanden er målt i luftlinje fra søkepunktet, ikke som anbefalt rute. Et offentlig tilfluktsrom " +
   "i nærheten er ikke i seg selv en anvisning om hvor du skal gå — følg råd og varsling fra " +
@@ -993,6 +1020,14 @@ export const TILFLUKTSROM_CAVEAT =
 
 export const SKOLEKRETS_LABEL = "Skolekrets";
 export const SKOLEKRETS_UNDERTEKST = "Veiledende inntaksområde";
+
+/** Vist når søket kom fra /skolekrets og adressen ikke ligger i noen av Oslos inntaksområder. */
+export const SKOLEKRETS_UTENFOR =
+  "Skolekrets vises foreløpig bare for adresser i Oslo. Denne adressen ligger ikke i noen av " +
+  "Oslo kommunes inntaksområder for barneskole.";
+
+/** Kilden svarte ikke, eller ga et flertydig svar. Det er ikke det samme som «utenfor Oslo». */
+export const SKOLEKRETS_UTILGJENGELIG = "Vi får ikke slått opp skolekrets akkurat nå. Prøv igjen om litt.";
 
 /** «Adressen ligger i det veiledende inntaksområdet til Nordberg skole.» */
 export function describeSkolekrets(skoler: readonly string[], krets: string): string {

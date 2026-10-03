@@ -46,7 +46,7 @@ export default function TilfluktsromPage() {
         </p>
 
         <div className="mt-8">
-          <SearchBox radius={DEFAULT_RADIUS_M} size="large" />
+          <SearchBox radius={DEFAULT_RADIUS_M} size="large" tool="tilfluktsrom" />
         </div>
 
         <section className="mt-14">

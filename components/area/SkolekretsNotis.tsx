@@ -6,7 +6,10 @@ import {
   SKOLEKRETS_LABEL,
   SKOLEKRETS_UNDERTEKST,
   SKOLEKRETS_UNGDOMSTRINN,
+  SKOLEKRETS_UTENFOR,
+  SKOLEKRETS_UTILGJENGELIG,
 } from "@/lib/facts/wording";
+import { DeepLinkTarget } from "./DeepLinkTarget";
 
 /**
  * Liten notis under adressen: hvilket veiledende inntaksområde for barneskole adressen
@@ -19,31 +22,50 @@ import {
  *
  * Teksten rendres på serveren, slik at den finnes i HTML-en. Det er forberedelsen til en
  * senere /skolekrets-side.
+ *
+ * Unntaket er når søket kom fra /skolekrets (`fraVerktoy`). Da har brukeren spurt om nettopp
+ * dette, og å lande øverst uten forklaring ville vært et ubesvart spørsmål. Utenfor Oslo står
+ * dekningsmeldingen her; svarer ikke kilden, står det — de to er ikke det samme.
+ *
+ * Notisen er ankeret `#skolekrets`.
  */
-export function SkolekretsNotis({ lat, lng }: { lat: number; lng: number }) {
+export function SkolekretsNotis({ lat, lng, fraVerktoy = false }: { lat: number; lng: number; fraVerktoy?: boolean }) {
   return (
     // Ingen plassholder mens den lastes: en notis som kanskje ikke finnes skal ikke
     // reservere plass og dytte siden nedover når svaret kommer.
     <Suspense fallback={null}>
-      <SkolekretsInnhold lat={lat} lng={lng} />
+      <SkolekretsInnhold lat={lat} lng={lng} fraVerktoy={fraVerktoy} />
     </Suspense>
   );
 }
 
-async function SkolekretsInnhold({ lat, lng }: { lat: number; lng: number }) {
+async function SkolekretsInnhold({ lat, lng, fraVerktoy }: { lat: number; lng: number; fraVerktoy: boolean }) {
   const resultat = await getSkolekrets(lat, lng);
 
   if (resultat.status === "flertydig" && process.env.NODE_ENV === "development") {
     console.warn(`[skolekrets] punktet dekkes av flere kretser: ${resultat.kretser.join(", ")}`);
   }
-  if (resultat.status !== "ok") return null;
+  if (resultat.status !== "ok") {
+    if (!fraVerktoy) return null;
+    return (
+      <DeepLinkTarget id="skolekrets" className="mt-5">
+        <p className="rounded-xl border border-line bg-surface px-4 py-2.5 text-[15px] leading-relaxed text-ink">
+          <span className="font-medium">{SKOLEKRETS_LABEL}</span>
+          <span className="mt-0.5 block text-muted">
+            {resultat.status === "utenfor" ? SKOLEKRETS_UTENFOR : SKOLEKRETS_UTILGJENGELIG}
+          </span>
+        </p>
+      </DeepLinkTarget>
+    );
+  }
 
   const navn = resultat.skoler.map((s) => s.navn);
   // Uten kuratert kobling viser vi kretsnavnet. Vi gjetter aldri hvilken skole det er.
   const overskrift = navn.length > 0 ? navn.join(" og ") : resultat.krets;
 
   return (
-    <details className="mt-5 rounded-xl border border-line bg-surface">
+    <DeepLinkTarget id="skolekrets" className="mt-5">
+    <details className="rounded-xl border border-line bg-surface">
       <summary className="cursor-pointer list-none px-4 py-2.5 text-[15px] text-ink [&::-webkit-details-marker]:hidden">
         <span className="font-medium">{SKOLEKRETS_LABEL}</span>
         <span aria-hidden="true" className="px-1.5 text-muted">
@@ -70,5 +92,6 @@ async function SkolekretsInnhold({ lat, lng }: { lat: number; lng: number }) {
         </p>
       </div>
     </details>
+    </DeepLinkTarget>
   );
 }

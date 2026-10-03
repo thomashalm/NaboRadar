@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { Suspense, use } from "react";
+import { DeepLinkTarget } from "./DeepLinkTarget";
 import { useMapSelection } from "./map-selection";
 import {
   grunnforholdCluster,
@@ -17,6 +19,7 @@ import type {
 } from "@/lib/facts/queries";
 import { combineStates } from "@/lib/facts/section-state";
 import { formatRadius } from "@/lib/format";
+import { TILFLUKTSROM_NAERMESTE_LENKE } from "@/lib/facts/wording";
 import {
   AREA_SECTIONS,
   PUBLIC_AREA_SECTIONS,
@@ -53,6 +56,8 @@ interface AreaFactsProps {
    * forhold ved adressen, og har sin egen radius.
    */
   friluft?: React.ReactNode;
+  /** Samme søk, men med de nærmeste tilfluktsrommene vist også utenfor valgt radius. */
+  nearestShelterHref?: string;
 }
 
 /**
@@ -66,6 +71,7 @@ export function AreaFacts({
   pending,
   saker,
   friluft,
+  nearestShelterHref,
 }: AreaFactsProps) {
   return (
     <section
@@ -91,6 +97,7 @@ export function AreaFacts({
             radius={radius}
             saker={saker}
             friluft={friluft}
+            nearestShelterHref={nearestShelterHref}
           />
         </Suspense>
       </div>
@@ -121,12 +128,14 @@ function FactsBody({
   radius,
   saker,
   friluft,
+  nearestShelterHref,
 }: {
   storedFacts: Promise<AreaFactsResult>;
   lookupFacts: Promise<AreaFactsResult>;
   radius: number;
   saker: React.ReactNode;
   friluft?: React.ReactNode;
+  nearestShelterHref?: string;
 }) {
   const db = use(storedFacts);
   const order =
@@ -160,6 +169,7 @@ function FactsBody({
               sectionId={sectionId}
               db={db}
               radius={radius}
+              nearestShelterHref={nearestShelterHref}
             />
           ),
         )}
@@ -178,12 +188,14 @@ function FactSection({
   db,
   lookupFacts,
   radius,
+  nearestShelterHref,
 }: {
   sectionId: string;
   db: AreaFactsResult;
   /** Satt bare for seksjoner som faktisk bruker et direkte oppslag. */
   lookupFacts?: Promise<AreaFactsResult>;
   radius: number;
+  nearestShelterHref?: string;
 }) {
   // use() kan stå i en betingelse; hvorvidt en seksjon har oppslag er dessuten fast.
   const lookups = lookupFacts ? use(lookupFacts) : null;
@@ -217,29 +229,42 @@ function FactSection({
   const samlet = group ? byggGruppe(sectionId, group, radius) : null;
 
   const label = SECTION_LABELS[sectionId] ?? sectionId;
+  // Seksjonene med stabilt anker. Ankeret står også på feilmeldingen: en lenke til
+  // #tilfluktsrom skal lande på forklaringen, ikke øverst på siden.
+  const ramme = (innhold: React.ReactNode) =>
+    ANKERSEKSJONER.has(sectionId) ? <DeepLinkTarget id={sectionId}>{innhold}</DeepLinkTarget> : innhold;
+
   if (state === "feilet") {
-    return (
+    return ramme(
       <SectionShell label={label}>
         <p className="rounded-2xl border border-dashed border-line-strong px-5 py-4 text-[15px] text-muted">
           Kunne ikke hente {label.toLowerCase()} akkurat nå.
         </p>
-      </SectionShell>
+      </SectionShell>,
     );
   }
   if (!samlet) return null;
 
-  return (
+  return ramme(
     <SectionShell label={samlet.label} intro={samlet.intro}>
       <div className="flex flex-col gap-3">
-        {samlet.clusters.map((cluster) => (
-          // Er gruppen hele seksjonen, gjentar vi ikke navnet. Undertypene i Nærområdet
-          // trenger sitt eget navn, fordi seksjonen rommer flere av dem.
-          <ClusterDetails
-            key={cluster.id}
-            cluster={cluster}
-            showLabel={cluster.label !== samlet.label}
-          />
-        ))}
+        {samlet.clusters.map((cluster) =>
+          cluster.emptyNote ? (
+            <EmptyNote
+              key={cluster.id}
+              text={cluster.emptyNote.text}
+              href={cluster.emptyNote.nearestLink ? nearestShelterHref : undefined}
+            />
+          ) : (
+            // Er gruppen hele seksjonen, gjentar vi ikke navnet. Undertypene i Nærområdet
+            // trenger sitt eget navn, fordi seksjonen rommer flere av dem.
+            <ClusterDetails
+              key={cluster.id}
+              cluster={cluster}
+              showLabel={cluster.label !== samlet.label}
+            />
+          ),
+        )}
         {samlet.facts.length > 0 && (
           <ul className="flex flex-col gap-3">
             {samlet.facts.map((fact) => (
@@ -260,7 +285,29 @@ function FactSection({
           </>
         )}
       </div>
-    </SectionShell>
+    </SectionShell>,
+  );
+}
+
+/** Seksjonene som har et stabilt anker i URL-en. Skolekrets har sitt i SkolekretsNotis. */
+const ANKERSEKSJONER: ReadonlySet<string> = new Set(["tilfluktsrom"]);
+
+/**
+ * Ingen offentlige tilfluktsrom innen valgt radius: én linje, og lenken til de nærmeste.
+ *
+ * Ikke en utvider — det er ingenting å åpne. Lenken går til samme søk i spesialverktøyets
+ * visning, der de nærmeste rommene står, merket som utenfor radius.
+ */
+function EmptyNote({ text, href }: { text: string; href?: string }) {
+  return (
+    <div className="rounded-2xl border border-line bg-surface px-5 py-3.5 text-[15px]">
+      <p className="text-ink">{text}</p>
+      {href && (
+        <Link href={href} className="mt-1 inline-flex h-9 items-center font-medium text-accent hover:underline">
+          {TILFLUKTSROM_NAERMESTE_LENKE} →
+        </Link>
+      )}
+    </div>
   );
 }
 
@@ -542,7 +589,7 @@ function ClusterDetails({
   showLabel?: boolean;
 }) {
   return (
-    <details className="rounded-2xl border border-line bg-surface">
+    <details open={cluster.defaultOpen || undefined} className="rounded-2xl border border-line bg-surface">
       <summary className="cursor-pointer px-5 py-3.5">
         {showLabel ? (
           <>

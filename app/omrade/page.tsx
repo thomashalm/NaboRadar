@@ -39,9 +39,15 @@ export default async function AreaPage({ searchParams }: { searchParams: SearchP
   const parsed = areaParamsSchema.safeParse(await searchParams);
   if (!parsed.success) return <InvalidArea />;
 
-  const { lat, lng, radius, sortering: sort } = parsed.data;
+  const { lat, lng, radius, sortering: sort, vis: tool } = parsed.data;
 
-  const { events, storedFacts, lookupFacts } = buildAreaView({ lat, lng, radius, sort });
+  const { events, storedFacts, lookupFacts } = buildAreaView({
+    lat,
+    lng,
+    radius,
+    sort,
+    nearestShelters: tool === "tilfluktsrom",
+  });
 
   return (
     <AreaShell>
@@ -56,7 +62,8 @@ export default async function AreaPage({ searchParams }: { searchParams: SearchP
         storedFacts={storedFacts}
         lookupFacts={lookupFacts}
         tiles={getMapTileConfig()}
-        skolekrets={<SkolekretsNotis lat={lat} lng={lng} />}
+        tool={tool}
+        skolekrets={<SkolekretsNotis lat={lat} lng={lng} fraVerktoy={tool === "skolekrets"} />}
         friluft={<FriluftSeksjon lat={lat} lng={lng} label={parsed.data.label} />}
       />
     </AreaShell>
