@@ -6,8 +6,11 @@ export type DbKind = "supabase" | "pglite";
 
 export interface Db {
   readonly kind: DbKind;
-  /** Kaller public.<fn>(navngitte argumenter) og returnerer radene. */
-  rpc<T>(fn: string, args?: Record<string, unknown>): Promise<T[]>;
+  /**
+   * Kaller public.<fn>(navngitte argumenter) og returnerer radene. `range` er et radvindu
+   * [fra, til] (begge med): Supabase-API-et gir høyst 1 000 rader per kall.
+   */
+  rpc<T>(fn: string, args?: Record<string, unknown>, options?: { range?: [number, number] }): Promise<T[]>;
 }
 
 export class DatabaseUnavailableError extends Error {

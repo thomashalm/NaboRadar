@@ -4,6 +4,8 @@ import { describe, expect, it, vi } from "vitest";
 // sitemap og robots henter SITE_URL fra app/layout.tsx, som laster en webfont. Fonten har
 // ingenting med denne testen å gjøre, og next/font kan ikke kjøre utenfor Next-bygget.
 vi.mock("next/font/google", () => ({ Geist: () => ({ variable: "--font-geist", className: "font" }) }));
+// Sitemapen tar med offentlige hytter fra databasen. Den delen er testet i tests/db/huts.test.ts.
+vi.mock("@/lib/huts/queries", () => ({ listPublicHuts: async () => [{ id: "a4fbf722-0000-0000-0000-000000000000", name: "Aursjobu" }] }));
 
 const { default: sitemap } = await import("@/app/sitemap");
 const { default: robots } = await import("@/app/robots");
@@ -20,8 +22,8 @@ import { RESEARCH_CATEGORIES } from "@/lib/admin/research-types";
 describe("research holdes utenfor det offentlige", () => {
   const les = (sti: string) => readFileSync(sti, "utf8");
 
-  it("nevner ikke research i sitemap", () => {
-    const urler = sitemap().map((e) => String(e.url));
+  it("nevner ikke research i sitemap", async () => {
+    const urler = (await sitemap()).map((e) => String(e.url));
     expect(urler.some((u) => /research|admin/i.test(u))).toBe(false);
     // Positiv kontroll: sitemappen har faktisk innhold, så testen over ikke er tom.
     expect(urler.length).toBeGreaterThan(0);

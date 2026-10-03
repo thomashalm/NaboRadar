@@ -40,7 +40,7 @@ class PgliteDb implements Db {
   readonly kind = "pglite" as const;
   constructor(readonly pg: PGlite) {}
 
-  async rpc<T>(fn: string, args: Record<string, unknown> = {}): Promise<T[]> {
+  async rpc<T>(fn: string, args: Record<string, unknown> = {}, options: { range?: [number, number] } = {}): Promise<T[]> {
     if (!/^[a-z_][a-z0-9_]*$/.test(fn)) throw new DatabaseQueryError(fn, "ugyldig funksjonsnavn");
     const names = Object.keys(args);
     for (const name of names) {
@@ -53,7 +53,8 @@ class PgliteDb implements Db {
       if (Array.isArray(value) && value.every((v) => v === null || typeof v !== "object")) return value;
       return JSON.stringify(value);
     });
-    const sql = `select * from public.${fn}(${names.map((n, i) => `${n} => $${i + 1}`).join(", ")})`;
+    const vindu = options.range ? ` offset ${Math.max(0, Math.floor(options.range[0]))} limit ${Math.max(0, Math.floor(options.range[1] - options.range[0] + 1))}` : "";
+    const sql = `select * from public.${fn}(${names.map((n, i) => `${n} => $${i + 1}`).join(", ")})${vindu}`;
     try {
       const result = await this.pg.query<Record<string, unknown>>(sql, params);
       // Skalarfunksjoner returnerer én kolonne med funksjonsnavnet — pakk ut som verdi.

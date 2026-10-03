@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 import { createPgliteDb } from "@/lib/db/pglite";
-import { hutsArePublic } from "@/lib/huts/queries";
+import { hutsArePublic, listPublicHuts } from "@/lib/huts/queries";
 import { destinationPoint } from "@/lib/geo/radius";
 
 type Db = Awaited<ReturnType<typeof createPgliteDb>>;
@@ -271,6 +271,28 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
         await db.pg.exec("rollback");
       }
       expect(await hutsArePublic(null)).toBe(false);
+    });
+
+    it("sitemapen får bare hytter som vises offentlig, og ingen før publisering", async () => {
+      expect(await listPublicHuts(db)).toEqual([]);
+      await db.pg.exec("begin");
+      try {
+        await db.pg.exec(`update area_feature_categories set is_public = true where category = 'hytte'`);
+        const offentlige = await listPublicHuts(db);
+        const synlige = (await db.pg.query<{ id: string }>(`select id from huts_public`)).rows.map((r) => r.id);
+        expect(offentlige.map((h) => h.id).sort()).toEqual(synlige.sort());
+        // Avvist eller bare i sekundærkilden: aldri med.
+        const skjulte = (await db.pg.query<{ id: string }>(
+          `select id from huts where rejected_at is not null or (confidence = 'low' and last_verified_at is null)`,
+        )).rows.map((r) => r.id);
+        expect(offentlige.some((h) => skjulte.includes(h.id))).toBe(false);
+        // Ikke for allmennheten: siden finnes, men den promoteres ikke.
+        const [første] = synlige;
+        await db.pg.query(`update huts set access_override = 'not_public', public_note = 'Kun for medlemmer.', override_source_url = 'https://eksempel.no', override_verified_at = now() where id = $1`, [første]);
+        expect((await listPublicHuts(db)).map((h) => h.id)).not.toContain(første);
+      } finally {
+        await db.pg.exec("rollback");
+      }
     });
 
     it("lar admin se hyttene før publisering", async () => {

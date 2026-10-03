@@ -1096,8 +1096,15 @@ Kategorien `hytte` er publisert (`is_public = true`); `hytte_kilde` er aldri off
 `huts_*`-funksjonene svarer for alle, men bare med hytter som er godkjent for visning: avviste
 hytter og hytter som bare står i sekundærkilden, er fortsatt skjult. Avpublisering er én linje:
 `update area_feature_categories set is_public = false where category = 'hytte'`. Forsiden
-lenker til hyttekartet så lenge kategorien er offentlig. `/hytter` og hyttesidene er fortsatt
-`noindex`, og hyttesidene står ikke i sitemapen.
+lenker til hyttekartet så lenge kategorien er offentlig.
+
+**Søkemotorer.** `/hytter` og hyttesidene indekseres. Sitemapen har `/hytter` og alle hytter en
+anonym besøkende kan se (`listPublicHuts`, uten innlogging, i sider på 1 000), uten lastmod og
+uten priority. Avviste, skjulte og sammenslåtte hytter gir 404 og er aldri med. Hytter som ikke
+er for allmennheten (`not_public`) har en side, men er `noindex` og står ikke i sitemapen.
+Tittelen er «Aursjobu – hytte i Skjåk», beskrivelsen bygges av type, sted, forvalter og
+tilgang, og hyttesiden har strukturerte data av typen `Place` — ikke `LodgingBusiness`, som
+ville antydet booking og pris.
 
 Supabase-API-et gir høyst 1 000 rader per kall. Hele-landet-visningen har flere hytter enn det,
 så `getHutsInBbox` henter `huts_in_bbox` side for side.

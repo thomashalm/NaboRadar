@@ -5,16 +5,20 @@ import { AreaShell } from "@/components/area/AreaShell";
 import { HutDetails } from "@/components/huts/HutDetails";
 import { HutPointMap } from "@/components/huts/HutPointMap";
 import { buildHutHref, buildHutMapHref, hutRefFromSlug } from "@/lib/huts/href";
-import { getHut } from "@/lib/huts/queries";
-import { HUT_TYPE_LABELS, formatHutDistance, hutPlaceLine, hutSummaryLine } from "@/lib/huts/wording";
+import { getHut, type Hut } from "@/lib/huts/queries";
+import { HUT_TYPE_LABELS, formatHutDistance, hutMetaDescription, hutPageTitle, hutPlaceLine, hutSummaryLine } from "@/lib/huts/wording";
 import { getMapTileConfig } from "@/lib/map/config";
 
 /**
  * Fast side for én hytte: /hytter/kobberhaughytta-3f2a9c1e.
  *
  * Adressen er delbar og overlever at hytta bytter navn — oppslaget skjer på ID-delen, og
- * navnet foran er pynt. Siden er noindex så lenge datasettet er en pilot; `canonical` peker
- * allerede på adressen med gjeldende navn, så den kan åpnes for indeksering uten ombygging.
+ * navnet foran er pynt. `canonical` peker på adressen med gjeldende navn, så en gammel lenke
+ * med gammelt navn ikke blir en egen side i søkemotorene.
+ *
+ * Indekseres. Bare hytter som vises offentlig har en side: avviste, skjulte og upubliserte gir
+ * 404 (`get_hut` svarer ikke for dem), og 404 er noindex. En hytte som ikke er for allmennheten,
+ * har en side, men er noindex og står ikke i sitemapen: den skal ikke promoteres som turhytte.
  */
 type Props = { params: Promise<{ ref: string }> };
 
@@ -27,12 +31,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resultat = await hent(params);
   if (resultat.status !== "ok") return { title: "Hytte ikke funnet", robots: { index: false, follow: true } };
   const { hut } = resultat;
-  const type = HUT_TYPE_LABELS[hut.type]?.toLowerCase() ?? "hytte";
   return {
-    title: hut.name,
-    description: `${hut.name} er en ${type}${hut.municipalityName ? ` i ${hut.municipalityName}` : ""}. Se hvor den ligger og hvem som driver den.`,
-    robots: { index: false, follow: true },
+    title: hutPageTitle(hut),
+    description: hutMetaDescription(hut),
     alternates: { canonical: buildHutHref(hut) },
+    ...(hut.access === "not_public" ? { robots: { index: false, follow: true } } : {}),
+  };
+}
+
+/**
+ * Strukturerte data: et sted med navn, posisjon og kommune. `Place`, ikke `LodgingBusiness` —
+ * vi selger ikke overnatting og vet ikke om hytta er ledig eller hva den koster.
+ */
+function strukturerteData(hut: Hut) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Place",
+    name: hut.name,
+    geo: { "@type": "GeoCoordinates", latitude: hut.lat, longitude: hut.lng },
+    ...(hut.municipalityName ? { containedInPlace: { "@type": "AdministrativeArea", name: hut.municipalityName } } : {}),
   };
 }
 
@@ -54,6 +71,11 @@ export default async function HutPage({ params }: Props) {
 
   return (
     <AreaShell>
+      <script
+        type="application/ld+json"
+        // Bygget av våre egne felt; navnet er escapet av JSON.stringify.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(strukturerteData(hut)).replace(/</g, "\\u003c") }}
+      />
       <main className="lg:grid lg:grid-cols-[minmax(22rem,30rem)_1fr]">
         <section className="px-5 pt-7 pb-8 sm:px-8 lg:px-10 lg:pt-10 lg:pb-16">
           <p className="text-[13px] text-muted">

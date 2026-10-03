@@ -264,6 +264,26 @@ export async function hutsArePublic(db?: Db | null): Promise<boolean> {
   }
 }
 
+/**
+ * Alle hytter en anonym besøkende kan se, til sitemapen: ID og navn, nok til adressen. Spør uten
+ * innlogging, så avviste, skjulte og upubliserte hytter aldri kommer med — er kategorien ikke
+ * publisert, er lista tom. Hytter som ikke er for allmennheten (`not_public`) vises på siden,
+ * men promoteres ikke. Hentes i sider på 1 000 (API-ets grense), sortert på navn og ID.
+ */
+export async function listPublicHuts(db?: Db | null): Promise<{ id: string; name: string }[]> {
+  const kilde = db === undefined ? await getReadDb() : db;
+  if (!kilde) return [];
+  const { minLng, minLat, maxLng, maxLat } = HUT_BOUNDS;
+  const args = { min_lng: minLng, min_lat: minLat, max_lng: maxLng, max_lat: maxLat, max_results: 5000 };
+  const ut: { id: string; name: string }[] = [];
+  for (let fra = 0; fra < 5000; fra += API_PAGE) {
+    const side = await kilde.rpc<{ id: string; name: string; access_kind: string }>("huts_in_bbox", args, { range: [fra, fra + API_PAGE - 1] });
+    ut.push(...side.filter((hut) => hut.access_kind !== "not_public").map(({ id, name }) => ({ id, name })));
+    if (side.length < API_PAGE) break;
+  }
+  return ut;
+}
+
 /** Navnesøk. Returnerer hele hytta, slik at et treff kan vises uten et oppslag til. */
 export async function searchHuts(q: string): Promise<Hut[] | null> {
   try {

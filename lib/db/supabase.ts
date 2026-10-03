@@ -6,8 +6,9 @@ class SupabaseDb implements Db {
   readonly kind = "supabase" as const;
   constructor(private readonly client: SupabaseClient) {}
 
-  async rpc<T>(fn: string, args: Record<string, unknown> = {}): Promise<T[]> {
-    const { data, error } = await this.client.rpc(fn, args);
+  async rpc<T>(fn: string, args: Record<string, unknown> = {}, options: { range?: [number, number] } = {}): Promise<T[]> {
+    const kall = this.client.rpc(fn, args);
+    const { data, error } = options.range ? await kall.range(options.range[0], options.range[1]) : await kall;
     if (error) throw new DatabaseQueryError(fn, error.message);
     if (data === null) return [];
     return (Array.isArray(data) ? data : [data]) as T[];

@@ -9,13 +9,15 @@ import { getMapTileConfig } from "@/lib/map/config";
  * Hytter og koier i kart.
  *
  * Samme datasett som «Friluft i nærheten» på områdesiden, men utforsket i kart: flytt
- * utsnittet, filtrer på type og eier, søk på navn. Datasettet dekker hele landet. Siden er
- * noindex så lenge kategorien er upublisert.
+ * utsnittet, filtrer på type og eier, søk på hytte eller sted. Datasettet dekker hele landet.
+ *
+ * Indekseres. Adresser med `lat`/`lng`/`hytte` er samme side med et annet startutsnitt, så
+ * canonical peker alltid på /hytter.
  */
 export const metadata: Metadata = {
-  title: "Hytter og koier",
-  description: "Turisthytter, ubetjente hytter og rastebuer i kart.",
-  robots: { index: false, follow: true },
+  title: "Hytter og koier i Norge",
+  description:
+    "Kart over turisthytter, ubetjente hytter, koier og rastebuer i hele Norge, fra Kartverket. Søk etter hytte eller sted, og se hvem som driver hytta og hvor du bestiller.",
   alternates: { canonical: "/hytter" },
 };
 

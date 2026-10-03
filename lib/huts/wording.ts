@@ -20,6 +20,38 @@ export const HUT_TYPE_LABELS: Record<HutType, string | null> = {
   unknown: null,
 };
 
+/** Ordet i sidetittelen: «Aursjobu – hytte i Skjåk». */
+const TITLE_NOUN: Partial<Record<HutType, string>> = { rest_cabin: "rastebu", open_cabin: "koie", day_trip_hut: "dagsturhytte", emergency_shelter: "nødbu" };
+
+/** Sidetittel for en hytte, uten «· NaboRadar» (det legger malen til). Kommune, ellers fylke. */
+export function hutPageTitle(hut: { name: string; type: HutType; municipalityName?: string | null; countyName?: string | null }): string {
+  const sted = hut.municipalityName ?? hut.countyName;
+  const ord = TITLE_NOUN[hut.type] ?? "hytte";
+  return sted ? `${hut.name} – ${ord} i ${sted}` : `${hut.name} – ${ord}`;
+}
+
+/**
+ * Beskrivelse til søkemotorer. Bare det vi faktisk vet: type, sted, forvalter og tilgang. Ingen
+ * påstand om at hytta er åpen eller ledig, og ingen pris.
+ */
+export function hutMetaDescription(hut: {
+  name: string;
+  type: HutType;
+  municipalityName?: string | null;
+  countyName?: string | null;
+  managerName: string | null;
+  access: HutAccessKind;
+}): string {
+  const typeOrd = HUT_TYPE_LABELS[hut.type]?.toLowerCase() ?? "hytte";
+  const sted = [hut.municipalityName, hut.countyName].filter(Boolean).join(", ");
+  const setninger = [`${hut.name} er en ${typeOrd}${sted ? ` i ${sted}` : ""}.`];
+  if (hut.managerName) setninger.push(`Forvaltes av ${hut.managerName}.`);
+  const tilgang = hutAccessLine(hut.access, "short");
+  if (tilgang) setninger.push(`${tilgang}.`);
+  setninger.push("Se kart, fakta og hvor du går videre.");
+  return setninger.join(" ");
+}
+
 /** Eierkategorien. «Andre» i kilden betyr uspesifisert, så den vises ikke som en eier. */
 export const HUT_OWNER_LABELS: Record<HutOwnerKind, string | null> = {
   dnt: "DNT",
