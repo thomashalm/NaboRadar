@@ -1,9 +1,11 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { z } from "zod";
 import { getDbMode, getReadDb } from "@/lib/db";
 import { DatabaseQueryError, type Db } from "@/lib/db/types";
 import { municipalityNames } from "@/lib/geo/municipalities";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { countyCounts, findCounty, groupCountyHuts, type CountyCount, type CountyListing, type IndexHut } from "./counties";
 import {
   HUT_BOUNDS,
   HUT_ACCESS_KINDS,
@@ -280,24 +282,79 @@ export async function hutsArePublic(db?: Db | null): Promise<boolean> {
   }
 }
 
+const indexRowSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  hut_type: z.enum(HUT_TYPES).catch("unknown"),
+  municipality_number: z.string().nullable(),
+});
+
 /**
- * Alle hytter en anonym besøkende kan se, til sitemapen: ID og navn, nok til adressen. Spør uten
- * innlogging, så avviste, skjulte og upubliserte hytter aldri kommer med — er kategorien ikke
- * publisert, er lista tom. Hytter som ikke er for allmennheten (`not_public`) vises på siden,
- * men promoteres ikke. Hentes i sider på 1 000 (API-ets grense), sortert på navn og ID.
+ * Den lette hytteindeksen (`hut_index`): id, navn, type og kommune for hver hytte en anonym
+ * besøkende kan se, uten de som ikke er for allmennheten. Leser anonymt, som hyttesiden, og
+ * henter i sider på 1 000 (API-ets grense), sortert på navn og ID. Feil kastes.
  */
-export async function listPublicHuts(db?: Db | null): Promise<{ id: string; name: string }[]> {
+async function hutIndex(municipalities: string[] | null, db?: Db | null): Promise<IndexHut[]> {
   const kilde = db === undefined ? await getReadDb() : db;
   if (!kilde) return [];
-  const { minLng, minLat, maxLng, maxLat } = HUT_BOUNDS;
-  const args = { min_lng: minLng, min_lat: minLat, max_lng: maxLng, max_lat: maxLat, max_results: 5000 };
-  const ut: { id: string; name: string }[] = [];
+  const ut: IndexHut[] = [];
   for (let fra = 0; fra < 5000; fra += API_PAGE) {
-    const side = await kilde.rpc<{ id: string; name: string; access_kind: string }>("huts_in_bbox", args, { range: [fra, fra + API_PAGE - 1] });
-    ut.push(...side.filter((hut) => hut.access_kind !== "not_public").map(({ id, name }) => ({ id, name })));
+    const side = await kilde.rpc<unknown>("hut_index", { p_municipalities: municipalities }, { range: [fra, fra + API_PAGE - 1] });
+    ut.push(...z.array(indexRowSchema).parse(side).map((r) => ({ id: r.id, name: r.name, type: r.hut_type, municipalityNumber: r.municipality_number })));
     if (side.length < API_PAGE) break;
   }
   return ut;
+}
+
+/**
+ * Alle hytter en anonym besøkende kan se, til sitemapen: ID, navn og kommune. Spør uten
+ * innlogging, så avviste, skjulte og upubliserte hytter aldri kommer med — er kategorien ikke
+ * publisert, er lista tom. Hytter som ikke er for allmennheten (`not_public`) har en side, men
+ * promoteres ikke.
+ */
+export async function listPublicHuts(db?: Db | null): Promise<{ id: string; name: string; municipalityNumber: string | null }[]> {
+  return (await hutIndex(null, db)).map(({ id, name, municipalityNumber }) => ({ id, name, municipalityNumber }));
+}
+
+/** Antall offentlige hytter per kommunenummer. Leser anonymt. */
+async function municipalityCounts(): Promise<{ municipalityNumber: string | null; huts: number }[]> {
+  const db = await getReadDb();
+  if (!db) return [];
+  const rows = await db.rpc<{ municipality_number: string | null; huts: number }>("hut_municipality_counts");
+  return rows.map((r) => ({ municipalityNumber: r.municipality_number, huts: Number(r.huts) }));
+}
+
+/** Taggen for alt som teller eller lister hytter på tvers av sider. Tømmes av /admin/hytter. */
+export const HUT_OVERVIEW_TAG = "hytter-oversikt";
+
+/**
+ * Hytter per fylke, til oversikten på /hytter. `/hytter` er dynamisk (adressen bærer kartets
+ * tilstand), så tellingen caches for seg: én spørring i timen, ikke én per besøk.
+ */
+const cachedMunicipalityCounts = unstable_cache(municipalityCounts, ["hut-municipality-counts"], {
+  revalidate: 3600,
+  tags: [HUT_OVERVIEW_TAG],
+});
+
+export async function getHutCountyOverview(): Promise<{ counties: CountyCount[]; withoutCounty: number } | null> {
+  try {
+    const [rows, register] = await Promise.all([cachedMunicipalityCounts(), municipalityNames()]);
+    return countyCounts(rows, register);
+  } catch (error) {
+    console.error("[hytter] fylkesoversikten feilet:", error instanceof Error ? error.name : "ukjent");
+    return null;
+  }
+}
+
+/**
+ * Hyttene i ett fylke, gruppert per kommune. Én spørring: fylkets kommunenummer sendes som
+ * liste. `null` når slugen ikke er et fylke. Feil kastes, så siden ikke caches halv.
+ */
+export async function getCountyHuts(slug: string): Promise<CountyListing | null> {
+  const register = await municipalityNames();
+  const fylke = findCounty(slug, register);
+  if (!fylke) return null;
+  return groupCountyHuts(fylke.county, await hutIndex(fylke.municipalities), register);
 }
 
 /** Navnesøk. Returnerer hele hytta, slik at et treff kan vises uten et oppslag til. */

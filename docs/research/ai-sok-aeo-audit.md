@@ -1,7 +1,8 @@
 # AI-søk / AEO: gjennomgang og oppfølging
 
 > **Status 2026-10-03:** forbedring 1 (faste og raske hyttesider) er gjort, se
-> [ADR 005](../adr/005-cached-public-hut-pages.md). Forbedring 2–5 er ikke gjort. Beslutningene om
+> [ADR 005](../adr/005-cached-public-hut-pages.md). Forbedring 2–4 og `lastmod`-delen av 5 er gjort i runde 2, se
+> [ADR 014](../adr/014-county-pages-and-sitemap.md). Bing Webmaster Tools er ikke satt opp (gjøres utenfor koden). Beslutningene om
 > indeksering, canonical og robots (OAI-SearchBot tillatt, GPTBot ikke avgjort) står i
 > [ADR 012](../adr/012-hut-seo-and-crawlers.md).
 
@@ -120,3 +121,69 @@ Kontrollert i produksjon:
 - Endringer fra synken synes på hyttesidene innen en time. Det er ingen direkte tømming fra GitHub Actions.
 - Ved en kommunereform må `lib/geo/kommuner-snapshot.json` hentes på nytt.
 - Stale-while-revalidate: den første besøkende etter en time får forrige versjon, mens ny lages i bakgrunnen.
+
+## Runde 2: fylkessider, fylkeslenker på /hytter, strukturerte data og sitemap (2026-10-03)
+
+Beslutningen står i [ADR 014](../adr/014-county-pages-and-sitemap.md).
+
+### Hvorfor fylker, og ikke kommuner, typer eller «nær sted»
+Tallene fra gjennomgangen over:
+
+- **Fylker:** alle 15 har mellom 9 og 348 hytter, så hver fylkesside har nok innhold til å stå
+  alene.
+- **Kommuner:** 115 av 277 har 1–2 hytter, og bare 23 har 15 eller flere. Kommunesider ville
+  stort sett blitt tynne.
+- **Typer for hele landet:** bare et filter over samme liste.
+- **«Nær sted»:** ubegrenset antall nesten like sider.
+
+Disse negative funnene står fortsatt. De er grunnen til at bare fylkesnivået er bygget.
+
+### Det som ble bygget
+- `/hytter/fylke/<slug>` for 15 fylker: H1, faktaingress, antall per type, kommunene som
+  hopplenker, én H2 per kommune med hyttene alfabetisk og lenke til hver hytteside. Ingen kart.
+- En server-rendret seksjon på `/hytter`: «Hytter og koier etter fylke», med antall og lenke, og en
+  linje om 29 hytter uten kommune.
+- Hyttesiden har fått fylket i den synlige brødsmulestien, og i `Place` `url`, `@id` og fylket
+  over kommunen. Den har også `BreadcrumbList`. Fylkessiden har `BreadcrumbList`.
+- Sitemapen har fylkessidene, og ikke lenger `lastmod`, `priority` eller `changefreq` på noen side.
+- To lette RPC-er: `hut_index` (én spørring per fylkesside) og `hut_municipality_counts` (én
+  spørring i timen for oversikten). Ingen N+1.
+
+### QA (lokalt bygg mot produksjonsdata)
+- Alle 15 fylkessider ga 200 med H1, tittel «Hytter og koier i <fylke> · NaboRadar», canonical til
+  egen side og `index, follow`. Brødsmulestien pekte på `/hytter` og fylkets kanoniske adresse.
+- Hytter og kommuner per fylke var identiske med databasen (`huts_public` uten `not_public`,
+  gruppert med kommuneregisteret). Antallet på fylkessiden, i lenketeksten på `/hytter` og i
+  databasen stemte for alle 15.
+- 1 475 lenkede hytter, 0 dubletter, 0 skjulte, avviste eller `not_public`. 1 475 + 29 uten
+  kommune = 1 504 offentlige.
+- Alle 1 475 hyttelenker ga 200.
+- Hyttesidene for Aursjobu, Kobberhaughytta, Knaben leirskole og Hindsæter:
+  - `@id`, `url` og canonical er like.
+  - Fylket ligger over kommunen. For Oslo står ett område, fordi kommune og fylke er det samme.
+  - Brødsmulestien har riktige kanoniske adresser.
+  - Hindsæter (uten kommune) har ingen brødsmulesti.
+- Sitemapen har 1 524 URL-er: 5 faste sider, 15 fylker og 1 504 hytter. Ingen `lastmod`,
+  `priority` eller `changefreq`.
+- Mobil (375 px): ingen sideveis scroll på `/hytter`, fylkessidene eller hyttesiden.
+- Ukjent fylke (`/hytter/fylke/finnes-ikke`) og `/hytter/fylke` gir 404.
+
+| Fylkesside | Første visning | Cachet | HTML | gzip |
+|---|---|---|---|---|
+| Innlandet (348) | 0,15 s | 3,6 ms | 327 KB | 33 KB |
+| Trøndelag (210) | 0,13 s | 2,6 ms | 206 KB | 22 KB |
+| Vestland (179) | 0,13 s | 2,4 ms | 198 KB | 21 KB |
+| Troms (79) | 0,13 s | 2,0 ms | 92 KB | 12 KB |
+| Oslo (9) | 0,11 s | 1,5 ms | 24 KB | 5 KB |
+| Finnmark (42) | 0,10 s | 1,9 ms | 58 KB | 8 KB |
+
+Én databasespørring per fylkesside. Kommuneregisteret ligger i Nexts datacache (et døgn) med
+øyeblikksbilde som reserve.
+
+### Begrensninger
+- 29 hytter uten kommune står ikke på noen fylkesside. De gjettes ikke inn i et fylke.
+- HTML-en er stor for de største fylkene, fordi Next serialiserer innholdet to ganger. Komprimert
+  er den liten.
+- Lokalt på macOS kan en URL med store bokstaver (`/hytter/fylke/Trondelag`) treffe den cachede
+  siden for `trondelag` én gang, fordi filsystemet ikke skiller på store og små bokstaver.
+  Canonical peker uansett på den riktige adressen.

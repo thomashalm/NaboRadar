@@ -5,6 +5,8 @@ import { cache } from "react";
 import { AreaShell } from "@/components/area/AreaShell";
 import { HutDetails } from "@/components/huts/HutDetails";
 import { HutPointMap } from "@/components/huts/HutPointMap";
+import { SITE_URL } from "@/app/layout";
+import { breadcrumbList, countyHref } from "@/lib/huts/counties";
 import { buildHutHref, buildHutMapHref, hutRefFromSlug } from "@/lib/huts/href";
 import { getHut, type Hut } from "@/lib/huts/queries";
 import { HUT_TYPE_LABELS, formatHutDistance, hutIntroText, hutMetaDescription, hutPageTitle, hutPlaceLine, hutSummaryLine } from "@/lib/huts/wording";
@@ -58,18 +60,38 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+const absolutt = (sti: string) => new URL(sti, SITE_URL).toString();
+
 /**
- * Strukturerte data: et sted med navn, posisjon og kommune. `Place`, ikke `LodgingBusiness` —
- * vi selger ikke overnatting og vet ikke om hytta er ledig eller hva den koster.
+ * Strukturerte data: et sted med navn, posisjon, kommune og fylke, og en stabil `@id` på den
+ * kanoniske adressen. `Place`, ikke `LodgingBusiness` — vi selger ikke overnatting og vet ikke
+ * om hytta er ledig eller hva den koster. Brødsmulestien er Hytter og koier → fylke → hytte, og
+ * står bare når fylket er kjent.
  */
 function strukturerteData(hut: Hut) {
-  return {
+  const url = absolutt(buildHutHref(hut));
+  const fylke = hut.countyName ? { "@type": "AdministrativeArea", name: hut.countyName } : null;
+  const område = hut.municipalityName
+    ? { "@type": "AdministrativeArea", name: hut.municipalityName, ...(fylke && fylke.name !== hut.municipalityName ? { containedInPlace: fylke } : {}) }
+    : fylke;
+  const sted = {
     "@context": "https://schema.org",
     "@type": "Place",
+    "@id": `${url}#sted`,
+    url,
     name: hut.name,
     geo: { "@type": "GeoCoordinates", latitude: hut.lat, longitude: hut.lng },
-    ...(hut.municipalityName ? { containedInPlace: { "@type": "AdministrativeArea", name: hut.municipalityName } } : {}),
+    ...(område ? { containedInPlace: område } : {}),
   };
+  if (!hut.countyName) return [sted];
+  return [
+    sted,
+    breadcrumbList([
+      { name: "Hytter og koier", url: absolutt("/hytter") },
+      { name: hut.countyName, url: absolutt(countyHref(hut.countyName)) },
+      { name: hut.name, url },
+    ]),
+  ];
 }
 
 export default async function HutPage({ params }: Props) {
@@ -80,18 +102,29 @@ export default async function HutPage({ params }: Props) {
 
   return (
     <AreaShell>
-      <script
-        type="application/ld+json"
-        // Bygget av våre egne felt; navnet er escapet av JSON.stringify.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(strukturerteData(hut)).replace(/</g, "\\u003c") }}
-      />
+      {strukturerteData(hut).map((data) => (
+        <script
+          key={String(data["@type"])}
+          type="application/ld+json"
+          // Bygget av våre egne felt; navnet er escapet av JSON.stringify.
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }}
+        />
+      ))}
       <main className="lg:grid lg:grid-cols-[minmax(22rem,30rem)_1fr]">
         <section className="px-5 pt-7 pb-8 sm:px-8 lg:px-10 lg:pt-10 lg:pb-16">
-          <p className="text-[13px] text-muted">
+          <nav aria-label="Brødsmulesti" className="text-[13px] text-muted">
             <Link href="/hytter" className="hover:text-ink">
               Hytter og koier
             </Link>
-          </p>
+            {hut.countyName && (
+              <>
+                <span aria-hidden="true"> › </span>
+                <Link href={countyHref(hut.countyName)} className="hover:text-ink">
+                  {hut.countyName}
+                </Link>
+              </>
+            )}
+          </nav>
           <h1 className="mt-1 text-[2rem] leading-tight font-semibold tracking-[-0.03em] text-balance sm:text-4xl">{hut.name}</h1>
           {undertittel && <p className="mt-1.5 text-[15px] text-muted">{undertittel}</p>}
           {/* Bygget av de samme feltene som Fakta, i setninger. Rendres på serveren. */}

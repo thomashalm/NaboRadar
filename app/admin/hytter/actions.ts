@@ -1,18 +1,22 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { getAdminSession } from "@/lib/admin/session";
+import { HUT_OVERVIEW_TAG } from "@/lib/huts/queries";
 import { HUT_ACCESS_OVERRIDES, HUT_OWNER_OVERRIDES, HUT_TYPE_OVERRIDES } from "@/lib/huts/types";
 
 /**
- * Hyttesidene caches i en time (app/hytter/[ref]/page.tsx). En endring her skal synes med en
- * gang, så alle hyttesidene merkes som utdaterte — de lages på nytt ved neste besøk. Hele ruten
- * og ikke én adresse: en kontroll kan endre naboenes sider også (en sammenslått eller avvist
- * hytte står i «Andre hytter i nærheten»), og det er sjelden nok til at det ikke koster noe.
+ * Hyttesidene og fylkessidene caches i en time, og antallet per fylke på /hytter likeså. En
+ * endring her skal synes med en gang, så alt merkes som utdatert og lages på nytt ved neste
+ * besøk. Hele rutene og ikke én adresse: en kontroll kan endre naboenes sider også (en
+ * sammenslått eller avvist hytte står i «Andre hytter i nærheten» og på fylkessiden), og det er
+ * sjelden nok til at det ikke koster noe.
  */
 function revalidateHutPages() {
   revalidatePath("/hytter/[ref]", "page");
+  revalidatePath("/hytter/fylke/[slug]", "page");
+  updateTag(HUT_OVERVIEW_TAG);
 }
 
 export type HutActionState = { status: "idle" } | { status: "ok"; message: string } | { status: "error"; message: string };

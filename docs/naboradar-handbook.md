@@ -268,6 +268,7 @@ kvikkleiresone har over 100 000 hjørner, og ville ellers sprengt svaret.
 | `get_event(event_id, lat, lng)` | Én plansak med dokumenter |
 | `data_status()` | Sist vellykkede sync per kilde, til kildelinjen i UI |
 | `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search` | Hytter og koier: rundt et punkt (inntil 50 km, nærmest først), i et kartutsnitt, i en kommune, og navnesøk. Svarer bare når kategorien `hytte` er publisert, eller kalleren er admin |
+| `get_hut`, `hut_index`, `hut_municipality_counts` | Én hytte på ID-delen av adressen (med lagret høyde); lett indeks (id, navn, type, kommune) for fylkessidene og sitemapen, eventuelt for en liste kommuner; antall per kommune til oversikten på `/hytter`. De to siste utelater `not_public`. Samme synlighet som over |
 | `get_hut(ref)` | Én hytte, slått opp på de åtte første tegnene i uuid-en. Til den faste hyttesiden |
 | `refresh_huts()` | Kobler kildeposter til hytter og regner de kanoniske feltene på nytt. Kjøres av synken, kun service_role |
 | `hut_review_queue()`, `review_hut()`, `set_hut_contact()`, `set_hut_overrides()`, `hut_contact_list()`, `hut_contact_summary()`, `hut_status_queue()`, `review_hut_status()` | Kontrollkøen, avgjørelsen (godkjenn, avvis, slå sammen), lenker og forvalter, overstyring av type og tilgang med offentlig merknad, og adminlisten. Kun innlogget admin |
@@ -313,7 +314,7 @@ Tilgangen er en **positiv, uttømmende liste**, ikke en opprydding i enkelttilfe
 
 | Rolle | Kan kalle |
 |---|---|
-| `anon` | `features_near`, `features_count_near`, `events_within`, `get_event`, `data_status`, `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search`, `get_hut` |
+| `anon` | `features_near`, `features_count_near`, `events_within`, `get_event`, `data_status`, `huts_near`, `huts_in_bbox`, `huts_in_municipality`, `huts_search`, `get_hut`, `hut_index`, `hut_municipality_counts` |
 | `authenticated` | det samme, pluss `hut_review_queue`, `review_hut`, `set_hut_contact`, `set_hut_overrides`, `hut_contact_list`, `hut_contact_summary`, `hut_status_queue`, `review_hut_status`, `is_admin`, `provider_health`, `recent_sync_runs`, `recent_sync_requests`, `request_sync`, `scheduler_status` og research-, review- og datasenterfunksjonene — som alle sjekker `is_admin()` selv |
 | `service_role` | alt — sync-workeren |
 | `postgres` | alt — migrasjoner og pg_cron |
@@ -1110,7 +1111,17 @@ hytter og hytter som bare står i sekundærkilden, er fortsatt skjult. Avpublise
 `update area_feature_categories set is_public = false where category = 'hytte'`. Forsiden
 lenker til hyttekartet så lenge kategorien er offentlig.
 
-**Søkemotorer.** `/hytter` og hyttesidene indekseres. Sitemapen har `/hytter` og alle hytter en
+**Fylkessider.** `/hytter/fylke/<slug>` lister hyttene i et fylke per kommune, alfabetisk, med
+lenke til hver hytteside, antall per type og en kort faktaingress (`countyIntro` i
+`lib/huts/wording.ts`). Ingen kart. Fylket kommer fra kommuneregisteret, ikke fra databasen:
+`getCountyHuts` finner fylkets kommunenummer og henter hyttene med én spørring
+(`hut_index(p_municipalities)`). Hytter uten kommune (29) og `not_public` står ikke der. Under
+kartet på `/hytter` står fylkene med antall (`hut_municipality_counts`, cachet en time), rendret på
+serveren, så det finnes en lenkevei `/hytter` → fylke → hytte uten JavaScript. Hyttesiden har
+fylket i brødsmulestien. Kommunesider, typesider og «nær sted»-sider er bevisst ikke laget — se
+[ADR 014](adr/014-county-pages-and-sitemap.md).
+
+**Søkemotorer.** `/hytter`, fylkessidene og hyttesidene indekseres. Sitemapen har `/hytter` og alle hytter en
 anonym besøkende kan se (`listPublicHuts`, uten innlogging, i sider på 1 000), uten lastmod og
 uten priority. Avviste, skjulte og sammenslåtte hytter gir 404 og er aldri med. Hytter som ikke
 er for allmennheten (`not_public`) har en side, men er `noindex` og står ikke i sitemapen.
@@ -1447,6 +1458,7 @@ koder vises ikke, vi gjetter ikke bygningstype), og nærmeste adresse.
 | `/api/hytter` | GET | `bbox` *eller* `kommune` *eller* `q`; `type` og `eier` kan gjentas | Zod: utsnitt innenfor kloden og riktig vei, kommunenummer fire sifre, `q` 2–60 tegn, kjente typer og eiere | Supabase (`huts_*`) + stedsnavn | databasens egen | `private, no-store` | 120/min |
 | `/hytter` | GET (side) | `lat`, `lng`, `hytte`, `fra` (navnet på stedet, gir avstand), `radius` (km, 1–50) — alle valgfrie | Zod; ugyldige verdier ignoreres. `fra` maks 120 tegn | `/api/hytter` fra klienten | — | Dynamisk, indekseres, canonical `/hytter` | ingen |
 | `/hytter/[ref]` | GET (side) | `<navn>-<8 heksadesimale tegn>` | Bare ID-delen brukes; alt annet gir 404 | Supabase anonymt (`get_hut` med lagret høyde, `huts_near`) + Kartverkets kommuneregister | 4 s på kommuneregisteret, med øyeblikksbilde som reserve; feiler databasen, kastes en feil som ikke caches | ISR: `s-maxage=3600, stale-while-revalidate`; tømmes av `/admin/hytter`. Indekseres (ikke `not_public`) | ingen |
+| `/hytter/fylke/[slug]` | GET (side) | fylkesnavn som slug (`innlandet`, `more-og-romsdal`) | Ukjent slug → 404 | Supabase anonymt (`hut_index` med fylkets kommunenummer) + kommuneregisteret | Feiler databasen, kastes en feil som ikke caches | ISR: `s-maxage=3600, stale-while-revalidate`; tømmes av `/admin/hytter`. Indekseres | ingen |
 | `/admin/hytter` | GET (side) + server actions | `q` | Supabase Auth + `is_admin()`, både i handlingene og i databasefunksjonene | Supabase | — | `private, no-store` | ingen |
 | `/sak/[id]` | GET (side) | uuid + søkekontekst | `get_event` | Supabase | — | Dynamisk | ingen |
 | `/` | GET (side) | — | — | — | — | Statisk, Netlify Durable | ingen |
@@ -2270,6 +2282,7 @@ Google. Det skillet styrer alt under.
 | `/skolekrets` | **Ja** | `/skolekrets` | Landingsside for et reelt søkebehov |
 | `/tilfluktsrom` | **Ja** | `/tilfluktsrom` | Samme — offentlige tilfluktsrom nær en adresse |
 | `/hytter` | **Ja** | `/hytter` for alle parametervarianter (`?hytte=`, `lat`/`lng`, `fra`, `radius`) | Hyttekartet. Parametrene er tilstand, ikke egne sider |
+| `/hytter/fylke/[slug]` | **Ja** | Egen fylkesside | 15 fylker. Hyttene per kommune, med lenke til hver hytteside. Se [ADR 014](adr/014-county-pages-and-sitemap.md) |
 | `/hytter/[ref]` | **Ja**, unntatt `not_public` (`noindex, follow`) | Adressen med gjeldende navn | Én side per offentlig hytte, med fakta i HTML-en. Se [ADR 012](adr/012-hut-seo-and-crawlers.md) |
 | `/personvern` | **Ja** | `/personvern` | Personvernerklæringen |
 | `/sak/[id]` | **Ja** | `/sak/[id]` uten kontekst | Ekte, unikt offentlig innhold per plansak |
@@ -2294,12 +2307,14 @@ Skulle saksidene vise seg å bli vurdert som tynt innhold, er det én linje å s
   ignoreres de.
 - **`robots.txt`** genereres av `app/robots.ts` og peker på sitemap og host.
 - **`sitemap.xml`** genereres av `app/sitemap.ts` (revalidert hver time) og inneholder `/`,
-  `/skolekrets`, `/tilfluktsrom`, `/personvern`, `/hytter` og hver hytte en anonym besøkende kan
-  se, unntatt `not_public` (ca. 1 500). Saksidene oppdages via lenker, ikke via sitemap.
-  Kjent svakhet: `lastmod` på de faste sidene settes til «nå» ved hver generering, og sier
-  derfor ingenting.
-- **Strukturerte data**: `WebSite` og `WebApplication` på forsiden, og `Place` (navn,
-  koordinater, kommune) på hyttesidene, som JSON-LD. Ingen
+  `/skolekrets`, `/tilfluktsrom`, `/personvern`, `/hytter`, fylkessidene og hver hytte en anonym
+  besøkende kan se, unntatt `not_public` (1 524 URL-er 2026-10-03). Saksidene oppdages via lenker.
+  **Ingen `lastmod`, `priority` eller `changefreq`**: vi har ingen meningsfull endringsdato, og
+  tidspunktet sitemapen genereres, er ikke en ([ADR 014](adr/014-county-pages-and-sitemap.md)).
+- **Strukturerte data**: `WebSite` og `WebApplication` på forsiden. På hyttesidene `Place` med
+  `@id` (kanonisk URL + `#sted`), `url`, koordinater og kommune med fylket over, og
+  `BreadcrumbList` (Hytter og koier → fylke → hytte) når fylket er kjent. På fylkessidene
+  `BreadcrumbList` (Hytter og koier → fylke). Som JSON-LD. Ingen
   `FAQPage` — vi har ingen synlig FAQ. Ingen `SearchAction` — søket vårt tar koordinater, ikke
   en fritekststreng, så en søke-URL-mal ville lovet noe som ikke virker. **Schema skal alltid
   matche det som faktisk står på siden.**
@@ -2326,7 +2341,8 @@ og 40 hyttesider etter hverandre uten 429 ([research/ai-sok-aeo-audit.md](resear
 | Flate | Cache |
 |---|---|
 | `/`, `/skolekrets`, `/tilfluktsrom`, `/personvern` | Statisk; forsiden revalideres hvert 5. minutt |
-| `/hytter/[ref]` | ISR i en time, tømmes av `/admin/hytter` ([ADR 005](adr/005-cached-public-hut-pages.md)) |
+| `/hytter/[ref]`, `/hytter/fylke/[slug]` | ISR i en time, tømmes av `/admin/hytter` ([ADR 005](adr/005-cached-public-hut-pages.md), [ADR 014](adr/014-county-pages-and-sitemap.md)) |
+| Antall per fylke på `/hytter` | `unstable_cache` i en time, taggen `hytter-oversikt`, tømmes av `/admin/hytter` |
 | `/hytter`, `/omrade`, `/sak/[id]` | Dynamisk, ingen delt cache |
 | `sitemap.xml` | Revalideres hver time |
 | `/api/*` | Bare nettleserens egen cache, eller `no-store` |

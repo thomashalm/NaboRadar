@@ -2,6 +2,10 @@
 
 **Status:** Aktiv · 2026-10-03
 
+> **Utvidet 2026-10-03 av [ADR 014](014-county-pages-and-sitemap.md):** fylkessider er bygget, `/hytter` har
+> server-rendrede fylkeslenker, hyttesidene har `url`, `@id`, fylke og `BreadcrumbList`, og sitemapen har ikke lenger
+> `lastmod`, `priority` eller `changefreq`. Teksten under beskriver beslutningen slik den ble tatt.
+
 ## Bakgrunn
 Etter lanseringen 2026-10-02 ([ADR 009](009-public-admin-security-model.md)) skulle hyttene kunne
 finnes i Google og i AI-søk som ChatGPT search, uten tynne SEO-sider.

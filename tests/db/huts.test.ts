@@ -257,6 +257,8 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
       expect(await som("anon", `select * from huts_in_bbox(10, 59, 11, 61)`)).toEqual([]);
       expect(await som("anon", `select * from huts_in_municipality('0301')`)).toEqual([]);
       expect(await som("anon", `select * from huts_search('kobberhaug')`)).toEqual([]);
+      expect(await som("anon", `select * from hut_index()`)).toEqual([]);
+      expect(await som("anon", `select * from hut_municipality_counts()`)).toEqual([]);
       // Innlogget, men ikke admin: fortsatt ingenting.
       expect(await som("authenticated", nær, "noen@example.com")).toEqual([]);
     });
@@ -375,6 +377,27 @@ describe("hytter og koier", { timeout: 60_000 }, () => {
         } finally {
           await db.pg.exec(`update huts set last_verified_at = null where confidence = 'low'`);
         }
+      });
+
+      it("fylkessidene: lett indeks per kommune, og antall som stemmer med indeksen", async () => {
+        type Rad = { id: string; name: string; hut_type: string; municipality_number: string | null };
+        const alle = (await som<Rad>("anon", `select * from hut_index()`)) as Rad[];
+        expect(alle.length).toBeGreaterThan(0);
+        expect(Object.keys(alle[0]!).sort()).toEqual(["hut_type", "id", "municipality_number", "name"]);
+        const synlige = (await db.pg.query<{ id: string }>(`select id from huts_public where access_kind <> 'not_public'`)).rows.map((r) => r.id);
+        expect(alle.map((r) => r.id).sort()).toEqual(synlige.sort());
+
+        const tall = (await som<{ municipality_number: string | null; huts: number }>("anon", `select * from hut_municipality_counts()`)) as { municipality_number: string | null; huts: number }[];
+        expect(tall.reduce((sum, r) => sum + r.huts, 0)).toBe(alle.length);
+
+        // Med en kommuneliste: bare de kommunene, og ingen uten kommune.
+        const kommune = alle.find((r) => r.municipality_number)?.municipality_number;
+        if (kommune) {
+          const ett = (await som<Rad>("anon", `select * from hut_index(array['${kommune}'])`)) as Rad[];
+          expect(ett.length).toBe(alle.filter((r) => r.municipality_number === kommune).length);
+          expect(ett.every((r) => r.municipality_number === kommune)).toBe(true);
+        }
+        expect(await som("anon", `select * from hut_index(array['9999'])`)).toEqual([]);
       });
 
       it("lekker ikke kontrollfelt", async () => {

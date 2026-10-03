@@ -20,6 +20,52 @@ export const HUT_TYPE_LABELS: Record<HutType, string | null> = {
   unknown: null,
 };
 
+const tall = new Intl.NumberFormat("nb-NO");
+
+/** Antall av en type, med riktig tall: «1 rastebu», «80 rastebuer». */
+const HUT_TYPE_COUNT: Record<HutType, readonly [string, string]> = {
+  staffed_hut: ["betjent hytte", "betjente hytter"],
+  self_service_hut: ["selvbetjent hytte", "selvbetjente hytter"],
+  unstaffed_hut: ["ubetjent hytte", "ubetjente hytter"],
+  rest_cabin: ["rastebu", "rastebuer"],
+  open_cabin: ["åpen koie", "åpne koier"],
+  day_trip_hut: ["dagsturhytte", "dagsturhytter"],
+  emergency_shelter: ["nødbu", "nødbuer"],
+  other: ["annen hytte", "andre hytter"],
+  unknown: ["hytte uten kjent type", "hytter uten kjent type"],
+};
+
+export function hutTypeCount(type: HutType, count: number): string {
+  const [en, flere] = HUT_TYPE_COUNT[type];
+  return `${tall.format(count)} ${count === 1 ? en : flere}`;
+}
+
+/** «348 hytter og koier», «1 hytte eller koie». */
+export function hutsAndCabins(count: number): string {
+  return count === 1 ? "1 hytte eller koie" : `${tall.format(count)} hytter og koier`;
+}
+
+/** Tittel på fylkessiden: «Hytter og koier i Innlandet». */
+export function countyPageTitle(county: string): string {
+  return `Hytter og koier i ${county}`;
+}
+
+/**
+ * Beskrivelse og ingress for fylkessiden. Bare tall vi har og hvor de kommer fra — ingen
+ * omtale av hvilke hytter som er best, og ingen fylltekst.
+ */
+export function countyIntro(listing: { county: string; total: number; municipalities: readonly unknown[] }): string {
+  const kommuner = listing.municipalities.length;
+  return (
+    `NaboRadar viser ${hutsAndCabins(listing.total)} i ${listing.county}, i ${kommuner} ${kommuner === 1 ? "kommune" : "kommuner"}. ` +
+    "Hyttene er hentet fra Kartverkets kartdata, med forvalter og lenke der vi har kontrollert dem."
+  );
+}
+
+export function countyMetaDescription(listing: { county: string; total: number; municipalities: readonly unknown[] }): string {
+  return `${countyIntro(listing)} Hver hytte har en egen side med type, tilgang og hvor du går videre.`;
+}
+
 /** Ordet i sidetittelen: «Aursjobu – hytte i Skjåk». */
 const TITLE_NOUN: Partial<Record<HutType, string>> = { rest_cabin: "rastebu", open_cabin: "koie", day_trip_hut: "dagsturhytte", emergency_shelter: "nødbu" };
 

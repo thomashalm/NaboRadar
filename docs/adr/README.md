@@ -32,6 +32,7 @@ ADR-er skrives ikke for spacing, tekststørrelse, små copy-endringer eller vanl
 | [011](011-hut-access-semantics.md) | Hytter: tilgang, «Ikke for allmennheten» og midlertidig stengt | Aktiv | 2026-10-02 |
 | [012](012-hut-seo-and-crawlers.md) | Hytter i søk og AI-søk: indeksering, canonical, faktatekst, robots | Aktiv | 2026-10-03 |
 | [013](013-privacy-and-cookies.md) | Personvern og cookies: privat prosjekt, ingen samtykkebanner | Aktiv | 2026-10-03 |
+| [014](014-county-pages-and-sitemap.md) | Fylkessider som eneste landingsnivå for hytter; sitemap uten kunstig lastmod | Aktiv | 2026-10-03 |
 
 ## Mal
 

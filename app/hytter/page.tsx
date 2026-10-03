@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { z } from "zod";
 import { AreaShell } from "@/components/area/AreaShell";
 import { HutExplorer } from "@/components/huts/HutExplorer";
 import { hutRefFromSlug } from "@/lib/huts/href";
-import { getHut } from "@/lib/huts/queries";
-import { hutOriginName } from "@/lib/huts/wording";
+import { countyHref } from "@/lib/huts/counties";
+import { getHut, getHutCountyOverview } from "@/lib/huts/queries";
+import { hutOriginName, hutsAndCabins } from "@/lib/huts/wording";
 import { getMapTileConfig } from "@/lib/map/config";
 
 /**
@@ -15,6 +17,9 @@ import { getMapTileConfig } from "@/lib/map/config";
  *
  * Indekseres. Adresser med `lat`/`lng`/`hytte` er samme side med et annet startutsnitt, så
  * canonical peker alltid på /hytter.
+ *
+ * Under kartet står fylkene med antall, rendret på serveren. Kartet og lista lastes i
+ * nettleseren; fylkeslenkene er veien videre til hyttesidene uten JavaScript (ADR 014).
  */
 export const metadata: Metadata = {
   title: "Hytter og koier i Norge",
@@ -59,7 +64,7 @@ export default async function HutsPage({ searchParams }: { searchParams: SearchP
   const uuid = z.uuid().safeParse(raw.hytte);
   const fra = fraSchema.safeParse(raw.fra);
   const radius = radiusSchema.safeParse(raw.radius);
-  const hytte = uuid.success ? null : await valgtHytte(raw.hytte);
+  const [hytte, oversikt] = await Promise.all([uuid.success ? null : valgtHytte(raw.hytte), getHutCountyOverview()]);
   // Et oppgitt startpunkt går foran: det er det avstandene måles fra.
   const center = sted.success ? sted.data : hytte ? { lat: hytte.lat, lng: hytte.lng } : null;
 
@@ -72,6 +77,35 @@ export default async function HutsPage({ searchParams }: { searchParams: SearchP
         radiusM={radius.success ? radius.data * 1000 : !sted.success && hytte ? VALGT_HYTTE_RADIUS_M : null}
         initialHutId={uuid.success ? uuid.data : (hytte?.id ?? null)}
       />
+      {oversikt && oversikt.counties.length > 0 && <FylkesOversikt {...oversikt} />}
     </AreaShell>
+  );
+}
+
+/** Fylkene med antall, som vanlige lenker. Rolig, under kartet, og uten JavaScript. */
+function FylkesOversikt({ counties, withoutCounty }: NonNullable<Awaited<ReturnType<typeof getHutCountyOverview>>>) {
+  return (
+    <section aria-labelledby="hytter-fylker" className="mt-10 border-t border-line">
+      <div className="mx-auto w-full max-w-6xl px-5 pt-8 pb-4 sm:px-8">
+        <h2 id="hytter-fylker" className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">
+          Hytter og koier etter fylke
+        </h2>
+        <ul className="mt-3 grid grid-cols-1 gap-x-8 sm:grid-cols-2 lg:grid-cols-3">
+          {counties.map((c) => (
+            <li key={c.slug}>
+              <Link href={countyHref(c.county)} className="flex items-baseline justify-between gap-3 border-b border-line/70 py-2 text-[15px] hover:text-accent">
+                <span className="font-medium">{c.county}</span>
+                <span className="text-[13px] text-muted">{hutsAndCabins(c.huts)}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+        {withoutCounty > 0 && (
+          <p className="mt-3 text-[13px] text-muted">
+            {withoutCounty === 1 ? "Én hytte" : `${withoutCounty} hytter`} mangler kommune i kildedataene og står derfor ikke på noen fylkesside.
+          </p>
+        )}
+      </div>
+    </section>
   );
 }
