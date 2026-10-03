@@ -21,7 +21,7 @@ const STRUKTURERTE_DATA = {
       name: "NaboRadar",
       inLanguage: "nb-NO",
       description:
-        "Offentlige planer, grunnforhold, støy og nærområdet rundt en norsk adresse, samlet ett sted.",
+        "Offentlige data om området rundt en norsk adresse, for deg som skal kjøpe bolig: skoler, støy, naturfare, infrastruktur og nye planer.",
     },
     {
       "@type": "WebApplication",
@@ -71,11 +71,14 @@ export default async function HomePage() {
 
       <main className="flex flex-1 flex-col items-center px-5 pt-[10vh] pb-24 sm:px-8 sm:pt-[13vh]">
         <div className="w-full max-w-2xl">
-          <h1 className="text-[2.6rem] leading-[1.05] font-semibold tracking-[-0.035em] text-balance sm:text-6xl">
-            Hva skjer rundt deg?
+          {/* Ett trinn mindre enn da overskriften var fire ord: setningen er lengre, og søkefeltet
+              skal fortsatt stå høyt på siden. */}
+          <h1 className="text-[2.25rem] leading-[1.08] font-semibold tracking-[-0.035em] text-balance sm:text-5xl">
+            Sjekk hva som finnes og skjer rundt boligen før du kjøper.
           </h1>
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted text-pretty sm:text-xl">
-            Se planer, bygging og andre endringer rundt en adresse – uten å lete i kommunale systemer.
+            NaboRadar samler offentlige data om området rundt en adresse – fra skoler og støy til naturfare og nye
+            planer.
           </p>
 
           <div className="mt-10 sm:mt-12">

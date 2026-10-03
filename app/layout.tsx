@@ -12,13 +12,18 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "sw
  */
 export const SITE_URL = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://naboradar.no");
 
+/**
+ * Posisjoneringen (2026-10-03): boligkjøperen, og både det som finnes i området og det som er på
+ * vei. Hytter og koier er en egen utforsker og nevnes ikke her.
+ */
+const TITTEL = "NaboRadar – Sjekk området rundt boligen før du kjøper";
 const BESKRIVELSE =
-  "Se planer, grunnforhold, støy og nærområdet rundt en norsk adresse. " +
-  "Offentlige kilder, samlet ett sted — uten å lete i kommunale systemer.";
+  "Sjekk hva som finnes og skjer rundt boligen før du kjøper. " +
+  "NaboRadar samler offentlige data om området rundt en adresse: skoler, støy, naturfare og nye planer.";
 
 export const metadata: Metadata = {
   metadataBase: SITE_URL,
-  title: { default: "NaboRadar – Hva skjer rundt deg?", template: "%s · NaboRadar" },
+  title: { default: TITTEL, template: "%s · NaboRadar" },
   description: BESKRIVELSE,
   applicationName: "NaboRadar",
   // Standard for alle sider. Undersider som ikke skal indekseres overstyrer selv.
@@ -28,7 +33,7 @@ export const metadata: Metadata = {
     siteName: "NaboRadar",
     locale: "nb_NO",
     url: SITE_URL,
-    title: "NaboRadar – Hva skjer rundt deg?",
+    title: TITTEL,
     description: BESKRIVELSE,
   },
   twitter: { card: "summary_large_image", title: "NaboRadar", description: BESKRIVELSE },
