@@ -118,6 +118,35 @@ describe("offentlig leseflate", { timeout: 30_000 }, () => {
       }
     });
 
+    it("admin får upubliserte kategorier fra de samme lese-RPC-ene, andre innloggede får dem ikke", async () => {
+      const somBruker = async (email: string) => {
+        await db.pg.exec("begin");
+        try {
+          await db.pg.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ role: "authenticated", email })]);
+          await db.pg.exec("set local role authenticated");
+          const nær = await db.pg.query<{ external_id: string }>(`select * from features_near(${ORIGIN.lat}, ${ORIGIN.lng}, 500, array['testhytte'])`);
+          const antall = await db.pg.query<{ category: string }>(`select * from features_count_near(${ORIGIN.lat}, ${ORIGIN.lng}, 500, array['testhytte'])`);
+          return { nær: nær.rows.map((r) => r.external_id), antall: antall.rows.map((r) => r.category) };
+        } finally {
+          await db.pg.exec("rollback");
+        }
+      };
+      await db.pg.exec(`insert into admin_users (email) values ('drift@example.com') on conflict do nothing`);
+      expect(await somBruker("drift@example.com")).toEqual({ nær: ["hytte"], antall: ["testhytte"] });
+      expect(await somBruker("annen@example.com")).toEqual({ nær: [], antall: [] });
+    });
+
+    it("forurenset grunn (miljo) er avpublisert: beholdt i basen, ikke i den offentlige leseflaten", async () => {
+      const [rad] = (await db.pg.query<{ is_public: boolean }>(`select is_public from area_feature_categories where category = 'miljo'`)).rows;
+      expect(rad!.is_public).toBe(false);
+      // Alle andre kategorier fra den opprinnelige listen er fortsatt publisert.
+      const publiserte = (await db.pg.query<{ category: string }>(`select category from area_feature_categories where is_public order by 1`)).rows.map((r) => r.category);
+      for (const kategori of ["grunnforhold", "stoy", "infrastruktur", "industri", "tilfluktsrom", "oppvekst", "helse", "servering", "omsorg", "skolekrets"]) {
+        expect(publiserte).toContain(kategori);
+      }
+      expect(publiserte).not.toContain("miljo");
+    });
+
     it("en kategori som ikke står i registeret, kan ikke skrives", async () => {
       const [resultat] = await db.rpc<{ inserted: number; failed: number }>("upsert_area_features", {
         p_provider_id: "mdir-industri-tillatelse",

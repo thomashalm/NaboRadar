@@ -102,7 +102,7 @@ export default function TilfluktsromPage() {
         <section className="mt-10">
           <h2 className="text-xl font-semibold tracking-[-0.02em]">Hva mer viser NaboRadar?</h2>
           <p className="mt-3 leading-relaxed text-muted">
-            Samme søk gir deg også varslede planoppstarter, grunnforhold, støy, forurenset grunn og hva slags
+            Samme søk gir deg også varslede planoppstarter, grunnforhold, støy og hva slags
             virksomheter og steder som finnes i nærheten.{" "}
             <Link href="/" className="text-accent hover:underline">
               Se hva NaboRadar dekker

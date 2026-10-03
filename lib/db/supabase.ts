@@ -24,6 +24,14 @@ export function createSupabaseReadDb(): Db | null {
 }
 
 /**
+ * Lesing som den innloggede brukeren. Brukes av admins adressevisning: lese-RPC-ene returnerer
+ * upubliserte kategorier bare når kallet kommer fra en admin, og det avgjør databasen selv.
+ */
+export function supabaseDbForClient(client: SupabaseClient): Db {
+  return new SupabaseDb(client);
+}
+
+/**
  * Skriving med secret key (omgår RLS). Kun for sync — aldri importert fra klientkode.
  * SUPABASE_SECRET_KEY har ikke NEXT_PUBLIC_-prefiks og kan derfor aldri havne i nettleseren.
  */

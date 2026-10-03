@@ -1,3 +1,4 @@
+import type { Db } from "@/lib/db";
 import { getAreaEvents } from "@/lib/events/queries";
 import { type ContaminatedScope, getAreaFacts } from "@/lib/facts/queries";
 import { withTimeout } from "@/lib/timeout";
@@ -23,10 +24,12 @@ export interface AreaViewInput {
   radius: number;
   sort: AreaSort;
   /**
-   * Forurenset grunn. Offentlig vises bare relevante funn; admins adressevisning ber om alle
+   * Forurenset grunn. Offentlig vises den ikke (`ingen`); admins adressevisning ber om alle
    * registreringene, slik at hele datagrunnlaget fortsatt kan etterprøves.
    */
   contaminatedScope?: ContaminatedScope;
+  /** Klienten de lagrede dataene leses med. Admin sender sin innloggede klient. */
+  db?: Db;
 }
 
 /**
@@ -34,13 +37,13 @@ export interface AreaViewInput {
  * mens de direkte oppslagene bruker opptil fem sekunder. Ingen await her — siden sendes med
  * adresse, radius, kart og layout med én gang, og hver kilde strømmer inn når den er ferdig.
  */
-export function buildAreaView({ lat, lng, radius, sort, contaminatedScope = "offentlig" }: AreaViewInput) {
+export function buildAreaView({ lat, lng, radius, sort, contaminatedScope = "ingen", db }: AreaViewInput) {
   return {
     events: withTimeout(getAreaEvents({ lat, lng, radius, sort }), EVENT_TIMEOUT_MS, () => ({
       status: "unavailable" as const,
       devReason: `Tidsavbrudd etter ${EVENT_TIMEOUT_MS} ms`,
     })),
-    storedFacts: withTimeout(getAreaFacts({ lat, lng, radius, sources: "db", contaminatedScope }), DB_TIMEOUT_MS, () => ({
+    storedFacts: withTimeout(getAreaFacts({ lat, lng, radius, sources: "db", contaminatedScope, db }), DB_TIMEOUT_MS, () => ({
       status: "unavailable" as const,
       devReason: `Tidsavbrudd etter ${DB_TIMEOUT_MS} ms`,
     })),

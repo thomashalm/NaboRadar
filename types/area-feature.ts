@@ -48,6 +48,8 @@ export interface AreaSection {
   /** Nøytral ingress. Brukes der overskriften alene ikke sier hva seksjonen er. */
   intro: string | null;
   categories: readonly AreaCategory[];
+  /** Bare i admins adressevisning. Seksjonen er verken med i rekkefølgen eller teksten offentlig. */
+  internal?: boolean;
 }
 
 /** Seksjonen med plansaker. Den fylles av events, ikke av områdefakta, men står i samme rekkefølge. */
@@ -57,7 +59,7 @@ export const SAKER_SECTION_ID = "saker";
  * Rekkefølgen følger hvor nær funnet er adressen selv.
  *
  * Støy og grunnforhold beskriver som regel søkepunktet: du står i sonen, eller du gjør det
- * ikke. Plansaker og forurenset grunn handler oftere om noe i nabolaget. Nærområdet står
+ * ikke. Plansaker handler oftere om noe i nabolaget. Nærområdet står
  * først fordi det er det mest umiddelbart forståelige svaret på «hva bør du vite om dette
  * området», og fordi det nesten alltid har innhold.
  */
@@ -94,21 +96,17 @@ export const AREA_SECTIONS: readonly AreaSection[] = [
   // Plansaker, og senere lokale saker som bydelsvedtak og støysaker knyttet til et sted.
   // De hører hjemme som undertyper her, ikke som en egen hovedseksjon.
   { id: SAKER_SECTION_ID, label: "Planer og saker", intro: null, categories: [] },
-  // Ligger sist som standard: registreringene er tette i byer, og de fleste gjelder et sted
-  // i nærheten — ikke adressen brukeren søkte på. Se sectionOrder() for unntaket.
-  { id: "forurenset-grunn", label: "Forurenset grunn", intro: null, categories: ["miljo"] },
+  // Internt (produktbeslutning 2026-10-03): vises bare i admins adressevisning. En registrering
+  // i nærheten har normalt liten verdi for en boligkjøpsbeslutning. Se sectionOrder().
+  { id: "forurenset-grunn", label: "Forurenset grunn", intro: null, categories: ["miljo"], internal: true },
   // Sist: dette er referanseinformasjon om beredskap, ikke et funn om området. Høyere oppe
   // ville den fått en vekt dataene ikke bærer, og lest som et varsel.
   { id: "tilfluktsrom", label: "Tilfluktsrom", intro: null, categories: ["tilfluktsrom"] },
 ];
 
-/**
- * Visningsrekkefølgen for ett søk.
- *
- * Forurenset grunn løftes til toppen når søkepunktet faktisk ligger inne i en registrert
- * lokalitet som kilden mener krever tiltak eller oppfølging. Da handler det om adressen selv,
- * ikke om noe i nabolaget. En registrering 760 meter unna løfter ingenting.
- */
+/** Seksjonene i den offentlige visningen: alt som ikke er internt. */
+export const PUBLIC_AREA_SECTIONS: readonly AreaSection[] = AREA_SECTIONS.filter((section) => !section.internal);
+
 /**
  * Kategoriene som helt eller delvis fylles av direkte oppslag mot eksterne kilder
  * (lib/facts/lookups). De er trege — strategisk støykartlegging tok 4,3 s på Alnabru — så
@@ -122,7 +120,16 @@ export function sectionWaitsForLookups(sectionId: string): boolean {
   return section?.categories.some((c) => LOOKUP_CATEGORIES.includes(c)) ?? false;
 }
 
-export function sectionOrder(input: { contaminationAtSearchPoint: boolean }): readonly AreaSection[] {
+/**
+ * Visningsrekkefølgen for ett søk.
+ *
+ * Offentlig er det de offentlige seksjonene i fast rekkefølge. Med `includeInternal` (admin) er
+ * forurenset grunn med, og den løftes til toppen når søkepunktet ligger inne i en registrert
+ * lokalitet som kilden mener krever tiltak eller oppfølging. En registrering 760 meter unna
+ * løfter ingenting.
+ */
+export function sectionOrder(input: { contaminationAtSearchPoint: boolean; includeInternal?: boolean }): readonly AreaSection[] {
+  if (!input.includeInternal) return PUBLIC_AREA_SECTIONS;
   if (!input.contaminationAtSearchPoint) return AREA_SECTIONS;
   const forurenset = AREA_SECTIONS.find((section) => section.id === "forurenset-grunn");
   if (!forurenset) return AREA_SECTIONS;

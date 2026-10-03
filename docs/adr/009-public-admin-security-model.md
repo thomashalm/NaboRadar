@@ -2,6 +2,12 @@
 
 **Status:** Aktiv · 2026-10-02 (nedtegnet 2026-10-03)
 
+> **2026-10-03:** `miljo` (forurenset grunn) er avpublisert på eksplisitt produktbeslutning. Samtidig
+> returnerer `features_near` og `features_count_near` upubliserte kategorier til innlogget admin, slik
+> at admins adressevisning fortsatt ser dataene (`20261101000000_miljo_internal.sql`). For anon og
+> andre innloggede er regelen uendret. Se
+> [håndbok §14](../naboradar-handbook.md#14-kildepresisjon-og-tolkningsregler).
+
 ## Bakgrunn
 To sikkerhetshull ble funnet og lukket høsten 2026 (detaljene står i
 [håndbok §7](../naboradar-handbook.md#7-rls-grants-og-databasesikkerhet)):

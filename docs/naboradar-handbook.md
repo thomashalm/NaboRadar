@@ -66,7 +66,7 @@ NaboRadar svarer på ett spørsmål: **hva er offentlig kjent om området rundt 
 
 Brukeren søker opp en adresse eller et sted, velger en radius (500 m, 1 km eller 3 km), og får en
 side som samler offentlige forhold i nærheten: varslede planoppstarter, grunnforhold, støy,
-kraftanlegg, forurenset grunn, skoler, barnehager, sykehus, omsorgstilbud, industri og
+kraftanlegg, skoler, barnehager, sykehus, omsorgstilbud, industri og
 skjenkesteder — med kart, avstand og kildelenke for hvert punkt.
 
 **Målgruppen** er privatpersoner som vurderer å kjøpe, leie eller bo et sted, og som ellers måtte
@@ -841,7 +841,7 @@ testdetaljer og eksempelresponser.
 | Kilde | Leverandør | Brukes til | Geometri | Rader | Lisens | Begrensninger |
 |---|---|---|---|---|---|---|
 | Planlegging igangsatt | DiBK | Varslede planoppstarter | Polygon/multipolygon | 1 552 events, 3 139 dokumenter | NLOD 2.0 | Ingen formål, status eller sluttdato i kilden. Kun kommunenummer, ikke navn |
-| Forurenset grunn | Miljødirektoratet | Registrerte lokaliteter | Polygon | 15 943 | NLOD 2.0 | Påvirkningsgrad er myndighetens vurdering, ikke en måling |
+| Forurenset grunn | Miljødirektoratet | Registrerte lokaliteter | Polygon | 15 943 | NLOD 2.0 | **Internt fra 2026-10-03**, vises bare i admin. Påvirkningsgrad er myndighetens vurdering, ikke en måling |
 | Industri med utslippstillatelse | Miljødirektoratet | Industri- og avfallsanlegg | Punkt | 866 | NLOD 1.0 | Kun anlegg med tillatelse. Ikke hovedkontorer |
 | Kartlagte kvikkleiresoner | NVE | Undersøkte soner | Polygon | 4 873 | NLOD 1.0 | Generalisert til ~1 m ved henting; største sone har 125 000 hjørner |
 | Transformatorstasjoner og kraftledninger | NVE | Kraftinfrastruktur | Punkt og linje | 5 645 | NLOD 1.0 | Kun sentral- og regionalnett. `0 kV` betyr ukjent, ikke null |
@@ -912,6 +912,25 @@ Hele poenget er at NaboRadar ikke skal si mer enn kilden gjør.
 
 ### Forurenset grunn
 
+> **Produktbeslutning 2026-10-03:** Forurenset grunn beholdes som internt/admin-datasett, men
+> vises ikke lenger i offentlig `/omrade` fordi normal nærliggende forekomst har begrenset verdi
+> for boligkjøpsbeslutningen.
+>
+> - Datasettet, synken (`mdir-forurenset-grunn`), admins adressevisning og researchen er uendret.
+> - Kategorien `miljo` er avpublisert i `area_feature_categories` (migrasjon
+>   `20261101000000_miljo_internal.sql`). Lese-RPC-ene `features_near` og `features_count_near`
+>   returnerer upubliserte kategorier bare til innlogget admin.
+> - Offentlig spør vi ikke etter kategorien (`contaminatedScope: "ingen"`), seksjonen er merket
+>   `internal` i `AREA_SECTIONS` og er ikke med i rekkefølgen, skjelettet, kartet, kildelisten eller
+>   forsideteksten.
+> - Admins adressevisning leser med den innloggede klienten (`supabaseDbForClient`) og
+>   `contaminatedScope: "alle"`.
+> - `data_status()` lister fortsatt kilden med navn og siste synk. Det er driftsstatus, ikke
+>   presentasjon.
+>
+> Punktene under beskriver datasettet og admins visning. Regelen om «bare relevante funn offentlig»
+> gjaldt fram til 2026-10-03 og er beholdt som historikk.
+
 - Påvirkningsgrad er **myndighetens vurdering**:
   - 1 — lite eller ikke forurenset, ikke behov for tiltak uansett arealbruk
   - 2 — akseptabel tilstand med dagens arealbruk
@@ -919,7 +938,7 @@ Hele poenget er at NaboRadar ikke skal si mer enn kilden gjør.
   - X — mistanke eller lite informasjon, oppfølging uavklart
 - **Grad 1 og 2 er kildens egen konklusjon om at det ikke er noe å følge opp** — de telles ikke som
   «til oppfølging».
-- **Offentlig vises bare relevante funn:** grad 3, grad X og lokaliteter der tiltak pågår
+- **Fram til 2026-10-03 viste offentlig bare relevante funn:** grad 3, grad X og lokaliteter der tiltak pågår
   (`prosessStatus = tiltakIgangsatt`). Finnes ingen slike innen radiusen, vises ikke seksjonen i
   det hele tatt — ingen «0 funn» og ingen «alt er trygt». Grad 1 og 2 skjules også når søkepunktet
   ligger i lokaliteten, og «oppfølging uavklart» alene gjør dem ikke relevante: et gammelt deponi
@@ -1713,7 +1732,7 @@ etter hvert.
 skjelett i samme form som det ferdige innholdet, så siden ikke hopper. En seksjon som feilet sier at
 vi ikke fikk hentet den — **manglende data presenteres aldri som «ingen treff»**.
 
-Seksjoner som bare bruker databasen (Nærområdet, Forurenset grunn) blir klare før oppslagene.
+Seksjoner som bare bruker databasen (Nærområdet) blir klare før oppslagene.
 Seksjoner som venter på et direkte oppslag (Grunnforhold, Støy, Infrastruktur) har egen `<Suspense>`.
 Er databasen nede, feiler ikke oppslagsseksjonene — og omvendt.
 
@@ -1732,9 +1751,11 @@ Effekten er målt: første synlige innhold gikk fra **4 970 ms til 55 ms** (Oslo
 3. **Naturfare** (seksjons-id `grunnforhold`)
 4. **Infrastruktur**
 5. **Planer og saker**
-6. **Forurenset grunn**
-7. **Tilfluktsrom**
-8. **Friluft i nærheten** (hytter og koier)
+6. **Tilfluktsrom**
+7. **Friluft i nærheten** (hytter og koier)
+
+«Forurenset grunn» er ikke en offentlig seksjon (produktbeslutning 2026-10-03, se §14). I admins
+adressevisning ligger den mellom «Planer og saker» og «Tilfluktsrom».
 
 Over seksjonene står bare adressen (H1), radiusvelgeren, «Endre sted» og skolekretsen. Det
 finnes ingen synlig mellomoverskrift eller ingress over funnene; en skjult H2 («Funn i området»)
@@ -1743,10 +1764,10 @@ holder overskriftsnivåene riktige for skjermlesere.
 Rekkefølgen følger **hvor nær funnet er adressen selv**. Nærområdet står først fordi det er det
 mest umiddelbart forståelige svaret, og fordi det nesten alltid har innhold. Så det som beskriver
 søkepunktet — støy og grunnforhold: du står i sonen, eller du gjør det ikke. Deretter det som
-oftere handler om nabolaget: plansaker og forurenset grunn.
+oftere handler om nabolaget: plansaker.
 
-**Unntak:** ligger søkepunktet inne i en forurensningslokalitet med påvirkningsgrad 3 eller X,
-løftes «Forurenset grunn» øverst.
+**Unntak, bare i admins adressevisning:** ligger søkepunktet inne i en forurensningslokalitet med
+påvirkningsgrad 3 eller X, løftes «Forurenset grunn» øverst.
 
 Det finnes **ingen** hovedseksjon som heter Naboklager, Lokale saker eller lignende. Slike saker
 hører hjemme som undertyper under «Planer og saker» hvis de noen gang bygges. Dette er testet.

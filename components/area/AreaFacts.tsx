@@ -19,6 +19,7 @@ import { combineStates } from "@/lib/facts/section-state";
 import { formatRadius } from "@/lib/format";
 import {
   AREA_SECTIONS,
+  PUBLIC_AREA_SECTIONS,
   SAKER_SECTION_ID,
   sectionWaitsForLookups,
   type AreaFact,
@@ -34,7 +35,7 @@ const SECTION_LABELS: Record<string, string> = Object.fromEntries(
 interface AreaFactsProps {
   /**
    * Kildene kommer som løfter. Databasen svarer på 0,1–1,8 s og bestemmer rekkefølgen — den
-   * vet om søkepunktet ligger i en forurenset lokalitet. De direkte oppslagene bruker opptil
+   * kan løfte en seksjon (i admins visning: forurenset grunn under søkepunktet). De direkte oppslagene bruker opptil
    * fem sekunder, og seksjonene deres venter for seg.
    */
   storedFacts: Promise<AreaFactsResult>;
@@ -101,7 +102,7 @@ export function AreaFacts({
 function AlleSkjeletter() {
   return (
     <div className="flex flex-col gap-7">
-      {AREA_SECTIONS.map((section) => (
+      {PUBLIC_AREA_SECTIONS.map((section) => (
         <SectionShell key={section.id} label={section.label}>
           <SectionSkeleton label="Henter data …" />
         </SectionShell>
@@ -129,7 +130,7 @@ function FactsBody({
 }) {
   const db = use(storedFacts);
   const order =
-    db.status === "ok" ? db.order : AREA_SECTIONS.map((section) => section.id);
+    db.status === "ok" ? db.order : PUBLIC_AREA_SECTIONS.map((section) => section.id);
 
   return (
     <>

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createLookupRunner, type LookupResult } from "./lookup-runner";
-import { getDbMode, getReadDb } from "@/lib/db";
+import { getDbMode, getReadDb, type Db } from "@/lib/db";
 import { formatDistance, formatRadius } from "@/lib/format";
 import {
   AREA_CATEGORIES,
@@ -26,8 +26,6 @@ import {
   OPPVEKST_CAVEAT,
   SERVERING_CAVEAT,
   describeContaminatedGroupSummary,
-  describeContaminatedRelevantOverview,
-  describeContaminatedRelevantSummary,
   describeContaminatedSummary,
   describeFact,
   describeMapLines,
@@ -240,17 +238,15 @@ function toFact(input: {
 }
 
 /**
- * Forurenset grunn: bare det brukeren faktisk bør merke seg blir hovedkort.
+ * Forurenset grunn er et internt datasett (produktbeslutning 2026-10-03).
  *
- * Offentlig vises bare relevante funn: påvirkningsgrad 3 (behov for tiltak), grad X (mistanke,
- * uavklart) og lokaliteter der tiltak pågår. Grad 1 og 2 er myndighetens egen konklusjon om at
- * tilstanden er akseptabel. Et gammelt deponi «lite eller ikke forurenset, uten behov for
- * tiltak» gir ingen handlingsverdi, og skal ikke få en seksjon som heter «Forurenset grunn» —
- * heller ikke når søkepunktet ligger i lokaliteten. Finnes ingen relevante funn, vises ikke
- * seksjonen i det hele tatt. Alder filtrerer ikke: et gammelt grad 3-funn vises fortsatt.
+ * Den offentlige `/omrade` viser det ikke lenger: en registrering i nærheten har normalt liten
+ * verdi for en boligkjøpsbeslutning. Kategorien er upublisert i databasen, så lese-RPC-ene
+ * returnerer den bare til innlogget admin, og offentlig spør vi ikke etter den i det hele tatt.
  *
- * Admin ser alt (`utvalg: "alle"`): kort for grad 3/X og for lokaliteten søkepunktet ligger i,
- * og alle registreringene i «Se alle» og kartet. Dataene lagres og synkes uendret.
+ * Admins adressevisning ser alt (`contaminatedScope: "alle"`): kort for grad 3/X og for
+ * lokaliteten søkepunktet ligger i, og alle registreringene i «Se alle» og kartet. Dataene
+ * lagres og synkes uendret.
  */
 const CONTAMINATED_CARD_LIMIT = 5;
 /** Rader per spørring. Holder svaret — og kartpayloaden — begrenset i tette områder. */
@@ -273,18 +269,8 @@ const toLngLat = (centroid: AreaGeometry | null): [number, number] => {
 const gradeOf = (row: FactRow): string =>
   typeof row.attributes.paavirkningsgrad === "string" ? row.attributes.paavirkningsgrad : "ukjentPåvirkning";
 
-/** Offentlig visning eller full visning for admin. */
-export type ContaminatedScope = "offentlig" | "alle";
-
-const tiltakPagar = (row: FactRow) => row.attributes.prosessStatus === "tiltakIgangsatt";
-
-/** Om en registrering er relevant nok til å vises offentlig: grad 3, grad X eller pågående tiltak. */
-export function erRelevantForurensning(input: { grade: string; prosessStatus?: unknown }): boolean {
-  return GRADES_NEEDING_ATTENTION.has(input.grade) || input.prosessStatus === "tiltakIgangsatt";
-}
-
-const relevant = (row: FactRow) =>
-  erRelevantForurensning({ grade: gradeOf(row), prosessStatus: row.attributes.prosessStatus });
+/** `ingen`: offentlig, datasettet hentes ikke. `alle`: admin, hele datagrunnlaget. */
+export type ContaminatedScope = "ingen" | "alle";
 
 /**
  * «Kildedata sist oppdatert», ikke bare «oppdatert»: datoen er kildens `oppdateringsdato`, da
@@ -387,80 +373,12 @@ const contaminatedFact = (row: FactRow): AreaFact[] => {
 };
 
 /**
- * Eksportert for test: hva som løftes fram og hva som telles er produktlogikk.
+ * Admin: alle registreringene, med kort for grad 3/X og for lokaliteten søkepunktet ligger i.
  *
- * Returnerer `null` når det ikke finnes noe å vise — offentlig betyr det at ingen av
- * registreringene er relevante, og da skal seksjonen ikke finnes.
+ * Eksportert for test: hva som løftes fram og hva som telles er produktlogikk. Returnerer
+ * `null` når det ikke finnes registreringer.
  */
-export function contaminatedFacts(
-  rows: FactRow[],
-  radiusM: number,
-  truncated = false,
-  utvalg: ContaminatedScope = "offentlig",
-) {
-  if (utvalg === "offentlig") return publicContaminatedFacts(rows, radiusM, truncated);
-  return allContaminatedFacts(rows, radiusM, truncated);
-}
-
-/** Offentlig: bare grad 3, grad X og pågående tiltak. Ingen relevante funn gir ingen seksjon. */
-function publicContaminatedFacts(rows: FactRow[], radiusM: number, truncated: boolean) {
-  const shown = rows.filter(relevant).sort(byRelevance);
-  if (shown.length === 0) return null;
-
-  const source = SOURCES["mdir-forurenset-grunn"]!;
-  const facts = shown.slice(0, CONTAMINATED_CARD_LIMIT).flatMap(contaminatedFact);
-  const summary = describeContaminatedRelevantOverview({ total: shown.length, radiusLabel: formatRadius(radiusM) });
-
-  const overview: SectionOverview = {
-    sectionId: "forurenset-grunn",
-    toggleLabel: "Se alle relevante registreringer i området",
-    total: shown.length,
-    noAttentionNote: null,
-    headline: truncated ? `${summary.headline} (blant de nærmeste registreringene)` : summary.headline,
-    details: summary.details,
-    caveat: summary.caveat,
-    sourceName: `${source.name} (${source.owner})`,
-    items: shown.map((row) => ({
-      id: row.id,
-      title: row.title,
-      distanceLabel: distanceLabel(row.distance_m, row.contains),
-      subtitle: GRADES_NEEDING_ATTENTION.has(gradeOf(row))
-        ? (PAAVIRKNINGSGRAD_SHORT[gradeOf(row)] ?? "uten oppgitt grad")
-        : "tiltak pågår",
-      contains: row.contains,
-      href: row.source_url,
-    })),
-  };
-
-  const mapFeatures = shown
-    .filter((row) => row.geometry?.type === "Polygon" || row.geometry?.type === "MultiPolygon")
-    .flatMap(mapFeatureFromRow);
-
-  // Uendret regel for å løfte seksjonen: søkepunktet ligger i en lokalitet med grad 3 eller X.
-  const affectsSearchPoint = shown.some((row) => row.contains && GRADES_NEEDING_ATTENTION.has(gradeOf(row)));
-
-  const cluster: FactCluster = {
-    sectionId: "forurenset-grunn",
-    id: "forurenset-grunn",
-    label: "Forurenset grunn",
-    summary: describeContaminatedRelevantSummary({
-      tiltak: shown.filter((row) => gradeOf(row) === "ikkeAkseptabelForurensning").length,
-      uavklart: shown.filter((row) => gradeOf(row) === "ukjentPåvirkning").length,
-      pagaende: shown.filter((row) => !GRADES_NEEDING_ATTENTION.has(gradeOf(row)) && tiltakPagar(row)).length,
-    }),
-    facts,
-    lists: [],
-    // Bare «Se alle» når det faktisk er flere enn kortene.
-    overview: shown.length > facts.length ? overview : null,
-    caveat: null,
-    sourceName: `${source.name} (${source.owner})`,
-  };
-
-  return { cluster, mapFeatures, affectsSearchPoint };
-}
-
-/** Admin: alle registreringene, med kort for grad 3/X og for lokaliteten søkepunktet ligger i. */
-function allContaminatedFacts(rows: FactRow[], radiusM: number, truncated: boolean) {
+export function contaminatedFacts(rows: FactRow[], radiusM: number, truncated = false) {
   const sorted = [...rows].sort(byRelevance);
   if (sorted.length === 0) return null;
 
@@ -791,8 +709,8 @@ async function runLookups(lat: number, lng: number, radiusM: number): Promise<{ 
 
 /**
  * Grupperer fakta i visningsrekkefølgen fra AREA_CATEGORIES. Tomme kategorier faller bort,
- * så de som har innhold flytter opp av seg selv. Forurenset grunn beholdes selv uten kort,
- * fordi den utvidbare oversikten fortsatt skal være tilgjengelig.
+ * så de som har innhold flytter opp av seg selv. En seksjon uten kort beholdes når den har en
+ * utvidbar oversikt (forurenset grunn i admins visning).
  */
 export function groupFacts(
   facts: AreaFact[],
@@ -817,7 +735,7 @@ export function groupFacts(
  *
  * Målt i produksjon: databasen svarer på 100–800 ms, mens de direkte oppslagene bruker opptil
  * fem sekunder — strategisk støykartlegging alene tok 4,3 s på Alnabru. Ved å hente dem hver
- * for seg kan Nærområdet og Forurenset grunn vises med én gang, mens Støy fylles inn etterpå.
+ * for seg kan Nærområdet vises med én gang, mens Støy fylles inn etterpå.
  */
 export type FactSources = "all" | "db" | "lookups";
 
@@ -826,10 +744,15 @@ export async function getAreaFacts(params: {
   lng: number;
   radius: number;
   sources?: FactSources;
-  /** Forurenset grunn: bare relevante funn (offentlig) eller alle registreringene (admin). */
+  /** Forurenset grunn hentes bare for admin (`alle`). Offentlig (`ingen`) spørres det ikke etter. */
   contaminatedScope?: ContaminatedScope;
+  /**
+   * Databaseklienten det leses med. Standard er den anonyme leseklienten. Admins adressevisning
+   * sender sin innloggede klient, fordi upubliserte kategorier bare returneres til admin.
+   */
+  db?: Db;
 }): Promise<AreaFactsResult> {
-  const { lat, lng, radius, sources: sourceSet = "all", contaminatedScope = "offentlig" } = params;
+  const { lat, lng, radius, sources: sourceSet = "all", contaminatedScope = "ingen" } = params;
   const brukDb = sourceSet !== "lookups";
   const brukOppslag = sourceSet !== "db";
   let rows: FactRow[] = [];
@@ -839,12 +762,14 @@ export async function getAreaFacts(params: {
 
   try {
     if (!brukDb) throw new SkipSource();
-    const db = await getReadDb();
+    const db = params.db ?? (await getReadDb());
     if (!db) throw new Error("ingen database");
-    // To spørringer: forurenset grunn er så tett i byer at den ellers fyller hele radgrensen
+    // Egne spørringer: forurenset grunn er så tett i byer at den ellers fyller hele radgrensen
     // og skyver ut kvikkleire, støy, kraftanlegg og anlegg med utslippstillatelse.
     const [contaminatedRaw, serveringRaw, otherRaw, countsRaw] = await Promise.all([
-      db.rpc<unknown>("features_near", { lat, lng, radius_m: radius, categories: ["miljo"], max_results: FEATURE_LIMIT }),
+      contaminatedScope === "alle"
+        ? db.rpc<unknown>("features_near", { lat, lng, radius_m: radius, categories: ["miljo"], max_results: FEATURE_LIMIT })
+        : Promise.resolve([]),
       db.rpc<unknown>("features_near", {
         lat,
         lng,
@@ -917,9 +842,7 @@ export async function getAreaFacts(params: {
   const contaminatedRows = rows.filter((r) => r.subtype === "forurenset_grunn");
   let contaminationAtSearchPoint = false;
   if (contaminatedRows.length > 0) {
-    const result = contaminatedFacts(contaminatedRows, radius, contaminatedTruncated, contaminatedScope);
-    // Offentlig kan resultatet være tomt selv om det finnes registreringer: da er ingen av dem
-    // relevante, og seksjonen skal ikke vises.
+    const result = contaminatedFacts(contaminatedRows, radius, contaminatedTruncated);
     if (result) {
       clusters.push(result.cluster);
       mapFeatures.push(...result.mapFeatures);
@@ -992,7 +915,7 @@ export async function getAreaFacts(params: {
   // Grunnforhold og infrastruktur får kilder fra både databasen og direkte oppslag. Gruppene
   // deres bygges derfor først når delsvarene er slått sammen (lib/facts/clusters.ts), ellers
   // hadde seksjonen fått én gruppe per kilde.
-  const sections = sectionOrder({ contaminationAtSearchPoint });
+  const sections = sectionOrder({ contaminationAtSearchPoint, includeInternal: contaminatedScope === "alle" });
   const groups = groupFacts(facts, overviews, sections, clusters);
 
   const unavailable = [...failed, ...(dbFailed ? ["database"] : [])]

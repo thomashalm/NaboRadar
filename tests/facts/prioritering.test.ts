@@ -77,7 +77,7 @@ describe("rekkefølge på kategoriene", () => {
 
   it("legger forurenset grunn sist når registreringen ikke gjelder søkepunktet", () => {
     // Eksempelet fra testingen: en registrering 760 m unna, søkepunktet utenfor lokaliteten.
-    const rekkefølge = sectionOrder({ contaminationAtSearchPoint: false });
+    const rekkefølge = sectionOrder({ contaminationAtSearchPoint: false, includeInternal: true });
     const ider = rekkefølge.map((s) => s.id);
     // Etter alle seksjonene som beskriver funn i området. Tilfluktsrom ligger bakerst, men det
     // er referanseinformasjon om beredskap, ikke et funn.
@@ -93,7 +93,7 @@ describe("rekkefølge på kategoriene", () => {
   });
 
   it("løfter forurenset grunn når søkepunktet ligger inne i en lokalitet som krever oppfølging", () => {
-    const rekkefølge = sectionOrder({ contaminationAtSearchPoint: true });
+    const rekkefølge = sectionOrder({ contaminationAtSearchPoint: true, includeInternal: true });
     expect(rekkefølge[0]!.id).toBe("forurenset-grunn");
     // Resten beholder sin innbyrdes rekkefølge.
     expect(rekkefølge.slice(1).map((s) => s.id)).toEqual([
@@ -149,7 +149,7 @@ describe("rekkefølge på kategoriene", () => {
     expect(utenStoy.map((g) => g.label)).toEqual(["Nærområdet", "Naturfare", "Forurenset grunn"]);
 
     // Også når forurenset grunn er løftet: de som mangler, faller bort.
-    const løftet = groupFacts([fact("miljo", { contains: true }), fact("oppvekst")], [], sectionOrder({ contaminationAtSearchPoint: true }));
+    const løftet = groupFacts([fact("miljo", { contains: true }), fact("oppvekst")], [], sectionOrder({ contaminationAtSearchPoint: true, includeInternal: true }));
     expect(løftet.map((g) => g.label)).toEqual(["Forurenset grunn", "Nærområdet"]);
 
     const bareStoy = groupFacts([fact("stoy")]);

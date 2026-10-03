@@ -94,7 +94,7 @@ describe("hvilke seksjoner som vises", () => {
   });
 
   it("beholder rekkefølgen fra svaret, også når forurenset grunn løftes", () => {
-    const løftet = sectionOrder({ contaminationAtSearchPoint: true }).map((s) => s.id);
+    const løftet = sectionOrder({ contaminationAtSearchPoint: true, includeInternal: true }).map((s) => s.id);
     const synlige = visibleSections({
       order: løftet,
       groups: løftet.map(gruppe),
@@ -107,7 +107,7 @@ describe("hvilke seksjoner som vises", () => {
     // Nærområdet først: det mest umiddelbart forståelige svaret, og nesten alltid noe der.
     // Så det som gjelder søkepunktet selv (støy, grunnforhold), før det som handler om
     // nabolaget (plansaker, forurenset grunn).
-    expect(sectionOrder({ contaminationAtSearchPoint: false }).map((s) => s.id)).toEqual([
+    expect(sectionOrder({ contaminationAtSearchPoint: false, includeInternal: true }).map((s) => s.id)).toEqual([
       "naeromradet",
       "stoy",
       "grunnforhold",

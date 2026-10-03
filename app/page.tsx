@@ -21,7 +21,7 @@ const STRUKTURERTE_DATA = {
       name: "NaboRadar",
       inLanguage: "nb-NO",
       description:
-        "Offentlige planer, grunnforhold, støy, forurenset grunn og nærområdet rundt en norsk adresse, samlet ett sted.",
+        "Offentlige planer, grunnforhold, støy og nærområdet rundt en norsk adresse, samlet ett sted.",
     },
     {
       "@type": "WebApplication",
@@ -42,7 +42,6 @@ const DEKKER = [
   ["Planer og saker", "Varslede planoppstarter fra Direktoratet for byggkvalitet, med planområdet i kart."],
   ["Grunnforhold", "Kartlagte kvikkleiresoner og aktsomhetsområder fra NVE."],
   ["Støy", "Beregnede støysoner fra veg, fly og strategisk støykartlegging."],
-  ["Forurenset grunn", "Registrerte lokaliteter fra Miljødirektoratet, med myndighetens egen vurdering."],
   ["Infrastruktur", "Transformatorstasjoner og kraftledninger fra NVE."],
   ["Nærområdet", "Skoler, barnehager, sykehus, omsorgstilbud, industri og steder med skjenkebevilling."],
 ] as const;

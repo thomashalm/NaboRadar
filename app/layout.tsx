@@ -13,7 +13,7 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "sw
 export const SITE_URL = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://naboradar.no");
 
 const BESKRIVELSE =
-  "Se planer, grunnforhold, støy, forurenset grunn og nærområdet rundt en norsk adresse. " +
+  "Se planer, grunnforhold, støy og nærområdet rundt en norsk adresse. " +
   "Offentlige kilder, samlet ett sted — uten å lete i kommunale systemer.";
 
 export const metadata: Metadata = {
