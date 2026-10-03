@@ -1308,6 +1308,16 @@ valget lukkes. Ved innlasting slås hytta opp og kartet starter rundt den. Kartu
 søk står ikke i adressen. Eldre lenker med full uuid og `lat`/`lng` virker fortsatt. Adressen
 canonicaliseres til `/hytter` og står ikke i sitemapen; hyttesiden er detaljsiden.
 
+**«Kort om hytta».** Hyttesiden har noen få setninger rett under tittelen, satt sammen på
+serveren av `hutIntroText` (`lib/huts/wording.ts`) fra de samme feltene som Fakta: type, kommune
+og fylke, høyde (Kartverket, bare fra 100 moh.), forvalter, tilgang, status og lenker. Ingen fri
+tekst og ingen omskriving av merknaden. Fire setninger er taket, ikke målet: en hytte med lite
+data får én setning, og det finnes ingen generell avslutning. Tilgangen nevnes ikke på betjente
+hytter med mindre den stenger noen ute (låst/bestilles, ikke for allmennheten), og Kartverkets
+«ulåst eller DNT-nøkkel» står bare i Fakta. Bestillingssetningen («Bestilling skjer via Inatur.»)
+krever en dokumentert bookinglenke, og faller bort når hytta er stengt eller ikke er for
+allmennheten; da peker lenken bare til «Mer informasjon finnes hos …».
+
 **Søk etter hytte eller sted.** Søkefeltet på `/hytter` gir både hytter (`huts_search`) og steder
 fra Kartverkets stedsnavn — den samme geokoderen som adressesøket på forsiden, men uten adresser.
 `/api/hytter?q=` returnerer begge i ett svar. Et sted gir bare et punkt, så kartet viser 20 km

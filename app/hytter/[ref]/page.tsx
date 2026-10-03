@@ -6,7 +6,7 @@ import { HutDetails } from "@/components/huts/HutDetails";
 import { HutPointMap } from "@/components/huts/HutPointMap";
 import { buildHutHref, buildHutMapHref, hutRefFromSlug } from "@/lib/huts/href";
 import { getHut, type Hut } from "@/lib/huts/queries";
-import { HUT_TYPE_LABELS, formatHutDistance, hutMetaDescription, hutPageTitle, hutPlaceLine, hutSummaryLine } from "@/lib/huts/wording";
+import { HUT_TYPE_LABELS, formatHutDistance, hutIntroText, hutMetaDescription, hutPageTitle, hutPlaceLine, hutSummaryLine } from "@/lib/huts/wording";
 import { getMapTileConfig } from "@/lib/map/config";
 
 /**
@@ -85,6 +85,13 @@ export default async function HutPage({ params }: Props) {
           </p>
           <h1 className="mt-1 text-[2rem] leading-tight font-semibold tracking-[-0.03em] text-balance sm:text-4xl">{hut.name}</h1>
           {undertittel && <p className="mt-1.5 text-[15px] text-muted">{undertittel}</p>}
+          {/* Bygget av de samme feltene som Fakta, i setninger. Rendres på serveren. */}
+          <section aria-labelledby="hytte-kort" className="mt-6">
+            <h2 id="hytte-kort" className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">
+              Kort om hytta
+            </h2>
+            <p className="mt-2 text-[15px] leading-relaxed text-ink">{hutIntroText(hut).join(" ")}</p>
+          </section>
           <div className="mt-7">
             <HutDetails hut={hut} />
           </div>

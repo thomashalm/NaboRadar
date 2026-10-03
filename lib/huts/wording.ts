@@ -271,6 +271,95 @@ function linkProvider(url: string): string | null {
   }
 }
 
+/** Typen med liten forbokstav, slik den står inne i en setning. */
+const TYPE_I_SETNING: Partial<Record<HutType, string>> = {
+  staffed_hut: "betjent hytte",
+  self_service_hut: "selvbetjent hytte",
+  unstaffed_hut: "ubetjent hytte",
+  rest_cabin: "rastebu",
+  open_cabin: "åpen koie",
+  day_trip_hut: "dagsturhytte",
+  emergency_shelter: "nødbu",
+};
+const PRONOMEN: Partial<Record<HutType, string>> = { rest_cabin: "Bua", emergency_shelter: "Bua", open_cabin: "Koia" };
+
+/**
+ * Tilgangen i en setning. Bare verdiene som sier noe tydelig: Kartverkets «ulåst eller
+ * DNT-nøkkel» er to ting på en gang og står i Fakta, ikke her.
+ */
+const TILGANG_I_SETNING: Partial<Record<HutAccessKind, string>> = {
+  locked_prebooking: "er låst og må bestilles på forhånd",
+  unlocked: "er ulåst",
+  dnt_key: "åpnes med DNT-nøkkelen",
+  code_lock: "har kodelås",
+  special_key: "har egen nøkkel",
+  code_or_special_key: "har kodelås eller egen nøkkel",
+  not_public: "er ikke et tilbud til allmennheten",
+};
+/** En betjent hytte har vertskap: døra er bare verdt å nevne når den stenger noen ute. */
+const TILGANG_BETJENT = new Set<HutAccessKind>(["locked_prebooking", "not_public"]);
+
+const HOYDE_MIN_M = 100;
+const tusen = new Intl.NumberFormat("nb-NO");
+
+/**
+ * «Kort om hytta»: én til fire setninger bygget av feltene vi har, i fast rekkefølge.
+ *
+ *   1. Hva og hvor: type, kommune og fylke, og høyden fra Kartverkets høydemodell over 100 moh.
+ *   2. Hvem og dør: forvalteren, og tilgangen når den er tydelig.
+ *   3. Bruk og status: «ikke overnatting» for rastebuer og dagsturhytter, og midlertidig stengt.
+ *   4. Hvor man bestiller eller leser mer — bare når det finnes en lenke med et navn.
+ *
+ * Mangler et felt, faller setningen bort. Ingenting fylles inn: en rastebu uten forvalter og
+ * lenke får to setninger, ikke fire. Den offentlige merknaden står i «Viktig å vite» og
+ * gjentas ikke her.
+ */
+export function hutIntroText(hut: {
+  name: string;
+  type: HutType;
+  municipalityName?: string | null;
+  countyName?: string | null;
+  elevationM?: number | null;
+  managerName: string | null;
+  access: HutAccessKind;
+  accessStatus: HutAccessStatus;
+  bookingUrl?: string | null;
+  infoUrl?: string | null;
+}): string[] {
+  const setninger: string[] = [];
+  const pronomen = PRONOMEN[hut.type] ?? "Hytta";
+  const kommune = hut.municipalityName ?? null;
+  const fylke = hut.countyName ?? null;
+  const sted = kommune && fylke && kommune !== fylke ? `${kommune} i ${fylke}` : (kommune ?? fylke);
+
+  let første = `${hut.name} er en ${TYPE_I_SETNING[hut.type] ?? "hytte"}${sted ? ` i ${sted}` : ""}`;
+  if (hut.elevationM != null && hut.elevationM >= HOYDE_MIN_M) første += `, omtrent ${tusen.format(hut.elevationM)} meter over havet`;
+  setninger.push(`${første}.`);
+
+  const tilgang = hut.type === "staffed_hut" && !TILGANG_BETJENT.has(hut.access) ? undefined : TILGANG_I_SETNING[hut.access];
+  if (hut.managerName && tilgang) setninger.push(`${pronomen} forvaltes av ${hut.managerName}, og den ${tilgang}.`);
+  else if (hut.managerName) setninger.push(`${pronomen} forvaltes av ${hut.managerName}.`);
+  else if (tilgang) setninger.push(`${pronomen} ${tilgang}.`);
+
+  if (hut.accessStatus === "closed") setninger.push("Den er midlertidig stengt.");
+  else if ((hut.type === "rest_cabin" || hut.type === "day_trip_hut") && hut.access !== "not_public") {
+    setninger.push("Den er beregnet på rast og dagsbesøk, ikke på overnatting.");
+  }
+
+  // En stengt hytte, eller en som ikke er et tilbud til allmennheten, inviteres det ikke til å bestille.
+  // Lenken pekes da bare til som informasjon.
+  const kanBestilles = hut.access !== "not_public" && hut.accessStatus !== "closed";
+  if (kanBestilles && hut.bookingUrl) {
+    const hos = linkProvider(hut.bookingUrl);
+    if (hos === "Inatur") setninger.push("Bestilling skjer via Inatur.");
+    else if (hos ?? hut.managerName) setninger.push(`Bestilling skjer hos ${hos ?? hut.managerName}.`);
+  } else if (hut.infoUrl ?? hut.bookingUrl) {
+    const hos = linkProvider((hut.infoUrl ?? hut.bookingUrl)!) ?? hut.managerName;
+    if (hos) setninger.push(`Mer informasjon finnes hos ${hos}.`);
+  }
+  return setninger.slice(0, 4);
+}
+
 export interface HutLink {
   kind: "booking" | "info";
   href: string;
