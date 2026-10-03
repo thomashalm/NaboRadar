@@ -81,8 +81,23 @@ Beslutningen står i [ADR 005](../adr/005-cached-public-hut-pages.md). Kort fort
 Åtte tilfeldige hytter, første kall: 0,87–1,85 s. I gjennomgangen tidligere samme dag: 0,8–3,9 s.
 
 **Etter, lokalt** (`next start` mot produksjonsdata): første visning 0,18–0,82 s (`x-nextjs-cache: MISS`), deretter 2 ms (`HIT`).
-Høyden var med hver gang. En forespørsel med cookie fikk samme cachede side. Produksjonstallene etter deploy står i rapporten
-for runden.
+
+**Etter, i produksjon** (commit `41eb3e3`). Hyttesidene caches nå hos Netlify (`Netlify Durable; hit; ttl≈3600`, Edge
+`stored`/`hit`); nettleseren får `public, max-age=0, must-revalidate`.
+
+| Hytte | 1. kall etter deploy (lages) | Cachet (6 kall) |
+|---|---|---|
+| Aursjobu | 1,01 s | 0,22–0,53 s |
+| Spiterstulen | 0,88 s | 0,09–0,57 s |
+| Fulehuk | 0,97 s | 0,09–0,45 s |
+| Glitterheim | 0,45 s | 0,09–0,49 s |
+| Vardfjellkåta | 0,61 s | 0,22–0,53 s |
+| Hindsæter | 0,85 s | 0,09–0,46 s |
+| Skjult hytte (Grønlia, avvist) | 404, 0,63 s | 404, 0,22–0,63 s (404 caches også) |
+
+Treffene fra Edge svarer på 0,09 s. Svarene fra Durable (0,2–0,5 s) er nettverket mellom målepunktet og Netlifys lager, ikke
+visningen. De åtte tilfeldige hyttene, første kall: 0,62–1,29 s (før: 0,87–1,85 s); den visningen caches så i en time. Høyden
+var med i alle 22 målte sider. En forespørsel med innloggingscookie fikk samme cachede side.
 
 ### Sikkerhet
 
