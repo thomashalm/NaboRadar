@@ -65,6 +65,9 @@ export function wmsPunktUrl(q: Omit<WmsPunktoppslag, "retry" | "signal" | "fetch
   return `${q.url}?${params.toString()}`;
 }
 
+/** Nøkkelen `lesWmsGml` legger treffets `gml:Box` under. Kan ikke kollidere med et kildefelt. */
+export const WMS_BOKS = "gml:coordinates";
+
 /** Feltene i ett treff, med kildens egne navn. */
 export type WmsFelt = Record<string, string>;
 
@@ -86,11 +89,67 @@ export function lesWmsGml(xml: string): Map<string, WmsFelt[]> {
     for (const [, kropp] of innhold!.matchAll(/<\w+_feature>([\s\S]*?)<\/\w+_feature>/g)) {
       const felt: WmsFelt = {};
       for (const [, nøkkel, verdi] of kropp!.matchAll(/<(\w+)>([^<]*)<\/\1>/g)) felt[nøkkel!] = verdi!.trim();
+      // Treffets omsluttende boks, «x,y x,y» slik MapServer skriver den. For et punktobjekt er
+      // de to hjørnene like, og boksen er punktets posisjon.
+      const boks = /<gml:coordinates>([^<]+)<\/gml:coordinates>/.exec(kropp!)?.[1];
+      if (boks) felt[WMS_BOKS] = boks.trim();
       treff.push(felt);
     }
     if (treff.length > 0) lag.set(navn!, treff);
   }
   return lag;
+}
+
+export interface WmsUtsnitt {
+  url: string;
+  layers: readonly string[];
+  /** Bare EPSG:4326 (lat,lon): det er det eneste geografiske CRS-et matrikkelkartet tilbyr. */
+  sør: number;
+  vest: number;
+  nord: number;
+  øst: number;
+  bredde: number;
+  høyde: number;
+  /** Pikselen det spørres i. Uten betydning når `heleUtsnittet` er satt. */
+  i: number;
+  j: number;
+  maksTreff: number;
+  /**
+   * MapServers `RADIUS=bbox`: alle objekter i utsnittet, ikke bare under pikselen. Det er en
+   * leverandørparameter, ikke WMS-standard. Kartverkets tjenester er MapServer, og svaret
+   * valideres uansett som `msGMLOutput`.
+   */
+  heleUtsnittet?: boolean;
+}
+
+/** `GetFeatureInfo` for et selvvalgt utsnitt, for lag som krever en bestemt målestokk. */
+export function wmsUtsnittUrl(q: WmsUtsnitt): string {
+  const lag = q.layers.join(",");
+  const params = new URLSearchParams({
+    SERVICE: "WMS",
+    VERSION: "1.3.0",
+    REQUEST: "GetFeatureInfo",
+    LAYERS: lag,
+    QUERY_LAYERS: lag,
+    STYLES: "",
+    CRS: "EPSG:4326",
+    BBOX: `${q.sør},${q.vest},${q.nord},${q.øst}`,
+    WIDTH: String(q.bredde),
+    HEIGHT: String(q.høyde),
+    I: String(q.i),
+    J: String(q.j),
+    INFO_FORMAT: "application/vnd.ogc.gml",
+    FEATURE_COUNT: String(q.maksTreff),
+  });
+  if (q.heleUtsnittet) params.set("RADIUS", "bbox");
+  return `${q.url}?${params.toString()}`;
+}
+
+export async function wmsUtsnittoppslag(
+  q: WmsUtsnitt & { retry: HttpRetryPolicy; signal?: AbortSignal; fetchImpl?: typeof fetch },
+): Promise<Map<string, WmsFelt[]>> {
+  const xml = await fetchGml(wmsUtsnittUrl(q), { retry: q.retry, signal: q.signal, fetchImpl: q.fetchImpl });
+  return lesWmsGml(xml);
 }
 
 export async function wmsPunktoppslag(q: WmsPunktoppslag): Promise<Map<string, WmsFelt[]>> {

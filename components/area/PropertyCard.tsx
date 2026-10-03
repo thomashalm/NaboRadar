@@ -94,9 +94,10 @@ export function PropertyCard({
 }
 
 function Details({ property }: { property: PropertyDetails }) {
-  const bygg = property.bygg.value;
-  const typer = [...new Set(bygg.map((b) => b.typeLabel).filter((t): t is string => t !== null))];
-  const kilder = [...new Set([property.matrikkelnummer.source, property.bygg.source, property.adresse?.source].filter(Boolean))];
+  // null betyr at byggoppslaget ikke ga et sikkert svar. Da vises ikke feltet, i stedet for «ingen».
+  const bygg = property.bygg?.value ?? null;
+  const typer = [...new Set((bygg ?? []).map((b) => b.typeLabel).filter((t): t is string => t !== null))];
+  const kilder = [...new Set([property.matrikkelnummer.source, property.bygg?.source, property.adresse?.source].filter(Boolean))];
 
   return (
     <>
@@ -110,11 +111,15 @@ function Details({ property }: { property: PropertyDetails }) {
           {property.kommune && <span className="text-muted"> · {property.kommune.value}</span>}
         </Field>
         {property.tomteareal && <Field label="Tomteareal">{formatArea(property.tomteareal.value)}</Field>}
-        {property.matrikkelenhetstype && <Field label="Type">{property.matrikkelenhetstype.value}</Field>}
-        <Field label="Bygg på eiendommen">
-          {bygg.length === 0 ? "Ingen registrert" : bygg.length}
-          {typer.length > 0 && <span className="block text-[13px] text-muted">{typer.join(" · ")}</span>}
-        </Field>
+        {bygg && (
+          // Full bredde: de offisielle betegnelsene er lange, og en stor eiendom har mange typer.
+          <div className="col-span-2">
+            <Field label="Bygg på eiendommen">
+              {bygg.length === 0 ? "Ingen registrert" : bygg.length}
+              {typer.length > 0 && <span className="block text-[13px] text-muted">{typer.join(" · ")}</span>}
+            </Field>
+          </div>
+        )}
       </dl>
 
       {property.flagg.length > 0 && (

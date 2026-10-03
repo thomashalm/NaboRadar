@@ -44,6 +44,9 @@ publisert 2026-10-02 ([ADR 009](../adr/009-public-admin-security-model.md)).
 |---|---|---|
 | [stormflo-flystoy-kildegjennomgang.md](stormflo-flystoy-kildegjennomgang.md) | 2026-10-03 | WFS-ene for stormflo og flystøy nede (Geonorge-bakmaskiner); etatenes publikumskart, semantikk og QA mot dem. Byttet til WMS samme dag ([ADR 015](../adr/015-publikumsprodukt-wms-og-kildefeil.md)) |
 | [eiendomshistorikk-feasibility.md](eiendomshistorikk-feasibility.md) | 2026-09-27 | Byggesakshistorikk per eiendom. Ren research |
+| [eiendomskort.md](eiendomskort.md) | 2026-10-03 | Eiendomskort: åpne felt, juss for byggeår/BRA/salg, QA av 49 adresser, DB-måling av nasjonal adresse → bygning (46–1 306 MB). **Kortet er ikke bygget, avventer.** Samme dag rettet: bygningstyper fra SSB KLASS 31 og eiendomskartet flyttet fra WFS til Eiendom-API + WMS |
+| [fiskevann-fiskearter.md](fiskevann-fiskearter.md) | 2026-10-03 | **Ikke prioritert / ikke bygg nå.** Innsjøer nasjonalt fra NVE; arter bare med datert prøvefiske/kartlegging (~870 innsjøer); ingen åpen fiskekortkilde |
+| [multehabitat.md](multehabitat.md) | 2026-10-03 | **Ikke prioritert / ikke bygg nå.** ANO gir ekte fravær; åpne myrkart fanger ~30 % av forekomstene med ~50 % presisjon; observasjoner følger bebyggelse |
 
 ### Eldre discovery- og analysedokumenter (ligger i `docs/`)
 Disse er research i samme betydning, men ligger utenfor mappen fordi andre dokumenter lenker til

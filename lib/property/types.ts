@@ -36,10 +36,10 @@ export interface PropertyDetails {
   kommune: Sourced<string> | null;
   /** Tomteareal i m², slik kilden har beregnet det. */
   tomteareal: Sourced<number> | null;
-  matrikkelenhetstype: Sourced<string> | null;
   adresse: Sourced<string> | null;
-  bygg: Sourced<PropertyBuilding[]>;
-  /** Matrikkelflagg vi kan forklare korrekt, f.eks. registrert forurensning i grunnen. */
+  /** Bygg med punkt inne i teigen. null når oppslaget feilet eller teigen er for stor: ukjent, ikke «ingen». */
+  bygg: Sourced<PropertyBuilding[]> | null;
+  /** Matrikkelflagg vi kan forklare korrekt, f.eks. registrert tvist om grenser. */
   flagg: Sourced<string>[];
   geometry: AreaGeometry;
   /** Punkt til å plassere kortet/popup. */

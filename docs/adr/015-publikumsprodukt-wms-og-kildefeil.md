@@ -2,6 +2,12 @@
 
 **Status:** Aktiv · 2026-10-03. Generaliserer [ADR 008](008-publish-what-the-agency-publishes.md).
 
+> **2026-10-03, senere samme dag:** matrikkel-WFS-ene (`wfs.matrikkelen-eiendomskart-teig`,
+> `-bygningspunkt`) sto nede på samme bakmaskin. Det klikkbare eiendomskartet er flyttet til
+> Kartverkets Eiendom-API og matrikkelkartets WMS etter samme regel. Detaljer i
+> [håndbok §15](../naboradar-handbook.md#15-eiendomsfunksjonen) og
+> [research/eiendomskort.md](../research/eiendomskort.md). Ingen ny ADR: prinsippet er det samme.
+
 ## Bakgrunn
 2026-10-03 viste `/omrade` «Disse kildene svarte ikke akkurat nå: Stormflo og havnivå, Flystøysoner» på
 alle adresser. Begge WFS-tjenestene hos Geonorge (`wfs.stormflo_havniva`, `wfs.stoylufthavn`) svarte

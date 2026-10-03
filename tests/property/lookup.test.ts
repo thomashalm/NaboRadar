@@ -1,19 +1,24 @@
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
+import { bygningstypeNavn } from "@/lib/property/bygningstype";
+import snapshot from "@/lib/property/bygningstyper.json";
 import { containsPoint, boundsOf } from "@/lib/property/geometry";
 import { clearPropertyCache, lookupProperty } from "@/lib/property/lookup";
 
 /**
- * Ekte WFS-svar fra Majorstuen, lagret under discovery. Klikkpunktet 59.92992, 10.71488 ligger
- * inne i teig 215/42 — og discovery viste at et lite bbox-søk ikke returnerer den teigen,
- * fordi filteret treffer representasjonspunktet. Derfor må oppslaget bruke buffer.
+ * Ekte svar fra Kartverket for klikkpunktet 59.92992, 10.71488 på Majorstuen (teig 215/42),
+ * lagret 2026-10-03: Eiendom-API-et (`punkt/omrader`) og matrikkelkartets WMS (lagene `teiger`
+ * og `bygning_symbol`). Bygningssvaret har 11 punkter i teigens utsnitt. Sju ligger inne i
+ * teigen, og ett av dem (81357773) er revet (BR).
  */
-const TEIGER = readFileSync("tests/fixtures/teiger-majorstuen.gml", "utf8");
-const BYGNINGER = readFileSync("tests/fixtures/bygninger-majorstuen.gml", "utf8");
+const OMRADER = readFileSync("tests/fixtures/eiendom-omrader-majorstuen.json", "utf8");
+const TEIG_GML = readFileSync("tests/fixtures/matrikkelkart-teig-majorstuen.gml", "utf8");
+const BYGG_GML = readFileSync("tests/fixtures/matrikkelkart-bygg-majorstuen.gml", "utf8");
 const KLIKK = { lat: 59.92992, lng: 10.71488 };
 
-const tomFeatureCollection = `<?xml version='1.0' encoding='UTF-8'?>
-<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0" numberReturned="0"></wfs:FeatureCollection>`;
+const INGEN_OMRADER = JSON.stringify({ type: "FeatureCollection", features: [] });
+const TOM_GML = `<?xml version="1.0" encoding="UTF-8"?>\n<msGMLOutput xmlns:gml="http://www.opengis.net/gml">\n</msGMLOutput>`;
+const WMS_UNNTAK = `<?xml version='1.0' encoding="UTF-8"?><ServiceExceptionReport version="1.3.0"><ServiceException code="LayerNotDefined">msWMSFeatureInfo(): Layer(s) specified in QUERY_LAYERS parameter is not offered.</ServiceException></ServiceExceptionReport>`;
 
 // Første adresse ligger utenfor teigen (verifisert mot fixturen), andre ligger inne i den.
 const adresseSvar = JSON.stringify({
@@ -24,40 +29,33 @@ const adresseSvar = JSON.stringify({
 });
 
 interface FakeOptions {
-  teigSvar?: (kall: number) => string;
-  byggSvar?: string;
+  omrader?: string;
+  teigGml?: string;
+  byggGml?: string;
   adresse?: string;
-  feilPå?: "teig" | "bygg" | "adresse";
+  feilPå?: "omrader" | "teig" | "bygg" | "adresse";
 }
 
-/** Bygger et fetch som svarer som Geonorge, og teller kallene. */
+const erLag = (url: string, lag: string) => new URL(url).searchParams.get("LAYERS") === lag;
+
+/** Bygger et fetch som svarer som Kartverket, og teller kallene. */
 function fakeFetch(options: FakeOptions = {}) {
   const kall: string[] = [];
   const impl = (async (input: string | URL) => {
     const url = String(input);
     kall.push(url);
     const feil = () => new Response("<html>502</html>", { status: 502 });
+    const json = (body: string) => new Response(body, { status: 200, headers: { "content-type": "application/json" } });
+    const gml = (body: string) => new Response(body, { status: 200, headers: { "content-type": "application/vnd.ogc.gml" } });
 
-    if (url.includes("eiendomskart-teig")) {
-      if (options.feilPå === "teig") return feil();
-      const n = kall.filter((u) => u.includes("eiendomskart-teig")).length;
-      return xml(options.teigSvar ? options.teigSvar(n) : TEIGER);
-    }
-    if (url.includes("bygningspunkt")) {
-      if (options.feilPå === "bygg") return feil();
-      return xml(options.byggSvar ?? BYGNINGER);
-    }
-    if (url.includes("adresser/v1/punktsok")) {
-      if (options.feilPå === "adresse") return feil();
-      return new Response(options.adresse ?? adresseSvar, { status: 200, headers: { "content-type": "application/json" } });
-    }
+    if (url.includes("/eiendom/v1/punkt/omrader")) return options.feilPå === "omrader" ? feil() : json(options.omrader ?? OMRADER);
+    if (url.includes("wms.matrikkelkart") && erLag(url, "teiger")) return options.feilPå === "teig" ? feil() : gml(options.teigGml ?? TEIG_GML);
+    if (url.includes("wms.matrikkelkart") && erLag(url, "bygning_symbol")) return options.feilPå === "bygg" ? feil() : gml(options.byggGml ?? BYGG_GML);
+    if (url.includes("adresser/v1/punktsok")) return options.feilPå === "adresse" ? feil() : json(options.adresse ?? adresseSvar);
     return feil();
   }) as unknown as typeof fetch;
   return { impl, kall };
 }
-
-const xml = (body: string) =>
-  new Response(JSON.stringify(body), { status: 200, headers: { "content-type": "application/json" } });
 
 /** lookupProperty bruker global fetch; bytt den ut for testen. */
 async function slåOpp(options: FakeOptions = {}, punkt = KLIKK) {
@@ -74,52 +72,92 @@ async function slåOpp(options: FakeOptions = {}, punkt = KLIKK) {
 describe("eiendomsoppslag", () => {
   beforeEach(() => clearPropertyCache());
 
-  it("finner teigen som faktisk inneholder klikkpunktet", async () => {
-    const { resultat } = await slåOpp();
+  it("finner teigen som omslutter klikkpunktet, fra Eiendom-API-et", async () => {
+    const { resultat, kall } = await slåOpp();
     expect(resultat.status).toBe("ok");
     if (resultat.status !== "ok") return;
     expect(resultat.property.matrikkelnummer.value).toBe("215/42");
     expect(resultat.property.matrikkelnummer.source).toBe("matrikkel-teig");
+    expect(containsPoint(resultat.property.geometry, KLIKK.lng, KLIKK.lat)).toBe(true);
+    // Matrikkel-WFS-ene brukes ikke lenger.
+    expect(kall.some((u) => u.includes("wfs.geonorge.no"))).toBe(false);
   });
 
-  it("velger riktig polygon når svaret har flere kandidater", async () => {
-    const { resultat } = await slåOpp();
-    // Svaret inneholder 38/28, 215/32 og 215/42. Bare den siste omslutter punktet.
-    expect(TEIGER).toContain("38/28");
-    expect(TEIGER).toContain("215/32");
-    if (resultat.status === "ok") expect(resultat.property.matrikkelnummer.value).toBe("215/42");
+  it("spør Eiendom-API-et i EUREF89 med nord = breddegrad og øst = lengdegrad", async () => {
+    const { kall } = await slåOpp();
+    const url = new URL(kall.find((u) => u.includes("punkt/omrader"))!);
+    expect(url.searchParams.get("nord")).toBe(String(KLIKK.lat));
+    expect(url.searchParams.get("ost")).toBe(String(KLIKK.lng));
+    expect(url.searchParams.get("koordsys")).toBe("4258");
+    expect(url.searchParams.get("utkoordsys")).toBe("4258");
   });
 
-  it("utvider bufferet når ingen kandidat traff — edge-caset fra discovery", async () => {
-    const { resultat, kall } = await slåOpp({ teigSvar: (n) => (n === 1 ? tomFeatureCollection : TEIGER) });
-    expect(resultat.status).toBe("ok");
-    const teigKall = kall.filter((u) => u.includes("eiendomskart-teig"));
-    expect(teigKall).toHaveLength(2);
-    // Andre forsøk skal ha et større bbox enn første.
-    const bbox = (u: string) => decodeURIComponent(new URL(u).searchParams.get("bbox") ?? "").split(",").map(Number);
-    const [s1, , n1] = bbox(teigKall[0]!);
-    const [s2, , n2] = bbox(teigKall[1]!);
-    expect(n2! - s2!).toBeGreaterThan(n1! - s1!);
+  it("spør matrikkelkartet i EPSG:4326 med lat,lon og fin nok målestokk", async () => {
+    const { kall } = await slåOpp();
+    for (const lag of ["teiger", "bygning_symbol"]) {
+      const url = new URL(kall.find((u) => u.includes("wms.matrikkelkart") && erLag(u, lag))!);
+      expect(url.searchParams.get("CRS")).toBe("EPSG:4326");
+      const [sør, vest, nord, øst] = url.searchParams.get("BBOX")!.split(",").map(Number);
+      // Akserekkefølge: breddegrad først.
+      expect(sør).toBeGreaterThan(59);
+      expect(sør).toBeLessThan(61);
+      expect(vest).toBeGreaterThan(10);
+      expect(vest).toBeLessThan(11);
+      expect(nord).toBeGreaterThan(sør!);
+      // `bygning_symbol` svarer tomt grovere enn 1:2 000. MapServer regner fra bredden i grader.
+      const målestokk = ((øst! - vest!) * 111_320) / (Number(url.searchParams.get("WIDTH")) * 0.00028);
+      expect(målestokk).toBeLessThan(2_000);
+    }
+    const bygg = new URL(kall.find((u) => erLag(u, "bygning_symbol"))!);
+    expect(bygg.searchParams.get("RADIUS")).toBe("bbox");
   });
 
-  it("henter areal, kommune og type fra kilden", async () => {
+  it("henter areal og kommune fra matrikkelkartet når teig-id-en er den samme", async () => {
     const { resultat } = await slåOpp();
     if (resultat.status !== "ok") throw new Error("forventet treff");
     expect(resultat.property.tomteareal?.value).toBeGreaterThan(0);
     expect(resultat.property.kommune?.value).toBe("OSLO");
-    expect(resultat.property.matrikkelenhetstype?.value).toBe("Grunneiendom");
+    expect(resultat.property.id).toBe("291305462");
   });
 
-  it("teller bygg som ligger inne i teigen, og oversetter bygningstypen", async () => {
+  it("bruker ikke areal fra en annen teig enn den Eiendom-API-et ga", async () => {
+    const { resultat } = await slåOpp({ teigGml: TEIG_GML.replace("<teigid>291305462</teigid>", "<teigid>1</teigid>") });
+    if (resultat.status !== "ok") throw new Error("forventet treff");
+    expect(resultat.property.tomteareal).toBeNull();
+    expect(resultat.property.kommune).toBeNull();
+    expect(resultat.property.matrikkelnummer.value).toBe("215/42");
+  });
+
+  it("teller bare bygg som ligger inne i teigen", async () => {
     const { resultat } = await slåOpp();
     if (resultat.status !== "ok") throw new Error("forventet treff");
-    const bygg = resultat.property.bygg.value;
-    expect(resultat.property.bygg.source).toBe("matrikkel-bygningspunkt");
-    for (const b of bygg) {
-      expect(containsPoint(resultat.property.geometry, ...hentPunkt(b.bygningsnummer!))).toBe(true);
+    expect(resultat.property.bygg!.source).toBe("matrikkel-bygningspunkt");
+    const nummer = resultat.property.bygg!.value.map((b) => b.bygningsnummer).sort();
+    // Utsnittet har 11 bygningspunkter. Tre ligger inne i teigen, resten i naboteigene.
+    expect(BYGG_GML.match(/<bygningsnummer>/g)).toHaveLength(11);
+    expect(nummer).toEqual(["300163527", "300216214", "81814589"]);
+  });
+
+  it("teller ikke bygg som er revet, avlyst eller utgått", async () => {
+    for (const status of ["BR", "BA", "BU", "BF"]) {
+      const byggGml = BYGG_GML.replace(
+        /(<bygningsnummer>81814589<\/bygningsnummer>[\s\S]*?<bygningsstatus>)TB/,
+        `$1${status}`,
+      );
+      expect(byggGml).not.toBe(BYGG_GML);
+      const { resultat } = await slåOpp({ byggGml });
+      if (resultat.status !== "ok") throw new Error("forventet treff");
+      expect(resultat.property.bygg!.value.map((b) => b.bygningsnummer)).not.toContain("81814589");
+      expect(resultat.property.bygg!.value).toHaveLength(2);
     }
-    // Fixturen har typene 143 og 311 — begge skal oversettes, ingen skal gjettes.
-    for (const b of bygg) if (b.typeCode) expect(b.typeLabel).toBeTruthy();
+  });
+
+  it("oversetter bygningstypen fra SSBs kodeliste og gjetter ikke ukjente koder", async () => {
+    const { resultat } = await slåOpp({ byggGml: BYGG_GML.replace("<bygningstype>412</bygningstype>", "<bygningstype>000</bygningstype>") });
+    if (resultat.status !== "ok") throw new Error("forventet treff");
+    const bygg = resultat.property.bygg!.value;
+    expect(bygg.find((b) => b.typeCode === "000")).toMatchObject({ typeLabel: null });
+    expect(bygg.find((b) => b.typeCode === "181")?.typeLabel).toBe("Garasje, uthus, anneks knyttet til bolig");
   });
 
   it("bruker adressen som ligger inne i teigen", async () => {
@@ -130,20 +168,49 @@ describe("eiendomsoppslag", () => {
     expect(resultat.property.adresse?.source).toBe("kartverket-adresse");
   });
 
-  it("gir «ingen eiendom» når ingen teig omslutter punktet", async () => {
-    const { resultat } = await slåOpp({ teigSvar: () => tomFeatureCollection });
+  it("gir «ingen eiendom» bare når Eiendom-API-et svarer gyldig uten teig", async () => {
+    const { resultat, kall } = await slåOpp({ omrader: INGEN_OMRADER });
+    expect(resultat.status).toBe("not-found");
+    // Ingen teig: da spør vi ikke etter bygg, areal eller adresse.
+    expect(kall).toHaveLength(1);
+  });
+
+  it("hopper over anleggsprojeksjonsflater", async () => {
+    const { resultat } = await slåOpp({ omrader: OMRADER.replace('"objekttype":"Teig"', '"objekttype":"Anleggsprojeksjonsflate"') });
     expect(resultat.status).toBe("not-found");
   });
 
-  it("tåler at kilden feiler, uten å kaste", async () => {
-    const { resultat } = await slåOpp({ feilPå: "teig" });
-    expect(resultat.status).toBe("error");
+  it("en teknisk feil er ikke «ingen eiendom»", async () => {
+    expect((await slåOpp({ feilPå: "omrader" })).resultat.status).toBe("error");
+    // 200 med noe annet enn det avtalte skjemaet er også en feil.
+    expect((await slåOpp({ omrader: JSON.stringify({ errors: { message: "x" } }) })).resultat.status).toBe("error");
+    expect((await slåOpp({ omrader: "<html>Bad gateway</html>" })).resultat.status).toBe("error");
   });
 
-  it("viser eiendommen selv om bygg eller adresse feiler", async () => {
-    const utenBygg = await slåOpp({ feilPå: "bygg" });
-    expect(utenBygg.resultat.status).toBe("ok");
-    if (utenBygg.resultat.status === "ok") expect(utenBygg.resultat.property.bygg.value).toEqual([]);
+  it("avviser koordinater utenfor Norge (byttet akserekkefølge)", async () => {
+    const byttet = JSON.parse(OMRADER) as { features: { geometry: { coordinates: number[][][] } }[] };
+    for (const ring of byttet.features[0]!.geometry.coordinates) for (const punkt of ring) punkt.reverse();
+    expect((await slåOpp({ omrader: JSON.stringify(byttet) })).resultat.status).toBe("error");
+  });
+
+  it("viser eiendommen med ukjent bygg når bygningsoppslaget feiler, aldri «ingen bygg»", async () => {
+    for (const options of [{ feilPå: "bygg" as const }, { byggGml: WMS_UNNTAK }, { byggGml: "<html>500</html>" }]) {
+      const { resultat } = await slåOpp(options);
+      expect(resultat.status).toBe("ok");
+      if (resultat.status === "ok") expect(resultat.property.bygg).toBeNull();
+    }
+  });
+
+  it("et gyldig, tomt bygningssvar betyr ingen bygg", async () => {
+    const { resultat } = await slåOpp({ byggGml: TOM_GML });
+    if (resultat.status !== "ok") throw new Error("forventet treff");
+    expect(resultat.property.bygg?.value).toEqual([]);
+  });
+
+  it("viser eiendommen uten areal eller adresse når de oppslagene feiler", async () => {
+    const utenAreal = await slåOpp({ feilPå: "teig" });
+    expect(utenAreal.resultat.status).toBe("ok");
+    if (utenAreal.resultat.status === "ok") expect(utenAreal.resultat.property.tomteareal).toBeNull();
 
     const utenAdresse = await slåOpp({ feilPå: "adresse" });
     expect(utenAdresse.resultat.status).toBe("ok");
@@ -155,11 +222,61 @@ describe("eiendomsoppslag", () => {
     const dump = JSON.stringify(resultat);
     expect(dump).not.toMatch(/hjemmelshaver|eiernavn|byggeår|byggeaar|bruksareal|kjøpesum|salgsdato|prisestimat/i);
   });
+});
 
-  it("henter ikke bygg eller adresse når ingen teig ble funnet", async () => {
-    const { kall } = await slåOpp({ teigSvar: () => tomFeatureCollection });
-    expect(kall.some((u) => u.includes("bygningspunkt"))).toBe(false);
-    expect(kall.some((u) => u.includes("punktsok"))).toBe(false);
+describe("bygningstype (SSB KLASS 31, NS 3457)", () => {
+  it("har kilde, versjon og dato i øyeblikksbildet", () => {
+    expect(snapshot.kilde).toContain("KLASS 31");
+    expect(snapshot.versjon).toBeTruthy();
+    expect(snapshot.hentet).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(Object.keys(snapshot.koder).length).toBeGreaterThan(100);
+  });
+
+  it("kodene som var feil i den håndskrevne tabellen", () => {
+    expect(bygningstypeNavn("719")).toBe("Sykehus");
+    expect(bygningstypeNavn("613")).toBe("Barneskole");
+    expect(bygningstypeNavn("641")).toBe("Museum, kunstgalleri");
+    expect(bygningstypeNavn("642")).toBe("Bibliotek, mediatek");
+    expect(bygningstypeNavn("612")).toBe("Barnehage");
+    expect(bygningstypeNavn("611")).toBe("Lekepark");
+    expect(bygningstypeNavn("143")).toBe("Store frittliggende boligbygg på 5 etasjer eller over");
+    expect(bygningstypeNavn("144")).toBe("Store sammenbygde boligbygg på 2 etasjer");
+    expect(bygningstypeNavn("145")).toBe("Store sammenbygde boligbygg på 3 og 4 etasjer");
+    expect(bygningstypeNavn("146")).toBe("Store sammenbygde boligbygg på 5 etasjer og over");
+    expect(bygningstypeNavn("181")).toBe("Garasje, uthus, anneks knyttet til bolig");
+    expect(bygningstypeNavn("171")).toBe("Seterhus, sel, rorbu o.l.");
+  });
+
+  it("én representativ kode i hver hovedgruppe", () => {
+    const forventet: Record<string, string> = {
+      "111": "Enebolig",
+      "131": "Rekkehus",
+      "161": "Fritidsbygning (hytter, sommerhus o.l.)",
+      "212": "Verkstedbygning",
+      "231": "Lagerhall",
+      "311": "Kontor- og administrasjonsbygning, rådhus",
+      "322": "Butikkbygning",
+      "412": "Jernbane- og T-banestasjon",
+      "511": "Hotellbygning",
+      "671": "Kirke, kapell",
+    };
+    for (const [kode, navn] of Object.entries(forventet)) expect(bygningstypeNavn(kode)).toBe(navn);
+    for (const gruppe of "12345678") {
+      expect(Object.keys(snapshot.koder).some((kode) => kode.startsWith(gruppe))).toBe(true);
+    }
+  });
+
+  it("ukjent, tom eller manglende kode gir null", () => {
+    expect(bygningstypeNavn("000")).toBeNull();
+    expect(bygningstypeNavn("")).toBeNull();
+    expect(bygningstypeNavn(null)).toBeNull();
+  });
+
+  it("ingen navn er tomme eller har overflødige mellomrom", () => {
+    for (const navn of Object.values(snapshot.koder)) {
+      expect(navn.length).toBeGreaterThan(2);
+      expect(navn).toBe(navn.trim());
+    }
   });
 });
 
@@ -183,14 +300,6 @@ describe("geometri", () => {
     expect(containsPoint(medHull, 20, 20)).toBe(false);
   });
 });
-
-/** Henter bygningens punkt fra fixturen, slik at testen ikke antar noe om rekkefølge. */
-function hentPunkt(bygningsnummer: string): [number, number] {
-  const blokk = BYGNINGER.split("<app:Bygning ").find((b) => b.includes(`<app:bygningsnummer>${bygningsnummer}<`));
-  const pos = blokk?.match(/<gml:pos>([^<]+)<\/gml:pos>/)?.[1] ?? "0 0";
-  const [lat, lng] = pos.trim().split(/\s+/).map(Number);
-  return [lng!, lat!];
-}
 
 describe("API-ruten", () => {
   beforeEach(() => clearPropertyCache());

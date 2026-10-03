@@ -135,7 +135,7 @@ bruker (nettleser)
   │                              └─► direkte oppslag (NVE, Miljødirektoratet, Vegvesenet, Avinor)
   │
   ├─ /api/geocode ──► Netlify ──► Kartverket (adresser + stedsnavn)
-  ├─ /api/eiendom ──► Netlify ──► Geonorge WFS (teig, bygningspunkt) + adresse-API
+  ├─ /api/eiendom ──► Netlify ──► Kartverket Eiendom-API + matrikkelkart-WMS + adresse-API
   │
   └─ kartfliser ─────────────────► cache.kartverket.no   (går utenom oss)
 ```
@@ -882,7 +882,7 @@ For store til å synke, eller svarer bare på «ligger punktet innenfor?».
 |---|---|
 | Kartverket adresse- og stedsnavnsøk | `/api/geocode` |
 | Kartverket WMTS (topograatone) | Bakgrunnskart. Hentes direkte av nettleseren |
-| Geonorge WFS — matrikkelen teig og bygningspunkt | `/api/eiendom` |
+| Kartverket Eiendom-API (teig) og matrikkelkart-WMS (areal, bygningspunkt) | `/api/eiendom` |
 | Geonorge adresse-punktsøk | Adresse på valgt eiendom |
 
 ---
@@ -1431,16 +1431,36 @@ kartet. «Se alle i kart» åpner hyttekartet med adressen som utgangspunkt og s
 
 Klikker brukeren i kartet når zoom ≥ **14**, slår `/api/eiendom` opp eiendommen under punktet.
 
-**Slik virker oppslaget:**
+**Slik virker oppslaget** (byttet fra matrikkel-WFS 2026-10-03, se
+[research/eiendomskort.md](research/eiendomskort.md) og [ADR 015](adr/015-publikumsprodukt-wms-og-kildefeil.md)):
 
-1. Teig-WFS spørres med en **bbox rundt klikkpunktet**, ikke med punktet selv. Discovery viste at
-   bbox-filteret treffer på representasjonspunktet, ikke på flaten — et lite søk ga null treff selv
-   når teigen omsluttet punktet.
-2. Vi avgjør selv hvilken teig som **inneholder** punktet (point-in-polygon).
-3. Finner vi ingen, **utvides bufferet én gang** (~65 m → ~275 m), slik at store eiendommer også
-   finnes. Maks 80 kandidater.
-4. Bygninger i teigen og nærmeste adresse hentes parallelt, og er utfyllende: mangler de, viser vi
-   eiendommen likevel.
+1. **Teigen** hentes fra Kartverkets Eiendom-API (`api.kartverket.no/eiendom/v1/punkt/omrader`, EUREF89,
+   `nord` = breddegrad, `ost` = lengdegrad). API-et svarer med flatene som omslutter punktet, og vi
+   kontrollerer selv at punktet ligger inne i flaten. Anleggsprojeksjonsflater hoppes over.
+2. **Areal, kommunenavn og tvist** hentes fra matrikkelkartets WMS (`wms.matrikkelkart`, laget
+   `teiger`, `GetFeatureInfo` i EPSG:4326 med lat,lon). Treffet brukes bare når teig-id-en er den
+   samme som Eiendom-API-et ga.
+3. **Bygg** hentes fra samme WMS, laget `bygning_symbol`, med alle punkter i teigens utsnitt
+   (`RADIUS=bbox`), og filtreres med punkt-i-polygon mot teigen.
+   - Laget svarer tomt grovere enn 1:2 000. Utsnittet får derfor 0,45 «gradmeter» per piksel.
+   - Bygg med status revet/brent (BR), avlyst (BA), utgått (BU) og flyttet (BF) telles ikke. Det
+     åpne datasettet «Matrikkelen – Bygningspunkt» utelater dem også.
+   - Teiger større enn 6 000 piksler i utsnittet (ca. 2,7 km) får ukjent bygg.
+4. **Adressen** er nærmeste offisielle adresse som ligger inne i teigen (adresse-API-et).
+
+**Feil er ikke fravær:**
+
+- Bare et gyldig, tomt svar fra Eiendom-API-et gir «Fant ingen registrert eiendom». HTTP-feil,
+  tidsavbrudd, svar utenfor skjemaet og koordinater utenfor Norge gir «får ikke hentet eiendomsdata».
+- Feiler areal-, bygg- eller adresseoppslaget, vises eiendommen uten det feltet. Bygg blir `null`
+  (ukjent) og feltet skjules. Det blir aldri «Ingen registrert».
+
+**Kontrollert 2026-10-03** på 19 adresser (enebolig, rekkehus, seksjonert og useksjonert blokk,
+gårdsbruk, festetomt, flere teiger, by og land): 19 av 19 ga adressens matrikkelnummer, og byggene
+var identiske med Kartverkets nasjonale nedlasting i 19 av 19.
+
+**Falt bort i byttet:** matrikkelenhetstype og flaggene for grunnforurensning og kulturminne på
+matrikkelenheten. De finnes ikke i WMS-en eller Eiendom-API-et.
 
 **Caching:** 10 minutter, maks 300 oppføringer, per serverinstans. Nøkkelen er koordinaten avrundet
 til fem desimaler. Svaret sendes med `cache-control: private, max-age=60`.
@@ -1454,8 +1474,13 @@ eiendommene inni seg og fanget klikket, slik at et hus inne i et planområde var
 | 2. eiendom/teig — klikk i flaten slår opp eiendommen | 2. store flater er fortsatt primær klikkflate |
 | 3. store flater blokkerer ikke lenger | |
 
-**Det vi viser:** matrikkelnummer, areal, bygninger med type (NS 3457-koder vi kjenner — ukjente
-koder vises ikke, vi gjetter ikke bygningstype), og nærmeste adresse.
+**Det vi viser:** matrikkelnummer, areal, bygninger med type og nærmeste adresse.
+
+**Bygningstype** oversettes med SSBs kodeliste (KLASS 31, «Standard for bygningstype / Matrikkelen»,
+NS 3457), lagret uendret i `lib/property/bygningstyper.json` og oppdatert med
+`npx tsx scripts/update-bygningstyper.ts`. Ukjente koder (f.eks. matrikkelens 999) vises ikke. Den
+håndskrevne tabellen som sto her før, hadde forskjøvne koder: sykehus (719) ble vist som «Annen
+beredskapsbygning» og barneskole (613) som «Museum eller bibliotek».
 
 > **Det vi ikke viser, fordi det ikke er åpne data:** eier, BRA, byggeår, salgspris, tinglysninger og
 > eiendomshistorikk. Disse krever avtale med Kartverket eller andre rettighetshavere. Ikke bygg noe
@@ -1467,7 +1492,7 @@ koder vises ikke, vi gjetter ikke bygningstype), og nærmeste adresse.
 
 | Rute | Metode | Input | Validering | Upstream | Timeout | Caching | Rate limit |
 |---|---|---|---|---|---|---|---|
-| `/api/eiendom` | GET | `lat`, `lng` | Zod: `lat` 57–72, `lng` 4–32. Alt annet → 400 | Geonorge WFS ×2 + adresse-API | 8 s totalt, 6 s per kall, 1 retry | `private, max-age=60` + 10 min serverside | 120/min |
+| `/api/eiendom` | GET | `lat`, `lng` | Zod: `lat` 57–72, `lng` 4–32. Alt annet → 400 | Eiendom-API + matrikkelkart-WMS ×2 + adresse-API | 8 s totalt, 6 s per kall, 1 retry | `private, max-age=60` + 10 min serverside | 120/min |
 | `/api/geocode` | GET | `q` | Zod: 2–100 tegn etter trim | Kartverket adresser + stedsnavn | Per kilde, delvis svar tillatt | `private, max-age=300`, `no-store` ved delvis svar | 120/min |
 | `/omrade` | GET (side) | `lat`, `lng`, `radius`, `label`, `sortering` | Zod. Ugyldig `lat`/`lng` → feilside. Ugyldig `radius` → standard 1 km. `label` maks 120 tegn, kontrolltegn fjernet | Supabase + direkte oppslag | 8 s (saker), 8 s (DB), 12 s (oppslag) | Dynamisk | 240/min |
 | `/api/hytter` | GET | `bbox` *eller* `kommune` *eller* `q`; `type` og `eier` kan gjentas | Zod: utsnitt innenfor kloden og riktig vei, kommunenummer fire sifre, `q` 2–60 tegn, kjente typer og eiere | Supabase (`huts_*`) + stedsnavn | databasens egen | `private, no-store` | 120/min |

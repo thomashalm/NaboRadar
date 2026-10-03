@@ -1,5 +1,11 @@
 # Discovery: klikkbare eiendommer og bygg
 
+> **Delvis utdatert 2026-10-03:** oppslaget bruker ikke lenger matrikkel-WFS-ene. De sto nede, og
+> eiendomskartet henter nå teigen fra Kartverkets Eiendom-API og areal og bygg fra matrikkelkartets
+> WMS. Bygningstypene kommer fra SSB KLASS 31 i stedet for en håndskrevet tabell. Se
+> [håndbok §15](naboradar-handbook.md#15-eiendomsfunksjonen) og
+> [research/eiendomskort.md](research/eiendomskort.md). Funnene under er historikk.
+
 Testet 2026-09-24. Alle tekniske funn er ekte kall, ikke antakelser. Juridiske funn er sitert
 fra forskrift og Kartverkets egen dokumentasjon; de er ikke en juridisk vurdering.
 
