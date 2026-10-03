@@ -1301,6 +1301,13 @@ skoler og organisasjoner (Husbergøya), og en som er stengt for vedlikehold på 
 (Solstua). Vi viser ikke noe av dette som egne felt — vi har ingen kilde som holder det ved
 like — men lenken til forvalteren gjør at brukeren finner det.
 
+**Valgt hytte i adressen.** Velges en hytte i kartet, lista eller søket, blir adressen
+`/hytter?hytte=aursjobu-a4fbf722` — samme nøkkel som hyttesiden. Den skrives med
+`history.replaceState`, så et valg ikke blir et nytt steg i historikken, og den fjernes når
+valget lukkes. Ved innlasting slås hytta opp og kartet starter rundt den. Kartutsnitt, filtre og
+søk står ikke i adressen. Eldre lenker med full uuid og `lat`/`lng` virker fortsatt. Adressen
+canonicaliseres til `/hytter` og står ikke i sitemapen; hyttesiden er detaljsiden.
+
 **Søk etter hytte eller sted.** Søkefeltet på `/hytter` gir både hytter (`huts_search`) og steder
 fra Kartverkets stedsnavn — den samme geokoderen som adressesøket på forsiden, men uten adresser.
 `/api/hytter?q=` returnerer begge i ett svar. Et sted gir bare et punkt, så kartet viser 20 km

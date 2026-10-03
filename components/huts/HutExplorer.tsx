@@ -225,6 +225,20 @@ export function HutExplorer({ tiles, center, originName, radiusM, initialHutId }
     rows.current.get(id)?.scrollIntoView({ block: "nearest", behavior: reduser ? "auto" : "smooth" });
   }, [selectedId, listed]);
 
+  // Valgt hytte står i adressen (`?hytte=aursjobu-a4fbf722`), så lenken kan deles og overlever
+  // en ny innlasting. `replaceState`: et valg er ikke et nytt steg i historikken, så Tilbake tar
+  // deg ut av kartet, ikke gjennom hvert klikk. Kartutsnitt, filtre og søk står ikke i adressen.
+  useEffect(() => {
+    const hytte = selectedId ? huts.find((hut) => hut.id === selectedId) : null;
+    // Venter på lista (valgt, men ikke hentet ennå) eller på et valg fra adressen.
+    if (selectedId && !hytte) return;
+    if (!selectedId && pendingSelect.current) return;
+    const url = new URL(window.location.href);
+    if (hytte) url.searchParams.set("hytte", buildHutHref(hytte).split("/").pop()!);
+    else url.searchParams.delete("hytte");
+    if (url.href !== window.location.href) window.history.replaceState(window.history.state, "", url);
+  }, [selectedId, huts]);
+
   const goToHit = useCallback((hit: Hut) => {
     pendingSelect.current = hit.id;
     setFit({ bounds: radiusBounds(hit.lat, hit.lng, 3000), key: `treff:${hit.id}` });
