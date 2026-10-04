@@ -58,7 +58,7 @@ describe("UdirSkolerProvider", () => {
       subtype: "grunnskole",
       title: "Aa skole",
       geometry: { type: "Point", coordinates: [9.50263, 63.39916] },
-      sourceUrl: "https://nsr.udir.no/enhet/975279154",
+      sourceUrl: "https://nsr.udir.no/enheter/975279154",
       attributes: { lavesteTrinn: 1, hoyesteTrinn: 10, antallElever: 40, eierforhold: "Offentlig" },
     });
   });

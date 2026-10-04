@@ -9,6 +9,17 @@ const WFS = "https://wfs.geonorge.no/skwms1/wfs.grunnskoler_vgs";
 const NSR = "https://data-nsr.udir.no/v4/enheter";
 
 /**
+ * Enhetens side i Nasjonalt skoleregister: `https://nsr.udir.no/enheter/<orgnr>`.
+ *
+ * Fram til 2026-10-04 lenket vi til `/enhet/<orgnr>` (entall). Den ruten finnes ikke i
+ * registerets nettside, og alle 3 103 skolelenkene ga «Siden finnes ikke – feilkode 404».
+ * Siden svarer HTTP 200 uansett adresse og viser feilen i nettleseren, så en vanlig lenkesjekk
+ * fanger den ikke. Formatet er lest fra nettsidens egen rutetabell (`enhet: "/enheter/:orgnr"`),
+ * ikke gjettet. Organisasjonsnummeret er nøkkelen, det samme vi allerede bruker som ekstern ID.
+ */
+export const nsrEnhetUrl = (orgnr: string): string => `https://nsr.udir.no/enheter/${orgnr}`;
+
+/**
  * Grunnskoler og videregående skoler fra Utdanningsdirektoratet (CC BY 4.0 / NLOD).
  *
  * WFS-en har koordinat, besøksadresse, trinn, elevtall og eierforhold, og publiserer bare
@@ -119,8 +130,8 @@ export class UdirSkolerProvider implements AreaFeatureProvider {
           adresse: nested(feature, "besøksadresse", "Besøksadresse", "adressenavn"),
           poststed: nested(feature, "besøksadresse", "Besøksadresse", "poststed"),
         },
-        // Udirs egen offentlige side for enheten.
-        sourceUrl: `https://nsr.udir.no/enhet/${orgnr}`,
+        // Udirs egen offentlige side for enheten. Se nsrEnhetUrl.
+        sourceUrl: nsrEnhetUrl(orgnr),
         sourceUrlType: "factsheet",
         sourceUpdatedAt: typeof feature.oppdateringsdato === "string" ? feature.oppdateringsdato : null,
       });

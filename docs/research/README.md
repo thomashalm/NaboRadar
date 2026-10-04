@@ -43,6 +43,7 @@ publisert 2026-10-02 ([ADR 009](../adr/009-public-admin-security-model.md)).
 ### Eiendom og områdedata
 | Fil | Dato | Kort |
 |---|---|---|
+| [skolelenker-404.md](skolelenker-404.md) | 2026-10-04 | Alle 3 103 skolelenker ga 404 i Nasjonalt skoleregister: malen var `/enhet/<orgnr>`, ruten er `/enheter/<orgnr>`. Rettet. Eksamenskontor i skolelisten er dokumentert, ikke endret |
 | [stoy-langmyrgrenda.md](stoy-langmyrgrenda.md) | 2026-10-04 | Langmyrgrenda 26 mot 26C: kilden var riktig gjengitt, men 50–54 dB fra gata utenfor ble vist som presist nivå ved huset. Førte til nye støytekster med T-1442-grensene som referanse |
 | [omrade-produktreview.md](omrade-produktreview.md) | 2026-10-03 | Produktreview av `/omrade` på 11 adresser: riktig i delene, men ordnet etter data, ikke etter hva en boligkjøper må vite. Forslag til ny rekkefølge, terskler og hva som mangler. Ikke implementert |
 | [tilfluktsrom-naermeste-rom.md](tilfluktsrom-naermeste-rom.md) | 2026-10-03 | Langmyrgrenda 26C viste ingen tilfluktsrom: dataene var identiske med Sivilforsvarets (556/556), nærmeste rom lå 3,3 km unna og seksjonen falt bort. Bygget: nærmeste rom i verktøyet, deep-link `#tilfluktsrom` og `#skolekrets`. 2026-10-04: syncen flyttet fra WFS til DSBs nedlastingsfil, 556/556 like ved byttet |
