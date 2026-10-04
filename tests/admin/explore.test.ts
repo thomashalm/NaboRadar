@@ -7,6 +7,8 @@ import { boksFor, lesUtsnitt, punktIFlate, utsnittKm } from "@/lib/admin/explore
 import { forurensetGrunnFeature } from "@/lib/admin/explore/forurenset-grunn";
 import { kraftnettFeature } from "@/lib/admin/explore/kraftnett";
 import { kvikkleireFeature } from "@/lib/admin/explore/kvikkleire";
+import { multefunnFeature } from "@/lib/admin/explore/multefunn";
+import { myrFeature } from "@/lib/admin/explore/myr";
 import { PLANSAK_OVERLAPP, plansakOverlapp } from "@/lib/admin/explore/plansak-overlapp";
 import { plansakFeature, plansakOverlappFeature } from "@/lib/admin/explore/plansaker";
 import { tolkSok } from "@/lib/admin/explore/parse";
@@ -187,6 +189,9 @@ describe("nye datasett i søket", () => {
       kraftnett: { openMap: "vurderes", omrade: "ja" },
       "forurenset-grunn": { openMap: "nei", omrade: "nei" },
       datasenter: { openMap: "nei", omrade: "egen beslutning" },
+      // Interne researchlag: aldri offentlige.
+      multefunn: { openMap: "nei", omrade: "nei" },
+      myr: { openMap: "nei", omrade: "nei" },
     });
   });
 
@@ -197,6 +202,8 @@ describe("nye datasett i søket", () => {
       kraftnett: true,
       "forurenset-grunn": true,
       datasenter: false,
+      multefunn: false,
+      myr: true,
     });
     expect(MAX_LAG).toBe(2);
   });
@@ -416,5 +423,90 @@ describe("Finn overlapp: hva en plansak traff", () => {
     expect(f.analysis?.heading).toBe("Overlapper kvikkleire");
     expect(JSON.stringify(f.details)).not.toMatch(/kvikkleire/i);
     expect(f.explanation).toBe("Vi vet ikke om planene senere er vedtatt, endret eller lagt bort.");
+  });
+});
+
+describe("multefunn og myr: interne researchlag", () => {
+  it("søkeordene velger riktig datasett", () => {
+    for (const sok of ["multer Oslo", "multe Oslo", "multefunn Oslo", "registrerte multefunn Oslo"]) expect(tolk(sok)).toMatchObject({ dataset: { id: "multefunn" }, sted: { status: "ok", sted: { number: "0301" } } });
+    expect(tolk("multefunn")).toMatchObject({ dataset: { id: "multefunn" }, sted: { status: "ingen" } });
+    for (const sok of ["myr Oslo", "myrer Oslo", "Oslo myr"]) expect(tolk(sok)).toMatchObject({ dataset: { id: "myr" }, sted: { status: "ok" } });
+    // «myr» er et eget ord: «Myrvoll» er ikke et søk etter myr.
+    expect(tolk("myrvoll").dataset).toBeNull();
+  });
+
+  it("begge sier hvor de dekker", () => {
+    for (const id of ["multefunn", "myr"]) {
+      const d = EXPLORE_DATASETS.find((x) => x.id === id)!;
+      expect(d.coverage).toEqual({ label: "Oslo og Marka", box: { minLng: 10.3, minLat: 59.78, maxLng: 11.1, maxLat: 60.3 } });
+      expect(d.description).toContain("Dekker bare Oslo og Marka");
+    }
+  });
+
+  const punkt = { type: "Point" as const, coordinates: [10.66, 60.03] };
+  const funn = (attributes: Record<string, string | number | null>) =>
+    ({ id: "f1", external_id: "6444831430", title: "Multe", subtype: "multefunn", attributes, source_url: "https://www.gbif.org/occurrence/6444831430", source_updated_at: null, geometry: punkt, center: punkt, total: 1 }) as Parameters<typeof multefunnFeature>[0];
+  const verdi = (f: { details: { label: string; value: string }[] }, label: string) => f.details.find((d) => d.label === label)?.value;
+
+  it("et funn viser dato, år, presisjon, kilde og lisens — og ingen person", () => {
+    const f = multefunnFeature(funn({ aar: 2026, maaned: 7, dato: "2026-07-12", presisjonM: 10, datasett: "Norwegian Species Observation Service", institusjon: "nbf", type: "observasjon", lisens: "CC BY 4.0", funnIRuta: 3 }), 2026);
+    expect(f.title).toBe("Multefunn, juli 2026");
+    expect(f.kind).toBe("Registrert funn");
+    expect(verdi(f, "Art")).toBe("Multe (Rubus chamaemorus)");
+    expect(verdi(f, "Dato")).toBe("12. juli 2026");
+    expect(verdi(f, "Registreringsår")).toBe("2026");
+    expect(verdi(f, "Presisjon")).toBe("10 m");
+    expect(verdi(f, "Lisens")).toBe("CC BY 4.0");
+    expect(verdi(f, "Funn i samme 100 m-rute")).toBe("3 (det nyeste vises)");
+    expect(f.sourceName).toBe("Norwegian Species Observation Service via GBIF (CC BY 4.0)");
+    expect(f.explanation).toBe("Registrert observasjon – sier ikke noe sikkert om forekomst i dag.");
+    expect(f.notice).toBe("Internt researchlag. Ikke offentlig.");
+    expect(f.details.map((d) => d.label)).not.toEqual(expect.arrayContaining(["Observatør", "Finner", "Lokalitet"]));
+  });
+
+  it("et gammelt funn tolkes ikke som en bestand", () => {
+    const f = multefunnFeature(funn({ aar: 2004, maaned: null, dato: null, presisjonM: 100, lisens: "CC BY 4.0", funnIRuta: 1 }), 2026);
+    expect(f.title).toBe("Multefunn, 2004");
+    expect(f.explanation).toContain("Funnet er fra 2004: det sier lite om hva som står der nå.");
+    expect(verdi(f, "Funn i samme 100 m-rute")).toBeUndefined();
+    expect(JSON.stringify(f)).not.toMatch(/bestand|vokser her|sannsynlig|lovende/i);
+  });
+
+  const flate = { type: "Polygon" as const, coordinates: [[[10.6, 60.0], [10.61, 60.0], [10.61, 60.01], [10.6, 60.0]]] };
+  const myr = (over: Record<string, unknown>) =>
+    ({ id: "m1", external_id: "0301:1_2", title: "Myr", subtype: "myr", attributes: { municipality_number: "0301" }, source_url: null, source_updated_at: "2016-12-02T00:00:00Z", geometry: flate, center: punkt, total: 1, area_m2: 24_300, finds_500: 0, nearest_m: null, nearest_id: null, nearest_year: null, ...over }) as Parameters<typeof myrFeature>[0];
+
+  it("myr med flere funn i nærheten: antall innen 500 m og nærmeste funn", () => {
+    const f = myrFeature(myr({ finds_500: 4, nearest_m: 183.4, nearest_id: "f1", nearest_year: 2023 }), "Oslo");
+    expect(f.title).toBe("Myr, 24 dekar");
+    expect(f.summary).toBe("4 registrerte multefunn innen 500 m");
+    expect(f.analysis).toMatchObject({ label: "Registrerte multefunn i nærheten", heading: "4 registrerte multefunn innen 500 m", lines: ["Nærmeste registrerte funn: 180 m."] });
+    expect(f.analysis!.items).toEqual([{ id: "f1", title: "Nærmeste funn", lines: ["180 m unna, registrert 2023"] }]);
+    expect(verdi(f, "Kommune")).toBe("Oslo");
+  });
+
+  it("funn på selve myra, ett funn, og funn lenger unna enn 500 m", () => {
+    expect(myrFeature(myr({ finds_500: 1, nearest_m: 0, nearest_id: "f1", nearest_year: 2021 }), null).analysis).toMatchObject({ heading: "1 registrert multefunn innen 500 m", lines: ["Nærmeste registrerte funn: på myra."] });
+    expect(myrFeature(myr({ finds_500: 1, nearest_m: 3.7, nearest_id: "f1", nearest_year: 2021 }), null).analysis!.lines).toEqual(["Nærmeste registrerte funn: i myrkanten."]);
+    const langt = myrFeature(myr({ finds_500: 0, nearest_m: 1340, nearest_id: "f1", nearest_year: 2019 }), null);
+    expect(langt.summary).toBe("Nærmeste registrerte funn: 1,3 km");
+    expect(langt.analysis!.heading).toBe("0 registrerte multefunn innen 500 m");
+  });
+
+  it("myr uten funn i nærheten: sier det, uten å gjøre det til en vurdering", () => {
+    const f = myrFeature(myr({ area_m2: 3_400 }), null);
+    expect(f.title).toBe("Myr, 3,4 dekar");
+    expect(f.summary).toBe("Ingen registrerte funn innen 2 km");
+    expect(f.analysis!.items).toEqual([]);
+    expect(f.analysis!.note).toContain("Ikke en sannsynlighet og ikke en vurdering av myra");
+  });
+
+  it("ingen score og ingen sannsynlighet i noen tekst", () => {
+    const alt = JSON.stringify([
+      myrFeature(myr({ finds_500: 9, nearest_m: 0, nearest_id: "f1", nearest_year: 2025 }), "Oslo"),
+      multefunnFeature(funn({ aar: 2025, maaned: 8, presisjonM: 5, lisens: "CC0", funnIRuta: 1 }), 2026),
+      EXPLORE_DATASETS.filter((d) => ["multefunn", "myr"].includes(d.id)).map((d) => d.description),
+    ]).replace("Ikke en sannsynlighet", "");
+    expect(alt).not.toMatch(/lovende|sannsynlig|score|poeng|egnet|her vokser|bekreftet/i);
   });
 });

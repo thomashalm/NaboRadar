@@ -6,7 +6,7 @@ import { hentOmrade, lesUtsnitt, utsnittKm } from "./area";
 import { utforskHref } from "./href";
 import { tolkSok } from "./parse";
 import { datasetMedId, EXPLORE_DATASETS, MAX_LAG } from "./registry";
-import type { ExploreArea, ExploreDataset, OverlapResult } from "./types";
+import type { ExploreArea, ExploreDataset, LngLatBox, OverlapResult } from "./types";
 
 /** Verdien av `analyse` i URL-en når hovedlaget er filtrert mot det andre laget. */
 export const OVERLAPP = "overlapp";
@@ -14,9 +14,16 @@ export const OVERLAPP = "overlapp";
 /** Større utsnitt enn dette er for mye for et datasett som krever område. */
 export const MAKS_UTSNITT_KM = 80;
 
-const info = (d: ExploreDataset): DatasettInfo => ({
+/** Ordet som velger datasettet når siden selv bygger et søk. */
+const sokeord = (d: ExploreDataset) => d.queryWord ?? d.label.toLowerCase();
+
+const overlapper = (a: LngLatBox, b: LngLatBox) => a.minLng <= b.maxLng && a.maxLng >= b.minLng && a.minLat <= b.maxLat && a.maxLat >= b.minLat;
+
+export const datasettInfo = (d: ExploreDataset): DatasettInfo => ({
   id: d.id,
   label: d.label,
+  sok: sokeord(d),
+  dekning: d.coverage?.label ?? null,
   description: d.description,
   unit: d.unit,
   needsArea: d.needsArea,
@@ -41,11 +48,11 @@ export async function byggVisning(
   const hoved = tolkning.dataset;
   if (!hoved) return { status: "ukjent_datasett" };
 
-  if (tolkning.sted.status === "ukjent") return { status: "ukjent_sted", dataset: info(hoved), tekst: tolkning.sted.tekst };
+  if (tolkning.sted.status === "ukjent") return { status: "ukjent_sted", dataset: datasettInfo(hoved), tekst: tolkning.sted.tekst };
   if (tolkning.sted.status === "flertydig") {
     return {
       status: "flertydig_sted",
-      dataset: info(hoved),
+      dataset: datasettInfo(hoved),
       tekst: tolkning.sted.tekst,
       valg: tolkning.sted.valg.map((s) => ({ nummer: s.number, navn: s.name, fylke: s.county })),
     };
@@ -61,7 +68,7 @@ export async function byggVisning(
     try {
       area = await hentOmradeFn(tolkning.sted.sted);
     } catch {
-      return { status: "feil", dataset: info(hoved), melding: `Kunne ikke hente grensen for ${tolkning.sted.sted.name} fra Kartverket akkurat nå.` };
+      return { status: "feil", dataset: datasettInfo(hoved), melding: `Kunne ikke hente grensen for ${tolkning.sted.sted.name} fra Kartverket akkurat nå.` };
     }
   } else if (utsnitt) {
     const { bredde, hoyde } = utsnittKm(utsnitt);
@@ -71,7 +78,7 @@ export async function byggVisning(
     }
   }
 
-  if (hoved.needsArea && !area) return { status: "trenger_omrade", dataset: info(hoved), utsnitt, maksKm: MAKS_UTSNITT_KM };
+  if (hoved.needsArea && !area) return { status: "trenger_omrade", dataset: datasettInfo(hoved), utsnitt, maksKm: MAKS_UTSNITT_KM };
 
   // Lenkene som legger til, fjerner og bytter lag. Bygges her, så komponenten ikke må kjenne URL-reglene.
   // Stedet skrives slik registeret gjør det («Bærum»), så søkefeltet ikke får små bokstaver.
@@ -80,7 +87,7 @@ export async function byggVisning(
     const [første, andre] = ids.map((id) => datasetMedId(id)!);
     if (!første) return "/admin/research/utforsk";
     return utforskHref({
-      q: [første.label.toLowerCase(), sted].filter(Boolean).join(" "),
+      q: [sokeord(første), sted].filter(Boolean).join(" "),
       kommune,
       utsnitt: input.utsnitt,
       lag: andre?.id,
@@ -101,7 +108,11 @@ export async function byggVisning(
     aktive.map(async (d): Promise<Lagvisning> => {
       const fjernHref = href(aktive.filter((x) => x.id !== d.id).map((x) => x.id));
       if (d.needsArea && !area) {
-        return { dataset: info(d), features: [], total: 0, feil: null, trengerOmrade: true, fjernHref };
+        return { dataset: datasettInfo(d), features: [], total: 0, feil: null, trengerOmrade: true, fjernHref };
+      }
+      // Et sted utenfor dekningsområdet er ikke «ingen treff»: dataene finnes ikke der.
+      if (area && d.coverage && !overlapper(area.box, d.coverage.box)) {
+        return { dataset: datasettInfo(d), features: [], total: 0, feil: null, trengerOmrade: false, fjernHref, utenforDekning: `${d.label} dekker foreløpig bare ${d.coverage.label}.` };
       }
       try {
         // Hovedlaget i «Finn overlapp» leses filtrert, i databasen. Referanselaget leses som
@@ -111,7 +122,7 @@ export async function byggVisning(
         const r = filtrert ?? (await d.load(client, area));
         const dempet = analyserer && d.id !== hoved.id;
         return {
-          dataset: info(d),
+          dataset: datasettInfo(d),
           features: r.features.map((f) => ({ ...f, datasetId: d.id, datasetLabel: d.label, ...(dempet ? { muted: true } : {}) })),
           total: r.total,
           feil: r.error,
@@ -120,7 +131,7 @@ export async function byggVisning(
           ...(dempet ? { kontekst: true } : {}),
         };
       } catch (error) {
-        return { dataset: info(d), features: [], total: 0, feil: error instanceof Error ? error.message : "ukjent feil", trengerOmrade: false, fjernHref };
+        return { dataset: datasettInfo(d), features: [], total: 0, feil: error instanceof Error ? error.message : "ukjent feil", trengerOmrade: false, fjernHref };
       }
     }),
   );
@@ -178,7 +189,7 @@ export async function byggVisning(
     lag,
     // Bare når det er plass til et lag til.
     leggTil: aktive.length < MAX_LAG ? EXPLORE_DATASETS.filter((d) => d.id !== hoved.id).map((d) => ({ id: d.id, label: d.label, href: href([hoved.id, d.id]) })) : [],
-    utsnittHref: utforskHref({ q: hoved.label.toLowerCase(), lag: aktive[1]?.id, analyse: analyserer ? OVERLAPP : undefined, utsnitt: "__UTSNITT__" }),
+    utsnittHref: utforskHref({ q: sokeord(hoved), lag: aktive[1]?.id, analyse: analyserer ? OVERLAPP : undefined, utsnitt: "__UTSNITT__" }),
     maksKm: MAKS_UTSNITT_KM,
   };
 }

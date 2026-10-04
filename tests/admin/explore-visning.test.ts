@@ -50,7 +50,7 @@ describe("byggVisning", () => {
     if (v.status !== "treff") throw new Error(v.status);
     expect(v.lag.map((l) => l.dataset.id)).toEqual(["plansaker"]);
     expect(v.lag[0]!.features[0]).toMatchObject({ datasetId: "plansaker", datasetLabel: "Plansaker", place: "Bærum" });
-    expect(v.leggTil.map((l) => l.id)).toEqual(["kvikkleire", "kraftnett", "forurenset-grunn", "datasenter"]);
+    expect(v.leggTil.map((l) => l.id)).toEqual(["kvikkleire", "kraftnett", "forurenset-grunn", "datasenter", "multefunn", "myr"]);
     expect(v.leggTil[0]!.href).toBe("/admin/research/utforsk?q=plansaker+B%C3%A6rum&lag=kvikkleire");
     expect(kall.map((k) => k.fn)).toEqual(["explore_events"]);
     expect(kall[0]!.args).toMatchObject({ p_min_lng: 10.4, p_max_lat: 60.0, p_area: flate });
@@ -207,6 +207,49 @@ describe("byggVisning", () => {
       if (v.status !== "treff") throw new Error(v.status);
       expect(v.lag[0]).toMatchObject({ feil: "statement timeout" });
       expect(v.analyse!.resultat).toBeNull();
+    });
+  });
+
+  describe("multefunn og myr", () => {
+    const utenfor = vi.fn(async (sted: { kind: "kommune" | "fylke"; name: string; county: string }): Promise<ExploreArea> => ({
+      kind: sted.kind, name: sted.name, county: sted.county, box: { minLng: 5.1, minLat: 60.2, maxLng: 5.7, maxLat: 60.6 }, polygon: null,
+    }));
+    const funn = { id: "f1", external_id: "1", title: "Multe", subtype: "multefunn", attributes: { aar: 2024, maaned: 7, presisjonM: 10, lisens: "CC BY 4.0" }, source_url: null, source_updated_at: null, geometry: { type: "Point", coordinates: [10.5, 59.9] }, center: { type: "Point", coordinates: [10.5, 59.9] }, total: 1 };
+    const myr = { ...funn, id: "m1", subtype: "myr", title: "Myr", attributes: { municipality_number: "3201" }, geometry: plansak.geometry, area_m2: 12000, finds_500: 1, nearest_m: 0, nearest_id: "f1", nearest_year: 2024 };
+
+    it("multer + myr: funnene er punkter, myrene flater med funn i nærheten — begge fra hver sin lesefunksjon", async () => {
+      const { client, kall } = klient({ "explore_area_features:gbif-multefunn-oslomarka": [funn], explore_mires: [myr] });
+      const v = await byggVisning(client, { q: "multer Bærum", lag: "myr" }, omrade as never);
+      if (v.status !== "treff") throw new Error(v.status);
+      expect(v.lag.map((l) => [l.dataset.id, l.features[0]?.style])).toEqual([["multefunn", "multefunn"], ["myr", "myr"]]);
+      expect(v.lag[1]!.features[0]!.analysis!.items[0]!.id).toBe("f1");
+      expect(kall.map((k) => k.fn).sort()).toEqual(["explore_area_features", "explore_mires"]);
+      // Ingen analyse mellom disse to: myrpanelet har tallene selv.
+      expect(v.analyse).toMatchObject({ stottet: false });
+    });
+
+    it("«multefunn» uten sted viser hele dekningsområdet, ikke hele landet", async () => {
+      const { client, kall } = klient({ "explore_area_features:gbif-multefunn-oslomarka": [funn] });
+      const v = await byggVisning(client, { q: "multefunn" }, omrade as never);
+      expect(v.status === "treff" && v.lag[0]!.features.length).toBe(1);
+      expect(kall[0]!.args).toMatchObject({ p_min_lng: 10.3, p_min_lat: 59.78, p_max_lng: 11.1, p_max_lat: 60.3, p_area: null });
+      // Overskriften sier «Oslo og Marka», ikke «hele landet».
+      expect(v.status === "treff" && v.lag[0]!.dataset.dekning).toBe("Oslo og Marka");
+    });
+
+    it("sted utenfor dekningen: sier det, og leser ingenting", async () => {
+      const { client, kall } = klient();
+      for (const q of ["multer Bergen", "myr Bergen"]) {
+        const v = await byggVisning(client, { q }, utenfor as never);
+        if (v.status !== "treff") throw new Error(v.status);
+        expect(v.lag[0]).toMatchObject({ features: [], total: 0, utenforDekning: expect.stringContaining("dekker foreløpig bare Oslo og Marka") });
+      }
+      expect(kall).toEqual([]);
+    });
+
+    it("myr uten sted ber om område", async () => {
+      const { client } = klient();
+      expect((await byggVisning(client, { q: "myr" }, omrade as never)).status).toBe("trenger_omrade");
     });
   });
 });

@@ -46,7 +46,7 @@ async function main() {
   // funksjon er det som faktisk stenger, ikke grantet. Anon skal aldri ha noen av dem.
   // explore_area_features og explore_events er lesefunksjonene bak Utforsk data: samme regel, og
   // alltid avgrenset.
-  const RESEARCH = ["research_items", "research_sources", "research_near", "save_research_item", "add_research_source", "delete_research_source", "research_runs", "research_map", "explore_area_features", "explore_events", "explore_events_overlap"];
+  const RESEARCH = ["research_items", "research_sources", "research_near", "save_research_item", "add_research_source", "delete_research_source", "research_runs", "research_map", "explore_area_features", "explore_events", "explore_events_overlap", "explore_mires"];
   // Review-laget. record_research_review_unchecked står med vilje *ikke* her: den er kjernen som
   // bare eieren skal kunne kalle, og skal derfor ikke ha grant til authenticated heller.
   const REVIEW = ["research_review_queue", "research_review_metrics", "research_reviews", "research_review_status", "research_review_interval", "record_research_review", "set_research_review_plan"];

@@ -3,6 +3,8 @@ import { datasenterDataset } from "./datasenter";
 import { forurensetGrunnDataset } from "./forurenset-grunn";
 import { kraftnettDataset } from "./kraftnett";
 import { kvikkleireDataset } from "./kvikkleire";
+import { multefunnDataset } from "./multefunn";
+import { myrDataset } from "./myr";
 import { plansakerDataset } from "./plansaker";
 import type { ExploreDataset } from "./types";
 
@@ -24,6 +26,9 @@ export const EXPLORE_DATASETS: readonly ExploreDataset[] = [
   kraftnettDataset,
   forurensetGrunnDataset,
   datasenterDataset,
+  // Interne researchlag, bare Oslo og Marka. Se lib/multe og docs/research/multer-oslo.md.
+  multefunnDataset,
+  myrDataset,
 ];
 
 /** Høyst så mange datasett vises samtidig. Kontrollert research, ikke et GIS. */

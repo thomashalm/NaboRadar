@@ -28,6 +28,8 @@ export const AREA_CATEGORIES = [
   // Kildeposter for hytter og koier. Aldri publisert og aldri vist: de er råstoffet til den
   // kanoniske tabellen `huts`, som har sine egne lesefunksjoner. Se lib/huts.
   "hytte_kilde",
+  // Internt researchlag i admin: registrerte multefunn og myr. Aldri publisert. Se lib/multe.
+  "natur_intern",
 ] as const;
 export type AreaCategory = (typeof AREA_CATEGORIES)[number];
 

@@ -279,3 +279,96 @@ describe("explore_events_overlap", { timeout: 60_000 }, () => {
     expect(await som("annen@example.com", sql)).toEqual([]);
   });
 });
+
+/**
+ * explore_mires: myrflater med registrerte multefunn i nærheten. Internt researchlag.
+ */
+describe("explore_mires", { timeout: 60_000 }, () => {
+  let db: Db;
+  type Rad = { external_id: string; area_m2: number; finds_500: number; nearest_m: number | null; nearest_year: number | null; total: string; geometry: { type: string } };
+  const som = async (email: string | null, sql: string) => {
+    await db.pg.exec("begin");
+    try {
+      await db.pg.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify(email ? { role: "authenticated", email } : { role: "anon" })]);
+      await db.pg.exec(`set local role ${email ? "authenticated" : "anon"}`);
+      return (await db.pg.query<Rad>(sql)).rows;
+    } catch {
+      return "NEKTET" as const;
+    } finally {
+      await db.pg.exec("rollback");
+    }
+  };
+  const BOKS = "10.5, 59.8, 11.0, 60.2";
+  const felles = { category: "natur_intern", attributes: {}, source_url: null, source_url_type: null, source_updated_at: null };
+  // 0,002° bredde ≈ 111 m, 0,002° lengde ≈ 111 m × cos 60° ≈ 56 m.
+  const myr = (id: string, lng: number, lat: number, s = 0.002) => ({ ...felles, external_id: id, content_hash: id, subtype: "myr", title: "Myr", geometry: { type: "Polygon", coordinates: [[[lng, lat], [lng + s, lat], [lng + s, lat + s], [lng, lat + s], [lng, lat]]] } });
+  const funn = (id: string, lng: number, lat: number, aar: number) => ({ ...felles, external_id: id, content_hash: id, subtype: "multefunn", title: "Multe", attributes: { aar }, geometry: { type: "Point", coordinates: [lng, lat] } });
+
+  beforeAll(async () => {
+    db = await createPgliteDb();
+    await db.pg.exec(`insert into admin_users (email) values ('drift@example.com') on conflict do nothing`);
+    const synk = { p_synced_at: new Date().toISOString() };
+    const m = await db.rpc("upsert_area_features", {
+      ...synk,
+      p_provider_id: "kartverket-n50-myr-oslomarka",
+      p_features: [myr("med-funn", 10.7, 60.0, 0.004), myr("naer-funn", 10.72, 60.0), myr("langt-unna", 10.9, 60.1), myr("bergen", 5.3, 60.39)],
+    });
+    const f = await db.rpc("upsert_area_features", {
+      ...synk,
+      p_provider_id: "gbif-multefunn-oslomarka",
+      p_features: [
+        funn("paa-myra", 10.701, 60.001, 2024),
+        funn("200m-nord", 10.701, 60.0058, 2019),
+        // Ca. 1 km øst for «naer-funn» (0,018° lengde ≈ 1 000 m).
+        funn("1km-ost", 10.74, 60.001, 2010),
+      ],
+    });
+    expect(JSON.stringify([m, f])).not.toMatch(/"failed":[1-9]/);
+  });
+
+  it("gir areal, antall funn innen 500 m og avstand til nærmeste funn", async () => {
+    const rader = await som("drift@example.com", `select * from explore_mires(${BOKS})`);
+    if (rader === "NEKTET") throw new Error("nektet");
+    // Størst først.
+    expect(rader.map((r) => r.external_id)).toEqual(["med-funn", "naer-funn", "langt-unna"]);
+    expect(Number(rader[0]!.total)).toBe(3);
+    const [med, naer, langt] = rader;
+
+    // Funnet ligger på myra: avstand 0. Det andre ligger ca. 200 m nord for kanten.
+    expect(med!.finds_500).toBe(2);
+    expect(med!.nearest_m).toBe(0);
+    expect(med!.nearest_year).toBe(2024);
+    expect(med!.area_m2).toBeGreaterThan(80_000);
+    expect(med!.area_m2).toBeLessThan(120_000);
+
+    // Ingen innen 500 m, men ett innen 2 km: avstanden oppgis.
+    expect(naer!.finds_500).toBe(0);
+    expect(naer!.nearest_m).toBeGreaterThan(800);
+    expect(naer!.nearest_m).toBeLessThan(1200);
+
+    // Lenger unna enn 2 km: ingen avstand, ikke et stort tall.
+    expect([langt!.finds_500, langt!.nearest_m, langt!.nearest_year]).toEqual([0, null, null]);
+    expect(med!.geometry.type).toMatch(/Polygon$/);
+  });
+
+  it("flaten og taket avgrenser", async () => {
+    const vest = `'{"type":"Polygon","coordinates":[[[10.6,59.9],[10.75,59.9],[10.75,60.05],[10.6,60.05],[10.6,59.9]]]}'::jsonb`;
+    const i = await som("drift@example.com", `select * from explore_mires(${BOKS}, ${vest})`);
+    expect(i === "NEKTET" ? i : i.map((r) => r.external_id)).toEqual(["med-funn", "naer-funn"]);
+    const kuttet = await som("drift@example.com", `select * from explore_mires(${BOKS}, null, 1)`);
+    expect(kuttet === "NEKTET" ? kuttet : [kuttet.length, Number(kuttet[0]!.total)]).toEqual([1, 3]);
+  });
+
+  it("bare admin: anon nektes, og innlogget ikke-admin får ingen rader", async () => {
+    expect(await som(null, `select * from explore_mires(${BOKS})`)).toBe("NEKTET");
+    expect(await som("annen@example.com", `select * from explore_mires(${BOKS})`)).toEqual([]);
+    expect(await som("annen@example.com", `select * from explore_area_features('gbif-multefunn-oslomarka', ${BOKS})`)).toEqual([]);
+  });
+
+  it("kategorien er upublisert: de offentlige lesefunksjonene gir verken funn eller myr", async () => {
+    const offentlig = await db.pg.query<{ n: number }>(`select count(*)::int as n from features_near(60.001, 10.701, 5000)`);
+    expect(offentlig.rows[0]!.n).toBe(0);
+    const reg = await db.pg.query<{ is_public: boolean }>(`select is_public from area_feature_categories where category = 'natur_intern'`);
+    expect(reg.rows).toEqual([{ is_public: false }]);
+  });
+});

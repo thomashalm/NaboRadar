@@ -421,7 +421,7 @@ finnes ingen anonym skrivevei.
 |---|---|
 | `/admin/adresse` | Hva finnes rundt denne adressen? Offentlig resultat pluss intern research |
 | `/admin/research` | Hva vet vi om dette funnet? Oversikt, søk, redigering, kilder og kildestatus |
-| `/admin/research/utforsk` | Hva finnes i dette datasettet, her? Kart først: plansaker, kvikkleire, kraftnett, forurenset grunn og datasentre, høyst to lag samtidig |
+| `/admin/research/utforsk` | Hva finnes i dette datasettet, her? Kart først: plansaker, kvikkleire, kraftnett, forurenset grunn, datasentre, og internt multefunn og myr. Høyst to lag samtidig |
 | `/admin/kart` | Hvor i landet finnes denne typen funn? Nasjonal geografisk utforskning |
 
 ### `/admin/kart` — research-kartet
@@ -2788,6 +2788,8 @@ kjenner, utelates.
 | Kraftnett | `kraftnett`, `kraftlinje(r)`, `kraftledning(er)`, `høyspent`, `høyspentlinje(r)`, `transformatorstasjon(er)`, `trafostasjon(er)`, `nettanlegg` | `area_features`, `nve-nettanlegg` (4 115 ledninger, 1 541 stasjoner), via `explore_area_features` | linjer og punkter | krever område |
 | Forurenset grunn | `forurenset grunn`, `forurensning`, `grunnforurensning`, `forurenset`, `forurensede lokaliteter` | `area_features`, `mdir-forurenset-grunn` (15 974), via `explore_area_features` | flater | krever område |
 | Datasenter | `datasenter`, `datasentre`, `datacenter`, `data center` m.fl. | research-funn med underkategori «Datasenter», via `research_map` | punkter | hele landet |
+| Multe: registrerte funn | `multer`, `multe`, `multefunn`, `registrerte multefunn`, `multebær`, `molte(r)` | `area_features`, `gbif-multefunn-oslomarka` (508 punkter), via `explore_area_features` | punkter | hele dekningsområdet (Oslo og Marka) |
+| Myr | `myr`, `myrer`, `myrflate(r)`, `myrområder` | `area_features`, `kartverket-n50-myr-oslomarka` (7 354 flater), via `explore_mires` | flater | krever område |
 
 «Krever område» betyr kommune, fylke eller et kartutsnitt under 80 km.
 
@@ -2801,6 +2803,8 @@ feltet er der for at ingen skal bygge en offentlig visning uten å ha sett beslu
 | Kraftnett | vurderes | ja |
 | Forurenset grunn | **nei** | **nei** |
 | Datasenter | nei | egen beslutning |
+| Multe: registrerte funn | **nei** | **nei** |
+| Myr | **nei** | **nei** |
 
 Forurenset grunn er og blir internt: ikke på `/omrade`, ikke i noe offentlig kart, og ikke
 gjennom noen offentlig RPC. Kategorien er upublisert i `area_feature_categories`.
@@ -2876,7 +2880,8 @@ Farger: plansaker blå, kvikkleire oransje (grønn for «utredet uten fare»), f
 blågrønn, kraftnett lilla, datasentre mørk grå. Flatene har lavt fyll og tydelig kant, så to
 flatelag kan leses oppå hverandre. Ledninger har en usynlig, bredere treffsone.
 
-**Nytt datasett:** skriv en `ExploreDataset` med `policy`, legg den i listen i `registry.ts`, og
+**Nytt datasett:** skriv en `ExploreDataset` med `policy` (og `coverage` hvis det ikke er
+landsdekkende, `queryWord` hvis navnet ikke er et søkeord), legg den i listen i `registry.ts`, og
 gi objekttypen en farge i kartlaget. Ligger dataene i `area_features`, kan `load` bruke
 `hentAreaFeatures` (`lib/admin/explore/area-features.ts`). Ligger de i en egen tabell, trengs en
 egen avgrenset admin-RPC etter mønsteret i `explore_events` — og den må inn i `RESEARCH`-listen
@@ -2897,6 +2902,36 @@ viser type, navn, spenning, nettnivå, eier og kommune.
 egne kategorier (påvirkningsgrad, oppfølging, tilstandsklasse, arealbruk) med de samme tekstene
 som resten av løsningen, og gjør dem ikke sterkere. En registrering gjelder lokaliteten slik den
 er avgrenset, ikke hele eiendommen. Panelet sier at datasettet er internt.
+
+**Multefunn og myr (internt researchlag, bare Oslo og Marka).** To datasett for personlig
+research: hvor er multe registrert, og hvor ligger myrene. **Ingen score og ingen sannsynlighet**
+— researchen ([multer-oslo.md](research/multer-oslo.md)) viste at en habitatmodell i praksis ble
+et myrkart, så vi lagrer dataene og lar kartet vise dem. Aldri offentlig: kategorien
+`natur_intern` er upublisert, og dataene leses bare gjennom admin-funksjonene.
+
+- *Multe: registrerte funn* — GBIF (Artsobservasjoner m.fl.), fra 2000, presisjon ≤ 100 m, CC BY
+  4.0 eller CC0, artsbestemt av et menneske (ikke Pl@ntNet), én per 100 m-rute (den nyeste).
+  Observatør og stedsbeskrivelse lagres ikke. Panelet viser dato, år, presisjon, datasett,
+  lisens og lenke til GBIF, og sier: «Registrert observasjon – sier ikke noe sikkert om forekomst
+  i dag.» Et funn som er ti år eller eldre, får i tillegg at det sier lite om hva som står der nå.
+- *Myr* — flater fra Kartverkets N50 (CC BY 4.0), 1:50 000. Små myrer mangler. FKB-AR5 er ikke
+  åpne data og brukes ikke. Panelet viser areal og kommune, og en egen blokk «Registrerte
+  multefunn i nærheten»: antall funn innen 500 m, og avstanden til det nærmeste hvis det ligger
+  innen 2 km («på myra», «i myrkanten» under 10 m, ellers avrundet til ti meter). Det nærmeste
+  funnet kan åpnes fra panelet når funnlaget er aktivt. Blokken sier at dette er
+  observasjonskontekst, ikke en sannsynlighet: en myr uten funn kan være en myr ingen har
+  registrert noe på.
+- Avstanden regnes i databasen (`explore_mires`), fra myrflaten til punktet, i UTM 33. Avviket fra
+  ellipsoiden er ca. 0,03 % ved Oslo. Arealet regnes på ellipsoiden.
+- **Dekning.** Datasettene har `coverage` i registeret. Et søk utenfor («multer Bergen») sier
+  «dekker foreløpig bare Oslo og Marka» og leser ingenting — det er ikke «ingen treff».
+  Boksen er 59,78–60,30° N, 10,30–11,10° Ø (`lib/multe/omrade.ts`).
+- **Import.** Kildene ligger i `lib/providers/gbif/multefunn.ts` og
+  `lib/providers/kartverket/n50-myr.ts`, og har ingen tidsplan. Oppdater for hånd:
+  `npm run sync:area -- --provider=gbif-multefunn-oslomarka` og
+  `npm run sync:area -- --provider=kartverket-n50-myr-oslomarka`. Utvalget er deterministisk.
+- Målt 2026-10-04: myr i Oslo (1 130 flater) 0,45 s, Nittedal 0,35 s, hele Akershus (1 500 av
+  5 246) 1,6 s. Funn: under 0,1 s. Siden sender 1,5 MB for myr i Oslo.
 
 **Kvikkleire.** Datasettet er NVEs *kartlagte* kvikkleiresoner, med status (mulig, påvist,
 utredet uten fare), risikoklasse og faregrad slik kilden har dem. *Aktsomhetsområdene* er et
@@ -2937,7 +2972,7 @@ objekt har ferdige panelrader: forurenset grunn i Oslo er 2,4 MB. Det er det tyn
 finnes i dag, og grunnen til at taket står på 1 500.
 
 **Bare admin.** Siden sjekker sesjonen. `explore_area_features`, `explore_events`,
-`explore_events_overlap` og `research_map` gir bare rader når `is_admin()` er sann, anon har ikke EXECUTE, og
+`explore_events_overlap`, `explore_mires` og `research_map` gir bare rader når `is_admin()` er sann, anon har ikke EXECUTE, og
 aktsomhetssjekken er en server action som sjekker sesjonen selv. Ingen nye offentlige ruter
 eller API-er. `npm run db:verify` kontrollerer rettighetene.
 

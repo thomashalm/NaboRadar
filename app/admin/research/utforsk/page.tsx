@@ -44,6 +44,6 @@ export default async function UtforskDataPage({ searchParams }: { searchParams: 
     lag: første(params.lag),
     analyse: første(params.analyse),
   });
-  const forslag = EXPLORE_DATASETS.map((d) => ({ id: d.id, label: d.label, description: d.description }));
+  const forslag = EXPLORE_DATASETS.map((d) => ({ id: d.id, label: d.label, sok: d.queryWord ?? d.label.toLowerCase(), description: d.description }));
   return <Datautforsker q={q} tiles={getMapTileConfig()} forslag={forslag} visning={visning} />;
 }

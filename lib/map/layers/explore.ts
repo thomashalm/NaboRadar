@@ -20,6 +20,9 @@ export const EXPLORE_COLOR: Record<ExploreStyle, string> = {
   kraftledning: "#7c3aed",
   transformatorstasjon: "#7c3aed",
   datasenter: "#334155",
+  // Multefunn og myr vises sammen: varme punkter mot kjølige flater.
+  multefunn: "#ea580c",
+  myr: "#0891b2",
 };
 
 const SOURCE = "explore";

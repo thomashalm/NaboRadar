@@ -17,7 +17,9 @@ export type ExploreStyle =
   | "plansak"
   | "kraftledning"
   | "transformatorstasjon"
-  | "forurenset_grunn";
+  | "forurenset_grunn"
+  | "multefunn"
+  | "myr";
 
 export interface ExploreFeature {
   id: string;
@@ -59,6 +61,8 @@ export interface ExploreFeature {
  * ikke noe kilden til objektet sier, og panelet viser det i en egen, merket blokk.
  */
 export interface ExploreAnalysis {
+  /** Merkelappen over blokken. Standard: «NaboRadars romlige analyse». */
+  label?: string;
   /** «Overlapper kvikkleire». */
   heading: string;
   /** Setninger om hva som ble funnet: «Planområdet overlapper 2 kartlagte kvikkleiresoner.» */
@@ -67,6 +71,8 @@ export interface ExploreAnalysis {
   items: { id: string; title: string; lines: string[] }[];
   /** Hvor mange flere som ble truffet enn dem som er listet. */
   more: number;
+  /** Forbeholdet under blokken. Standard gjelder plansaker. */
+  note?: string;
 }
 
 export interface LngLatBox {
@@ -121,6 +127,11 @@ export interface ExploreDataset {
   label: string;
   /** «områder», «datasentre» — til tellingen. */
   unit: { one: string; many: string };
+  /**
+   * Ordet siden selv skriver i søkefeltet for datasettet (lenkene som legger til og bytter lag).
+   * Standard er navnet i små bokstaver; settes når navnet ikke er et søkeord.
+   */
+  queryWord?: string;
   /** Ord som velger datasettet, i små bokstaver. Eksplisitt liste, ingen tolkning. */
   aliases: readonly string[];
   /**
@@ -143,6 +154,11 @@ export interface ExploreDataset {
     refs: Record<string, OverlapTexts>;
     load(client: SupabaseClient, area: ExploreArea, refId: string): Promise<OverlapResult>;
   };
+  /**
+   * Området datasettet finnes for, når det ikke er hele landet. Et søk utenfor sier det, i stedet
+   * for å vise «ingen treff» som om dataene var sjekket.
+   */
+  coverage?: { label: string; box: LngLatBox };
   /** Om et trykk i kartet uten objekt skal sjekke punktet mot en ekstern kilde. */
   pointCheck?: "kvikkleire_aktsomhet";
   load(client: SupabaseClient, area: ExploreArea | null): Promise<ExploreResult>;

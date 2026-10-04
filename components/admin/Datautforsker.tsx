@@ -18,6 +18,10 @@ import { bindLayer } from "@/lib/map/layers/types";
 export interface DatasettInfo {
   id: string;
   label: string;
+  /** Ordet som velger datasettet i et søk siden bygger selv. */
+  sok: string;
+  /** Området datasettet finnes for, når det ikke er hele landet. */
+  dekning: string | null;
   description: string;
   unit: { one: string; many: string };
   needsArea: boolean;
@@ -37,6 +41,8 @@ export interface Lagvisning {
   fjernHref: string;
   /** Referanselaget i «Finn overlapp»: vises i kartet, men har ingen egen resultatliste. */
   kontekst?: boolean;
+  /** Søkestedet ligger utenfor området datasettet finnes for. Ikke det samme som «ingen treff». */
+  utenforDekning?: string;
 }
 
 /** «Vis sammen» eller «Finn overlapp», når to lag er aktive. */
@@ -103,7 +109,7 @@ export function Datautforsker({
 }: {
   q: string;
   tiles: MapTileConfig;
-  forslag: { id: string; label: string; description: string }[];
+  forslag: { id: string; label: string; sok: string; description: string }[];
   visning: UtforskVisning;
 }) {
   const router = useRouter();
@@ -214,7 +220,7 @@ export function Datautforsker({
     const hoved = datasett[0];
     if (!utsnitt || !hoved) return;
     const verdi = [utsnitt[0][0], utsnitt[0][1], utsnitt[1][0], utsnitt[1][1]].map((n) => n.toFixed(4)).join(",");
-    const mal = visning.status === "treff" ? visning.utsnittHref : utforskHref({ q: hoved.label.toLowerCase(), utsnitt: "__UTSNITT__" });
+    const mal = visning.status === "treff" ? visning.utsnittHref : utforskHref({ q: hoved.sok, utsnitt: "__UTSNITT__" });
     startTransition(() => router.replace(mal.replace("__UTSNITT__", encodeURIComponent(verdi)), { scroll: false }));
   };
 
@@ -418,6 +424,8 @@ const LAGFARGE: Record<string, keyof typeof EXPLORE_COLOR> = {
   kraftnett: "kraftledning",
   "forurenset-grunn": "forurenset_grunn",
   datasenter: "datasenter",
+  multefunn: "multefunn",
+  myr: "myr",
 };
 const farge = (lag: Lagvisning) => EXPLORE_COLOR[lag.features[0]?.style ?? LAGFARGE[lag.dataset.id] ?? "datasenter"];
 
@@ -447,6 +455,7 @@ function Lagliste({
         </h3>
       )}
       {lag.feil && <p className="mt-2 rounded-xl bg-danger-soft px-3 py-2 text-[14px] text-danger">Kunne ikke hente {dataset.label.toLowerCase()}: {lag.feil}</p>}
+      {lag.utenforDekning && visOverskrift && <p className="mt-2 rounded-xl border border-dashed border-line-strong px-3 py-2 text-[14px] text-ink">{lag.utenforDekning}</p>}
       {lag.trengerOmrade && (
         <p className="mt-2 rounded-xl border border-dashed border-line-strong px-3 py-2 text-[14px] text-ink">
           {dataset.label} er for stort til å vises for hele landet. Legg til et sted i søket, eller zoom inn og søk i kartutsnittet.
@@ -492,7 +501,9 @@ function Lagliste({
 
 /** Antallet i laget. Et lag som ikke er lest, har ikke «0» — det har ikke noe tall. */
 const tellTekst = (lag: Lagvisning) =>
-  lag.feil
+  lag.utenforDekning
+    ? `${lag.dataset.unit.many} ikke dekket her`
+    : lag.feil
     ? `${lag.dataset.unit.many} ikke hentet`
     : lag.trengerOmrade
       ? `${lag.dataset.unit.many} ikke vist`
@@ -527,12 +538,12 @@ function Velgpanel({ features, velg, lukk }: { features: ExploreFeature[]; velg:
 }
 
 /** Datasettene det går an å søke i, som lenker. */
-function Forslagsliste({ forslag }: { forslag: { id: string; label: string; description: string }[] }) {
+function Forslagsliste({ forslag }: { forslag: { id: string; label: string; sok: string; description: string }[] }) {
   return (
     <ul className="mt-3 space-y-2">
       {forslag.map((d) => (
         <li key={d.id}>
-          <Link href={`/admin/research/utforsk?q=${encodeURIComponent(d.label.toLowerCase())}`} className="text-[15px] font-medium text-accent hover:underline">
+          <Link href={utforskHref({ q: d.sok })} className="text-[15px] font-medium text-accent hover:underline">
             {d.label}
           </Link>
           <span className="block text-[13px] text-muted">{d.description}</span>
@@ -543,7 +554,7 @@ function Forslagsliste({ forslag }: { forslag: { id: string; label: string; desc
 }
 
 /** Overskrift, telling og meldinger over listen. */
-function Status({ visning, forslag }: { visning: UtforskVisning; forslag: { id: string; label: string; description: string }[] }) {
+function Status({ visning, forslag }: { visning: UtforskVisning; forslag: { id: string; label: string; sok: string; description: string }[] }) {
   switch (visning.status) {
     case "tom":
       return (
@@ -574,7 +585,7 @@ function Status({ visning, forslag }: { visning: UtforskVisning; forslag: { id: 
             {visning.valg.map((v) => (
               <li key={v.nummer}>
                 <Link
-                  href={`/admin/research/utforsk?${new URLSearchParams({ q: `${visning.dataset.label.toLowerCase()} ${v.navn}`, kommune: v.nummer })}`}
+                  href={`/admin/research/utforsk?${new URLSearchParams({ q: `${visning.dataset.sok} ${v.navn}`, kommune: v.nummer })}`}
                   className="text-[15px] font-medium text-accent hover:underline"
                 >
                   {v.navn}, {v.fylke}
@@ -603,7 +614,7 @@ function Status({ visning, forslag }: { visning: UtforskVisning; forslag: { id: 
       return (
         <div>
           <h2 className="text-[17px] font-medium text-ink">
-            {[visning.analyse?.resultat?.tittel ?? visning.lag.map((l) => l.dataset.label).join(" + "), sted ?? "hele landet"].join(" · ")}
+            {[visning.analyse?.resultat?.tittel ?? visning.lag.map((l) => l.dataset.label).join(" + "), sted ?? hoved.dataset.dekning ?? "hele landet"].join(" · ")}
           </h2>
           {visning.analyse?.resultat ? (
             <>
@@ -612,7 +623,7 @@ function Status({ visning, forslag }: { visning: UtforskVisning; forslag: { id: 
             </>
           ) : visning.lag.length === 1 ? (
             <p className="mt-0.5 text-[15px] text-ink">
-              {hoved.feil ? "" : hoved.total === 0 ? `Ingen ${hoved.dataset.unit.many} ${sted ? `i ${sted}` : "registrert"}.` : tellTekst(hoved)}
+              {hoved.feil ? "" : hoved.utenforDekning ? hoved.utenforDekning : hoved.total === 0 ? `Ingen ${hoved.dataset.unit.many} ${sted ? `i ${sted}` : "registrert"}.` : tellTekst(hoved)}
             </p>
           ) : (
             <p className="mt-0.5 text-[15px] text-ink">{visning.lag.map((l) => `${tellTekst(l)}`).join(" · ")}</p>
@@ -688,7 +699,7 @@ function Detaljpanel({ feature, lukk, velg, finnes }: { feature: ExploreFeature;
 function Analyseblokk({ analyse, velg, finnes }: { analyse: ExploreAnalysis; velg: (id: string) => void; finnes: (id: string) => boolean }) {
   return (
     <section aria-label={analyse.heading} className="mt-4 rounded-xl border border-line bg-canvas px-3 py-3">
-      <p className="text-[11px] font-semibold tracking-[0.06em] text-muted uppercase">NaboRadars romlige analyse</p>
+      <p className="text-[11px] font-semibold tracking-[0.06em] text-muted uppercase">{analyse.label ?? "NaboRadars romlige analyse"}</p>
       <h3 className="mt-0.5 text-[15px] font-medium text-ink">{analyse.heading}</h3>
       {analyse.lines.map((linje) => (
         <p key={linje} className="mt-1 text-[14px] text-ink">
@@ -714,7 +725,7 @@ function Analyseblokk({ analyse, velg, finnes }: { analyse: ExploreAnalysis; vel
         ))}
       </ul>
       {analyse.more > 0 && <p className="text-[13px] text-muted">… og {analyse.more} til.</p>}
-      <p className="mt-2 text-[12px] leading-relaxed text-muted">{ANALYSE_FORBEHOLD}</p>
+      <p className="mt-2 text-[12px] leading-relaxed text-muted">{analyse.note ?? ANALYSE_FORBEHOLD}</p>
     </section>
   );
 }

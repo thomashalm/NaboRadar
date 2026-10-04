@@ -1,6 +1,7 @@
 # Mulig multeterreng i Oslo og Marka
 
-> Research only. Undersøkt 2026-10-04. Ingenting er bygget eller lagret i databasen.
+> Undersøkt 2026-10-04. **Bygget samme dag:** det enkle adminlaget med registrerte funn og myr
+> (se «Hva som ble bygget» nederst). Scoren er ikke bygget.
 > **Anbefaling: ikke bygg en score nå.** Med åpne data vi kan måle på, blir modellen et myrkart
 > med en kantsone rundt. Bygg heller et enkelt adminlag med registrerte funn og myr, og test
 > tre variabler til (åpen/tresatt myr, markfuktighet, kronedekning) før en score vurderes.
@@ -211,3 +212,54 @@ brukerfora. Ingen bærprognose. Ikke lagret AR5-data.
 - LAVDAS på Geonorge.
 - At testen i punkt 3 viser at åpen myr eller markfuktighet rangerer innen myr.
 - AR5 som åpne data.
+
+## Hva som ble bygget (2026-10-04)
+Det enkle laget i anbefalingens punkt 2, i `/admin/research/utforsk`. Ingen score.
+
+**Multe: registrerte funn**
+- Kilde: GBIF (`api.gbif.org/v1/occurrence/search`, taxonKey 2998290), boksen over.
+- Importert: **508 funn.** 486 fra Artsobservasjoner («Norwegian Species Observation Service»),
+  resten fra mindre datasett (Stabbetorp 8, iNaturalist 6, ANO 2, BioDivAbove 2 m.fl.).
+  506 er CC BY 4.0 og 2 er CC0. Hver registrering beholder datasett, lisens og lenke til GBIF.
+- Utvalg: til stede, år 2000+, presisjon ≤ 100 m, CC BY 4.0 eller CC0, ikke Pl@ntNet (automatisk
+  artsbestemt; 9 registreringer utelatt), én per 100 m-rute (nyeste, så lavest GBIF-nøkkel).
+  Av 919 i GBIF ble 411 utelatt. ANO er med her (to punkter); i kalibreringen over var de holdt
+  utenfor.
+- Ikke lagret: observatør, finner, stedsbeskrivelse.
+- Alder: median 2024. 413 av funnene er fra 2020 eller senere, 80 fra 2010–2019, 15 fra 2000–2009.
+
+**Myr**
+- Kilde: Kartverket N50 Kartdata, objekttypen `Myr` i arealdekke, CC BY 4.0. Lest per kommune
+  fra samme arkiv som hyttene (21 kommuner som berører boksen).
+- Importert: **7 354 flater, 49 km².** Median 3,5 dekar. 8 445 flater i de samme kommunene lå
+  utenfor boksen og ble ikke tatt inn. Lagret geometri: 4 MB.
+- AR5 er ikke brukt.
+
+**Nærmeste funn**
+- `explore_mires` gir for hver myr: areal, antall funn innen 500 m, og avstand til nærmeste funn
+  innen 2 km. Avstanden måles fra myrflaten (0 når funnet ligger på myra), i UTM 33.
+- 500 m ble beholdt. Fordeling: 793 myrer (11 %) har et funn innen 250 m, 1 730 (24 %) innen
+  500 m, 3 612 (49 %) innen 1 km. 143 myrer har et funn på selve flaten, og 1 424 har ingen innen
+  2 km.
+
+**Lagring og tilgang**
+- `area_features`, kategori `natur_intern` (upublisert). Bare admin-funksjonene
+  `explore_area_features` og `explore_mires` leser dem. Kontrollert i produksjon: anon nektes,
+  innlogget ikke-admin får 0 rader, og `features_near` gir ingen av dem.
+- Ingen tidsplan. Oppdateres for hånd med `npm run sync:area -- --provider=…`.
+
+**Observasjoner fra dataene (ikke en score)**
+- Flest funn innen 500 m: en myr på 21 dekar på Krokskogen i Ringerike (60,096° N, 10,428° Ø)
+  med 11. Rundt den ligger fire myrer til med 7–9. Det er den tydeligste klyngen: 10 ruter med
+  funn på én kvadratkilometer, 16 registreringer.
+- Myrer uten funn på flaten, men med mange rett ved: i Enebakk, sør i Østmarka (59,80° N,
+  10,99° Ø), ligger myrer på 22, 94 og 13 dekar med 6–8 funn innen 500 m og nærmeste funn
+  135–280 m unna.
+- Andre klynger: Østmarka ved Lørenskog/Rælingen (59,86° N, 10,97° Ø og 59,98° N, 10,95° Ø),
+  Romeriksåsene/Lunner (60,23–60,27° N, 10,61–10,70° Ø) og Nordmarka ved Tryvann–Kobberhaug
+  (60,00° N, 10,66° Ø).
+- Skjevhet: funnene ligger i 85 ruter på 5 × 5 km. De fem tetteste rutene har 127 av 508 funn,
+  og én rute har 42. Det er steder noen har kartlagt grundig (Lokalflora Oslo og Akershus,
+  Florakartlegging i Viken), ikke nødvendigvis steder med mer multe.
+- 45 ruter på 100 m har flere enn ett funn (opptil 4): samme sted registrert flere ganger.
+
