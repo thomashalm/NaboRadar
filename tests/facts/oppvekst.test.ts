@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { describeClusterSummary, describeFact, describeMapLines, OPPVEKST_CAVEAT, OPPVEKST_TYPE_LABEL } from "@/lib/facts/wording";
+import { describeClusterSummary, describeFact, describeMapLines, describePlaceLine, OPPVEKST_CAVEAT, OPPVEKST_TYPE_LABEL } from "@/lib/facts/wording";
 import { UdirBarnehagerProvider } from "@/lib/providers/udir/barnehager";
 import { UdirSkolerProvider } from "@/lib/providers/udir/skoler";
 import type { AreaAttributes } from "@/types/area-feature";
@@ -167,10 +167,20 @@ describe("kort og popup", () => {
   });
 
   it("gir popup-tekst fra samme register", () => {
-    expect(describeMapLines({ subtype: "grunnskole", attributes: { eierforhold: "Offentlig" } })).toEqual([
-      "Grunnskole (Utdanningsdirektoratet)",
-      "Offentlig eierforhold",
-    ]);
+    // Samme betegnelse som i listen, fra samme funksjon.
+    const skoler: [string, Record<string, string | number>, string][] = [
+      ["grunnskole", { eierforhold: "Offentlig", lavesteTrinn: 1, hoyesteTrinn: 7 }, "Barneskole, 1.–7. trinn"],
+      ["grunnskole", { eierforhold: "Offentlig", lavesteTrinn: 8, hoyesteTrinn: 10 }, "Ungdomsskole, 8.–10. trinn"],
+      ["grunnskole", { eierforhold: "Privat", lavesteTrinn: 1, hoyesteTrinn: 10 }, "Barne- og ungdomsskole, 1.–10. trinn"],
+      ["videregaende_skole", { eierforhold: "Offentlig", lavesteTrinn: 11, hoyesteTrinn: 13 }, "Videregående skole, Vg1–Vg3"],
+      ["grunnskole", { eierforhold: "Offentlig" }, "Skole"],
+    ];
+    for (const [subtype, attributes, betegnelse] of skoler) {
+      const linjer = describeMapLines({ subtype, attributes });
+      expect(linjer).toEqual([betegnelse, `${attributes.eierforhold} eierforhold · Utdanningsdirektoratet`]);
+      expect(linjer[0]).toBe(describePlaceLine({ subtype, attributes }));
+    }
+    expect(describeMapLines({ subtype: "grunnskole", attributes: {} })).toEqual(["Skole", "Utdanningsdirektoratet"]);
     expect(describeMapLines({ subtype: "barnehage", attributes: {} })).toEqual(["Barnehage (Utdanningsdirektoratet)"]);
   });
 });

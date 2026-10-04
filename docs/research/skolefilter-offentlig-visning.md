@@ -121,11 +121,21 @@ skolene med type. Regelen står i håndboka.
 | Adresse | Før (på avstand) | Etter |
 |---|---|---|
 | Karl Johans gate 1, 1 km | Otto Treider (vgs, 620 m), Urtehagen (vgs, 680 m), Møllergata (vgs, 760 m) | St Sunniva (1.–10., 860 m), Otto Treider (vgs, 620 m), Urtehagen (vgs, 680 m) |
+| Karl Johans gate 1, 3 km | Otto Treider (vgs, 620 m), Urtehagen (vgs, 680 m), Møllergata (vgs, 760 m) | St Sunniva (1.–10., 860 m), Vahl skole (1.–7., 1,1 km), Gamlebyen skole (1.–7., 1,3 km) |
+| ved Trondheim katedralskole, 1 km | Trondheim katedralskole (vgs, 150 m), Bybroen vgs (180 m), Misjonsskolen (vgs, 250 m) | Birralee (1.–10., 470 m), Adventkirken skole (1.–10., 580 m), Trondheim International School (1.–10., 830 m) |
 | Lom, 3 km | Jotunheimen vgs (150 m), Lom ungdomsskule (160 m), Loar skule (1.–7., 310 m) | Loar skule (310 m), Lom ungdomsskule (160 m), Jotunheimen vgs (150 m) |
 | Langmyrgrenda 26, 1 km | Korsvoll skole (1.–7., 320 m), Nordberg skole (8.–10., 960 m) | uendret |
 | Kirkeveien 64A, 1 km | Majorstuen skole (1.–10., 100 m), Marienlyst (1.–10., 780 m), Kristelig gymnasium grunnskole (8.–10., 980 m) | uendret |
 | ved Kautokeino skole, 1 km | Kautokeino skole (1.–10., 150 m), Samisk vgs (880 m) | uendret; 1.–10.-skolen står én gang |
 | ved Fjellhamar skole, 1 km | Fjellhamar skole (uten trinn, 160 m), Fjellsrud skole (uten trinn, 400 m), Lørenskog vgs (920 m) | uendret; begge merket «Skole» |
+
+Justert samme dag: de ledige plassene fylles med grunnskoler før videregående. Ved Karl Johans
+gate 1 med 1 km endrer det ingenting — St Sunniva er eneste grunnskole innen radius, så
+videregående fyller fortsatt opp. Med 3 km tar grunnskolene alle tre plassene.
+
+Gråsone: ved Fjellhamar skole med 3 km står Luhr skole (1.–7., 1,3 km) og Bråtejordet skole
+(8.–10., 2 km) foran Fjellhamar skole (uten trinn, 160 m). Skolen uten trinn får tredjeplassen,
+men kan ikke ta barne- eller ungdomsplassen, fordi vi ikke vet hvilke trinn den har.
 
 Gråsone: i Lørenskog mangler registeret trinn for flere ekte skoler på rad. Ingen av dem kan
 plasseres som barne- eller ungdomsskole, så de vises som «Skole» i avstandsrekkefølge.

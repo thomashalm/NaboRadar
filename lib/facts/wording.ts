@@ -1245,6 +1245,12 @@ export function describeMapLines(input: { subtype: string; attributes: AreaAttri
       (line): line is string => line !== null,
     );
   }
+  if (subtype === "grunnskole" || subtype === "videregaende_skole") {
+    // Samme betegnelse som i listen og i detaljvisningen (describeSkole). Kilden står på linjen
+    // under, så den lengste betegnelsen ikke brekker popupen.
+    const eier = str(a.eierforhold);
+    return [describeSkole(subtype, a), [eier ? `${eier} eierforhold` : null, "Utdanningsdirektoratet"].filter(Boolean).join(" · ")];
+  }
   if (subtype in OPPVEKST_TYPE_LABEL) {
     const eier = str(a.eierforhold);
     return [`${OPPVEKST_TYPE_LABEL[subtype]} (Utdanningsdirektoratet)`, eier ? `${eier} eierforhold` : null].filter(

@@ -938,20 +938,24 @@ barneskolen lå bak «Se alle». Fra 2026-10-04 velges de tre første slik
 1. nærmeste skole med barnetrinn (1.–7.)
 2. nærmeste skole med ungdomstrinn (8.–10.). Er det samme skole som i 1, står den én gang.
 3. en grunnskole uten registrerte trinn, hvis den ligger nærmere enn skolene i 1 og 2
-4. resten av plassene: de nærmeste skolene som er igjen, uansett type
+4. resten av plassene: de nærmeste grunnskolene som er igjen, også dem uten registrerte trinn
+5. først når det ikke finnes flere grunnskoler innen radius: videregående, på avstand
 
 - Mangler barneskole eller ungdomsskole innen radius, står plassen ikke tom — de neste rykker opp.
-- Videregående kan stå blant de tre første, men aldri foran en barneskole eller ungdomsskole som
-  finnes innen radius. Den er ikke filtrert bort, og står i «Se alle» som før.
+- Videregående kan stå blant de tre første, men aldri foran en grunnskole som finnes innen
+  radius. Den er ikke filtrert bort, og står i «Se alle» som før. Ingen skoler hentes inn
+  utenfra valgt radius.
 - **Skoler uten trinn** merkes «Skole» og skjules ikke. Vi vet ikke hva slags skole det er, så
   den erstatter aldri barneskolen eller ungdomsskolen — den får plassen ved siden av når den er
-  nærmere. Ligger den lenger unna, konkurrerer den på avstand med resten.
+  nærmere. Registertypen er fortsatt grunnskole, så den går foran videregående.
 - Resten av listen, bak «Se alle», står på avstand. Rekkefølgen i de tre første følger regelen,
   ikke avstanden, så avstandene der kan stå «i ulage».
 - **Merking** leses av trinnene: «Barneskole, 1.–7. trinn», «Ungdomsskole, 8.–10. trinn»,
   «Barne- og ungdomsskole, 1.–10. trinn» (alle som har trinn på begge sider av 7./8.),
   «Videregående skole, Vg1–Vg3» og «Skole».
-- Kartet, tellingen («6 skoler innen 1 km»), barnehagene og skolekretsen er ikke berørt.
+- **Samme betegnelse overalt:** listen, detaljvisningen og kartpopupen bruker `describeSkole`.
+  Popupen har betegnelsen på én linje og «Offentlig eierforhold · Utdanningsdirektoratet» på neste.
+- Kartutvalget, tellingen («6 skoler innen 1 km»), barnehagene og skolekretsen er ikke berørt.
 
 ### Støy
 

@@ -43,8 +43,16 @@ describe("de tre første skolene", () => {
     ).toEqual(["St Sunniva", "Otto Treider", "Urtehagen vgs"]);
   });
 
-  it("barneskole først, så ungdomsskole, så nærmeste øvrige", () => {
-    expect(topp3([rad("Vgs nær", "videregaende"), rad("Ungdom", "ungdomsskole"), rad("Barne", "barneskole"), rad("Barne 2", "barneskole")])).toEqual(["Barne", "Ungdom", "Vgs nær"]);
+  it("barneskole først, så ungdomsskole, så nærmeste øvrige grunnskole — foran videregående", () => {
+    expect(topp3([rad("Vgs nær", "videregaende"), rad("Ungdom", "ungdomsskole"), rad("Barne", "barneskole"), rad("Barne 2", "barneskole")])).toEqual(["Barne", "Ungdom", "Barne 2"]);
+  });
+
+  it("videregående fyller opp når det ikke finnes flere grunnskoler innen radius", () => {
+    expect(topp3([rad("Vgs nær", "videregaende"), rad("Ungdom", "ungdomsskole"), rad("Barne", "barneskole"), rad("Vgs 2", "videregaende")])).toEqual(["Barne", "Ungdom", "Vgs nær"]);
+  });
+
+  it("en kombinert skole står én gang, og de neste plassene går til andre grunnskoler", () => {
+    expect(topp3([rad("Vgs", "videregaende"), rad("Kombinert", "barne_og_ungdomsskole"), rad("Vgs 2", "videregaende"), rad("Barne", "barneskole"), rad("Ungdom", "ungdomsskole")])).toEqual(["Kombinert", "Barne", "Ungdom"]);
   });
 
   it("en 1.–10.-skole dekker begge behov og står én gang", () => {
@@ -54,7 +62,7 @@ describe("de tre første skolene", () => {
   });
 
   it("barneskole nærmest og kombinert skole lenger unna: begge vises, kombinert som ungdomstilbudet", () => {
-    expect(topp3([rad("Barne", "barneskole"), rad("Vgs", "videregaende"), rad("Kombinert", "barne_og_ungdomsskole"), rad("Ungdom", "ungdomsskole")])).toEqual(["Barne", "Kombinert", "Vgs"]);
+    expect(topp3([rad("Barne", "barneskole"), rad("Vgs", "videregaende"), rad("Kombinert", "barne_og_ungdomsskole"), rad("Ungdom", "ungdomsskole")])).toEqual(["Barne", "Kombinert", "Ungdom"]);
   });
 
   it("mangler ungdomsskole innen radius: plassen står ikke tom", () => {
@@ -79,8 +87,12 @@ describe("de tre første skolene", () => {
       expect(topp3([rad("Uten trinn", "skole"), rad("Barne", "barneskole")])).toEqual(["Barne", "Uten trinn"]);
     });
 
-    it("ligger den lenger unna enn begge, konkurrerer den på avstand med resten", () => {
-      expect(topp3([rad("Barne", "barneskole"), rad("Ungdom", "ungdomsskole"), rad("Vgs", "videregaende"), rad("Uten trinn", "skole")])).toEqual(["Barne", "Ungdom", "Vgs"]);
+    it("ligger den lenger unna enn begge, går den likevel foran videregående: registertypen er grunnskole", () => {
+      expect(topp3([rad("Barne", "barneskole"), rad("Ungdom", "ungdomsskole"), rad("Vgs", "videregaende"), rad("Uten trinn", "skole")])).toEqual(["Barne", "Ungdom", "Uten trinn"]);
+    });
+
+    it("flere skoler uten trinn: alle går foran videregående, på avstand", () => {
+      expect(topp3([rad("Vgs", "videregaende"), rad("Uten 1", "skole"), rad("Uten 2", "skole"), rad("Uten 3", "skole")])).toEqual(["Uten 1", "Uten 2", "Uten 3"]);
     });
 
     it("finnes verken barne- eller ungdomsskole, står den først", () => {
@@ -90,7 +102,7 @@ describe("de tre første skolene", () => {
 
   it("resten av listen står på avstand, og ingen rader legges til eller fjernes", () => {
     const rader = [rad("Vgs 1", "videregaende"), rad("Vgs 2", "videregaende"), rad("Barne", "barneskole"), rad("Vgs 3", "videregaende"), rad("Ungdom", "ungdomsskole"), rad("Vgs 4", "videregaende"), rad("Barne 2", "barneskole")];
-    expect(alle(rader)).toEqual(["Barne", "Ungdom", "Vgs 1", "Vgs 2", "Vgs 3", "Vgs 4", "Barne 2"]);
+    expect(alle(rader)).toEqual(["Barne", "Ungdom", "Barne 2", "Vgs 1", "Vgs 2", "Vgs 3", "Vgs 4"]);
     expect(alle(rader).sort()).toEqual(rader.map((r) => r.navn).sort());
   });
 

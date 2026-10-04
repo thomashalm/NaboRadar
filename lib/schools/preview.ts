@@ -13,11 +13,13 @@
  *    Registeret mangler trinn for rundt hundre ekte grunnskoler, og en nærskole skal ikke
  *    forsvinne bak «Se alle» fordi et felt mangler. Vi vet ikke hva slags skole det er, så den
  *    erstatter ingen av de to over — den får plassen ved siden av.
- * 4. resten av plassene fylles med de nærmeste skolene som er igjen, uansett type
+ * 4. resten av plassene fylles med de nærmeste grunnskolene som er igjen — også dem uten
+ *    registrerte trinn, for registertypen sier fortsatt grunnskole
+ * 5. først når det ikke finnes flere grunnskoler innen radius, fylles det opp med videregående
  *
  * Mangler barneskole eller ungdomsskole innen radius, blir plassen ikke stående tom: da rykker
- * de neste opp. Videregående kan altså stå i de tre første, men aldri foran en barneskole eller
- * ungdomsskole som finnes innen radius.
+ * de neste opp. Videregående kan altså stå i de tre første, men aldri foran en grunnskole som
+ * finnes innen radius. Ingen skoler hentes inn utenfra radien.
  *
  * Resten av listen — bak «Se alle» — er sortert på avstand, som før. Kartet er ikke berørt:
  * det tegner alle skolene innen radius.
@@ -67,7 +69,11 @@ export function orderSchoolsForPreview<T>(rows: readonly T[], kindOf: (row: T) =
   const utenTrinn = kinds.findIndex((kind, index) => kind === "skole" && (fjerneste < 0 || index < fjerneste));
   velg(utenTrinn);
 
-  for (let index = 0; index < rows.length && valgt.length < preview; index++) velg(index);
+  // Grunnskoler først, så videregående. Begge på avstand.
+  kinds.forEach((kind, index) => {
+    if (kind !== "videregaende") velg(index);
+  });
+  kinds.forEach((_, index) => velg(index));
 
   return [...valgt.map((index) => rows[index]!), ...rows.filter((_, index) => !valgt.includes(index))];
 }
