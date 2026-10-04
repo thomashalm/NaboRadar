@@ -478,35 +478,49 @@ export function describeStoyReferanse(subtype: string, ovre: number | null): str
  *
  * Fravær av treff er tre forskjellige ting, og bare én av dem er et resultat:
  *
- * - **Kartlagt, under laveste intervall:** «Ingen kartlagt … over 50 dB ved søkepunktet.» Vi
- *   sier nivået det er snakk om, og «kartlagt» — aldri «ingen støy», og ikke «lavt», som ingen
- *   offisiell kilde bruker om dB-nivåer. Laveste intervall er 50 dB, unntatt for jernbane utenfor
- *   byområdene, der det er 55 dB.
+ * - **Kartlagt, under laveste intervall:** «Lavt modellert støynivå fra vei og bane ved
+ *   søkepunktet.» / «Under 50 dB i støykartene.» «Lavt» er NaboRadars eget ord (produktbeslutning
+ *   2026-10-04), og det har én bestemt betydning: punktet ligger i et dokumentert dekningsområde,
+ *   oppslaget har svart, og punktet ligger ikke i noe støypolygon — altså under laveste
+ *   kartlagte intervall. Tallet står alltid på linjen under, så ordet kan etterprøves.
+ *   Laveste intervall er 50 dB, unntatt for jernbane utenfor byområdene, der det er 55 dB.
  * - **Ikke kartlagt:** vi sier at kartet ikke finnes her. Det er ikke et funn om støy.
  * - **Kildefeil:** kommer aldri hit. Oppslaget kaster, og kilden står som «svarte ikke».
+ *
+ * Setningen gjelder støykildene den nevner, ikke all støy. Derfor «modellert» og «fra vei og
+ * bane» — aldri «stille», «lite støy», «ingen støy» eller «svært lavt».
  *
  * Bare kilder som faktisk er dekket nevnes. Er bare vei kartlagt, sier vi ingenting om bane.
  * Utenfor byområdene er det bare de mest trafikkerte veiene og banene som er kartlagt, og det
  * står i setningen — ellers leses den som om gata utenfor også var vurdert.
  *
- * `dekket` sier om setningen er et resultat (kartlagt) eller bare en opplysning om dekning.
+ * `detail` er satt bare når setningen er et resultat (kartlagt). Støygruppen bruker det til å
+ * skille «kartlagt» fra «ikke kartlagt».
  */
-export function describeStoyStatus(a: AreaAttributes): { text: string; dekket: boolean } | null {
+export function describeStoyStatus(a: AreaAttributes): { text: string; detail: string | null } | null {
   const veg = a.vegTreff === true ? null : str(a.vegDekning);
   const bane = a.baneTreff === true ? null : str(a.baneDekning);
-  const slutt = "ved søkepunktet.";
+  const begge = (veg === "by" || veg === "hoved") && (bane === "by" || bane === "hoved");
 
-  if (veg === "by" && bane === "by") return { text: `Ingen kartlagt vei- eller banestøy over 50 dB ${slutt}`, dekket: true };
+  const kilder: { navn: string; terskel: number }[] = [];
+  if (veg === "by") kilder.push({ navn: begge ? "vei" : "veitrafikk", terskel: 50 });
+  if (veg === "hoved") kilder.push({ navn: "de mest trafikkerte veiene", terskel: 50 });
+  if (bane === "by") kilder.push({ navn: "bane", terskel: 50 });
+  if (bane === "hoved") kilder.push({ navn: "de mest trafikkerte jernbanestrekningene", terskel: 55 });
 
-  const deler: string[] = [];
-  if (veg === "by") deler.push(`Ingen kartlagt veitrafikkstøy over 50 dB ${slutt}`);
-  if (veg === "hoved") deler.push(`Ingen kartlagt støy over 50 dB fra de mest trafikkerte veiene ${slutt}`);
-  if (bane === "by") deler.push(`Ingen kartlagt banestøy over 50 dB ${slutt}`);
-  if (bane === "hoved") deler.push(`Ingen kartlagt støy over 55 dB fra de mest trafikkerte jernbanestrekningene ${slutt}`);
-  if (deler.length > 0) return { text: deler.join(" "), dekket: true };
+  if (kilder.length > 0) {
+    const kart = kilder.length > 1 ? "støykartene" : "støykartet";
+    const likeTerskler = kilder.every((kilde) => kilde.terskel === kilder[0]!.terskel);
+    return {
+      text: `Lavt modellert støynivå fra ${kilder.map((kilde) => kilde.navn).join(" og ")} ved søkepunktet.`,
+      detail: likeTerskler
+        ? `Under ${kilder[0]!.terskel} dB i ${kart}.`
+        : `Under 50 dB for vei og 55 dB for jernbane i ${kart}.`,
+    };
+  }
 
   // Ingen av kildene har kart her, og ingen traff.
-  if (a.vegTreff !== true && a.baneTreff !== true) return { text: STOY_IKKE_KARTLAGT, dekket: false };
+  if (a.vegTreff !== true && a.baneTreff !== true) return { text: STOY_IKKE_KARTLAGT, detail: null };
   return null;
 }
 
@@ -831,9 +845,9 @@ export function describeFact(input: {
     case "stoy_strategisk_status": {
       const status = describeStoyStatus(a);
       if (!status) return null;
-      // `caveat` bærer kartnivå-forbeholdet bare når setningen er et resultat. Støygruppen
-      // (lib/facts/clusters.ts) bruker det til å skille «kartlagt» fra «ikke kartlagt».
-      return { headline: status.text, details: [], caveat: status.dekket ? STOY_KARTNIVA : null };
+      // Linjen under («Under 50 dB i støykartene.») finnes bare når setningen er et resultat.
+      // Støygruppen (lib/facts/clusters.ts) bruker den til å skille «kartlagt» fra «ikke kartlagt».
+      return { headline: status.text, details: status.detail ? [status.detail] : [], caveat: null };
     }
 
     case "stoysone_veg_t1442": {

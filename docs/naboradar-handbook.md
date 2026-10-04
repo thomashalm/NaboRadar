@@ -916,7 +916,7 @@ Hele poenget er at NaboRadar ikke skal si mer enn kilden gjør.
   | Utfall | Hvordan vi vet det | Hva som vises |
   |---|---|---|
   | Treff | Punktet ligger i et Lden-polygon | Støykort |
-  | Kartlagt, uten treff | Punktet ligger i et byområde (lag 0) eller dekningspolygon (lag 1), men ikke i noe Lden-polygon | «Ingen kartlagt vei- eller banestøy over 50 dB ved søkepunktet.» + kartnivå-forbeholdet |
+  | Kartlagt, uten treff | Punktet ligger i et byområde (lag 0) eller dekningspolygon (lag 1), men ikke i noe Lden-polygon | «Lavt modellert støynivå fra vei og bane ved søkepunktet.» / «Under 50 dB i støykartene.» |
   | Ikke kartlagt | Punktet ligger utenfor begge dekningslagene | «Området er ikke med i den strategiske støykartleggingen av vei og bane.» |
   | Kildefeil | Et av kallene feilet | Ingen status. Kilden står som «svarte ikke» nederst på siden |
 
@@ -924,10 +924,20 @@ Hele poenget er at NaboRadar ikke skal si mer enn kilden gjør.
     veiene (over 3 mill. passeringer i året) og jernbanestrekningene kartlagt, og setningen sier
     det: «… fra de mest trafikkerte veiene …».
   - Bare kilder som faktisk er dekket nevnes. Er bare vei kartlagt, sier vi ingenting om bane.
-  - 50 dB er laveste intervall i kilden (55 dB for jernbane utenfor byområdene). Vi skriver aldri
-    «ingen støy», «stille» eller «lavt».
-  - Finnes det andre støyfunn, står et resultat for den andre kilden nederst i gruppen («Ingen
-    kartlagt banestøy over 50 dB ved søkepunktet.»). «Ikke kartlagt» tas ikke med da.
+  - **Når et søkepunkt ligger i et dokumentert dekningsområde, men under laveste kartlagte nivå,
+    beskriver NaboRadar dette som «lavt modellert støynivå» for de aktuelle støykildene.** «Lavt»
+    er vårt eget ord (produktbeslutning 2026-10-04) og har bare denne betydningen: dekket, svart
+    og uten treff. Tallet står alltid på linjen under («Under 50 dB i støykartene.»), så ordet
+    kan etterprøves. Laveste intervall er 50 dB; 55 dB for jernbane utenfor byområdene.
+  - **Vurderingen gjelder konkrete støykilder, ikke all mulig lokal støy.** Derfor «modellert» og
+    «fra vei og bane». Vi skriver aldri «stille», «lite støy», «ingen støy», «svært lavt» eller
+    «ved boligen».
+  - «Lavt» brukes aldri når området ikke er kartlagt, når dekningen er ukjent, eller når
+    oppslaget feilet. Ordet brukes heller ikke om nivåer som faktisk har et treff — der står
+    Lden-intervallet og T-1442-grensene.
+  - Finnes det andre støyfunn, står resultatet for den andre kilden som én egen linje nederst i
+    gruppen: «Lavt modellert støynivå fra bane ved søkepunktet (under 50 dB i støykartet).»
+    «Ikke kartlagt» tas ikke med da.
   - Statusen gjelder bare strategisk kartlegging. Støyvarselkartet for veg og flystøysonene har
     ikke dekningslag, så der sier fravær av treff ingenting.
 - **Tallet er et kartnivå, ikke et nivå ved huset** (regler fra 2026-10-04). Strategisk
@@ -940,7 +950,8 @@ Hele poenget er at NaboRadar ikke skal si mer enn kilden gjør.
   står det «Under gul støysone (gul fra 55 dB)». Ellers står bare grensene. Vi sier aldri at
   nivået *er* eller *tilsvarer* en støysone: strategisk kartlegging er ikke et støysonekart, og et
   intervall på 5 dB kan ligge på begge sider av en grense (bane 55–59 mot gul fra 58).
-- **Ingen egne ord for nivået.** «Lavt», «moderat» og «høyt» har ingen offisiell dekning.
+- **Ingen egne ord for nivåer med treff.** «Moderat» og «høyt» har ingen offisiell dekning. «Lavt»
+  brukes bare om ett tilfelle: kartlagt og under laveste intervall, se under.
 - **50–54 dB vises**, men som det er: under gul støysone.
 - **Banelagets tall er nedre grense i et intervall på 5 dB** («65» er 65–69 dB, slik kildens
   tegnforklaring sier). 75 er det åpne toppintervallet.

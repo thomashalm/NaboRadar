@@ -639,7 +639,7 @@ function ClusterDetails({
         ))}
 
         {cluster.caveat && (
-          <p className="mt-3 text-[13px] leading-relaxed text-muted">
+          <p className="mt-3 text-[13px] leading-relaxed whitespace-pre-line text-muted">
             {cluster.caveat}
           </p>
         )}

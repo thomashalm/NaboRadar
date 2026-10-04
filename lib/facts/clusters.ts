@@ -212,7 +212,7 @@ export function grunnforholdCluster(facts: AreaFact[], radiusM: number): FactClu
 /** Støytypene som oppgir et Lden-intervall, til forskjell fra de rene sonekortene. */
 const LDEN_SUBTYPER: ReadonlySet<string> = new Set(["stoy_strategisk_veg", "stoy_strategisk_bane"]);
 
-/** Statusen fra strategisk kartlegging: «ingen kartlagt støy over 50 dB» eller «ikke kartlagt». */
+/** Statusen fra strategisk kartlegging: «lavt modellert støynivå» eller «ikke kartlagt». */
 const STOY_STATUS = "stoy_strategisk_status";
 
 export function stoyCluster(facts: AreaFact[], radiusM: number): FactCluster | null {
@@ -233,12 +233,17 @@ export function stoyCluster(facts: AreaFact[], radiusM: number): FactCluster | n
       overview: null,
       caveat: null,
       sourceName: status.sourceName,
-      emptyNote: { text: status.headline, detail: status.caveat, nearestLink: false },
+      emptyNote: { text: status.headline, detail: status.details[0] ?? null, nearestLink: false },
     };
   }
-  // Med andre støyfunn: et resultat («ingen kartlagt veitrafikkstøy over 50 dB») er verdt å ta
+  // Med andre støyfunn: et resultat («lavt modellert støynivå fra bane») er verdt å ta
   // med nederst. «Ikke kartlagt» er det ikke — da sier kortene det som finnes.
-  const resultat = status?.caveat ? status.headline : null;
+  // Én linje, så den ikke konkurrerer med støykortet: «… ved søkepunktet (under 50 dB i støykartet).»
+  const detalj = status?.details[0];
+  const resultat =
+    status && detalj
+      ? `${status.headline.replace(/\.$/, "")} (${detalj.charAt(0).toLowerCase()}${detalj.slice(1).replace(/\.$/, "")}).`
+      : null;
 
   const kilder = [...new Set(sortert.map((fact) => fact.sourceName))];
   const forste = sortert[0]!;
@@ -268,7 +273,8 @@ export function stoyCluster(facts: AreaFact[], radiusM: number): FactCluster | n
     caveat:
       [resultat, harLden ? (flere ? LDEN_FORKLARING : `${STOY_KARTNIVA} ${LDEN_FORKLARING}`) : null]
         .filter((del): del is string => del !== null)
-        .join(" ") || null,
+        // Egen linje for statusen; forbehold og Lden-forklaring på linjen under.
+        .join("\n") || null,
     sourceName: kilder.join(" · "),
   };
 }

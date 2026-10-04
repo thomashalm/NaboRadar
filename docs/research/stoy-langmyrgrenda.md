@@ -79,6 +79,14 @@ ikke kartlagt, og feil. Reglene står i håndboka.
 Kontrollert at byområdet er modellert helt ut til kanten: punkter i Sørumsand, Sørkedalen og
 Hurum, alle i byområdet «Oslo», har støypolygoner innen én kilometer.
 
+### Ordlyd justert samme dag
+
+«Ingen kartlagt vei- eller banestøy over 50 dB ved søkepunktet.» var riktig, men lite
+menneskelig. Byttet til «Lavt modellert støynivå fra vei og bane ved søkepunktet.» med «Under 50
+dB i støykartene.» på linjen under. «Lavt» er en produktbeslutning, ikke et ord fra kilden, og
+brukes bare når punktet er dekket, oppslaget har svart og punktet er uten treff. Logikken er
+uendret.
+
 ## Begrensninger
 
 - Dekningslaget utenfor byene (lag 1) har ingen beskrivelse i tjenesten. Vi leser det som

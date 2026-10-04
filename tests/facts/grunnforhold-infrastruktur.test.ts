@@ -302,24 +302,27 @@ describe("støy som kompakt gruppe", () => {
   });
 
   it("uten støyfunn: én statuslinje i stedet for en tom seksjon", () => {
-    const kartlagt = stoyFakta({ id: "s", subtype: "stoy_strategisk_status", headline: "Ingen kartlagt vei- eller banestøy over 50 dB ved søkepunktet.", caveat: "Modellberegnet kartnivå ved søkepunktet. Kan variere over korte avstander." });
+    const kartlagt = stoyFakta({ id: "s", subtype: "stoy_strategisk_status", headline: "Lavt modellert støynivå fra vei og bane ved søkepunktet.", details: ["Under 50 dB i støykartene."], caveat: null });
     const c = stoyCluster([kartlagt], 1000)!;
     expect(c.facts).toEqual([]);
-    expect(c.emptyNote).toEqual({ text: kartlagt.headline, detail: kartlagt.caveat, nearestLink: false });
+    expect(c.emptyNote).toEqual({ text: "Lavt modellert støynivå fra vei og bane ved søkepunktet.", detail: "Under 50 dB i støykartene.", nearestLink: false });
 
-    const ikke = stoyFakta({ id: "s", subtype: "stoy_strategisk_status", headline: "Området er ikke med i den strategiske støykartleggingen av vei og bane.", caveat: null });
+    const ikke = stoyFakta({ id: "s", subtype: "stoy_strategisk_status", headline: "Området er ikke med i den strategiske støykartleggingen av vei og bane.", details: [], caveat: null });
     expect(stoyCluster([ikke], 1000)!.emptyNote).toEqual({ text: ikke.headline, detail: null, nearestLink: false });
   });
 
-  it("med støyfunn: statusen teller ikke som støykilde, og et resultat står nederst", () => {
-    const status = stoyFakta({ id: "s", subtype: "stoy_strategisk_status", headline: "Ingen kartlagt banestøy over 50 dB ved søkepunktet.", caveat: "x" });
+  it("med støyfunn: statusen teller ikke som støykilde, og står som én egen linje nederst", () => {
+    const status = stoyFakta({ id: "s", subtype: "stoy_strategisk_status", headline: "Lavt modellert støynivå fra bane ved søkepunktet.", details: ["Under 50 dB i støykartet."], caveat: null });
     const c = stoyCluster([stoyFakta({ id: "veg", subtype: "stoy_strategisk_veg" }), status], 1000)!;
     expect(c.facts.map((f) => f.id)).toEqual(["veg"]);
     expect(c.label).not.toContain("2 støykilder");
-    expect(c.caveat).toMatch(/^Ingen kartlagt banestøy over 50 dB ved søkepunktet\. /);
+    expect(c.caveat!.split("\n")).toEqual([
+      "Lavt modellert støynivå fra bane ved søkepunktet (under 50 dB i støykartet).",
+      "Modellberegnet kartnivå ved søkepunktet. Kan variere over korte avstander. Lden er gjennomsnittlig støynivå over døgnet, der kveld og natt teller ekstra.",
+    ]);
 
     // «Ikke kartlagt» er ikke et resultat, og tas ikke med når det finnes andre funn (f.eks. fly).
-    const ikke = stoyFakta({ id: "s", subtype: "stoy_strategisk_status", headline: "Området er ikke med …", caveat: null });
+    const ikke = stoyFakta({ id: "s", subtype: "stoy_strategisk_status", headline: "Området er ikke med …", details: [], caveat: null });
     const fly = stoyCluster([stoyFakta({ id: "fly", subtype: "stoysone_fly_t1442" }), ikke], 1000)!;
     expect(fly.caveat).toBeNull();
     expect(fly.facts).toHaveLength(1);

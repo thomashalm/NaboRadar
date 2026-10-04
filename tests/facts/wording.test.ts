@@ -215,38 +215,60 @@ describe("støy", () => {
 
   describe("status uten treff", () => {
     const tekst = (a: Record<string, string | boolean>) => describe_("stoy_strategisk_status", a, true);
+    const linjer = (a: Record<string, string | boolean>) => { const t = tekst(a)!; return [t.headline, t.details[0] ?? null]; };
 
-    it("kartlagt i byområde: nivået og «kartlagt» står i setningen", () => {
-      const s = tekst({ vegDekning: "by", baneDekning: "by", vegTreff: false, baneTreff: false })!;
-      expect(s.headline).toBe("Ingen kartlagt vei- eller banestøy over 50 dB ved søkepunktet.");
-      expect(s.caveat).toBe("Modellberegnet kartnivå ved søkepunktet. Kan variere over korte avstander.");
+    it("kartlagt i byområde, begge under 50 dB", () => {
+      expect(linjer({ vegDekning: "by", baneDekning: "by", vegTreff: false, baneTreff: false })).toEqual([
+        "Lavt modellert støynivå fra vei og bane ved søkepunktet.",
+        "Under 50 dB i støykartene.",
+      ]);
     });
 
     it("nevner bare kilden som er dekket og uten treff", () => {
-      expect(tekst({ vegDekning: "by", baneDekning: "by", vegTreff: true, baneTreff: false })!.headline).toBe("Ingen kartlagt banestøy over 50 dB ved søkepunktet.");
-      expect(tekst({ vegDekning: "by", baneDekning: "by", vegTreff: false, baneTreff: true })!.headline).toBe("Ingen kartlagt veitrafikkstøy over 50 dB ved søkepunktet.");
-      expect(tekst({ vegDekning: "hoved", baneDekning: "ingen", vegTreff: false, baneTreff: false })!.headline).toBe(
-        "Ingen kartlagt støy over 50 dB fra de mest trafikkerte veiene ved søkepunktet.",
-      );
-      expect(tekst({ vegDekning: "ingen", baneDekning: "hoved", vegTreff: false, baneTreff: false })!.headline).toBe(
-        "Ingen kartlagt støy over 55 dB fra de mest trafikkerte jernbanestrekningene ved søkepunktet.",
+      expect(linjer({ vegDekning: "by", baneDekning: "by", vegTreff: true, baneTreff: false })).toEqual([
+        "Lavt modellert støynivå fra bane ved søkepunktet.",
+        "Under 50 dB i støykartet.",
+      ]);
+      expect(linjer({ vegDekning: "by", baneDekning: "by", vegTreff: false, baneTreff: true })).toEqual([
+        "Lavt modellert støynivå fra veitrafikk ved søkepunktet.",
+        "Under 50 dB i støykartet.",
+      ]);
+      expect(linjer({ vegDekning: "by", baneDekning: "ingen", vegTreff: false, baneTreff: false })[0]).toBe(
+        "Lavt modellert støynivå fra veitrafikk ved søkepunktet.",
       );
     });
 
-    it("ikke kartlagt er ikke et funn om støy", () => {
+    it("utenfor byområdene sier setningen at bare de mest trafikkerte strekningene er med", () => {
+      expect(linjer({ vegDekning: "hoved", baneDekning: "ingen", vegTreff: false, baneTreff: false })).toEqual([
+        "Lavt modellert støynivå fra de mest trafikkerte veiene ved søkepunktet.",
+        "Under 50 dB i støykartet.",
+      ]);
+      expect(linjer({ vegDekning: "ingen", baneDekning: "hoved", vegTreff: false, baneTreff: false })).toEqual([
+        "Lavt modellert støynivå fra de mest trafikkerte jernbanestrekningene ved søkepunktet.",
+        "Under 55 dB i støykartet.",
+      ]);
+      // Ulike terskler: begge står.
+      expect(linjer({ vegDekning: "hoved", baneDekning: "hoved", vegTreff: false, baneTreff: false })[1]).toBe(
+        "Under 50 dB for vei og 55 dB for jernbane i støykartene.",
+      );
+    });
+
+    it("«lavt» brukes aldri uten dekning: ikke kartlagt er ikke et funn om støy", () => {
       const s = tekst({ vegDekning: "ingen", baneDekning: "ingen", vegTreff: false, baneTreff: false })!;
       expect(s.headline).toBe("Området er ikke med i den strategiske støykartleggingen av vei og bane.");
-      expect(s.caveat).toBeNull();
-      expect(s.headline).not.toMatch(/ingen kartlagt|over \d+ dB/i);
+      expect(s.details).toEqual([]);
+      expect(s.headline).not.toMatch(/lavt|under \d+ dB/i);
     });
 
-    it("sier aldri «ingen støy», «stille» eller «lavt»", () => {
+    it("overdriver ikke: gjelder de nevnte kildene, ikke all støy", () => {
       const alle = [
         { vegDekning: "by", baneDekning: "by", vegTreff: false, baneTreff: false },
         { vegDekning: "hoved", baneDekning: "hoved", vegTreff: false, baneTreff: false },
         { vegDekning: "ingen", baneDekning: "ingen", vegTreff: false, baneTreff: false },
-      ].map((a) => tekst(a)!.headline);
-      for (const s of alle) expect(s).not.toMatch(/ingen støy|stille|lavt|rolig/i);
+      ].map((a) => linjer(a).join(" "));
+      for (const s of alle) expect(s).not.toMatch(/ingen støy|stille|lite støy|svært lavt|ved boligen/i);
+      // «Lavt» står alltid sammen med «modellert» og kildene det gjelder.
+      for (const s of alle.slice(0, 2)) expect(s).toMatch(/^Lavt modellert støynivå fra /);
     });
 
     it("har ingenting å si når alt som er dekket har treff", () => {
