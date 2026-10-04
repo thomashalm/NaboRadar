@@ -130,6 +130,16 @@ describe("N50: normalisering", () => {
     ]);
   });
 
+  it("regner om nøyaktig i Øst-Finnmark, 15° fra sentralmeridianen", () => {
+    // Fasit fra Kartverkets transformasjonstjeneste (25833 → 4258) for dette punktet. Den korte
+    // rekkeutviklingen la hyttene her 15–30 m for langt øst (docs/research/utm33-konvertering.md).
+    const { records } = new KartverketN50HytterProvider().normalize({
+      features: parseN50Huts(gml(hytte({ navn: "Testkoia", grad: "Ubetjent", pos: "1070000 7900000" })), "5632"),
+      documents: [],
+    });
+    expect(records[0]!.geometry.coordinates).toEqual([30.482327, 70.546692]);
+  });
+
   it("tar inn en serveringshytte bare når den står på listen over bekreftede unntak", () => {
     const molde = new KartverketN50HytterProvider().normalize({
       features: parseN50Huts(

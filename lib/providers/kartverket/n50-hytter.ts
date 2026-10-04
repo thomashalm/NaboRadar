@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { utm33ToWgs84 } from "@/lib/geo/utm";
+import { utm33ToWgs84Exact } from "@/lib/geo/utm";
 import { HUT_REFRESH_FN, HUT_SOURCE_CATEGORY, inHutBounds, type HutSourceAttributes } from "@/lib/huts/types";
 import { fetchGml } from "@/lib/providers/gml";
 import type {
@@ -211,7 +211,7 @@ export class KartverketN50HytterProvider implements AreaFeatureProvider {
       }
       const raw = parsed.data;
       const navn = raw.navn?.trim() ?? "";
-      const point = utm33ToWgs84([raw.easting, raw.northing]);
+      const point = utm33ToWgs84Exact([raw.easting, raw.northing]);
       const key = `${raw.knr}:${slug(navn)}`;
 
       const unntak = raw.betjeningsgrad === "Serveringshytte" && SERVERING_MED_OVERNATTING.has(key);

@@ -29,7 +29,7 @@ som var sant da undersøkelsen ble gjort, ikke nødvendigvis dagens løsning. Da
 | [hytter-andre-berikelse.md](hytter-andre-berikelse.md) | 2026-10-02 | «Andre»: private turisthytter, kystled, allmenninger; «ikke for allmennheten» |
 | [dnt-booking-ledighet.md](dnt-booking-ledighet.md) | 2026-10-02 | DNTs booking har åpne endepunkter, men rettighetene er uklare. Ikke bygget |
 | [hytter-geografiske-filtre.md](hytter-geografiske-filtre.md) | 2026-10-03 | «Ved sjøen», «Ved vann», «På fjellet» fra N50-arealdekke. Ikke bygget |
-| [utm33-konvertering.md](utm33-konvertering.md) | 2026-10-04 | N50-hyttene er regnet om fra UTM 33 med en kort rekkeutvikling: median 2 cm feil, 90 hytter over 1 m, 19 i Øst-Finnmark 15–30 m. Fasit: Kartverkets transformasjonstjeneste. Korrigering foreslått, ikke utført |
+| [utm33-konvertering.md](utm33-konvertering.md) | 2026-10-04 | N50-hyttene er regnet om fra UTM 33 med en kort rekkeutvikling: median 2 cm feil, 90 hytter over 1 m, 19 i Øst-Finnmark 15–30 m. Fasit: Kartverkets transformasjonstjeneste. Rettet samme dag: 742 hytter flyttet, høyde slått opp på nytt, identitet og overstyringer uendret |
 
 Statuslinjen «Kategorien er upublisert» i hyttefilene gjaldt da de ble skrevet. Kategorien ble
 publisert 2026-10-02 ([ADR 009](../adr/009-public-admin-security-model.md)).
