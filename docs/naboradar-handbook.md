@@ -929,6 +929,30 @@ ikke en retting av kilden: enhetene ligger uendret i databasen og vises i admin,
 - Reglene bor i `lib/schools/classification.ts`. Bakgrunn og tall:
   [research/skolefilter-offentlig-visning.md](research/skolefilter-offentlig-visning.md).
 
+### Skolevisningen på `/omrade`
+
+Skolelisten var sortert på avstand alene. I sentrum ga det tre videregående skoler øverst, mens
+barneskolen lå bak «Se alle». Fra 2026-10-04 velges de tre første slik
+(`lib/schools/preview.ts`):
+
+1. nærmeste skole med barnetrinn (1.–7.)
+2. nærmeste skole med ungdomstrinn (8.–10.). Er det samme skole som i 1, står den én gang.
+3. en grunnskole uten registrerte trinn, hvis den ligger nærmere enn skolene i 1 og 2
+4. resten av plassene: de nærmeste skolene som er igjen, uansett type
+
+- Mangler barneskole eller ungdomsskole innen radius, står plassen ikke tom — de neste rykker opp.
+- Videregående kan stå blant de tre første, men aldri foran en barneskole eller ungdomsskole som
+  finnes innen radius. Den er ikke filtrert bort, og står i «Se alle» som før.
+- **Skoler uten trinn** merkes «Skole» og skjules ikke. Vi vet ikke hva slags skole det er, så
+  den erstatter aldri barneskolen eller ungdomsskolen — den får plassen ved siden av når den er
+  nærmere. Ligger den lenger unna, konkurrerer den på avstand med resten.
+- Resten av listen, bak «Se alle», står på avstand. Rekkefølgen i de tre første følger regelen,
+  ikke avstanden, så avstandene der kan stå «i ulage».
+- **Merking** leses av trinnene: «Barneskole, 1.–7. trinn», «Ungdomsskole, 8.–10. trinn»,
+  «Barne- og ungdomsskole, 1.–10. trinn» (alle som har trinn på begge sider av 7./8.),
+  «Videregående skole, Vg1–Vg3» og «Skole».
+- Kartet, tellingen («6 skoler innen 1 km»), barnehagene og skolekretsen er ikke berørt.
+
 ### Støy
 
 - Alltid **modellberegning, aldri måling ved boligen**.

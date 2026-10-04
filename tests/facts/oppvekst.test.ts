@@ -126,12 +126,12 @@ describe("kort og popup", () => {
   it("viser type, trinn, elevtall og adresse", () => {
     const text = skole({ lavesteTrinn: 1, hoyesteTrinn: 7, antallElever: 392, eierforhold: "Offentlig", adresse: "Ankerveien 130", poststed: "OSLO" });
     expect(text.headline).toBe("Bogstad skole");
-    expect(text.details).toEqual(["Grunnskole, 1.–7. trinn.", "392 elever · offentlig skole", "Ankerveien 130, OSLO"]);
+    expect(text.details).toEqual(["Barneskole, 1.–7. trinn.", "392 elever · offentlig skole", "Ankerveien 130, OSLO"]);
   });
 
   it("håndterer manglende felt uten tomme linjer", () => {
     const text = skole({});
-    expect(text.details).toEqual(["Grunnskole."]);
+    expect(text.details).toEqual(["Skole."]);
     expect(text.details.every((d) => d.trim().length > 0)).toBe(true);
   });
 

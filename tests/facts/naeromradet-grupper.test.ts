@@ -154,7 +154,7 @@ describe("Nærområdet: skoler og barnehager som én gruppe", () => {
 
   it("gir undertekst med trinn eller aldersgruppe", () => {
     const c = cluster(seksVarianter);
-    expect(c.lists.find((l) => l.id === "skoler")!.items[0]!.subtitle).toBe("Grunnskole, 1.–7. trinn");
+    expect(c.lists.find((l) => l.id === "skoler")!.items[0]!.subtitle).toBe("Barneskole, 1.–7. trinn");
     expect(c.lists.find((l) => l.id === "barnehager")!.items[0]!.subtitle).toBe("Barnehage, 1–5 år");
     expect(c.caveat).toContain("Familiebarnehager i private hjem og spesialskoler er ikke med");
   });

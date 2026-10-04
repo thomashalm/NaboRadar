@@ -3,6 +3,7 @@ import { createLookupRunner, type LookupResult } from "./lookup-runner";
 import { getDbMode, getReadDb, type Db } from "@/lib/db";
 import { formatDistance, formatRadius } from "@/lib/format";
 import { MAX_RADIUS_M } from "@/lib/geo/constants";
+import { orderSchoolsForPreview, schoolKind } from "@/lib/schools/preview";
 import {
   AREA_CATEGORIES,
   AREA_SECTIONS,
@@ -761,7 +762,16 @@ function buildCluster(
 
   for (const list of spec.lists) {
     // rows er allerede sortert nærmest først, så filtreringen beholder avstandsrekkefølgen.
-    const alle = treff.filter((row) => list.subtypes.includes(row.subtype));
+    const etterAvstand = treff.filter((row) => list.subtypes.includes(row.subtype));
+    // Skolelisten: barneskole og ungdomsskole først, se lib/schools/preview.ts. Resten på avstand.
+    const alle =
+      list.id === "skoler"
+        ? orderSchoolsForPreview(
+            etterAvstand,
+            (row) => schoolKind({ subtype: row.subtype, lavesteTrinn: row.attributes.lavesteTrinn, hoyesteTrinn: row.attributes.hoyesteTrinn }),
+            CLUSTER_PREVIEW,
+          )
+        : etterAvstand;
     // Én liste i gruppen: da gjelder gruppens totale antall for den listen.
     const total = kuttet && spec.lists.length === 1 ? antallIOmradet : alle.length;
     if (alle.length === 0) continue;

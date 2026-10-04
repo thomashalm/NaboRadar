@@ -1,3 +1,4 @@
+import { schoolKind, type SchoolKind } from "@/lib/schools/preview";
 import { SCHOOL_HIDDEN_LABEL, type SchoolHiddenReason } from "@/lib/schools/classification";
 import { formatArea } from "@/lib/format";
 import type { AreaAttributes } from "@/types/area-feature";
@@ -291,6 +292,30 @@ export const ANLEGG_TYPE_LABEL: Record<string, string> = {
 };
 
 /** Skoler og barnehager. Nøytrale typenavn — dette er steder som finnes, ikke forhold å vurdere. */
+/**
+ * Skoletypen slik en forelder ville sagt det, fra trinnene registeret oppgir. «Grunnskole» sier
+ * ikke om det er en barneskole eller en ungdomsskole, og det er det folk lurer på.
+ */
+const SKOLE_LABEL: Record<SchoolKind, string> = {
+  barneskole: "Barneskole",
+  ungdomsskole: "Ungdomsskole",
+  barne_og_ungdomsskole: "Barne- og ungdomsskole",
+  videregaende: "Videregående skole",
+  // Grunnskole uten registrerte trinn. Vi gjetter ikke hvilken type det er.
+  skole: "Skole",
+};
+
+/** «Barneskole, 1.–7. trinn», «Barne- og ungdomsskole, 1.–10. trinn», «Videregående skole, Vg1–Vg3», «Skole». */
+export function describeSkole(subtype: string, a: AreaAttributes): string {
+  const label = SKOLE_LABEL[schoolKind({ subtype, lavesteTrinn: a.lavesteTrinn, hoyesteTrinn: a.hoyesteTrinn })];
+  const fra = num(a.lavesteTrinn);
+  const til = num(a.hoyesteTrinn);
+  if (fra === null || til === null) return label;
+  // Udir koder videregående som trinn 11–13. Det heter Vg1–Vg3 på norsk.
+  if (subtype === "videregaende_skole") return fra >= 11 && til <= 13 ? `${label}, Vg${fra - 10}–Vg${til - 10}` : label;
+  return `${label}, ${fra}.–${til}. trinn`;
+}
+
 export const OPPVEKST_TYPE_LABEL: Record<string, string> = {
   grunnskole: "Grunnskole",
   videregaende_skole: "Videregående skole",
@@ -789,10 +814,7 @@ export function describeFact(input: {
     case "grunnskole":
     case "videregaende_skole": {
       const details: string[] = [];
-      const fra = num(a.lavesteTrinn);
-      const til = num(a.hoyesteTrinn);
-      const trinn = fra !== null && til !== null ? `${fra}.–${til}. trinn` : null;
-      details.push([OPPVEKST_TYPE_LABEL[subtype], trinn].filter(Boolean).join(", ") + ".");
+      details.push(`${describeSkole(subtype, a)}.`);
       const fakta = [
         num(a.antallElever) !== null ? `${num(a.antallElever)} elever` : null,
         str(a.eierforhold) ? `${str(a.eierforhold)!.toLowerCase()} skole` : null,
@@ -1198,14 +1220,7 @@ export function describePlaceLine(input: { subtype: string; attributes: AreaAttr
     const til = num(a.hoyesteAlder);
     return fra !== null && til !== null ? `${label}, ${fra}–${til} år` : label;
   }
-  const fra = num(a.lavesteTrinn);
-  const til = num(a.hoyesteTrinn);
-  if (fra === null || til === null) return label;
-  // Udir koder videregående som trinn 11–13. Det heter Vg1–Vg3 på norsk.
-  if (input.subtype === "videregaende_skole") {
-    return fra >= 11 && til <= 13 ? `${label}, Vg${fra - 10}–Vg${til - 10}` : label;
-  }
-  return `${label}, ${fra}.–${til}. trinn`;
+  return describeSkole(input.subtype, a);
 }
 
 /** Oppsummering for «Se alle anlegg i området». */

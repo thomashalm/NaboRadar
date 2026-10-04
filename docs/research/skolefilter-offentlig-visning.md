@@ -112,6 +112,24 @@ undersøkelsen, enhet for enhet (0 avvik av 3 101).
 | Borte fra listen og kartet | – | Eksamenskontoret i Akershus, Filadelfia bibelskole |
 | Admin | 8 skoler | 8 skoler, de to merket med grunn |
 
+## Oppfølging: hvilke skoler som står først
+
+Etter filteret var nærmeste «skole» ved Karl Johans gate 1 fortsatt en videregående skole. Listen
+velger nå de tre første etter trinn — barneskole, ungdomsskole, så de nærmeste øvrige — og merker
+skolene med type. Regelen står i håndboka.
+
+| Adresse | Før (på avstand) | Etter |
+|---|---|---|
+| Karl Johans gate 1, 1 km | Otto Treider (vgs, 620 m), Urtehagen (vgs, 680 m), Møllergata (vgs, 760 m) | St Sunniva (1.–10., 860 m), Otto Treider (vgs, 620 m), Urtehagen (vgs, 680 m) |
+| Lom, 3 km | Jotunheimen vgs (150 m), Lom ungdomsskule (160 m), Loar skule (1.–7., 310 m) | Loar skule (310 m), Lom ungdomsskule (160 m), Jotunheimen vgs (150 m) |
+| Langmyrgrenda 26, 1 km | Korsvoll skole (1.–7., 320 m), Nordberg skole (8.–10., 960 m) | uendret |
+| Kirkeveien 64A, 1 km | Majorstuen skole (1.–10., 100 m), Marienlyst (1.–10., 780 m), Kristelig gymnasium grunnskole (8.–10., 980 m) | uendret |
+| ved Kautokeino skole, 1 km | Kautokeino skole (1.–10., 150 m), Samisk vgs (880 m) | uendret; 1.–10.-skolen står én gang |
+| ved Fjellhamar skole, 1 km | Fjellhamar skole (uten trinn, 160 m), Fjellsrud skole (uten trinn, 400 m), Lørenskog vgs (920 m) | uendret; begge merket «Skole» |
+
+Gråsone: i Lørenskog mangler registeret trinn for flere ekte skoler på rad. Ingen av dem kan
+plasseres som barne- eller ungdomsskole, så de vises som «Skole» i avstandsrekkefølge.
+
 ## Barnehagelenker
 
 30 av 30 kontrollerte lenker til `barnehagefakta.no` åpnet riktig barnehage i nettleser. Siden
