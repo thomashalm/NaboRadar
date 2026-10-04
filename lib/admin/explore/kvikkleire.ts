@@ -48,6 +48,8 @@ export const kvikkleireDataset: ExploreDataset = {
   unit: { one: "kartlagt sone", many: "kartlagte soner" },
   aliases: ["kvikkleire", "kvikkleiresone", "kvikkleiresoner", "kvikkleireområde", "kvikkleireområder", "kvikkleireskred"],
   needsArea: true,
+  policy: { openMap: "ja", omrade: "ja" },
+  pointCheck: "kvikkleire_aktsomhet",
   description:
     "NVEs kartlagte kvikkleiresoner. Aktsomhetsområdene er et annet og mye større kart: de vises ikke som flater, men kan sjekkes for et punkt ved å trykke i kartet.",
 
@@ -73,7 +75,7 @@ export const kvikkleireDataset: ExploreDataset = {
 };
 
 /** Eksportert for test: hva som står i listen og panelet er produktlogikk. */
-export function kvikkleireFeature(rad: Rad, kommune: string | null): ExploreFeature {
+export function kvikkleireFeature(rad: Rad, kommune: string | null): Omit<ExploreFeature, "datasetId" | "datasetLabel"> {
   const a = rad.attributes;
   const utenFare = rad.subtype === "kvikkleire_utredet_uten_fare";
   const tekst = (verdi: unknown) => (typeof verdi === "string" && verdi ? verdi : null);

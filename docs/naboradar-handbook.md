@@ -421,7 +421,7 @@ finnes ingen anonym skrivevei.
 |---|---|
 | `/admin/adresse` | Hva finnes rundt denne adressen? Offentlig resultat pluss intern research |
 | `/admin/research` | Hva vet vi om dette funnet? Oversikt, søk, redigering, kilder og kildestatus |
-| `/admin/research/utforsk` | Hva finnes i dette datasettet, her? Kart først: kvikkleire og datasentre |
+| `/admin/research/utforsk` | Hva finnes i dette datasettet, her? Kart først: plansaker, kvikkleire, kraftnett, forurenset grunn og datasentre, høyst to lag samtidig |
 | `/admin/kart` | Hvor i landet finnes denne typen funn? Nasjonal geografisk utforskning |
 
 ### `/admin/kart` — research-kartet
@@ -2775,37 +2775,119 @@ fylke). Et sted som ikke finnes der, er ukjent — vi gjetter ikke. Heter flere 
 datasettene som finnes; det er ikke et fritekstsøk i hele databasen.
 
 **Datasett-registeret** (`lib/admin/explore/registry.ts`). Hvert datasett er en adapter med
-`aliases`, `needsArea` og `load`, som henter objektene i et område og gjør dem til
+`aliases`, `needsArea`, `policy` og `load`, som henter objektene i et område og gjør dem til
 `ExploreFeature` — tittel, type, kort status, rader til detaljpanelet, forklaring, kilde. Siden,
 kartlaget (`lib/map/layers/explore.ts`), listen og panelet kjenner bare `ExploreFeature`.
+Feltnavn og koder fra kilden vises aldri rått: adapteren oversetter dem, og en kode den ikke
+kjenner, utelates.
 
-| Datasett | Kilde | Geometri | Uten sted |
-|---|---|---|---|
-| Kvikkleire | `area_features`, `nve-kvikkleire-soner` (4 865 flater) | flater | krever kommune, fylke eller et kartutsnitt under 80 km |
-| Datasenter | research-funn med underkategori «Datasenter», via `research_map` | punkter | hele landet |
+| Datasett | Søkeord | Kilde og lesevei | Geometri | Uten sted |
+|---|---|---|---|---|
+| Plansaker | `plan`, `planer`, `plansak`, `plansaker`, `planoppstart`, `reguleringsplan(er)`, `planarbeid` | `events` med uttrekk og dokumenter, via `explore_events` (1 563 saker) | flater | krever område |
+| Kvikkleire | `kvikkleire`, `kvikkleiresone(r)`, `kvikkleireområde(r)`, `kvikkleireskred` | `area_features`, `nve-kvikkleire-soner` (4 865), via `explore_area_features` | flater | krever område |
+| Kraftnett | `kraftnett`, `kraftlinje(r)`, `kraftledning(er)`, `høyspent`, `høyspentlinje(r)`, `transformatorstasjon(er)`, `trafostasjon(er)`, `nettanlegg` | `area_features`, `nve-nettanlegg` (4 115 ledninger, 1 541 stasjoner), via `explore_area_features` | linjer og punkter | krever område |
+| Forurenset grunn | `forurenset grunn`, `forurensning`, `grunnforurensning`, `forurenset`, `forurensede lokaliteter` | `area_features`, `mdir-forurenset-grunn` (15 974), via `explore_area_features` | flater | krever område |
+| Datasenter | `datasenter`, `datasentre`, `datacenter`, `data center` m.fl. | research-funn med underkategori «Datasenter», via `research_map` | punkter | hele landet |
 
-**Nytt datasett:** skriv en `ExploreDataset`, legg den i listen i `registry.ts`, og gi
-objekttypen en farge i kartlaget. Ligger dataene i `area_features`, kan `load` bruke
-`explore_area_features`. Ingen endring i siden.
+«Krever område» betyr kommune, fylke eller et kartutsnitt under 80 km.
+
+**Hvor datasettene kan vises** står som `policy` på hver adapter. Utforsk data er admin uansett;
+feltet er der for at ingen skal bygge en offentlig visning uten å ha sett beslutningen.
+
+| Datasett | Åpent kart senere | `/omrade` |
+|---|---|---|
+| Plansaker | ja | ja |
+| Kvikkleire | ja | ja |
+| Kraftnett | vurderes | ja |
+| Forurenset grunn | **nei** | **nei** |
+| Datasenter | nei | egen beslutning |
+
+Forurenset grunn er og blir internt: ikke på `/omrade`, ikke i noe offentlig kart, og ikke
+gjennom noen offentlig RPC. Kategorien er upublisert i `area_feature_categories`.
+
+**To lag.** Søket velger hovedlaget. «+ Legg til lag» legger ett til, for samme område. Aktive
+lag står som brikker med ×; fjernes hovedlaget, blir det andre hovedlag med samme sted.
+**Høyst to** (`MAX_LAG`): dette er kontrollert research, ikke et GIS. Tilstanden ligger i
+URL-en — `q` (datasett og sted), `kommune` (valg ved flertydig sted), `utsnitt` og `lag` (det
+andre laget) — så en kombinasjon kan bokmerkes. `lib/admin/explore/visning.ts` gjør URL-en om
+til det siden viser, og leser begge lag samtidig: ett kall per lag, samme flate til begge.
+Kartet flytter seg når området endres, ikke når lag legges til eller byttes.
+
+Hvert objekt vet hvilket lag det hører til (`datasetId`, `datasetLabel`), og panelet sier det:
+«Plansaker · Varslet planoppstart». Ligger flere objekter under samme trykk — fra ett eller to
+lag — får admin en liste og velger; det åpnes aldri flere paneler. **Siden sier ingenting om
+hvordan lagene forholder seg til hverandre.** «Denne planen overlapper kvikkleire» er en
+analyse vi ikke gjør; brukeren ser selv. Begge lag ligger i samme kartkilde med lag-ID på hvert
+objekt, så overlapp, avstand eller snitt kan legges til senere uten å endre adapterne.
+
+Farger: plansaker blå, kvikkleire oransje (grønn for «utredet uten fare»), forurenset grunn
+blågrønn, kraftnett lilla, datasentre mørk grå. Flatene har lavt fyll og tydelig kant, så to
+flatelag kan leses oppå hverandre. Ledninger har en usynlig, bredere treffsone.
+
+**Nytt datasett:** skriv en `ExploreDataset` med `policy`, legg den i listen i `registry.ts`, og
+gi objekttypen en farge i kartlaget. Ligger dataene i `area_features`, kan `load` bruke
+`hentAreaFeatures` (`lib/admin/explore/area-features.ts`). Ligger de i en egen tabell, trengs en
+egen avgrenset admin-RPC etter mønsteret i `explore_events` — og den må inn i `RESEARCH`-listen
+i `scripts/verify-db.ts`. Ingen endring i siden.
+
+**Plansaker.** Varsler om planoppstart fra DiBK — de samme sakene som «Planer og saker» på
+`/omrade`, spurt etter område. Panelet viser tiltakstype, formål (ordrett sitat, bare når
+uttrekket fant et), plantype, forslagsstiller, varslingsdato, kommune, planområde, dokumenter
+med lenke og lenke til saken. Nyeste varsel først. **Vi viser ingen status vi ikke har:**
+kilden sier at planarbeid er varslet, ikke om planen senere er vedtatt, endret eller lagt bort,
+og den setningen står i panelet.
+
+**Kraftnett.** NVEs kraftledninger og transformatorstasjoner. Jordkabler og det lokale
+distribusjonsnettet er ikke med. En ledning uten egennavn heter «Kraftledning 132 kV». Panelet
+viser type, navn, spenning, nettnivå, eier og kommune.
+
+**Forurenset grunn.** Miljødirektoratets registrerte lokaliteter. Panelet bruker myndighetens
+egne kategorier (påvirkningsgrad, oppfølging, tilstandsklasse, arealbruk) med de samme tekstene
+som resten av løsningen, og gjør dem ikke sterkere. En registrering gjelder lokaliteten slik den
+er avgrenset, ikke hele eiendommen. Panelet sier at datasettet er internt.
 
 **Kvikkleire.** Datasettet er NVEs *kartlagte* kvikkleiresoner, med status (mulig, påvist,
 utredet uten fare), risikoklasse og faregrad slik kilden har dem. *Aktsomhetsområdene* er et
 annet kart — 148 235 flater som ikke ligger i databasen. De vises ikke som flater. Et trykk i
-kartet der det ikke er noen sone, sjekker punktet mot NVEs aktsomhetskart og svarer «innenfor»,
-«utenfor» eller «ikke dekket». Et aktsomhetsområde presenteres aldri som en kartlagt sone.
+kartet der det ikke er noe objekt, sjekker punktet mot NVEs aktsomhetskart når kvikkleire er et
+av lagene, og svarer «innenfor», «utenfor» eller «ikke dekket». Et aktsomhetsområde presenteres
+aldri som en kartlagt sone.
 
 **Datasenter.** Ikke et eget register: research-funnene leses gjennom samme vei som
 research-kartet. Bare funn med koordinat og standard verifisering vises. Panelet sier at det er
 et internt research-funn, og lenker til funnet for kilder og notater.
 
-**Avgrenset lesing.** `explore_area_features` gir alltid et utsnitt, eventuelt avgrenset videre
-av kommune- eller fylkesflaten, høyst 2 000 objekter per kall (de største først, `total` sier
-hvor mange som fantes), med geometri forenklet etter utsnittets bredde. Ingen bulkeksport, og
-ingen nasjonal GeoJSON i nettleseren.
+**Avgrenset lesing.** Begge lese-RPC-ene krever et utsnitt, eventuelt avgrenset videre av
+kommune- eller fylkesflaten, og forenkler geometrien etter utsnittets bredde.
+`explore_area_features` gir høyst 2 000 objekter per kall (siden ber om 1 500, de største
+først), `explore_events` høyst 2 000 (siden ber om 800, nyeste først). `total` sier hvor mange
+som fantes. Nås taket, står det i listen: «Viser de første 1 500 av 2 899 treff. Zoom inn eller
+avgrens området.» Aldri kuttet i stillhet. Et lag som krever område og ikke har fått et, leses
+ikke, og vises som «ikke vist» — ikke som 0. Ingen bulkeksport, og ingen nasjonal GeoJSON i
+nettleseren.
 
-**Bare admin.** Siden sjekker sesjonen, `explore_area_features` og `research_map` gir bare rader
-når `is_admin()` er sann, anon har ikke EXECUTE, og aktsomhetssjekken er en server action som
-sjekker sesjonen selv. Ingen nye offentlige ruter eller API-er.
+Flaten og utsnittet tolkes én gang i plpgsql-variabler; som del av spørringen ble kommuneflaten
+tolket for hver rad, og Oslo tok halvannet minutt. `area_features` har GiST-indeks på `geom`
+(`area_features_geom_gix`), `events` på `geom` (`events_geom_gix`); begge brukes.
+
+Målt mot produksjon 2026-10-04 (tre kall, varmt; første kall i parentes):
+
+| Område | Plansaker | Kraftnett | Forurenset grunn |
+|---|---|---|---|
+| Oslo | 53 saker, 0,08–0,15 s (0,75), 90 kB | 144 anlegg, 0,07 s (0,10), 76 kB | 1 500 av 2 899, 0,62 s (0,90), 1,4 MB |
+| Bærum | 39, 0,08 s (0,12), 79 kB | 44, 0,06 s, 22 kB | 249, 0,13 s, 216 kB |
+| Trondheim | 55, 0,07 s (0,18), 109 kB | 60, 0,05 s, 32 kB | 1 461, 0,16 s, 1,1 MB |
+| Trøndelag | 152, 0,12 s (0,27), 273 kB | 446, 0,10 s, 221 kB | 1 500 av 2 492, 0,25–0,30 s, 1,1 MB |
+| Innlandet | 124, 0,18 s (0,43), 216 kB | 466, 0,21–0,32 s (0,82), 224 kB | 1 185, 0,46 s (1,02), 871 kB |
+
+Størrelsene er svaret fra databasen. Det siden sender til nettleseren er større, fordi hvert
+objekt har ferdige panelrader: forurenset grunn i Oslo er 2,4 MB. Det er det tyngste søket som
+finnes i dag, og grunnen til at taket står på 1 500.
+
+**Bare admin.** Siden sjekker sesjonen. `explore_area_features`, `explore_events` og
+`research_map` gir bare rader når `is_admin()` er sann, anon har ikke EXECUTE, og
+aktsomhetssjekken er en server action som sjekker sesjonen selv. Ingen nye offentlige ruter
+eller API-er. `npm run db:verify` kontrollerer rettighetene.
 
 ### Adressesøk og kart
 

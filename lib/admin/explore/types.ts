@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { MultiPolygon, Point, Polygon } from "geojson";
+import type { LineString, MultiLineString, MultiPolygon, Point, Polygon } from "geojson";
 
 /**
  * Utforsk data: typene datasettene og siden deler.
@@ -10,15 +10,25 @@ import type { MultiPolygon, Point, Polygon } from "geojson";
  */
 
 /** Hvordan objektet tegnes. Fargene bor i kartlaget (lib/map/layers/explore.ts). */
-export type ExploreStyle = "kvikkleire_sone" | "kvikkleire_uten_fare" | "datasenter";
+export type ExploreStyle =
+  | "kvikkleire_sone"
+  | "kvikkleire_uten_fare"
+  | "datasenter"
+  | "plansak"
+  | "kraftledning"
+  | "transformatorstasjon"
+  | "forurenset_grunn";
 
 export interface ExploreFeature {
   id: string;
+  /** Datasettet objektet kommer fra. Settes av siden, ikke av adapteren. */
+  datasetId: string;
+  datasetLabel: string;
   title: string;
   /** «Kartlagt kvikkleiresone», «Datasenter». Aldri en type kilden ikke oppgir. */
   kind: string;
   style: ExploreStyle;
-  geometry: Polygon | MultiPolygon | Point;
+  geometry: Polygon | MultiPolygon | Point | LineString | MultiLineString;
   /** Punkt å fokusere på. */
   center: [number, number];
   /** Kommune eller sted, når vi har det. */
@@ -33,6 +43,8 @@ export interface ExploreFeature {
   notice: string | null;
   sourceName: string;
   sourceUrl: string | null;
+  /** Lenker som hører til objektet, f.eks. saksdokumenter. */
+  links?: { label: string; url: string }[];
   /** Intern lenke for mer, f.eks. research-funnet. */
   href: string | null;
   hrefLabel: string | null;
@@ -58,7 +70,8 @@ export interface ExploreArea {
 }
 
 export interface ExploreResult {
-  features: ExploreFeature[];
+  /** Uten `datasetId` og `datasetLabel`: de legges på av siden. */
+  features: Omit<ExploreFeature, "datasetId" | "datasetLabel">[];
   /** Hvor mange som finnes i området. Større enn `features.length` når svaret er kuttet. */
   total: number;
   /** Satt når noe gikk galt. Da er `features` tom, og dette er ikke «ingen treff». */
@@ -80,5 +93,12 @@ export interface ExploreDataset {
   needsArea: boolean;
   /** Én linje om hva datasettet er og ikke er. */
   description: string;
+  /**
+   * Hvor datasettet kan vises. Bare dokumentasjon her — Utforsk data er admin uansett — men den
+   * står ved datasettet, slik at ingen bygger en offentlig visning uten å ha sett beslutningen.
+   */
+  policy: { openMap: "ja" | "nei" | "vurderes"; omrade: "ja" | "nei" | "egen beslutning" };
+  /** Om et trykk i kartet uten objekt skal sjekke punktet mot en ekstern kilde. */
+  pointCheck?: "kvikkleire_aktsomhet";
   load(client: SupabaseClient, area: ExploreArea | null): Promise<ExploreResult>;
 }

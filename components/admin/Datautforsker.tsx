@@ -7,18 +7,33 @@ import { sjekkAktsomhetAction } from "@/app/admin/research/utforsk/actions";
 import { AreaMap, type MapPopupContent } from "@/components/map/AreaMap";
 import { NORGE } from "@/lib/admin/kart-bounds";
 import { AKTSOMHET_TEKST, type Aktsomhet } from "@/lib/admin/explore/aktsomhet";
+import { utforskHref } from "@/lib/admin/explore/href";
 import type { ExploreFeature, LngLatBox } from "@/lib/admin/explore/types";
 import type { LngLatBounds } from "@/lib/geo/bounds";
 import type { MapTileConfig } from "@/lib/map/config";
 import { EXPLORE_COLOR, exploreLayer } from "@/lib/map/layers/explore";
 import { bindLayer } from "@/lib/map/layers/types";
 
-interface DatasettInfo {
+export interface DatasettInfo {
   id: string;
   label: string;
   description: string;
   unit: { one: string; many: string };
   needsArea: boolean;
+  pointCheck: "kvikkleire_aktsomhet" | null;
+}
+
+/** Ett aktivt lag: datasettet, treffene og hvordan laget fjernes. */
+export interface Lagvisning {
+  dataset: DatasettInfo;
+  features: ExploreFeature[];
+  /** Hvor mange som finnes i området. Større enn `features.length` når svaret er kuttet. */
+  total: number;
+  /** Laget kunne ikke hentes. Det andre laget vises likevel. */
+  feil: string | null;
+  /** Laget er for stort uten sted eller utsnitt. */
+  trengerOmrade: boolean;
+  fjernHref: string;
 }
 
 /** Hva siden har kommet fram til. Hver tilstand har sin egen, ærlige melding. */
@@ -31,10 +46,13 @@ export type UtforskVisning =
   | { status: "feil"; dataset: DatasettInfo; melding: string }
   | {
       status: "treff";
-      dataset: DatasettInfo;
       omrade: { kind: "kommune" | "fylke" | "utsnitt"; navn: string | null; fylke: string | null; box: LngLatBox } | null;
-      features: ExploreFeature[];
-      total: number;
+      /** Ett eller to lag. Det første er hovedlaget fra søket. */
+      lag: Lagvisning[];
+      /** Datasettene som kan legges til som lag nummer to. Tom når to lag er aktive. */
+      leggTil: { id: string; label: string; href: string }[];
+      /** Adressen for «Søk i kartutsnittet», med `__UTSNITT__` der utsnittet skal stå. */
+      utsnittHref: string;
       maksKm: number;
     };
 
@@ -72,15 +90,20 @@ export function Datautforsker({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [valgt, setValgt] = useState<string | null>(null);
-  const [vist, setVist] = useState(LISTE_SIDE);
+  const [vist, setVist] = useState<Record<string, number>>({});
   const [punkt, setPunkt] = useState<Punktsjekk | null>(null);
+  /** Flere objekter under samme trykk. Brukeren velger hvilket. */
+  const [underMarkor, setUnderMarkor] = useState<string[]>([]);
   const [utsnitt, setUtsnitt] = useState<LngLatBounds | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  const features = visning.status === "treff" ? visning.features : INGEN;
-  const dataset = "dataset" in visning ? visning.dataset : null;
+  const lagene = visning.status === "treff" ? visning.lag : INGEN_LAG;
+  // Ett kartlag for alle objektene. Hovedlaget tegnes sist, og ligger dermed øverst.
+  const features = useMemo(() => [...lagene].reverse().flatMap((l) => l.features), [lagene]);
+  const datasett = visning.status === "treff" ? lagene.map((l) => l.dataset) : "dataset" in visning ? [visning.dataset] : [];
   const valgtFeature = features.find((f) => f.id === valgt) ?? null;
-  const erKvikkleire = dataset?.id === "kvikkleire";
+  const punktsjekk = datasett.some((d) => d.pointCheck === "kvikkleire_aktsomhet");
+  const kreverOmrade = datasett.some((d) => d.needsArea);
 
   const lag = useMemo(() => [bindLayer(exploreLayer, features)], [features]);
 
@@ -98,10 +121,18 @@ export function Datautforsker({
     }
     return NORGE;
   }, [visning, features]);
-  const fitKey = `${q}|${visning.status}|${visning.status === "treff" ? (visning.omrade?.navn ?? JSON.stringify(visning.omrade?.box ?? null)) : ""}`;
+  // Kartet flytter seg når området endres, ikke når lag legges til, fjernes eller byttes: da
+  // skal brukeren bli stående der hun så. Uten område følger kartet hovedlagets treff.
+  const fitKey =
+    visning.status === "treff"
+      ? visning.omrade
+        ? `omrade|${visning.omrade.navn ?? JSON.stringify(visning.omrade.box)}`
+        : `lag|${visning.lag[0]?.dataset.id}`
+      : `${visning.status}|${q}`;
 
   const velg = useCallback((id: string | null) => {
     setValgt(id);
+    setUnderMarkor([]);
     if (id) setPunkt(null);
   }, []);
 
@@ -119,22 +150,28 @@ export function Datautforsker({
   const popupFor = useCallback(
     (id: string): MapPopupContent | null => {
       const f = features.find((x) => x.id === id);
-      return f ? { lngLat: f.center, title: f.title, lines: [f.kind, f.summary].filter((l): l is string => !!l), minZoom: f.geometry.type === "Point" ? 12 : 13 } : null;
+      return f ? { lngLat: f.center, title: f.title, lines: [lagOgType(f), f.summary].filter((l): l is string => !!l), minZoom: f.geometry.type === "Point" ? 12 : 13 } : null;
     },
     [features],
   );
 
   /**
-   * Trykk i kartflaten. En sone under punktet velges. Ellers, for kvikkleire: sjekk om punktet
-   * ligger i NVEs aktsomhetsområde — det kartet har vi ikke som flater.
+   * Trykk i kartflaten. Ligger ett objekt under punktet, velges det. Ligger flere der — to lag
+   * oppå hverandre — får brukeren velge. Ligger ingen der, og et av lagene er kvikkleire, sjekkes
+   * punktet mot NVEs aktsomhetskart, som vi ikke har som flater.
    */
   const trykkIKart = useCallback(
     (position: { lat: number; lng: number }, covering: string[]) => {
-      if (covering[0]) {
-        velg(covering[0]);
+      const unike = [...new Set(covering)];
+      if (unike.length === 1) {
+        velg(unike[0]!);
         return;
       }
       setValgt(null);
+      setPunkt(null);
+      setUnderMarkor(unike);
+      if (unike.length > 1 || !punktsjekk) return;
+
       setPunkt({ status: "laster", ...position });
       void sjekkAktsomhetAction(position.lat, position.lng).then((svar) =>
         setPunkt((nå) =>
@@ -146,18 +183,20 @@ export function Datautforsker({
         ),
       );
     },
-    [velg],
+    [velg, punktsjekk],
   );
 
   const utsnittKm = utsnitt
     ? (utsnitt[1][0] - utsnitt[0][0]) * 111.32 * Math.cos((((utsnitt[0][1] + utsnitt[1][1]) / 2) * Math.PI) / 180)
     : null;
   const maksKm = visning.status === "treff" || visning.status === "trenger_omrade" ? visning.maksKm : 0;
-  const kanSøkeIUtsnitt = !!dataset?.needsArea && utsnitt !== null && utsnittKm !== null && utsnittKm <= maksKm;
+  const kanSøkeIUtsnitt = kreverOmrade && utsnitt !== null && utsnittKm !== null && utsnittKm <= maksKm;
   const søkIUtsnitt = () => {
-    if (!utsnitt || !dataset) return;
+    const hoved = datasett[0];
+    if (!utsnitt || !hoved) return;
     const verdi = [utsnitt[0][0], utsnitt[0][1], utsnitt[1][0], utsnitt[1][1]].map((n) => n.toFixed(4)).join(",");
-    startTransition(() => router.replace(`/admin/research/utforsk?${new URLSearchParams({ q: dataset.label.toLowerCase(), utsnitt: verdi })}`, { scroll: false }));
+    const mal = visning.status === "treff" ? visning.utsnittHref : utforskHref({ q: hoved.label.toLowerCase(), utsnitt: "__UTSNITT__" });
+    startTransition(() => router.replace(mal.replace("__UTSNITT__", encodeURIComponent(verdi)), { scroll: false }));
   };
 
   return (
@@ -187,7 +226,9 @@ export function Datautforsker({
           <Status visning={visning} forslag={forslag} />
         </div>
 
-        {dataset?.needsArea && (visning.status === "treff" || visning.status === "trenger_omrade") && (
+        {visning.status === "treff" && <Lagrad lag={visning.lag} leggTil={visning.leggTil} />}
+
+        {kreverOmrade && (visning.status === "treff" || visning.status === "trenger_omrade") && (
           <div className="mt-3">
             <button
               type="button"
@@ -209,39 +250,24 @@ export function Datautforsker({
         <div ref={panelRef} className="mt-5 scroll-mt-4">
           {valgtFeature ? (
             <Detaljpanel feature={valgtFeature} lukk={() => setValgt(null)} />
+          ) : underMarkor.length > 1 ? (
+            <Velgpanel features={underMarkor.flatMap((id) => features.find((f) => f.id === id) ?? [])} velg={velg} lukk={() => setUnderMarkor([])} />
           ) : punkt ? (
             <Punktpanel punkt={punkt} lukk={() => setPunkt(null)} />
           ) : null}
         </div>
 
-        {features.length > 0 && (
-          <ul className="mt-4 divide-y divide-line border-y border-line">
-            {features.slice(0, vist).map((f) => (
-              <li key={f.id}>
-                <button
-                  type="button"
-                  onClick={() => velgFraListe(f.id)}
-                  aria-pressed={valgt === f.id}
-                  className={`flex w-full items-start gap-3 px-2 py-2.5 text-left focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none ${
-                    valgt === f.id ? "bg-accent-soft" : "hover:bg-ink/[0.03]"
-                  }`}
-                >
-                  <span aria-hidden="true" className="mt-1.5 size-2.5 shrink-0 rounded-full" style={{ background: EXPLORE_COLOR[f.style] }} />
-                  <span className="min-w-0">
-                    <span className="block text-[15px] font-medium text-ink [overflow-wrap:anywhere]">{f.title}</span>
-                    <span className="block text-[13px] text-muted">{[f.kind, f.place].filter(Boolean).join(" · ")}</span>
-                    {f.summary && <span className="block text-[13px] text-muted">{f.summary}</span>}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-        {features.length > vist && (
-          <button type="button" onClick={() => setVist((n) => n + LISTE_SIDE)} className="mt-3 self-start text-[15px] font-medium text-accent hover:underline">
-            Vis flere ({features.length - vist} til)
-          </button>
-        )}
+        {lagene.map((lag) => (
+          <Lagliste
+            key={lag.dataset.id}
+            lag={lag}
+            visOverskrift={lagene.length > 1}
+            vist={vist[lag.dataset.id] ?? LISTE_SIDE}
+            valgt={valgt}
+            velg={velgFraListe}
+            mer={() => setVist((n) => ({ ...n, [lag.dataset.id]: (n[lag.dataset.id] ?? LISTE_SIDE) + LISTE_SIDE }))}
+          />
+        ))}
 
         <Link href="/admin/research" className="mt-8 text-[15px] font-medium text-accent hover:underline">
           Til research
@@ -251,7 +277,7 @@ export function Datautforsker({
       <div className="relative order-2 mx-5 mt-5 h-[55vh] min-h-72 overflow-hidden rounded-2xl border border-line sm:mx-8 lg:order-none lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:m-0 lg:h-auto lg:rounded-none lg:border-0 lg:border-l">
         <AreaMap
           tiles={tiles}
-          title={dataset ? `Kart over ${dataset.label.toLowerCase()}, ${features.length} objekter` : "Kart over Norge"}
+          title={datasett.length > 0 ? `Kart over ${datasett.map((d) => d.label.toLowerCase()).join(" og ")}, ${features.length} objekter` : "Kart over Norge"}
           layers={lag}
           fitBounds={fitBounds}
           fitKey={fitKey}
@@ -259,12 +285,12 @@ export function Datautforsker({
           selectedId={valgt}
           onSelect={velg}
           onPropertyClick={trykkIKart}
-          propertyLookupActive={erKvikkleire}
+          propertyLookupActive
           onViewportChange={setUtsnitt}
           popupFor={popupFor}
           popupTakesFocus={false}
         />
-        {erKvikkleire && (
+        {punktsjekk && (
           <p className="pointer-events-none absolute inset-x-0 bottom-3 text-center text-[13px] text-muted">
             <span className="rounded-full bg-surface/90 px-3 py-1.5">Trykk i kartet for å sjekke aktsomhetsområde i et punkt</span>
           </p>
@@ -274,7 +300,158 @@ export function Datautforsker({
   );
 }
 
-const INGEN: ExploreFeature[] = [];
+const INGEN_LAG: Lagvisning[] = [];
+
+/** «Plansaker · Varslet planoppstart». Er laget og typen samme ord, står det én gang. */
+const lagOgType = (f: ExploreFeature) => (f.datasetLabel.toLowerCase() === f.kind.toLowerCase() ? f.datasetLabel : `${f.datasetLabel} · ${f.kind}`);
+
+/** De aktive lagene som brikker med ×, og «Legg til lag» når det er plass til ett til. */
+function Lagrad({ lag, leggTil }: { lag: Lagvisning[]; leggTil: { id: string; label: string; href: string }[] }) {
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-2">
+      {lag.map((l) => (
+        <span key={l.dataset.id} className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface py-0.5 pr-0.5 pl-3 text-[14px] text-ink">
+          <span aria-hidden="true" className="size-2.5 rounded-full" style={{ background: farge(l) }} />
+          {l.dataset.label}
+          <Link href={l.fjernHref} aria-label={`Fjern laget ${l.dataset.label}`} className="grid size-8 place-items-center rounded-full text-[16px] leading-none text-muted hover:bg-ink/[0.06] hover:text-ink">
+            ×
+          </Link>
+        </span>
+      ))}
+      {leggTil.length > 0 && (
+        <details className="relative">
+          <summary className="cursor-pointer list-none rounded-full border border-dashed border-line-strong px-3 py-1.5 text-[14px] font-medium text-ink hover:border-ink [&::-webkit-details-marker]:hidden">
+            + Legg til lag
+          </summary>
+          <ul className="absolute z-20 mt-1.5 min-w-48 rounded-xl border border-line bg-surface py-1.5 shadow-pop">
+            {leggTil.map((d) => (
+              <li key={d.id}>
+                <Link href={d.href} className="block px-4 py-2 text-[14px] text-ink hover:bg-ink/[0.04]">
+                  {d.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </div>
+  );
+}
+
+/** Fargen laget har i kartet: den første objekttypen, ellers datasettets egen. */
+const LAGFARGE: Record<string, keyof typeof EXPLORE_COLOR> = {
+  plansaker: "plansak",
+  kvikkleire: "kvikkleire_sone",
+  kraftnett: "kraftledning",
+  "forurenset-grunn": "forurenset_grunn",
+  datasenter: "datasenter",
+};
+const farge = (lag: Lagvisning) => EXPLORE_COLOR[lag.features[0]?.style ?? LAGFARGE[lag.dataset.id] ?? "datasenter"];
+
+/** Treffene i ett lag: telling, eventuell melding og listen. */
+function Lagliste({
+  lag,
+  visOverskrift,
+  vist,
+  valgt,
+  velg,
+  mer,
+}: {
+  lag: Lagvisning;
+  visOverskrift: boolean;
+  vist: number;
+  valgt: string | null;
+  velg: (id: string) => void;
+  mer: () => void;
+}) {
+  const { features, total, dataset } = lag;
+  return (
+    <section className="mt-4" aria-label={dataset.label}>
+      {visOverskrift && (
+        <h3 className="flex items-center gap-2 text-xs font-semibold tracking-[0.08em] text-muted uppercase">
+          <span aria-hidden="true" className="size-2.5 rounded-full" style={{ background: farge(lag) }} />
+          {dataset.label} · {tellTekst(lag)}
+        </h3>
+      )}
+      {lag.feil && <p className="mt-2 rounded-xl bg-danger-soft px-3 py-2 text-[14px] text-danger">Kunne ikke hente {dataset.label.toLowerCase()}: {lag.feil}</p>}
+      {lag.trengerOmrade && (
+        <p className="mt-2 rounded-xl border border-dashed border-line-strong px-3 py-2 text-[14px] text-ink">
+          {dataset.label} er for stort til å vises for hele landet. Legg til et sted i søket, eller zoom inn og søk i kartutsnittet.
+        </p>
+      )}
+      {/* Aldri kuttet i stillhet: nås taket, står det her. */}
+      {features.length < total && (
+        <p className="mt-2 rounded-xl bg-canvas px-3 py-2 text-[14px] text-ink">
+          Viser de første {features.length.toLocaleString("nb-NO")} av {total.toLocaleString("nb-NO")} treff. Zoom inn eller avgrens området.
+        </p>
+      )}
+      {features.length > 0 && (
+        <ul className="mt-2 divide-y divide-line border-y border-line">
+          {features.slice(0, vist).map((f) => (
+            <li key={f.id}>
+              <button
+                type="button"
+                onClick={() => velg(f.id)}
+                aria-pressed={valgt === f.id}
+                className={`flex w-full items-start gap-3 px-2 py-2.5 text-left focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none ${
+                  valgt === f.id ? "bg-accent-soft" : "hover:bg-ink/[0.03]"
+                }`}
+              >
+                <span aria-hidden="true" className="mt-1.5 size-2.5 shrink-0 rounded-full" style={{ background: EXPLORE_COLOR[f.style] }} />
+                <span className="min-w-0">
+                  <span className="block text-[15px] font-medium text-ink [overflow-wrap:anywhere]">{f.title}</span>
+                  <span className="block text-[13px] text-muted">{[f.kind, f.place].filter(Boolean).join(" · ")}</span>
+                  {f.summary && <span className="block text-[13px] text-muted">{f.summary}</span>}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {features.length > vist && (
+        <button type="button" onClick={mer} className="mt-3 text-[15px] font-medium text-accent hover:underline">
+          Vis flere ({features.length - vist} til)
+        </button>
+      )}
+    </section>
+  );
+}
+
+/** Antallet i laget. Et lag som ikke er lest, har ikke «0» — det har ikke noe tall. */
+const tellTekst = (lag: Lagvisning) =>
+  lag.feil
+    ? `${lag.dataset.unit.many} ikke hentet`
+    : lag.trengerOmrade
+      ? `${lag.dataset.unit.many} ikke vist`
+      : `${lag.total.toLocaleString("nb-NO")} ${lag.total === 1 ? lag.dataset.unit.one : lag.dataset.unit.many}`;
+
+/** Flere objekter under samme trykk i kartet. Ett panel om gangen: brukeren velger. */
+function Velgpanel({ features, velg, lukk }: { features: ExploreFeature[]; velg: (id: string) => void; lukk: () => void }) {
+  return (
+    <section aria-label="Flere objekter her" className="rounded-2xl border border-line bg-surface px-4 py-4">
+      <div className="flex items-start justify-between gap-3">
+        <h2 className="text-[15px] font-medium text-ink">{features.length} objekter under punktet. Hvilket vil du se?</h2>
+        <button type="button" onClick={lukk} aria-label="Lukk" className="shrink-0 rounded-full px-2 text-[18px] leading-none text-muted hover:text-ink">
+          ×
+        </button>
+      </div>
+      <ul className="mt-2 divide-y divide-line">
+        {features.map((f) => (
+          <li key={f.id}>
+            <button type="button" onClick={() => velg(f.id)} className="flex w-full items-start gap-3 py-2 text-left hover:bg-ink/[0.03]">
+              <span aria-hidden="true" className="mt-1.5 size-2.5 shrink-0 rounded-full" style={{ background: EXPLORE_COLOR[f.style] }} />
+              <span className="min-w-0">
+                <span className="block text-[14px] font-medium text-ink [overflow-wrap:anywhere]">{f.title}</span>
+                <span className="block text-[13px] text-muted">{lagOgType(f)}</span>
+                {f.summary && <span className="block text-[13px] text-muted">{f.summary}</span>}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
 
 /** Datasettene det går an å søke i, som lenker. */
 function Forslagsliste({ forslag }: { forslag: { id: string; label: string; description: string }[] }) {
@@ -349,15 +526,18 @@ function Status({ visning, forslag }: { visning: UtforskVisning; forslag: { id: 
       return <p className="rounded-2xl bg-danger-soft px-4 py-3 text-[15px] text-danger">{visning.melding}</p>;
     case "treff": {
       const sted = visning.omrade?.kind === "utsnitt" ? "kartutsnittet" : visning.omrade?.navn;
-      const enhet = visning.total === 1 ? visning.dataset.unit.one : visning.dataset.unit.many;
+      const hoved = visning.lag[0]!;
       return (
         <div>
-          <h2 className="text-[17px] font-medium text-ink">{[visning.dataset.label, sted ?? "hele landet"].join(" · ")}</h2>
-          <p className="mt-0.5 text-[15px] text-ink">
-            {visning.total === 0 ? `Ingen ${visning.dataset.unit.many} ${sted ? `i ${sted}` : "registrert"}.` : `${visning.total.toLocaleString("nb-NO")} ${enhet}`}
-            {visning.features.length < visning.total && ` · kartet viser de ${visning.features.length.toLocaleString("nb-NO")} største`}
-          </p>
-          <p className="mt-2 text-[13px] text-muted">{visning.dataset.description}</p>
+          <h2 className="text-[17px] font-medium text-ink">{[visning.lag.map((l) => l.dataset.label).join(" + "), sted ?? "hele landet"].join(" · ")}</h2>
+          {visning.lag.length === 1 ? (
+            <p className="mt-0.5 text-[15px] text-ink">
+              {hoved.feil ? "" : hoved.total === 0 ? `Ingen ${hoved.dataset.unit.many} ${sted ? `i ${sted}` : "registrert"}.` : tellTekst(hoved)}
+            </p>
+          ) : (
+            <p className="mt-0.5 text-[15px] text-ink">{visning.lag.map((l) => `${tellTekst(l)}`).join(" · ")}</p>
+          )}
+          {visning.lag.length === 1 && <p className="mt-2 text-[13px] text-muted">{hoved.dataset.description}</p>}
         </div>
       );
     }
@@ -369,7 +549,11 @@ function Detaljpanel({ feature, lukk }: { feature: ExploreFeature; lukk: () => v
     <section aria-label="Detaljer" className="rounded-2xl border border-line bg-surface px-4 py-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[12px] font-medium tracking-[0.04em] text-muted uppercase">{feature.kind}</p>
+          {/* Datasettet står først: med to lag i kartet er det det første man må vite. */}
+          <p className="flex items-center gap-1.5 text-[12px] font-medium tracking-[0.04em] text-muted uppercase">
+            <span aria-hidden="true" className="size-2 rounded-full" style={{ background: EXPLORE_COLOR[feature.style] }} />
+            {lagOgType(feature)}
+          </p>
           <h2 className="mt-0.5 text-[17px] font-medium text-ink [overflow-wrap:anywhere]">{feature.title}</h2>
         </div>
         <button type="button" onClick={lukk} aria-label="Lukk detaljer" className="shrink-0 rounded-full px-2 text-[18px] leading-none text-muted hover:text-ink">
@@ -385,6 +569,17 @@ function Detaljpanel({ feature, lukk }: { feature: ExploreFeature; lukk: () => v
           </div>
         ))}
       </dl>
+      {feature.links && feature.links.length > 0 && (
+        <ul className="mt-3 space-y-1 border-t border-line pt-3">
+          {feature.links.map((lenke) => (
+            <li key={lenke.url}>
+              <a href={lenke.url} target="_blank" rel="noopener noreferrer" className="text-[14px] text-accent hover:underline [overflow-wrap:anywhere]">
+                {lenke.label} ↗
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
       {feature.explanation && <p className="mt-3 text-[13px] leading-relaxed text-muted">{feature.explanation}</p>}
       <p className="mt-3 text-[13px] text-muted">
         Kilde:{" "}
@@ -411,7 +606,7 @@ function Punktpanel({ punkt, lukk }: { punkt: Punktsjekk; lukk: () => void }) {
     <section aria-label="Punkt i kartet" aria-live="polite" className="rounded-2xl border border-line bg-surface px-4 py-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[12px] font-medium tracking-[0.04em] text-muted uppercase">Punkt i kartet · ingen kartlagt sone her</p>
+          <p className="text-[12px] font-medium tracking-[0.04em] text-muted uppercase">Punkt i kartet · ingen objekter her</p>
           <h2 className="mt-0.5 text-[17px] font-medium text-ink">
             {punkt.status === "laster" ? "Sjekker aktsomhetskartet …" : punkt.status === "feil" ? "Kunne ikke sjekke aktsomhetskartet" : tekst!.tittel}
           </h2>

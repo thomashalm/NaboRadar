@@ -4,9 +4,12 @@ vi.mock("server-only", () => ({}));
 
 import { AKTSOMHET_TEKST } from "@/lib/admin/explore/aktsomhet";
 import { boksFor, lesUtsnitt, punktIFlate, utsnittKm } from "@/lib/admin/explore/area";
+import { forurensetGrunnFeature } from "@/lib/admin/explore/forurenset-grunn";
+import { kraftnettFeature } from "@/lib/admin/explore/kraftnett";
 import { kvikkleireFeature } from "@/lib/admin/explore/kvikkleire";
+import { plansakFeature } from "@/lib/admin/explore/plansaker";
 import { tolkSok } from "@/lib/admin/explore/parse";
-import { EXPLORE_DATASETS } from "@/lib/admin/explore/registry";
+import { EXPLORE_DATASETS, MAX_LAG } from "@/lib/admin/explore/registry";
 
 /**
  * Utforsk data: søket tolkes deterministisk. Et ord velger datasettet, resten er et sted fra
@@ -154,5 +157,161 @@ describe("kvikkleire i panelet og listen", () => {
     const kvikkleire = EXPLORE_DATASETS.find((d) => d.id === "kvikkleire")!;
     expect(kvikkleire.needsArea).toBe(true);
     expect(kvikkleire.description).toContain("Aktsomhetsområdene er et annet");
+  });
+});
+
+describe("nye datasett i søket", () => {
+  it("plansaker, kraftnett og forurenset grunn velges av sine ord", () => {
+    for (const sok of ["planer Bærum", "plansaker Bærum", "plan Bærum", "reguleringsplaner Bærum"]) expect(tolk(sok)).toMatchObject({ dataset: { id: "plansaker" }, sted: { status: "ok", sted: { number: "3201" } } });
+    for (const sok of ["kraftlinjer Oslo", "kraftnett Oslo", "kraftlinje Oslo", "transformatorstasjoner Oslo", "transformatorstasjon Oslo"]) expect(tolk(sok)).toMatchObject({ dataset: { id: "kraftnett" }, sted: { status: "ok", sted: { number: "0301" } } });
+    for (const sok of ["forurenset grunn Trondheim", "forurensning Trondheim", "Trondheim forurenset grunn"]) expect(tolk(sok)).toMatchObject({ dataset: { id: "forurenset-grunn" }, sted: { status: "ok", sted: { number: "5001" } } });
+  });
+
+  it("flerordsalias tar hele uttrykket: «grunn» blir ikke et sted", () => {
+    expect(tolk("forurenset grunn")).toMatchObject({ dataset: { id: "forurenset-grunn" }, stedTekst: "", sted: { status: "ingen" } });
+  });
+
+  it("ingen ord velger to datasett, og alle har en policy", () => {
+    const alle = EXPLORE_DATASETS.flatMap((d) => d.aliases.map((a) => [a, d.id] as const));
+    expect(new Set(alle.map(([a]) => a)).size).toBe(alle.length);
+    for (const d of EXPLORE_DATASETS) expect(d.policy).toBeDefined();
+  });
+
+  it("policyen følger beslutningene: forurenset grunn og datasentre er ikke for åpent kart", () => {
+    const policy = Object.fromEntries(EXPLORE_DATASETS.map((d) => [d.id, d.policy]));
+    expect(policy).toEqual({
+      plansaker: { openMap: "ja", omrade: "ja" },
+      kvikkleire: { openMap: "ja", omrade: "ja" },
+      kraftnett: { openMap: "vurderes", omrade: "ja" },
+      "forurenset-grunn": { openMap: "nei", omrade: "nei" },
+      datasenter: { openMap: "nei", omrade: "egen beslutning" },
+    });
+  });
+
+  it("alle store datasett krever område; bare datasentre vises for hele landet", () => {
+    expect(Object.fromEntries(EXPLORE_DATASETS.map((d) => [d.id, d.needsArea]))).toEqual({
+      plansaker: true,
+      kvikkleire: true,
+      kraftnett: true,
+      "forurenset-grunn": true,
+      datasenter: false,
+    });
+    expect(MAX_LAG).toBe(2);
+  });
+});
+
+describe("plansaker i panelet", () => {
+  const rad = (over: Record<string, unknown> = {}) =>
+    ({
+      id: "sak-1",
+      title: "Detaljregulering for Storgata 1, boliger",
+      type: "planning_started",
+      municipality_number: "3201",
+      announced_at: "2026-03-10",
+      source_url: "https://plandata.ft.dibk.no/x",
+      area_m2: 12345.6,
+      attributes: { planId: "r2026001", plantype: "Detaljregulering", proposerType: "Foretak", tiltakstype: "bolig", formaal: "Legge til rette for boligbebyggelse" },
+      documents: [
+        { type: "Planvarsel", title: "Planvarsel.pdf", url: "https://plandata.ft.dibk.no/d/1", date: "2026-03-10" },
+        { type: "Planinitiativ", title: "Planinitiativ", url: "https://plandata.ft.dibk.no/d/2", date: null },
+        { type: "Annet", title: "Ugyldig", url: "javascript:alert(1)", date: null },
+      ],
+      geometry: { type: "Polygon", coordinates: [[[10, 59], [10.1, 59], [10.1, 59.1], [10, 59]]] },
+      center: { type: "Point", coordinates: [10.05, 59.05] },
+      total: 1,
+      ...over,
+    }) as Parameters<typeof plansakFeature>[0];
+  const verdi = (f: ReturnType<typeof plansakFeature>, label: string) => f.details.find((d) => d.label === label)?.value;
+
+  it("viser tiltakstype, formål som sitat, dato, kommune og dokumenter", () => {
+    const f = plansakFeature(rad(), "Bærum");
+    expect(f.kind).toBe("Varslet planoppstart");
+    expect(verdi(f, "Tiltakstype")).toBe("Boligprosjekt");
+    expect(verdi(f, "Formål")).toBe("«Legge til rette for boligbebyggelse»");
+    expect(verdi(f, "Kommune")).toBe("Bærum");
+    expect(verdi(f, "Plantype")).toBe("Detaljregulering");
+    expect(verdi(f, "Dokumenter")).toBe("2");
+    expect(f.links!.map((l) => l.url)).toEqual(["https://plandata.ft.dibk.no/d/1", "https://plandata.ft.dibk.no/d/2"]);
+    expect(f.links!.map((l) => l.label)).toEqual(["Varsel om oppstart · Planvarsel.pdf · 10. mars 2026", "Planinitiativ · Planinitiativ"]);
+    expect(f.href).toBe("/sak/sak-1");
+  });
+
+  it("uten formål står det ingenting om formål — vi oppsummerer ikke selv", () => {
+    const f = plansakFeature(rad({ attributes: { plantype: "Detaljregulering" }, documents: [] }), null);
+    expect(verdi(f, "Formål")).toBeUndefined();
+    expect(verdi(f, "Dokumenter")).toBe("ingen i kilden");
+    expect(f.links).toEqual([]);
+  });
+
+  it("dikter ikke status: forbeholdet står, og ingen ord om vedtak", () => {
+    const f = plansakFeature(rad(), "Bærum");
+    expect(f.explanation).toBe("Vi vet ikke om planene senere er vedtatt, endret eller lagt bort.");
+    expect(JSON.stringify(f.details)).not.toMatch(/vedtatt|godkjent|avslått|pågår/i);
+    // Ukjent dokumenttype vises ikke med kildens kode.
+    const ukjent = plansakFeature(rad({ documents: [{ type: "NyKodeFraKilden", title: "Notat.pdf", url: "https://example.com/n", date: null }] }), null);
+    expect(ukjent.links![0]!.label).toBe("Dokument · Notat.pdf");
+  });
+});
+
+describe("kraftnett i panelet", () => {
+  const rad = (subtype: string, title: string, attributes: Record<string, string | number | null>, geometry: unknown) =>
+    ({ id: "k1", external_id: "e1", title, subtype, attributes, source_url: null, source_updated_at: null, geometry, center: { type: "Point", coordinates: [10, 60] }, total: 1 }) as Parameters<typeof kraftnettFeature>[0];
+  const linje = { type: "LineString", coordinates: [[10, 60], [10.1, 60.1]] };
+
+  it("ledning uten egennavn får spenningen som navn", () => {
+    const f = kraftnettFeature(rad("kraftledning", "Kraftledning", { spenningKv: 132, nettnivaa: "regional", eier: "ELVIA AS", driftsattAar: null }, linje), "Oslo");
+    expect(f.title).toBe("Kraftledning 132 kV");
+    expect(f.style).toBe("kraftledning");
+    expect(f.summary).toBe("132 kV · regionalnett · ELVIA AS");
+    expect(f.details.map((d) => d.label)).toEqual(["Type", "Spenning", "Nettnivå", "Eier", "Kommune"]);
+  });
+
+  it("transformatorstasjon med navn, uten spenning", () => {
+    const f = kraftnettFeature(rad("transformatorstasjon", "M584", { spenningKv: null, nettnivaa: null, eier: "NORDKYN KRAFTLAG SA", driftsattAar: 1958 }, { type: "Point", coordinates: [10, 60] }), null);
+    expect(f.title).toBe("M584");
+    expect(f.kind).toBe("Transformatorstasjon");
+    expect(f.style).toBe("transformatorstasjon");
+    expect(f.details).toEqual([
+      { label: "Type", value: "Transformatorstasjon" },
+      { label: "Navn", value: "M584" },
+      { label: "Eier", value: "NORDKYN KRAFTLAG SA" },
+      { label: "Satt i drift", value: "1958" },
+    ]);
+  });
+
+  it("viser ikke rå feltnavn", () => {
+    const f = kraftnettFeature(rad("kraftledning", "Kraftledning", { spenningKv: 50, nettnivaa: "regional", eier: null, driftsattAar: null }, linje), null);
+    expect(JSON.stringify(f)).not.toMatch(/spenningKv|nettnivaa|driftsattAar/);
+  });
+});
+
+describe("forurenset grunn i panelet", () => {
+  const rad = (attributes: Record<string, string | number | boolean | null>) =>
+    ({ id: "f1", external_id: "12534-D", title: "Bondelia gartneri", subtype: "forurenset_grunn", attributes, source_url: "https://grunnforurensning.miljodirektoratet.no/faktaark.html?lok_id=12534", source_updated_at: "2025-01-03T00:00:00Z", geometry: { type: "Polygon", coordinates: [[[10, 59], [10.1, 59], [10.1, 59.1], [10, 59]]] }, center: { type: "Point", coordinates: [10, 59] }, total: 1 }) as Parameters<typeof forurensetGrunnFeature>[0];
+  const verdi = (f: ReturnType<typeof forurensetGrunnFeature>, label: string) => f.details.find((d) => d.label === label)?.value;
+
+  it("lokalitet med rik metadata: myndighetens egne ord", () => {
+    const f = forurensetGrunnFeature(rad({ status: "Godkjent", arealM2: 13943, arealbruk: "bebyggelseBolig", lokalitetType: "deponi", prosessStatus: "avsluttet", registrertAar: 2019, tilstandsklasse: "megetGod", paavirkningsgrad: "liteForurensning", harStoffopplysninger: false }), "Trondheim");
+    expect(f.summary).toBe("Myndighetens vurdering: lite eller ikke forurenset");
+    expect(verdi(f, "Vurdering")).toBe("Påvirkningsgrad 1 – lite eller ikke forurenset, ikke behov for tiltak uansett arealbruk");
+    expect(verdi(f, "Oppfølging")).toBe("Saken er avsluttet");
+    expect(verdi(f, "Tilstandsklasse")).toBe("1 – meget god");
+    expect(verdi(f, "Arealbruk")).toBe("Boligbebyggelse");
+    expect(verdi(f, "Lokalitet-ID")).toBe("12534-D");
+    expect(f.sourceUrl).toContain("faktaark");
+  });
+
+  it("lokalitet med lite metadata viser bare det som finnes", () => {
+    const f = forurensetGrunnFeature(rad({ paavirkningsgrad: "ukjentPåvirkning", arealbruk: "uavklart", harStoffopplysninger: false }), null);
+    expect(f.details.map((d) => d.label)).toEqual(["Vurdering", "Stoffopplysninger", "Sist oppdatert i kilden", "Lokalitet-ID"]);
+    expect(f.summary).toBe("Myndighetens vurdering: uavklart");
+  });
+
+  it("gjør ikke vurderingen sterkere enn kilden, og sier at datasettet er internt", () => {
+    const akseptabel = forurensetGrunnFeature(rad({ paavirkningsgrad: "akseptabelForurensning" }), null);
+    expect(JSON.stringify(akseptabel)).not.toMatch(/farlig|giftig|helsefare|alvorlig/i);
+    expect(akseptabel.notice).toContain("Internt datasett");
+    // En kode vi ikke kjenner, vises ikke rått.
+    expect(forurensetGrunnFeature(rad({ paavirkningsgrad: "nyKode" }), null).summary).toBeNull();
   });
 });

@@ -23,6 +23,7 @@ export const datasenterDataset: ExploreDataset = {
   unit: { one: "datasenter", many: "datasentre" },
   aliases: ["datasenter", "datasentre", "datasenteret", "datasentrene", "data center", "data centers", "datacenter", "datasentere"],
   needsArea: false,
+  policy: { openMap: "nei", omrade: "egen beslutning" },
   description: "Registrerte datasentre fra intern research. Ikke et offentlig register.",
 
   async load(client, area) {
@@ -41,7 +42,7 @@ export const datasenterDataset: ExploreDataset = {
 };
 
 /** Eksportert for test. */
-export function datasenterFeature(p: Kartpunkt): ExploreFeature {
+export function datasenterFeature(p: Kartpunkt): Omit<ExploreFeature, "datasetId" | "datasetLabel"> {
   const dc = p.datasenter ?? null;
   const kapasitet = mwTekst(dc?.mw ?? null);
   const sted = [p.address, p.city].filter(Boolean).join(", ");

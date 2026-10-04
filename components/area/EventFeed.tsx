@@ -1,5 +1,6 @@
 "use client";
 
+import { STATUS_FORBEHOLD } from "@/lib/plans/visning";
 import Link from "next/link";
 import { Suspense, use, type RefObject } from "react";
 import type { AreaEventsResult } from "@/lib/events/queries";
@@ -33,7 +34,7 @@ interface EventFeedProps {
 
 const MONTHS = DEFAULT_ANNOUNCED_WITHIN_MONTHS;
 /** Kilden har bare varselet. Hva som skjedde etterpå, står ikke der. */
-export const STATUS_FORBEHOLD = "Vi vet ikke om planene senere er vedtatt, endret eller lagt bort.";
+export { STATUS_FORBEHOLD };
 /** Hvor mange saker som vises når gruppen åpnes. Resten ligger bak «Se alle saker». */
 const PREVIEW = 3;
 

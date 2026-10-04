@@ -208,7 +208,7 @@ const PAAVIRKNINGSGRAD_SETNING: Record<string, string> = {
 };
 
 /** Kildens offisielle etiketter, ordrett fra tegnforklaringen. Vises under «Detaljer». */
-const PAAVIRKNINGSGRAD_TEKNISK: Record<string, string> = {
+export const PAAVIRKNINGSGRAD_TEKNISK: Record<string, string> = {
   liteForurensning: "Påvirkningsgrad 1 – lite eller ikke forurenset, ikke behov for tiltak uansett arealbruk",
   akseptabelForurensning: "Påvirkningsgrad 2 – akseptabel tilstand med dagens arealbruk",
   ikkeAkseptabelForurensning: "Påvirkningsgrad 3 – ikke akseptabel tilstand, behov for tiltak",
@@ -224,7 +224,7 @@ export const PAAVIRKNINGSGRAD_SHORT: Record<string, string> = {
 };
 
 /** Hvor langt saken er kommet hos forurensningsmyndigheten. */
-const PROSESS_STATUS_SETNING: Record<string, string> = {
+export const PROSESS_STATUS_SETNING: Record<string, string> = {
   uavklart: "Oppfølgingen er foreløpig uavklart.",
   undersøkelseIgangsatt: "Undersøkelser er igangsatt.",
   undersøkelseGjennomført: "Undersøkelser er gjennomført.",
@@ -235,7 +235,7 @@ const PROSESS_STATUS_SETNING: Record<string, string> = {
 };
 
 /** Hva slags sted kilden har registrert. Oversettelser av kildens egne koder — ingen tolkning. */
-const LOKALITET_TYPE_SETNING: Record<string, string> = {
+export const LOKALITET_TYPE_SETNING: Record<string, string> = {
   forurensetGrunn: "forurenset grunn",
   deponi: "et nedlagt eller eksisterende deponi",
   deponiKommunalt: "et kommunalt deponi",
@@ -251,7 +251,7 @@ const LOKALITET_TYPE_SETNING: Record<string, string> = {
 };
 
 /** Arealbruk med Miljødirektoratets egne etiketter, slik de står i faktaarket. */
-const AREALBRUK_TEXT: Record<string, string> = {
+export const AREALBRUK_TEXT: Record<string, string> = {
   bebyggelseBolig: "Boligbebyggelse",
   bebyggelseAnnen: "Annen bebyggelse og anlegg",
   sentrumsområder: "Sentrumsområder, kontor og forretninger",
@@ -262,7 +262,7 @@ const AREALBRUK_TEXT: Record<string, string> = {
 };
 
 /** Målt tilstandsklasse. Oppgitt for om lag en fjerdedel av lokalitetene. */
-const TILSTANDSKLASSE_TEXT: Record<string, string> = {
+export const TILSTANDSKLASSE_TEXT: Record<string, string> = {
   megetGod: "1 – meget god",
   god: "2 – god",
   moderat: "3 – moderat",

@@ -9,24 +9,35 @@ import type { MapLayer } from "./types";
  * objekttype trenger bare en farge her. Flatene er klikkbare som flater, punktene som markører.
  */
 export const EXPLORE_COLOR: Record<ExploreStyle, string> = {
+  // Fargene må kunne leses to og to. Plansaker er blå og ligger øverst av flatene; de tre
+  // «grunn»-lagene er varme eller grønne, så en plansak over en sone fortsatt ses som to ting.
+  plansak: "#1d4ed8",
   // Kartlagt sone: varm og tydelig. Utredet uten fare: dempet grønn — ikke samme signal.
   kvikkleire_sone: "#b45309",
   kvikkleire_uten_fare: "#4d7c0f",
+  forurenset_grunn: "#0f766e",
+  // Kraftnettet: én farge for linje og stasjon. Tydelig, men smal nok til ikke å dominere.
+  kraftledning: "#7c3aed",
+  transformatorstasjon: "#7c3aed",
   datasenter: "#334155",
 };
 
 const SOURCE = "explore";
 const FILL = "explore-fill";
 const LINE = "explore-line";
+const WIRE = "explore-wire";
+/** Bred, usynlig linje over ledningen: en to piksler bred strek er ikke til å treffe. */
+const WIRE_HIT = "explore-wire-hit";
 const POINT = "explore-point";
 
 const selected: ExpressionSpecification = ["boolean", ["feature-state", "selected"], false];
 const erFlate: ExpressionSpecification = ["==", ["geometry-type"], "Polygon"];
+const erLinje: ExpressionSpecification = ["==", ["geometry-type"], "LineString"];
 const erPunkt: ExpressionSpecification = ["==", ["geometry-type"], "Point"];
 
 export const exploreLayer: MapLayer<readonly ExploreFeature[]> = {
   id: "explore",
-  interactiveLayerIds: [POINT, FILL],
+  interactiveLayerIds: [POINT, WIRE_HIT, FILL],
   markerLayerIds: [POINT],
   idFromFeature: (properties) => (typeof properties.featureId === "string" ? properties.featureId : null),
 
@@ -37,14 +48,30 @@ export const exploreLayer: MapLayer<readonly ExploreFeature[]> = {
       type: "fill",
       source: SOURCE,
       filter: erFlate,
-      paint: { "fill-color": ["get", "farge"], "fill-opacity": ["case", selected, 0.5, 0.22] },
+      // Lavt fyll og tydelig kant: to flatelag oppå hverandre skal begge kunne ses.
+      paint: { "fill-color": ["get", "farge"], "fill-opacity": ["case", selected, 0.45, 0.16] },
     });
     map.addLayer({
       id: LINE,
       type: "line",
       source: SOURCE,
       filter: erFlate,
-      paint: { "line-color": ["get", "farge"], "line-width": ["case", selected, 3, 1.2], "line-opacity": 0.95 },
+      paint: { "line-color": ["get", "farge"], "line-width": ["case", selected, 3, 1.4], "line-opacity": 0.95 },
+    });
+    map.addLayer({
+      id: WIRE,
+      type: "line",
+      source: SOURCE,
+      filter: erLinje,
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: { "line-color": ["get", "farge"], "line-width": ["case", selected, 5, 2], "line-opacity": 0.9 },
+    });
+    map.addLayer({
+      id: WIRE_HIT,
+      type: "line",
+      source: SOURCE,
+      filter: erLinje,
+      paint: { "line-color": "#000000", "line-width": 14, "line-opacity": 0 },
     });
     map.addLayer({
       id: POINT,

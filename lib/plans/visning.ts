@@ -6,6 +6,12 @@ import { erTiltakstype, klassifiserTiltak, TILTAKSTYPE_LABELS, type Tiltakstype 
  * saklista på /omrade og sakssiden.
  */
 
+/**
+ * Forbeholdet som følger plansakene overalt: kilden er varsel om planoppstart, og sier ikke hva
+ * som skjedde etterpå.
+ */
+export const STATUS_FORBEHOLD = "Vi vet ikke om planene senere er vedtatt, endret eller lagt bort.";
+
 /** En endring av en plan som allerede gjelder, ikke et nytt prosjekt. */
 export function erPlanendring(plantype: string | null | undefined): boolean {
   return /mindre|forenklet|endring/i.test(plantype ?? "");

@@ -43,6 +43,7 @@ publisert 2026-10-02 ([ADR 009](../adr/009-public-admin-security-model.md)).
 ### Eiendom og områdedata
 | Fil | Dato | Kort |
 |---|---|---|
+| [utforsk-data-datasett.md](utforsk-data-datasett.md) | 2026-10-04 | Hvilke datasett bør inn i admin «Utforsk data»: vurdering av det vi har lokalt, kombinasjoner og rekkefølge. Bygget samme dag: plansaker, kraftnett, forurenset grunn (bare admin) og to lag samtidig |
 | [skolefilter-offentlig-visning.md](skolefilter-offentlig-visning.md) | 2026-10-04 | Eksamenskontor, voksenopplæring, nettskoler, fagskoler og bibelskoler i Udirs skoleregister: 78 av 3 101 skjules offentlig. Næringskode som hovedsignal, smal navneregel i tillegg. Bygget |
 | [skolelenker-404.md](skolelenker-404.md) | 2026-10-04 | Alle 3 103 skolelenker ga 404 i Nasjonalt skoleregister: malen var `/enhet/<orgnr>`, ruten er `/enheter/<orgnr>`. Rettet. Eksamenskontor i skolelisten er dokumentert, ikke endret |
 | [stoy-langmyrgrenda.md](stoy-langmyrgrenda.md) | 2026-10-04 | Langmyrgrenda 26 mot 26C: kilden var riktig gjengitt, men 50–54 dB fra gata utenfor ble vist som presist nivå ved huset. Førte til nye støytekster med T-1442-grensene som referanse |
