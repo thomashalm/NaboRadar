@@ -126,6 +126,14 @@ jobs:
         continue-on-error: true
         run: npm run plans:enrich -- --limit=60
 
+      # Skolefilteret: næringskode fra Udirs register for nye og endrede skoler. Kjøres her og ikke
+      # bare etter skolesynken, slik at filteret holdes ved like også når skole-WFS-en er nede.
+      # Udir som ikke svarer skal aldri gjøre syncen rød, og skjuler ingen skoler.
+      - name: Skolefilter
+        if: ${{ steps.config.outputs.configured == 'true' }}
+        continue-on-error: true
+        run: npm run schools:classify -- --limit=300
+
       # De direkte oppslagene på /omrade (flom, radon, stormflo, støy …) synkes ikke. Her spørres
       # hver kilde én gang, og utfallet lagres for /admin. En kilde som er nede, skal aldri gjøre
       # syncen rød — derfor continue-on-error.

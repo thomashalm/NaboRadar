@@ -2,6 +2,8 @@ import type { NormalizedAreaFeature } from "@/types/area-feature";
 import { fetchJson } from "@/lib/http";
 import { asNumber, gmlPoint, nested, wfsPages, type GmlFeature } from "@/lib/providers/gml";
 import type { AreaFeatureProvider, NormalizeResult, ProviderHealth, RawBatch, RejectedRecord, SyncOptions } from "@/lib/providers/types";
+import type { Db } from "@/lib/db/types";
+import { formatSchoolRefreshResult, refreshSchoolUnits } from "@/lib/schools/refresh";
 import { DEFAULT_RETRY_POLICY, type HttpRetryPolicy } from "@/lib/sync/types";
 
 const WFS = "https://wfs.geonorge.no/skwms1/wfs.grunnskoler_vgs";
@@ -48,6 +50,11 @@ export class UdirSkolerProvider implements AreaFeatureProvider {
   readonly license = { name: "Creative Commons Navngivelse 4.0", url: "https://creativecommons.org/licenses/by/4.0/" };
   readonly defaultStatus = "active" as const;
   readonly statusReason = null;
+
+  /** Næringskode og offentlig filter for nye og endrede skoler (se lib/schools/refresh.ts). */
+  async afterSync(db: Db): Promise<string> {
+    return formatSchoolRefreshResult(await refreshSchoolUnits(db, { fetchImpl: this.fetchImpl, retry: this.retry }));
+  }
 
   constructor(
     private readonly fetchImpl: typeof fetch = fetch,

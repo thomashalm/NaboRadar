@@ -904,6 +904,31 @@ Hele poenget er at NaboRadar ikke skal si mer enn kilden gjør.
   - friskmeldte/sikrede soner holdes adskilt
 - **Faregrad og risikoklasse gjelder sonen, ikke den enkelte eiendommen.**
 
+### Skolefilter for offentlig visning
+
+Udirs register fører også eksamenskontor, voksenopplæring, nettskoler, fagskoler og bibelskoler
+som skoler. De vises ikke i den offentlige skolelisten (fra 2026-10-04). Dette er et produktfilter,
+ikke en retting av kilden: enhetene ligger uendret i databasen og vises i admin, med grunnen.
+
+- **Regel 1, næringskode:** primær næringskode fra registeret som starter med 85.4, 85.5 eller
+  85.6 → skjult.
+- **Regel 2, smal navneregel**, når koden er ordinær eller mangler: eksamenskontor, privatist,
+  voksenopplæring, nettskole, «Karriere …», bibelskole, fagskole. Navn med «skole og …» er
+  blandede enheter og skjules ikke av navnet.
+- **Ukjent vises.** Uten næringskode gjelder bare navneregelen. En feil hos Udir skjuler aldri en
+  ordinær skole.
+- **Ikke brukt:** skolekategorien «Voksenopplæringssenter» (53 ordinære skoler har den), elevtall
+  og trinn (mangler for mange ekte skoler).
+- **Bevisst ikke filtrert:** 11 administrasjonsenheter med ordinær kode. En regel som fanger dem,
+  ville også truffet ekte skoler.
+- Filteret gjelder `features_near` og `features_count_near`, og dermed alle offentlige lister,
+  tellinger og kartmarkører. Skolekrets er ikke berørt.
+- Klassifiseringen ligger i `school_units` og oppdateres av `npm run schools:classify` (eget steg
+  i sync-jobben, og etter skolesynken). Bare nye og endrede enheter hentes fra Udir. Ingen kall
+  mot Udir når en side lastes.
+- Reglene bor i `lib/schools/classification.ts`. Bakgrunn og tall:
+  [research/skolefilter-offentlig-visning.md](research/skolefilter-offentlig-visning.md).
+
 ### Støy
 
 - Alltid **modellberegning, aldri måling ved boligen**.

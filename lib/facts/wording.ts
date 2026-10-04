@@ -1,3 +1,4 @@
+import { SCHOOL_HIDDEN_LABEL, type SchoolHiddenReason } from "@/lib/schools/classification";
 import { formatArea } from "@/lib/format";
 import type { AreaAttributes } from "@/types/area-feature";
 
@@ -1186,6 +1187,12 @@ export function describePlaceLine(input: { subtype: string; attributes: AreaAttr
   }
 
   const label = OPPVEKST_TYPE_LABEL[input.subtype] ?? "Skole eller barnehage";
+  // Bare admin får denne attributten: enheten er skjult i den offentlige skolelisten.
+  const skjult = str(a.offentligSkjult);
+  if (skjult) {
+    const grunn = SCHOOL_HIDDEN_LABEL[skjult as SchoolHiddenReason] ?? skjult;
+    return `${label} · vises ikke offentlig (${grunn})`;
+  }
   if (input.subtype === "barnehage") {
     const fra = num(a.lavesteAlder);
     const til = num(a.hoyesteAlder);
