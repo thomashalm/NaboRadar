@@ -421,6 +421,7 @@ finnes ingen anonym skrivevei.
 |---|---|
 | `/admin/adresse` | Hva finnes rundt denne adressen? Offentlig resultat pluss intern research |
 | `/admin/research` | Hva vet vi om dette funnet? Oversikt, søk, redigering, kilder og kildestatus |
+| `/admin/research/utforsk` | Hva finnes i dette datasettet for dette området? Plassholder — ikke bygget |
 | `/admin/kart` | Hvor i landet finnes denne typen funn? Nasjonal geografisk utforskning |
 
 ### `/admin/kart` — research-kartet
@@ -2739,8 +2740,18 @@ filtrerer, og funksjonene returnerer tomt.
 
 ### `/admin/research`
 
-Liste med søk, åtte filtre (kommune, kategori, type, verifisering, driftsstatus, følsomhet,
-sikkerhet, interesse) og fem sorteringer. Søket går mot databasen og dekker tittel, beskrivelse,
+**Research er manuelle, interne funn.** Strukturerte datasett og kartlag hører hjemme i
+«Utforsk data» (under).
+
+Liste med søk, åtte filtre og seks sorteringer. Standardvisningen (fra 2026-10-04) viser bare
+søk, kommune, kategori og sortering. Type, verifisering, driftsstatus, følsomhet, sikkerhet og
+interesse ligger bak **«Flere filtre»** — de er fortsatt tilgjengelige, men skjult som standard.
+Er noen av dem i bruk, står utvideren åpen og sier hvor mange («Flere filtre (2)»). Alle filtrene
+er vanlige URL-parametre og virker likt uansett hvor de står; lagrede lenker gir samme treff.
+
+Under filtrene står tre innganger: **Utforsk data**, **Review-kø** (med antall som trenger
+review) og **Nytt funn**. Visningen ligger i `components/admin/ResearchOversikt.tsx`; siden
+henter og filtrerer. Søket går mot databasen og dekker tittel, beskrivelse,
 adresse, kommune, sted, kategori, underkategori, notater **og kildenavn** — et søk på
 «Kartverket» finner funnene som hviler på Kartverket. Filtrering og sortering skjer i sideren:
 volumet er lavt, og én spørring pluss URL-parametre er billigere enn åtte kombinerbare
@@ -2748,6 +2759,16 @@ databasefiltre.
 
 `/admin/research/nytt` oppretter, `/admin/research/[id]` viser funnet med kildene over
 redigeringsskjemaet — det er kildene man skal lese før man endrer en status.
+
+### `/admin/research/utforsk` — Utforsk data
+
+**Utforsk data er strukturerte datasett og kartlag**, ikke research-funn. Foreløpig en
+plassholder uten funksjonalitet, slik at inngangen fra research-siden har et sted å peke.
+
+Retningen: velg et datasett og et område, og få treffene som liste og i kart. For eksempel
+kvikkleire i Oslo, støy i Trondheim, tilfluktsrom i Bergen, hytter i Troms eller planer i Bærum.
+Med datasett, kommune eller fylke, egenskapsfiltre som passer datasettet, og liste + kart. Ikke
+bygget ennå.
 
 ### Adressesøk og kart
 
