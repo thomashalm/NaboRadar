@@ -3,7 +3,7 @@ import { datasenterDataset } from "./datasenter";
 import { forurensetGrunnDataset } from "./forurenset-grunn";
 import { kraftnettDataset } from "./kraftnett";
 import { kvikkleireDataset } from "./kvikkleire";
-import { multefunnDataset, tyttebaerfunnDataset } from "./multefunn";
+import { kantarellfunnDataset, multefunnDataset, tyttebaerfunnDataset } from "./multefunn";
 import { myrDataset } from "./myr";
 import { plansakerDataset } from "./plansaker";
 import type { ExploreDataset } from "./types";
@@ -30,6 +30,7 @@ export const EXPLORE_DATASETS: readonly ExploreDataset[] = [
   multefunnDataset,
   myrDataset,
   tyttebaerfunnDataset,
+  kantarellfunnDataset,
 ];
 
 /** Høyst så mange datasett vises samtidig. Kontrollert research, ikke et GIS. */

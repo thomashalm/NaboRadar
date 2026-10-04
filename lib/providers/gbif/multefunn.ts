@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { fetchJson } from "@/lib/http";
-import { MULTE_BOKS, MULTEFUNN_PROVIDER, NATUR_INTERN, TYTTEBAERFUNN_PROVIDER } from "@/lib/multe/omrade";
+import { KANTARELLFUNN_PROVIDER, MULTE_BOKS, MULTEFUNN_PROVIDER, NATUR_INTERN, TYTTEBAERFUNN_PROVIDER } from "@/lib/multe/omrade";
 import type { AreaFeatureProvider, NormalizeResult, ProviderHealth, RawBatch, RejectedRecord, SyncOptions } from "@/lib/providers/types";
 import type { NormalizedAreaFeature } from "@/types/area-feature";
 
 /**
- * Registrerte artsfunn i Oslo og Marka, fra GBIF. Interne researchlag: multe og tyttebær.
+ * Registrerte artsfunn i Oslo og Marka, fra GBIF. Interne researchlag: multe, tyttebær og kantarell.
  *
  * KILDE: GBIF samler Artsobservasjoner, museenes feltnotater og herbarier, ANO m.fl. Samme
  * registreringer som Artskart. Hver registrering har sin egen lisens.
@@ -19,7 +19,15 @@ import type { NormalizedAreaFeature } from "@/types/area-feature";
  *   - én registrering per rute på 100 m: den nyeste, og ved likt år den med lavest GBIF-nøkkel.
  *     Utvalget er dermed det samme hver gang kilden er den samme.
  *
- * PERSONVERN: observatør og finner lagres ikke. Stedsbeskrivelsen (fritekst) lagres heller ikke.
+ *   - ikke registreringer kilden selv merker som uverifiserte eller automatisk godkjent.
+ *
+ * GJENTAK (bare arter der det er slått på — kantarell): for hvert funn telles alle brukbare
+ * registreringer innen 250 m, også dem som tynnes bort: hvor mange, i hvor mange ulike år, og av
+ * hvor mange ulike observatører. Soppens mycel lever i bakken i mange år, så «registrert her i
+ * fem ulike sesonger» sier mer enn ett funn. Det er en opptelling, ikke en sannsynlighet.
+ *
+ * PERSONVERN: observatør og finner lagres ikke — bare antallet ulike observatører i nærheten, der
+ * gjentak er slått på. Stedsbeskrivelsen (fritekst) lagres heller ikke.
  *
  * ET FUNN ER EN OBSERVASJON, IKKE EN BESTAND. Det sier at noen så planten der den dagen.
  * Kildene sier ikke om planten hadde blomst eller bær: feltet for det er fylt ut for under én
@@ -38,10 +46,16 @@ export interface Artsfunn {
   subtype: string;
   /** `title` i area_features: artens norske navn. */
   art: string;
+  /** Tell registreringer i nærheten over flere år. Se «GJENTAK» over. */
+  gjentak?: boolean;
 }
 
 export const MULTE: Artsfunn = { providerId: MULTEFUNN_PROVIDER, name: "Registrerte multefunn, Oslo og Marka", taxonKey: 2998290, subtype: "multefunn", art: "Multe" };
 export const TYTTEBAER: Artsfunn = { providerId: TYTTEBAERFUNN_PROVIDER, name: "Registrerte tyttebærfunn, Oslo og Marka", taxonKey: 2882835, subtype: "tyttebaerfunn", art: "Tyttebær" };
+export const KANTARELL: Artsfunn = { providerId: KANTARELLFUNN_PROVIDER, name: "Registrerte kantarellfunn, Oslo og Marka", taxonKey: 5249504, subtype: "kantarellfunn", art: "Kantarell", gjentak: true };
+
+/** Radius for opptellingen av funn i nærheten. */
+export const GJENTAK_RADIUS_M = 250;
 
 const API = "https://api.gbif.org/v1/occurrence/search";
 const SIDE = 300;
@@ -68,6 +82,11 @@ const rawSchema = z.object({
   institutionCode: z.string().optional(),
   basisOfRecord: z.string().optional(),
   references: z.string().optional(),
+  identificationVerificationStatus: z.string().optional(),
+  fieldNotes: z.string().optional(),
+  /** Leses for å telle ulike observatører i nærheten. Lagres aldri. */
+  recordedBy: z.string().optional(),
+  media: z.array(z.unknown()).optional(),
 });
 type RawFunn = z.infer<typeof rawSchema>;
 
@@ -159,6 +178,7 @@ export class GbifArtsfunnProvider implements AreaFeatureProvider {
       else if (raw.coordinateUncertaintyInMeters === undefined || raw.coordinateUncertaintyInMeters > 100) hopp("presisjon dårligere enn 100 m eller ikke oppgitt");
       else if (!lisens) hopp("lisensen er ikke CC BY 4.0 eller CC0");
       else if (raw.datasetKey && AUTOMATISK_BESTEMT.has(raw.datasetKey)) hopp("automatisk artsbestemt (Pl@ntNet)");
+      else if (/unverified|automated/i.test(raw.identificationVerificationStatus ?? "")) hopp("uverifisert eller automatisk godkjent i kilden");
       else brukbare.push({ raw, lisens });
     }
 
@@ -172,6 +192,21 @@ export class GbifArtsfunnProvider implements AreaFeatureProvider {
         skipped.push({ kind: "feature", externalId: String(funn.raw.key), reason: "flere funn i samme 100 m-rute" });
       } else ruter.set(rute(funn.raw), { valgt: funn, antall: 1 });
     }
+
+    // Gjentak: alle brukbare registreringer innen 250 m av funnet, før tynningen.
+    const gjentak = (raw: RawFunn): Record<string, string | number | null> => {
+      if (!this.art.gjentak) return {};
+      const naer = brukbare.filter(({ raw: r }) => Math.hypot((r.decimalLatitude - raw.decimalLatitude) * 111_320, (r.decimalLongitude - raw.decimalLongitude) * 111_320 * Math.cos((raw.decimalLatitude * Math.PI) / 180)) <= GJENTAK_RADIUS_M);
+      const aar = [...new Set(naer.map(({ raw: r }) => r.year!))].sort((a, b) => a - b);
+      const observatorer = new Set(naer.map(({ raw: r }) => r.recordedBy).filter(Boolean));
+      return {
+        funnINaerheten: naer.length,
+        aarINaerheten: aar.length,
+        // «2015, 2018, 2021» — år er ikke personopplysninger, og listen er kort.
+        aarliste: aar.join(", "),
+        observatorerINaerheten: observatorer.size > 0 ? observatorer.size : null,
+      };
+    };
 
     const records = [...ruter.values()].map(({ valgt: { raw, lisens }, antall }): NormalizedAreaFeature => ({
       providerId: this.id,
@@ -193,6 +228,10 @@ export class GbifArtsfunnProvider implements AreaFeatureProvider {
         type: BASIS[raw.basisOfRecord ?? ""] ?? null,
         lisens,
         funnIRuta: antall,
+        bilde: (raw.media?.length ?? 0) > 0,
+        // Kildens egen kvalitetssikring, når den er oppgitt.
+        validert: /validated|approved/i.test(`${raw.identificationVerificationStatus ?? ""} ${raw.fieldNotes ?? ""}`),
+        ...gjentak(raw),
       },
       sourceUrl: `https://www.gbif.org/occurrence/${raw.key}`,
       sourceUrlType: "provider_page",
@@ -223,5 +262,11 @@ export class GbifMultefunnProvider extends GbifArtsfunnProvider {
 export class GbifTyttebaerfunnProvider extends GbifArtsfunnProvider {
   constructor(fetchImpl: typeof fetch = fetch) {
     super(TYTTEBAER, fetchImpl);
+  }
+}
+
+export class GbifKantarellfunnProvider extends GbifArtsfunnProvider {
+  constructor(fetchImpl: typeof fetch = fetch) {
+    super(KANTARELL, fetchImpl);
   }
 }

@@ -7,7 +7,7 @@ import { boksFor, lesUtsnitt, punktIFlate, utsnittKm } from "@/lib/admin/explore
 import { forurensetGrunnFeature } from "@/lib/admin/explore/forurenset-grunn";
 import { kraftnettFeature } from "@/lib/admin/explore/kraftnett";
 import { kvikkleireFeature } from "@/lib/admin/explore/kvikkleire";
-import { multefunnFeature, tyttebaerfunnFeature } from "@/lib/admin/explore/multefunn";
+import { kantarellfunnFeature, multefunnFeature, tyttebaerfunnFeature } from "@/lib/admin/explore/multefunn";
 import { myrFeature } from "@/lib/admin/explore/myr";
 import { PLANSAK_OVERLAPP, plansakOverlapp } from "@/lib/admin/explore/plansak-overlapp";
 import { plansakFeature, plansakOverlappFeature } from "@/lib/admin/explore/plansaker";
@@ -193,6 +193,7 @@ describe("nye datasett i søket", () => {
       multefunn: { openMap: "nei", omrade: "nei" },
       myr: { openMap: "nei", omrade: "nei" },
       tyttebaerfunn: { openMap: "nei", omrade: "nei" },
+      kantarellfunn: { openMap: "nei", omrade: "nei" },
     });
   });
 
@@ -206,6 +207,7 @@ describe("nye datasett i søket", () => {
       multefunn: false,
       myr: true,
       tyttebaerfunn: false,
+      kantarellfunn: false,
     });
     expect(MAX_LAG).toBe(2);
   });
@@ -438,7 +440,7 @@ describe("multefunn og myr: interne researchlag", () => {
   });
 
   it("begge sier hvor de dekker", () => {
-    for (const id of ["multefunn", "myr", "tyttebaerfunn"]) {
+    for (const id of ["multefunn", "myr", "tyttebaerfunn", "kantarellfunn"]) {
       const d = EXPLORE_DATASETS.find((x) => x.id === id)!;
       expect(d.coverage).toEqual({ label: "Oslo og Marka", box: { minLng: 10.3, minLat: 59.78, maxLng: 11.1, maxLat: 60.3 } });
       expect(d.description).toContain("Dekker bare Oslo og Marka");
@@ -544,5 +546,55 @@ describe("tyttebær: registrerte funn", () => {
     expect(d.description).toContain("Funnene gjelder planten: kildene sier ikke om den hadde bær.");
     expect(d.description).not.toMatch(/lovende|sannsynlig|score|her vokser|bekreftet|moden/i);
     expect(d.overlap).toBeUndefined();
+  });
+});
+
+describe("kantarell: registrerte funn og funn i flere sesonger", () => {
+  const punkt = { type: "Point" as const, coordinates: [10.83, 59.95] };
+  const rad = (attributes: Record<string, string | number | boolean | null>) =>
+    ({ id: "k1", external_id: "77", title: "Kantarell", subtype: "kantarellfunn", attributes, source_url: "https://www.gbif.org/occurrence/77", source_updated_at: null, geometry: punkt, center: punkt, total: 1 }) as Parameters<typeof kantarellfunnFeature>[0];
+  const felles = { aar: 2024, maaned: 8, dato: "2024-08-18", presisjonM: 10, datasett: "Norwegian Species Observation Service", lisens: "CC BY 4.0", funnIRuta: 1, bilde: true, validert: false };
+
+  it("søkeordene velger datasettet", () => {
+    for (const sok of ["kantarell Oslo", "kantareller Oslo", "kantarellfunn Oslo", "kantarell funn Oslo"]) expect(tolk(sok)).toMatchObject({ dataset: { id: "kantarellfunn" }, sted: { status: "ok" } });
+    const d = EXPLORE_DATASETS.find((x) => x.id === "kantarellfunn")!;
+    expect(tolk(`${d.queryWord} Oslo`).dataset?.id).toBe("kantarellfunn");
+  });
+
+  it("funn i flere sesonger: «Registrert i 5 ulike år», med årene og antall observatører", () => {
+    const f = kantarellfunnFeature(rad({ ...felles, funnINaerheten: 12, aarINaerheten: 5, aarliste: "2018, 2019, 2021, 2024, 2026", observatorerINaerheten: 4 }), 2026);
+    expect(f.title).toBe("Kantarellfunn, august 2024");
+    expect(f.summary).toBe("Registrert i 5 ulike år innen 250 m · presisjon 10 m");
+    expect(f.analysis).toEqual({
+      label: "Registrert her før",
+      heading: "Registrert i 5 ulike år",
+      lines: ["12 registrerte funn innen 250 m, fra 2018–2026.", "År: 2018, 2019, 2021, 2024, 2026.", "4 ulike observatører."],
+      items: [],
+      more: 0,
+      note: "En opptelling av registreringer, ikke en sannsynlighet. Mange funn kan også bety at mange har lett akkurat her.",
+    });
+    expect(f.details.find((d) => d.label === "Bilde")!.value).toBe("ja, hos kilden");
+  });
+
+  it("flere funn samme år er ikke flere sesonger, og ett enkelt funn får ingen blokk", () => {
+    const sammeAar = kantarellfunnFeature(rad({ ...felles, funnINaerheten: 3, aarINaerheten: 1, aarliste: "2024", observatorerINaerheten: 1 }), 2026);
+    expect(sammeAar.analysis).toMatchObject({ heading: "3 registrerte funn samme år", lines: ["3 registrerte funn innen 250 m, alle fra 2024.", "1 observatør."] });
+    expect(sammeAar.summary).toBe("presisjon 10 m · Norwegian Species Observation Service");
+    expect(kantarellfunnFeature(rad({ ...felles, funnINaerheten: 1, aarINaerheten: 1, aarliste: "2024", observatorerINaerheten: 1 }), 2026).analysis).toBeUndefined();
+  });
+
+  it("et gammelt soppfunn: mycelet kan leve lenge, men det lover ikke sopp i år", () => {
+    const f = kantarellfunnFeature(rad({ ...felles, aar: 2011, dato: "2011-08-02", funnINaerheten: 1, aarINaerheten: 1, aarliste: "2011" }), 2026);
+    expect(f.explanation).toBe("Registrert observasjon – sier ikke noe sikkert om forekomst i dag. Funnet er fra 2011. Mycelet kan leve lenge på samme sted, men funnet sier ikke om det kommer sopp i år.");
+  });
+
+  it("gjentak vises bare for kantarell: samme rad som multe har ingen blokk", () => {
+    expect(multefunnFeature(rad({ ...felles, funnINaerheten: 12, aarINaerheten: 5, aarliste: "2018, 2019" }), 2026).analysis).toBeUndefined();
+  });
+
+  it("ingen sannsynlighet og ingen score", () => {
+    const d = EXPLORE_DATASETS.find((x) => x.id === "kantarellfunn")!;
+    const alt = JSON.stringify([d.description, kantarellfunnFeature(rad({ ...felles, funnINaerheten: 12, aarINaerheten: 5, aarliste: "2018, 2026", observatorerINaerheten: 4 }), 2026)]).replace("ikke en sannsynlighet", "");
+    expect(alt).not.toMatch(/sannsynlig|score|lovende|garant|her vokser|sikkert funn/i);
   });
 });

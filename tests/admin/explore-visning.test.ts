@@ -50,7 +50,7 @@ describe("byggVisning", () => {
     if (v.status !== "treff") throw new Error(v.status);
     expect(v.lag.map((l) => l.dataset.id)).toEqual(["plansaker"]);
     expect(v.lag[0]!.features[0]).toMatchObject({ datasetId: "plansaker", datasetLabel: "Plansaker", place: "Bærum" });
-    expect(v.leggTil.map((l) => l.id)).toEqual(["kvikkleire", "kraftnett", "forurenset-grunn", "datasenter", "multefunn", "myr", "tyttebaerfunn"]);
+    expect(v.leggTil.map((l) => l.id)).toEqual(["kvikkleire", "kraftnett", "forurenset-grunn", "datasenter", "multefunn", "myr", "tyttebaerfunn", "kantarellfunn"]);
     expect(v.leggTil[0]!.href).toBe("/admin/research/utforsk?q=plansaker+B%C3%A6rum&lag=kvikkleire");
     expect(kall.map((k) => k.fn)).toEqual(["explore_events"]);
     expect(kall[0]!.args).toMatchObject({ p_min_lng: 10.4, p_max_lat: 60.0, p_area: flate });
@@ -255,6 +255,15 @@ describe("byggVisning", () => {
       expect(kall[0]!.args).toMatchObject({ p_provider_id: "gbif-tyttebaerfunn-oslomarka", p_min_lng: 10.3, p_max_lat: 60.3, p_limit: 2000 });
       const bergen = await byggVisning(client, { q: "tyttebær Bergen" }, utenfor as never);
       expect(bergen.status === "treff" && bergen.lag[0]!.utenforDekning).toBe("Tyttebær: registrerte funn dekker foreløpig bare Oslo og Marka.");
+    });
+
+    it("kantarell: stedene med flest sesonger står først", async () => {
+      const k = (id: string, aar: number, sesonger: number) => ({ ...funn, id, subtype: "kantarellfunn", title: "Kantarell", attributes: { aar, maaned: 8, presisjonM: 10, lisens: "CC BY 4.0", funnINaerheten: sesonger, aarINaerheten: sesonger, aarliste: String(aar) } });
+      const { client } = klient({ "explore_area_features:gbif-kantarellfunn-oslomarka": [k("nytt", 2026, 1), k("gjentatt", 2019, 5), k("to", 2024, 2)] });
+      const v = await byggVisning(client, { q: "kantarell Bærum" }, omrade as never);
+      if (v.status !== "treff") throw new Error(v.status);
+      expect(v.lag[0]!.features.map((f) => f.id)).toEqual(["gjentatt", "to", "nytt"]);
+      expect(v.lag[0]!.features[0]).toMatchObject({ datasetLabel: "Kantarell: registrerte funn", style: "kantarellfunn" });
     });
 
     it("myr uten sted ber om område", async () => {

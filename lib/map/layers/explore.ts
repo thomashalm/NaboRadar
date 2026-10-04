@@ -25,6 +25,8 @@ export const EXPLORE_COLOR: Record<ExploreStyle, string> = {
   myr: "#0891b2",
   // Tyttebær: rød, tydelig forskjellig fra multefunnene når de to vises sammen.
   tyttebaerfunn: "#be123c",
+  // Kantarell: gul. Mørk nok til å synes mot det lyse kartet.
+  kantarellfunn: "#ca8a04",
 };
 
 const SOURCE = "explore";

@@ -1,5 +1,5 @@
 import "server-only";
-import { MULTE_BOKS, MULTE_DEKNING, MULTEFUNN_PROVIDER, TYTTEBAERFUNN_PROVIDER } from "@/lib/multe/omrade";
+import { KANTARELLFUNN_PROVIDER, MULTE_BOKS, MULTE_DEKNING, MULTEFUNN_PROVIDER, TYTTEBAERFUNN_PROVIDER } from "@/lib/multe/omrade";
 import { dato, hentAreaFeatures, rader, tall, tekst, type AreaFeatureRad } from "./area-features";
 import type { ExploreDataset, ExploreFeature } from "./types";
 
@@ -28,8 +28,12 @@ interface Art {
   art: string;
   /** «Multefunn» — første ord i tittelen på et funn. */
   funnord: string;
-  style: "multefunn" | "tyttebaerfunn";
+  style: "multefunn" | "tyttebaerfunn" | "kantarellfunn";
   description: string;
+  /** Setningen et funn på ti år eller mer får i tillegg. Standard gjelder planter. */
+  gammeltTekst?: (aar: number) => string;
+  /** Vis og sorter etter funn i flere sesonger på samme sted (se providerens «GJENTAK»). */
+  gjentak?: boolean;
 }
 
 function artsfunnDataset(art: Art): ExploreDataset {
@@ -49,7 +53,7 @@ function artsfunnDataset(art: Art): ExploreDataset {
       const svar = await hentAreaFeatures(client, art.providerId, area ?? { kind: "utsnitt", name: null, county: null, box: MULTE_BOKS, polygon: null }, 2000);
       if (svar.error) return { features: [], total: 0, error: svar.error };
       return {
-        // Nyeste først: de sier mest om i dag.
+        // Nyeste først: de sier mest om i dag. Med gjentak: stedene med flest sesonger først.
         features: svar.rader.map((rad) => artsfunnFeature(rad, art)).sort((a, b) => b.sort - a.sort || a.id.localeCompare(b.id)).map(({ sort: _sort, ...f }) => f),
         total: svar.total,
         error: null,
@@ -83,12 +87,32 @@ const TYTTEBAER: Art = {
   description: `Registrerte funn av tyttebær fra GBIF (Artsobservasjoner m.fl.), fra 2000 og med presisjon på 100 m eller bedre. Dekker bare ${MULTE_DEKNING}. Funnene gjelder planten: kildene sier ikke om den hadde bær. ${FUNN_FORBEHOLD}`,
 };
 
+export const GJENTAK_FORBEHOLD = "En opptelling av registreringer, ikke en sannsynlighet. Mange funn kan også bety at mange har lett akkurat her.";
+
+const KANTARELL: Art = {
+  id: "kantarellfunn",
+  label: "Kantarell: registrerte funn",
+  queryWord: "kantarellfunn",
+  aliases: ["registrerte kantarellfunn", "kantarell funn", "kantarellfunn", "kantareller", "kantarell", "cantharellus cibarius"],
+  providerId: KANTARELLFUNN_PROVIDER,
+  art: "Kantarell (Cantharellus cibarius)",
+  funnord: "Kantarellfunn",
+  style: "kantarellfunn",
+  gjentak: true,
+  // Mycelet lever i bakken i mange år. Et gammelt funn er derfor ikke uinteressant — men det
+  // lover heller ikke sopp i år.
+  gammeltTekst: (aar) => `Funnet er fra ${aar}. Mycelet kan leve lenge på samme sted, men funnet sier ikke om det kommer sopp i år.`,
+  description: `Registrerte funn av kantarell fra GBIF (Artsobservasjoner m.fl.), fra 2000 og med presisjon på 100 m eller bedre. Dekker bare ${MULTE_DEKNING}. Steder med funn i flere sesonger står først. ${FUNN_FORBEHOLD}`,
+};
+
 export const multefunnDataset = artsfunnDataset(MULTE);
+export const kantarellfunnDataset = artsfunnDataset(KANTARELL);
 export const tyttebaerfunnDataset = artsfunnDataset(TYTTEBAER);
 
 /** Eksportert for test: multefunn med årets dato som «nå». */
 export const multefunnFeature = (rad: AreaFeatureRad, iAar = new Date().getFullYear()) => artsfunnFeature(rad, MULTE, iAar);
 export const tyttebaerfunnFeature = (rad: AreaFeatureRad, iAar = new Date().getFullYear()) => artsfunnFeature(rad, TYTTEBAER, iAar);
+export const kantarellfunnFeature = (rad: AreaFeatureRad, iAar = new Date().getFullYear()) => artsfunnFeature(rad, KANTARELL, iAar);
 
 /** `iAar` er året «nå», så teksten om alder kan testes. */
 function artsfunnFeature(rad: AreaFeatureRad, art: Art, iAar = new Date().getFullYear()): Omit<ExploreFeature, "datasetId" | "datasetLabel"> & { sort: number } {
@@ -103,6 +127,15 @@ function artsfunnFeature(rad: AreaFeatureRad, art: Art, iAar = new Date().getFul
   const naar = maaned && aar ? `${MAANED[maaned - 1]} ${aar}` : aar ? String(aar) : null;
   const gammelt = aar !== null && iAar - aar >= ELDRE_ETTER_AAR;
 
+  // Gjentak: registreringer innen 250 m, talt opp ved import.
+  const naer = art.gjentak ? tall(a.funnINaerheten) : null;
+  const sesonger = art.gjentak ? tall(a.aarINaerheten) : null;
+  const aarliste = tekst(a.aarliste);
+  const flereAar = sesonger !== null && sesonger >= 2;
+  const spenn = aarliste ? aarliste.split(", ") : [];
+  const fraTil = spenn.length > 1 ? `${spenn[0]}–${spenn.at(-1)}` : (spenn[0] ?? null);
+  const observatorer = tall(a.observatorerINaerheten);
+
   return {
     id: rad.id,
     title: naar ? `${art.funnord}, ${naar}` : art.funnord,
@@ -111,7 +144,7 @@ function artsfunnFeature(rad: AreaFeatureRad, art: Art, iAar = new Date().getFul
     geometry: rad.geometry,
     center: rad.center.coordinates as [number, number],
     place: null,
-    summary: [presisjon !== null ? `presisjon ${presisjon} m` : null, datasett].filter(Boolean).join(" · ") || null,
+    summary: [flereAar ? `Registrert i ${sesonger} ulike år innen 250 m` : null, presisjon !== null ? `presisjon ${presisjon} m` : null, flereAar ? null : datasett].filter(Boolean).join(" · ") || null,
     details: rader([
       { label: "Art", value: art.art },
       dag ? { label: "Dato", value: dag } : null,
@@ -122,15 +155,35 @@ function artsfunnFeature(rad: AreaFeatureRad, art: Art, iAar = new Date().getFul
       tekst(a.prosjekt) ? { label: "Prosjekt", value: tekst(a.prosjekt)! } : null,
       lisens ? { label: "Lisens", value: lisens } : null,
       iRuta !== null && iRuta > 1 ? { label: "Funn i samme 100 m-rute", value: `${iRuta} (det nyeste vises)` } : null,
+      a.bilde === true ? { label: "Bilde", value: "ja, hos kilden" } : null,
+      a.validert === true ? { label: "Kvalitetssikret", value: "ja, av kilden" } : null,
       { label: "GBIF-ID", value: rad.external_id },
     ]),
+    // Egen blokk for funn i flere sesonger. Opptelling, merket som det.
+    ...(naer !== null && naer > 1 && fraTil
+      ? {
+          analysis: {
+            label: "Registrert her før",
+            heading: flereAar ? `Registrert i ${sesonger} ulike år` : `${naer} registrerte funn samme år`,
+            lines: [
+              `${naer} registrerte funn innen 250 m, ${flereAar ? `fra ${fraTil}` : `alle fra ${fraTil}`}.`,
+              ...(flereAar && aarliste ? [`År: ${aarliste}.`] : []),
+              ...(observatorer !== null && observatorer > 0 ? [`${observatorer} ${observatorer === 1 ? "observatør" : "ulike observatører"}.`] : []),
+            ],
+            items: [],
+            more: 0,
+            note: GJENTAK_FORBEHOLD,
+          },
+        }
+      : {}),
     // Et gammelt funn tolkes ikke som en bestand. Det sies, det skjules ikke.
-    explanation: gammelt ? `${FUNN_FORBEHOLD} Funnet er fra ${aar}: det sier lite om hva som står der nå.` : FUNN_FORBEHOLD,
+    explanation: gammelt ? `${FUNN_FORBEHOLD} ${art.gammeltTekst ? art.gammeltTekst(aar!) : `Funnet er fra ${aar}: det sier lite om hva som står der nå.`}` : FUNN_FORBEHOLD,
     notice: INTERNT,
     sourceName: [datasett ?? "GBIF", datasett ? "via GBIF" : null, lisens ? `(${lisens})` : null].filter(Boolean).join(" "),
     sourceUrl: rad.source_url,
     href: null,
     hrefLabel: null,
-    sort: (aar ?? 0) * 100 + (maaned ?? 0),
+    // Sesonger først (bare med gjentak), så nyeste.
+    sort: (sesonger ?? 0) * 1_000_000 + (aar ?? 0) * 100 + (maaned ?? 0),
   };
 }

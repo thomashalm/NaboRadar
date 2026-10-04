@@ -20,7 +20,8 @@ export type ExploreStyle =
   | "forurenset_grunn"
   | "multefunn"
   | "myr"
-  | "tyttebaerfunn";
+  | "tyttebaerfunn"
+  | "kantarellfunn";
 
 export interface ExploreFeature {
   id: string;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aapenLisens, GbifMultefunnProvider, GbifTyttebaerfunnProvider, TYTTEBAER } from "@/lib/providers/gbif/multefunn";
+import { aapenLisens, GbifKantarellfunnProvider, GbifMultefunnProvider, GbifTyttebaerfunnProvider, KANTARELL, TYTTEBAER } from "@/lib/providers/gbif/multefunn";
 import { KartverketN50MyrProvider, parseN50Myr } from "@/lib/providers/kartverket/n50-myr";
 
 /**
@@ -28,7 +28,7 @@ describe("GbifMultefunnProvider", () => {
     expect(records[0]).toMatchObject({
       providerId: "gbif-multefunn-oslomarka", externalId: "100", category: "natur_intern", subtype: "multefunn", title: "Multe",
       geometry: { type: "Point", coordinates: [10.664691, 60.03638] },
-      attributes: { aar: 2024, maaned: 7, dato: "2024-07-12", presisjonM: 10, datasett: "Norwegian Species Observation Service", prosjekt: "Lokalflora Oslo og Akershus", institusjon: "nbf", type: "observasjon", lisens: "CC BY 4.0", funnIRuta: 1 },
+      attributes: { aar: 2024, maaned: 7, dato: "2024-07-12", presisjonM: 10, datasett: "Norwegian Species Observation Service", prosjekt: "Lokalflora Oslo og Akershus", institusjon: "nbf", type: "observasjon", lisens: "CC BY 4.0", funnIRuta: 1, bilde: false, validert: false },
       sourceUrl: "https://www.gbif.org/occurrence/100",
     });
     expect(JSON.stringify(records)).not.toMatch(/Ola Nordmann|Bak hytta/);
@@ -88,6 +88,51 @@ describe("GbifTyttebaerfunnProvider", () => {
     expect(urler[0]).toContain("taxonKey=2882835");
     expect(urler[0]).toContain("decimalLatitude=59.78%2C60.3");
     expect(urler[0]).toContain("decimalLongitude=10.3%2C11.1");
+  });
+});
+
+describe("GbifKantarellfunnProvider", () => {
+  const p = new GbifKantarellfunnProvider();
+  // 0,001° bredde ≈ 111 m.
+  const sett = [
+    funn({ key: 1, year: 2024, recordedBy: "A", media: [{}] }),
+    funn({ key: 2, year: 2019, recordedBy: "B", decimalLatitude: 60.03738, fieldNotes: "Validationstatus: Approved Media" }),
+    funn({ key: 3, year: 2019, recordedBy: "B", decimalLatitude: 60.03739 }),
+    funn({ key: 4, year: 2012, recordedBy: "C", decimalLatitude: 60.0381 }),
+    // 600 m unna: hører ikke til samme sted.
+    funn({ key: 5, year: 2021, recordedBy: "D", decimalLatitude: 60.0418 }),
+  ];
+
+  it("kilde-ID, takson og gjentak er slått på", () => {
+    expect([p.id, KANTARELL.taxonKey, KANTARELL.gjentak]).toEqual(["gbif-kantarellfunn-oslomarka", 5249504, true]);
+  });
+
+  it("teller registreringer innen 250 m: antall, ulike år og ulike observatører — også dem som tynnes bort", () => {
+    const { records } = p.normalize({ features: sett, documents: [] });
+    const a = records.find((r) => r.externalId === "1")!.attributes;
+    expect(a).toMatchObject({ funnINaerheten: 4, aarINaerheten: 3, aarliste: "2012, 2019, 2024", observatorerINaerheten: 3, bilde: true, validert: false });
+    const alene = records.find((r) => r.externalId === "5")!.attributes;
+    expect(alene).toMatchObject({ funnINaerheten: 1, aarINaerheten: 1, aarliste: "2021", observatorerINaerheten: 1 });
+    expect(records.find((r) => r.externalId === "2")!.attributes.validert).toBe(true);
+    // Funnet fra 2012 deler 100 m-rute med et nyere og vises ikke selv — men det teller i opptellingen over.
+    expect(records.map((r) => r.externalId).sort()).toEqual(["1", "2", "5"]);
+  });
+
+  it("observatørnavn brukes til å telle, men lagres ikke", () => {
+    const { records } = p.normalize({ features: sett.map((f, i) => ({ ...f, recordedBy: `Fullt Navn ${i}` })), documents: [] });
+    expect(JSON.stringify(records)).not.toMatch(/Fullt Navn/);
+  });
+
+  it("uverifiserte og automatisk godkjente registreringer tas ikke inn", () => {
+    const { records, skipped } = p.normalize({ features: [funn({ key: 1, identificationVerificationStatus: "unverified" }), funn({ key: 2, decimalLatitude: 60.1, identificationVerificationStatus: "Approved | Automated" }), funn({ key: 3, decimalLatitude: 60.2, identificationVerificationStatus: "validated" })], documents: [] });
+    expect(records.map((r) => r.externalId)).toEqual(["3"]);
+    expect(skipped!.map((s) => s.reason)).toEqual(["uverifisert eller automatisk godkjent i kilden", "uverifisert eller automatisk godkjent i kilden"]);
+  });
+
+  it("multe får ikke gjentaksfeltene", () => {
+    const a = new GbifMultefunnProvider().normalize({ features: sett, documents: [] }).records[0]!.attributes;
+    expect(a.funnINaerheten).toBeUndefined();
+    expect(a.aarliste).toBeUndefined();
   });
 });
 
