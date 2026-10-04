@@ -7,7 +7,7 @@ import type { AreaLookup, LookupContext, LookupHit } from "./types";
 /** Kortere budsjett enn sync: brukeren venter på svaret. */
 const LOOKUP_RETRY = { timeoutMs: 5_000, maxRetries: 1, baseDelayMs: 200 };
 
-const AKTSOMHET_SERVICE = "https://kart.nve.no/enterprise/rest/services/KvikkleireskredAktsomhet/MapServer";
+export const AKTSOMHET_SERVICE = "https://kart.nve.no/enterprise/rest/services/KvikkleireskredAktsomhet/MapServer";
 const NETTANLEGG_SERVICE = "https://kart.nve.no/enterprise/rest/services/Nettanlegg4/MapServer";
 
 /**

@@ -322,7 +322,7 @@ export const OPPVEKST_TYPE_LABEL: Record<string, string> = {
   barnehage: "Barnehage",
 };
 
-const STABILITET_TEXT: Record<string, string> = {
+export const STABILITET_TEXT: Record<string, string> = {
   paavist_lav_sikkerhet: "Kvikkleire er påvist i sonen, med beregnet sikkerhetsfaktor under 1,4",
   paavist_ikke_vurdert: "Kvikkleire er påvist i sonen, stabiliteten er ikke vurdert",
   paavist_tilfredsstillende: "Kvikkleire er påvist i sonen, med beregnet sikkerhetsfaktor over 1,4",
@@ -330,14 +330,14 @@ const STABILITET_TEXT: Record<string, string> = {
   ikke_fare: "Utredet: ikke fare for områdeskred",
 };
 
-const UNDERSOKELSE_TEXT: Record<string, string> = {
+export const UNDERSOKELSE_TEXT: Record<string, string> = {
   ingen: "ingen undersøkelse",
   enkel: "enkel undersøkelse",
   supplerende: "supplerende undersøkelser av stabilitet",
   sikringstiltak_utfort: "sikringstiltak utført",
 };
 
-const KONSEKVENS_TEXT: Record<string, string> = {
+export const KONSEKVENS_TEXT: Record<string, string> = {
   ingen: "ingen",
   mindre_alvorlig: "mindre alvorlig",
   alvorlig: "alvorlig",

@@ -421,7 +421,7 @@ finnes ingen anonym skrivevei.
 |---|---|
 | `/admin/adresse` | Hva finnes rundt denne adressen? Offentlig resultat pluss intern research |
 | `/admin/research` | Hva vet vi om dette funnet? Oversikt, søk, redigering, kilder og kildestatus |
-| `/admin/research/utforsk` | Hva finnes i dette datasettet for dette området? Plassholder — ikke bygget |
+| `/admin/research/utforsk` | Hva finnes i dette datasettet, her? Kart først: kvikkleire og datasentre |
 | `/admin/kart` | Hvor i landet finnes denne typen funn? Nasjonal geografisk utforskning |
 
 ### `/admin/kart` — research-kartet
@@ -2762,13 +2762,50 @@ redigeringsskjemaet — det er kildene man skal lese før man endrer en status.
 
 ### `/admin/research/utforsk` — Utforsk data
 
-**Utforsk data er strukturerte datasett og kartlag**, ikke research-funn. Foreløpig en
-plassholder uten funksjonalitet, slik at inngangen fra research-siden har et sted å peke.
+**Utforsk data er adminverktøyet for direkte utforsking av strukturerte datasett og kartlag.**
+Research er manuelle, interne funn og oppfølgingen av dem; Utforsk data svarer på «hva finnes i
+dette datasettet, her?». Kart først: admin skriver «kvikkleire Oslo» eller «datasenter», og
+treffene står i kartet og i listen ved siden av. Trykk i kartet eller listen åpner samme
+detaljpanel.
 
-Retningen: velg et datasett og et område, og få treffene som liste og i kart. For eksempel
-kvikkleire i Oslo, støy i Trondheim, tilfluktsrom i Bergen, hytter i Troms eller planer i Bærum.
-Med datasett, kommune eller fylke, egenskapsfiltre som passer datasettet, og liste + kart. Ikke
-bygget ennå.
+**Søket** tolkes deterministisk (`lib/admin/explore/parse.ts`), uten AI: en eksplisitt liste med
+ord velger datasettet, og resten er et sted fra Kartverkets kommuneregister (kommune, ellers
+fylke). Et sted som ikke finnes der, er ukjent — vi gjetter ikke. Heter flere kommuner det samme
+(Herøy, Våler), må admin velge. Et søk som ikke treffer et datasett, sier det og lister
+datasettene som finnes; det er ikke et fritekstsøk i hele databasen.
+
+**Datasett-registeret** (`lib/admin/explore/registry.ts`). Hvert datasett er en adapter med
+`aliases`, `needsArea` og `load`, som henter objektene i et område og gjør dem til
+`ExploreFeature` — tittel, type, kort status, rader til detaljpanelet, forklaring, kilde. Siden,
+kartlaget (`lib/map/layers/explore.ts`), listen og panelet kjenner bare `ExploreFeature`.
+
+| Datasett | Kilde | Geometri | Uten sted |
+|---|---|---|---|
+| Kvikkleire | `area_features`, `nve-kvikkleire-soner` (4 865 flater) | flater | krever kommune, fylke eller et kartutsnitt under 80 km |
+| Datasenter | research-funn med underkategori «Datasenter», via `research_map` | punkter | hele landet |
+
+**Nytt datasett:** skriv en `ExploreDataset`, legg den i listen i `registry.ts`, og gi
+objekttypen en farge i kartlaget. Ligger dataene i `area_features`, kan `load` bruke
+`explore_area_features`. Ingen endring i siden.
+
+**Kvikkleire.** Datasettet er NVEs *kartlagte* kvikkleiresoner, med status (mulig, påvist,
+utredet uten fare), risikoklasse og faregrad slik kilden har dem. *Aktsomhetsområdene* er et
+annet kart — 148 235 flater som ikke ligger i databasen. De vises ikke som flater. Et trykk i
+kartet der det ikke er noen sone, sjekker punktet mot NVEs aktsomhetskart og svarer «innenfor»,
+«utenfor» eller «ikke dekket». Et aktsomhetsområde presenteres aldri som en kartlagt sone.
+
+**Datasenter.** Ikke et eget register: research-funnene leses gjennom samme vei som
+research-kartet. Bare funn med koordinat og standard verifisering vises. Panelet sier at det er
+et internt research-funn, og lenker til funnet for kilder og notater.
+
+**Avgrenset lesing.** `explore_area_features` gir alltid et utsnitt, eventuelt avgrenset videre
+av kommune- eller fylkesflaten, høyst 2 000 objekter per kall (de største først, `total` sier
+hvor mange som fantes), med geometri forenklet etter utsnittets bredde. Ingen bulkeksport, og
+ingen nasjonal GeoJSON i nettleseren.
+
+**Bare admin.** Siden sjekker sesjonen, `explore_area_features` og `research_map` gir bare rader
+når `is_admin()` er sann, anon har ikke EXECUTE, og aktsomhetssjekken er en server action som
+sjekker sesjonen selv. Ingen nye offentlige ruter eller API-er.
 
 ### Adressesøk og kart
 
