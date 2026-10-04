@@ -7,6 +7,7 @@ import { sjekkAktsomhetAction } from "@/app/admin/research/utforsk/actions";
 import { AreaMap, type MapPopupContent } from "@/components/map/AreaMap";
 import { NORGE } from "@/lib/admin/kart-bounds";
 import { AKTSOMHET_TEKST, type Aktsomhet } from "@/lib/admin/explore/aktsomhet";
+import { EKSEMPELKOMBINASJON, EKSEMPELSOK } from "@/lib/admin/explore/eksempler";
 import { utforskHref } from "@/lib/admin/explore/href";
 import type { ExploreFeature, LngLatBox } from "@/lib/admin/explore/types";
 import type { LngLatBounds } from "@/lib/geo/bounds";
@@ -217,10 +218,12 @@ export function Datautforsker({
             name="q"
             defaultValue={q}
             autoComplete="off"
-            placeholder={'Søk etter f.eks. "kvikkleire Oslo" eller "datasenter"'}
+            placeholder={'Søk etter f.eks. "planer Oslo" eller "datasenter"'}
             className="w-full rounded-full border border-line bg-surface px-5 py-3.5 text-[16px] text-ink outline-none focus:border-accent"
           />
         </form>
+
+        {visning.status === "tom" && <Komigang />}
 
         <div className={`mt-5 ${pending ? "opacity-50" : ""}`}>
           <Status visning={visning} forslag={forslag} />
@@ -305,6 +308,43 @@ const INGEN_LAG: Lagvisning[] = [];
 /** «Plansaker · Varslet planoppstart». Er laget og typen samme ord, står det én gang. */
 const lagOgType = (f: ExploreFeature) => (f.datasetLabel.toLowerCase() === f.kind.toLowerCase() ? f.datasetLabel : `${f.datasetLabel} · ${f.kind}`);
 
+const LEGG_TIL_KNAPP = "inline-flex min-h-9 items-center rounded-full border bg-surface px-3.5 text-[14px] font-medium";
+
+/**
+ * Tomtilstanden: hvordan man kommer i gang, og at kartet tar to lag. «+ Legg til lag» står her
+ * allerede, deaktivert, så kombinasjonen er synlig før første søk. Eksemplene er vanlige søk.
+ */
+function Komigang() {
+  return (
+    <div className="mt-3">
+      <p className="text-[14px] text-muted">Søk etter ett lag først. Deretter kan du legge til ett lag til i samme kart.</p>
+      <ul className="mt-3 flex flex-wrap gap-2" aria-label="Eksempelsøk">
+        {EKSEMPELSOK.map((sok) => (
+          <li key={sok}>
+            <Link href={utforskHref({ q: sok })} className="inline-flex min-h-9 items-center rounded-full border border-line bg-surface px-3.5 text-[14px] text-ink hover:border-ink">
+              {sok}
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        <button type="button" disabled aria-describedby="legg-til-hjelp" className={`${LEGG_TIL_KNAPP} cursor-not-allowed border-dashed border-line-strong text-muted`}>
+          + Legg til lag
+        </button>
+        <span id="legg-til-hjelp" className="text-[13px] text-muted">
+          Søk etter første lag for å kombinere to datasett
+        </span>
+      </div>
+      <p className="mt-2 text-[13px] text-muted">
+        Eksempel:{" "}
+        <Link href={utforskHref({ q: EKSEMPELKOMBINASJON.q, lag: EKSEMPELKOMBINASJON.lag })} className="text-accent hover:underline">
+          {EKSEMPELKOMBINASJON.tekst}
+        </Link>
+      </p>
+    </div>
+  );
+}
+
 /** De aktive lagene som brikker med ×, og «Legg til lag» når det er plass til ett til. */
 function Lagrad({ lag, leggTil }: { lag: Lagvisning[]; leggTil: { id: string; label: string; href: string }[] }) {
   return (
@@ -320,7 +360,7 @@ function Lagrad({ lag, leggTil }: { lag: Lagvisning[]; leggTil: { id: string; la
       ))}
       {leggTil.length > 0 && (
         <details className="relative">
-          <summary className="cursor-pointer list-none rounded-full border border-dashed border-line-strong px-3 py-1.5 text-[14px] font-medium text-ink hover:border-ink [&::-webkit-details-marker]:hidden">
+          <summary className={`${LEGG_TIL_KNAPP} cursor-pointer list-none border-accent text-accent hover:bg-accent/[0.06] [&::-webkit-details-marker]:hidden`}>
             + Legg til lag
           </summary>
           <ul className="absolute z-20 mt-1.5 min-w-48 rounded-xl border border-line bg-surface py-1.5 shadow-pop">
@@ -475,7 +515,7 @@ function Status({ visning, forslag }: { visning: UtforskVisning; forslag: { id: 
     case "tom":
       return (
         <div>
-          <p className="text-[15px] text-ink">Skriv hva du vil finne, og gjerne hvor.</p>
+          <p className="text-[13px] text-muted">Datasettene du kan søke i:</p>
           <Forslagsliste forslag={forslag} />
         </div>
       );

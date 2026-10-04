@@ -9,7 +9,8 @@ import { kraftnettFeature } from "@/lib/admin/explore/kraftnett";
 import { kvikkleireFeature } from "@/lib/admin/explore/kvikkleire";
 import { plansakFeature } from "@/lib/admin/explore/plansaker";
 import { tolkSok } from "@/lib/admin/explore/parse";
-import { EXPLORE_DATASETS, MAX_LAG } from "@/lib/admin/explore/registry";
+import { EKSEMPELKOMBINASJON, EKSEMPELSOK } from "@/lib/admin/explore/eksempler";
+import { datasetMedId, EXPLORE_DATASETS, MAX_LAG } from "@/lib/admin/explore/registry";
 
 /**
  * Utforsk data: søket tolkes deterministisk. Et ord velger datasettet, resten er et sted fra
@@ -313,5 +314,23 @@ describe("forurenset grunn i panelet", () => {
     expect(akseptabel.notice).toContain("Internt datasett");
     // En kode vi ikke kjenner, vises ikke rått.
     expect(forurensetGrunnFeature(rad({ paavirkningsgrad: "nyKode" }), null).summary).toBeNull();
+  });
+});
+
+describe("eksemplene i tomtilstanden", () => {
+  it("hvert eksempelsøk treffer et datasett og et sted som finnes", () => {
+    expect(EKSEMPELSOK.map((sok) => { const t = tolk(sok); return [t.dataset?.id, t.sted.status]; })).toEqual([
+      ["plansaker", "ok"],
+      ["kvikkleire", "ok"],
+      ["kraftnett", "ok"],
+      ["datasenter", "ingen"],
+    ]);
+  });
+
+  it("eksempelkombinasjonen er to ulike datasett for et sted — ingen egen syntaks", () => {
+    const t = tolk(EKSEMPELKOMBINASJON.q);
+    expect(t).toMatchObject({ dataset: { id: "plansaker" }, sted: { status: "ok" } });
+    expect(datasetMedId(EKSEMPELKOMBINASJON.lag)?.id).toBe("kvikkleire");
+    expect(EKSEMPELKOMBINASJON.q).not.toContain("+");
   });
 });

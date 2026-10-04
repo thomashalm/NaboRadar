@@ -2813,6 +2813,14 @@ andre laget) — så en kombinasjon kan bokmerkes. `lib/admin/explore/visning.ts
 til det siden viser, og leser begge lag samtidig: ett kall per lag, samme flate til begge.
 Kartet flytter seg når området endres, ikke når lag legges til eller byttes.
 
+**Tomtilstanden forklarer flyten** uten at noen må lære syntaks: én linje («Søk etter ett lag
+først. Deretter kan du legge til ett lag til i samme kart.»), noen eksempelsøk som brikker, og
+«+ Legg til lag» synlig, men deaktivert, med teksten «Søk etter første lag for å kombinere to
+datasett». Én lenke viser en ferdig kombinasjon («Planer + kvikkleire»). Eksemplene ligger i
+`lib/admin/explore/eksempler.ts` og testes mot registeret. Etter første søk står «+ Legg til
+lag» ved lagbrikkene; listen der kommer fra registeret, uten hovedlaget. Med to lag er den
+borte. Søket har ingen `+`-syntaks: veien er alltid søk først, så «Legg til lag».
+
 Hvert objekt vet hvilket lag det hører til (`datasetId`, `datasetLabel`), og panelet sier det:
 «Plansaker · Varslet planoppstart». Ligger flere objekter under samme trykk — fra ett eller to
 lag — får admin en liste og velger; det åpnes aldri flere paneler. **Siden sier ingenting om
