@@ -1172,6 +1172,12 @@ Regelen fra 2026-10-03. Samme datasett og samme lesefunksjon (`features_near`), 
 
 - `/omrade` lister ikke rom utenfor radien, og de tegnes ikke i kartet. Siden skal ikke late som
   om noe 3 km unna ligger innen 1 km. Hovedradiene er uendret: 500 m, 1 km, 3 km.
+- **Hver rad er en trykkflate**, både rom innen radius og de nærmeste utenfor. Et trykk velger
+  rommet i kartet: markøren utheves, kartet flytter seg dit hvis rommet ligger utenfor utsnittet,
+  og popupen åpner seg — samme mekanisme som for alle andre lister på siden
+  (`MapSelectionProvider`). På mobil hentes kartet fram. I verktøyvisningen er de nærmeste rommene
+  derfor kartobjekter, synlig utenfor radiussirkelen; kartet er fortsatt zoomet til valgt radius
+  til noen trykker. Valget ligger ikke i URL-en — ingen valg på resultatsiden gjør det.
 - Spesialverktøyet skal alltid svare. De nærmeste rommene er merket som utenfor valgt radius, og
   forbeholdet om at et rom i nærheten ikke er en anvisning står som før.
 - **10 km er satt etter fordelingen, ikke etter skjønn.** Av 327 adresser spredt over hele Oslo har

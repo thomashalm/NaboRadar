@@ -402,7 +402,12 @@ const SHELTER_PROVIDER_ID = "dsb-tilfluktsrom";
  *
  * `nearest` er rommene innen NEAREST_SHELTER_RADIUS_M, nærmest først. Er den tom, finnes det
  * ingen offentlige rom innen 10 km: da står seksjonen bare i spesialverktøyet, med den grensen
- * i teksten. Rommene tegnes ikke i kartet, som er zoomet til valgt radius.
+ * i teksten.
+ *
+ * I spesialverktøyet er de nærmeste rommene også kartobjekter, slik at raden kan trykkes: kartet
+ * flytter seg til rommet og åpner samme popup som for rom innen radius. Markøren ligger synlig
+ * utenfor radiussirkelen, og kartet er fortsatt zoomet til valgt radius til noen trykker.
+ * `/omrade` uten verktøyet lister ikke rommene, og tegner dem derfor heller ikke.
  *
  * Eksportert for test — hva som vises og hvordan det formuleres er produktlogikk.
  */
@@ -410,7 +415,7 @@ export function shelterFactsOutsideRadius(
   nearest: FactRow[],
   radiusM: number,
   showNearest: boolean,
-): { cluster: FactCluster } | null {
+): { cluster: FactCluster; mapFeatures: AreaMapFeature[] } | null {
   const sorted = [...nearest].sort(byRelevance).slice(0, NEAREST_SHELTER_COUNT);
   if (sorted.length === 0 && !showNearest) return null;
 
@@ -426,13 +431,17 @@ export function shelterFactsOutsideRadius(
 
   if (sorted.length === 0) {
     const text = `${describeTilfluktsromIngen(formatRadius(NEAREST_SHELTER_RADIUS_M))}.`;
-    return { cluster: { ...base, summary: text, lists: [], caveat: null, emptyNote: { text, nearestLink: false } } };
+    return {
+      cluster: { ...base, summary: text, lists: [], caveat: null, emptyNote: { text, nearestLink: false } },
+      mapFeatures: [],
+    };
   }
 
   const ingen = describeTilfluktsromIngen(formatRadius(radiusM));
   if (!showNearest) {
     return {
       cluster: { ...base, summary: ingen, lists: [], caveat: null, emptyNote: { text: `${ingen}.`, nearestLink: true } },
+      mapFeatures: [],
     };
   }
 
@@ -453,11 +462,12 @@ export function shelterFactsOutsideRadius(
       caveat: TILFLUKTSROM_CAVEAT,
       defaultOpen: true,
     },
+    mapFeatures: sorted.flatMap(mapFeatureFromRow),
   };
 }
 
 /** Oppslaget etter nærmeste rom feilet. Seksjonen sier det, i stedet for å stå tom eller mangle. */
-function shelterFactsUnavailable(): { cluster: FactCluster } {
+function shelterFactsUnavailable(): { cluster: FactCluster; mapFeatures: AreaMapFeature[] } {
   const text = TILFLUKTSROM_UTILGJENGELIG;
   return {
     cluster: {
@@ -472,6 +482,7 @@ function shelterFactsUnavailable(): { cluster: FactCluster } {
       sourceName: "",
       emptyNote: { text, nearestLink: false },
     },
+    mapFeatures: [],
   };
 }
 
@@ -1004,6 +1015,7 @@ export async function getAreaFacts(params: {
       : shelterFactsOutsideRadius(nearestShelterRows, radius, params.nearestShelters ?? false);
     if (result) {
       clusters.push(result.cluster);
+      mapFeatures.push(...result.mapFeatures);
       if (!nearestSheltersFailed) usedSources.add(SHELTER_PROVIDER_ID);
     }
   }

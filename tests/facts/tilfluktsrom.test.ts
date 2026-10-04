@@ -277,8 +277,10 @@ describe("ingen rom innen radius", () => {
     expect(cluster!.caveat).toBe(TILFLUKTSROM_CAVEAT);
     expect(cluster!.sourceName).toContain("Sivilforsvaret");
     expect(svar.sources.map((k) => k.name)).toContain("Offentlige tilfluktsrom");
-    // Kartet er zoomet til valgt radius. Rom utenfor tegnes ikke som om de lå innenfor.
-    expect(svar.mapFeatures).toEqual([]);
+    // Radene skal kunne trykkes: hvert rom i listen har et kartobjekt med samme id.
+    expect(svar.mapFeatures.map((f) => f.id)).toEqual(cluster!.lists[0]!.items.map((i) => i.id));
+    expect(svar.mapFeatures.every((f) => f.category === "tilfluktsrom")).toBe(true);
+    expect(svar.mapFeatures[0]!.distanceLabel).toBe("3,3 km unna");
   });
 
   it("gjelder også 3 km: nærmeste rom ligger 3,3 km unna", async () => {
@@ -293,6 +295,8 @@ describe("ingen rom innen radius", () => {
     // Rommene listes ikke — /omrade later ikke som om noe 3 km unna ligger innen 1 km.
     expect(cluster!.lists).toEqual([]);
     expect(JSON.stringify(cluster)).not.toContain("Bentsegt");
+    // … og tegner dem derfor heller ikke i kartet.
+    expect((await seksjon({ radius: 1000 })).svar.mapFeatures).toEqual([]);
   });
 
   it("sier aldri «ingen tilfluktsrom» uten radius", async () => {
