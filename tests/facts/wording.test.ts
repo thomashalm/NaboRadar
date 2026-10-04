@@ -160,16 +160,57 @@ describe("støy", () => {
     const strategisk = describe_("stoy_strategisk_veg", { niva: "55–59 dB" }, true)!;
     expect(strategisk.headline).toContain("Lden 55–59 dB");
     // Metode og kartleggingsår står én gang i «Kilder og metode», ikke på hvert kort.
-    expect(strategisk.details).toEqual([]);
+    expect(strategisk.details).toEqual(["Gul støysone fra 55 dB, rød fra 65 dB (T-1442)"]);
     expect(SOURCES["mdir-stoy-strategisk"]!.method).toContain("EU-støydirektivet, kartlagt 2022");
-    // «Ved søkepunktet» står som avstand på kortet og i kortformen — ikke en gang til i overskriften.
     expect(strategisk.headline).not.toContain("søkepunktet");
-    expect(strategisk.compact!.context).toBe("Ved søkepunktet · modellberegnet, ikke målt ved boligen");
 
     const varsel = describe_("stoysone_veg_t1442", { sone: "gul", kilde: "ERF-veger", prognoseAar: 2040 }, true)!;
     expect(varsel.headline).toBe("Gul støysone for veitrafikk (T-1442)");
     // Statens vegvesens eget forbehold er en egenskap ved kartet, og står ved kilden.
     expect(SOURCES["svv-stoysone-veg"]!.method).toContain("ikke skal brukes til detaljvurdering av enkeltboliger");
+  });
+
+  /**
+   * QA Langmyrgrenda 26 (2026-10-04): 50–54 dB fra gata utenfor ble vist likt som et høyt nivå,
+   * med «Ved søkepunktet» som om det var målt ved huset. Grensene er T-1442 tabell 1.
+   */
+  describe("referanse mot T-1442", () => {
+    const linje = (subtype: string, nedre: number, ovre: number | null) =>
+      describe_(subtype, { niva: "x dB", nedre, ovre }, true)!.details[0];
+
+    it("vei 50–54 ligger under gul støysone, og sier det", () => {
+      expect(linje("stoy_strategisk_veg", 50, 54)).toBe("Under gul støysone (gul fra 55 dB)");
+    });
+
+    it("vei fra 55 og opp får grensene som referanse, uten å bli kalt en sone", () => {
+      for (const [nedre, ovre] of [[55, 59], [60, 64], [65, 69], [70, 74], [75, null]] as const) {
+        const tekst = linje("stoy_strategisk_veg", nedre, ovre)!;
+        expect(tekst).toBe("Gul støysone fra 55 dB, rød fra 65 dB (T-1442)");
+        expect(tekst).not.toMatch(/tilsvarer|ligger i|^(Gul|Rød) støysone$/i);
+      }
+    });
+
+    it("bane har egne grenser, og et intervall som krysser gul grense kalles ikke «under»", () => {
+      expect(linje("stoy_strategisk_bane", 50, 54)).toBe("Under gul støysone (gul fra 58 dB)");
+      // 55–59 ligger på begge sider av 58. Da oppgir vi bare grensene.
+      expect(linje("stoy_strategisk_bane", 55, 59)).toBe("Gul støysone fra 58 dB, rød fra 68 dB (T-1442)");
+      expect(linje("stoy_strategisk_bane", 65, 69)).toBe("Gul støysone fra 58 dB, rød fra 68 dB (T-1442)");
+    });
+
+    it("storbylaget sier at gatene rundt er med; riksveglaget gjør det ikke", () => {
+      const by = describe_("stoy_strategisk_veg", { niva: "50–54 dB", nedre: 50, ovre: 54, byomrade: true }, true)!;
+      expect(by.details).toEqual(["Under gul støysone (gul fra 55 dB)", "Modellert for alle gater i byområdet."]);
+      const riks = describe_("stoy_strategisk_veg", { niva: "50–54 dB", nedre: 50, ovre: 54, byomrade: false }, true)!;
+      expect(riks.details).toEqual(["Under gul støysone (gul fra 55 dB)"]);
+    });
+
+    it("ingen ord som vurderer nivået", () => {
+      const alt = JSON.stringify([
+        describe_("stoy_strategisk_veg", { niva: "50–54 dB", nedre: 50, ovre: 54, byomrade: true }, true),
+        describe_("stoy_strategisk_bane", { niva: "over 75 dB", nedre: 75, ovre: null }, true),
+      ]);
+      expect(alt).not.toMatch(/lavt|moderat|høyt|farlig|usunt|problematisk|helse/i);
+    });
   });
 
   it("uten dB-verdi vises ingenting", () => {

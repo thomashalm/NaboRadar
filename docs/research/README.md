@@ -43,6 +43,7 @@ publisert 2026-10-02 ([ADR 009](../adr/009-public-admin-security-model.md)).
 ### Eiendom og områdedata
 | Fil | Dato | Kort |
 |---|---|---|
+| [stoy-langmyrgrenda.md](stoy-langmyrgrenda.md) | 2026-10-04 | Langmyrgrenda 26 mot 26C: kilden var riktig gjengitt, men 50–54 dB fra gata utenfor ble vist som presist nivå ved huset. Førte til nye støytekster med T-1442-grensene som referanse |
 | [omrade-produktreview.md](omrade-produktreview.md) | 2026-10-03 | Produktreview av `/omrade` på 11 adresser: riktig i delene, men ordnet etter data, ikke etter hva en boligkjøper må vite. Forslag til ny rekkefølge, terskler og hva som mangler. Ikke implementert |
 | [tilfluktsrom-naermeste-rom.md](tilfluktsrom-naermeste-rom.md) | 2026-10-03 | Langmyrgrenda 26C viste ingen tilfluktsrom: dataene var identiske med Sivilforsvarets (556/556), nærmeste rom lå 3,3 km unna og seksjonen falt bort. Bygget: nærmeste rom i verktøyet, deep-link `#tilfluktsrom` og `#skolekrets`. 2026-10-04: syncen flyttet fra WFS til DSBs nedlastingsfil, 556/556 like ved byttet |
 | [planer-og-saker-v2.md](planer-og-saker-v2.md) | 2026-10-03 | Planer og saker: kilder, livssyklus og test av 74 saker. Trinn 1 bygget samme dag ([ADR 016](../adr/016-plansaker-deterministisk-uttrekk-og-relevans.md)): formål i 60 %, tiltakstype i 56 % av 1 563 saker |

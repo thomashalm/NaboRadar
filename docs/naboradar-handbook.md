@@ -909,6 +909,26 @@ Hele poenget er at NaboRadar ikke skal si mer enn kilden gjør.
 - Alltid **modellberegning, aldri måling ved boligen**.
 - **Lden** er et døgnnivå med tillegg for kveld og natt — ikke «hvor høyt det er nå».
 - Strategisk kartlegging dekker bare utvalgte områder og kilder. Ingen treff betyr *ikke* stille.
+- **Tallet er et kartnivå, ikke et nivå ved huset** (regler fra 2026-10-04). Strategisk
+  kartlegging er beregnet 4 m over bakken, punktet er et adressepunkt og ikke en fasade, og
+  intervallgrensene ligger få meter fra hverandre. Teksten er derfor «Modellberegnet kartnivå ved
+  søkepunktet. Kan variere over korte avstander.» — ikke «Ved søkepunktet» alene. Bakgrunn:
+  [research/stoy-langmyrgrenda.md](research/stoy-langmyrgrenda.md).
+- **Intervallet står alltid med T-1442s grenser som referanse**, per kilde: vei gul fra 55 dB og
+  rød fra 65 dB, bane gul fra 58 dB og rød fra 68 dB. Ligger hele intervallet under gul grense,
+  står det «Under gul støysone (gul fra 55 dB)». Ellers står bare grensene. Vi sier aldri at
+  nivået *er* eller *tilsvarer* en støysone: strategisk kartlegging er ikke et støysonekart, og et
+  intervall på 5 dB kan ligge på begge sider av en grense (bane 55–59 mot gul fra 58).
+- **Ingen egne ord for nivået.** «Lavt», «moderat» og «høyt» har ingen offisiell dekning.
+- **50–54 dB vises**, men som det er: under gul støysone.
+- **Banelagets tall er nedre grense i et intervall på 5 dB** («65» er 65–69 dB, slik kildens
+  tegnforklaring sier). 75 er det åpne toppintervallet.
+- **I storbylaget er alle gater modellert**, ikke bare de store veiene. Kortet sier «Modellert for
+  alle gater i byområdet», og vi navngir ikke en vei kilden ikke oppgir.
+- **Lden forklares én gang**, nederst i støygruppen: «Lden er gjennomsnittlig støynivå over døgnet,
+  der kveld og natt teller ekstra.»
+- Kortene gjentar ikke «ved søkepunktet» når gruppen sier det. En sone i nærheten beholder avstanden.
+- De rene T-1442-sonekortene (støyvarselkart for veg, flystøy) er uendret.
 
 ### Forurenset grunn
 
@@ -1939,8 +1959,8 @@ Alle seksjoner følger samme form:
   500 m siste 24 måneder · Se 3 km» — ikke en stor stiplet boks. Forbeholdet om at kilden ikke sier om planarbeidet pågår
   vises bare når det finnes en sak å ta forbehold om
 - **Maks to linjer før brukeren må åpne.** Støy vises som «Støy fra veitrafikk · Lden 65–69 dB» /
-  «Ved søkepunktet · modellberegnet, ikke målt ved boligen»; kortene bak utvideren har dB-nivået
-  og kilden, og metode og kartleggingsår står i «Kilder og metode». Kortformen kommer fra
+  «Gul støysone fra 55 dB, rød fra 65 dB (T-1442)»; kortene bak utvideren har dB-nivået,
+  referansen og kilden, og metode og kartleggingsår står i «Kilder og metode». Kortformen kommer fra
   formuleringsregisteret, ikke fra UI-et, og er samme påstand med færre ord
 
 Grenser: 3 i forhåndsvisning, maks 30 i en liste, 150 hentede skjenkesteder, maks 30 kartmarkører

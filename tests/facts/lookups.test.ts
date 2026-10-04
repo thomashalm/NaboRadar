@@ -77,8 +77,20 @@ describe("strategisk støy", () => {
     );
     const hits = await lookup.run(CTX);
     expect(hits.map((h) => h.subtype).sort()).toEqual(["stoy_strategisk_bane", "stoy_strategisk_veg"]);
-    expect(hits.find((h) => h.subtype === "stoy_strategisk_veg")!.attributes.niva).toBe("55–59 dB");
+    expect(hits.find((h) => h.subtype === "stoy_strategisk_veg")!.attributes).toMatchObject({ niva: "55–59 dB", nedre: 55, ovre: 59, byomrade: false });
+    // Banelagets verdi er nedre grense i et intervall på 5 dB — kildens tegnforklaring sier
+    // «70 - 75 dB» for 70. Vi skrev tidligere «70 dB eller mer».
+    expect(hits.find((h) => h.subtype === "stoy_strategisk_bane")!.attributes).toMatchObject({ niva: "70–74 dB", nedre: 70, ovre: 74 });
     expect(hits.every((h) => h.contains)).toBe(true);
+
+    const by = new StrategiskStoyLookup(
+      jsonFetch((url) => (url.includes("stoykart_strategisk_veg") ? fc([point({ category: "Lden5054", source: "roadsInAgglomeration" })]) : fc([]))),
+    );
+    expect((await by.run(CTX))[0]!.attributes).toMatchObject({ niva: "50–54 dB", nedre: 50, ovre: 54, byomrade: true });
+    const topp = new StrategiskStoyLookup(
+      jsonFetch((url) => (url.includes("stoykart_strategisk_bane") ? fc([point({ stoyintervall: 75, stoyenhet: "LDEN" })]) : fc([]))),
+    );
+    expect((await topp.run(CTX))[0]!.attributes).toMatchObject({ niva: "over 75 dB", nedre: 75, ovre: null });
 
     const nightOnly = new StrategiskStoyLookup(jsonFetch(() => fc([point({ stoyintervall: 65, stoyenhet: "LNIGHT" })])));
     expect(await nightOnly.run(CTX)).toEqual([]);

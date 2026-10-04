@@ -2,7 +2,9 @@ import {
   describeClusterToggle,
   describeGrunnforholdSummary,
   describeInfrastrukturSummary,
+  LDEN_FORKLARING,
   STOY_FORBEHOLD,
+  STOY_KARTNIVA,
 } from "./wording";
 import { formatRadius } from "@/lib/format";
 import type { AreaFact } from "@/types/area-feature";
@@ -207,6 +209,9 @@ export function grunnforholdCluster(facts: AreaFact[], radiusM: number): FactClu
  * funnet. Standardvisningen er derfor to linjer: hva som er beregnet, og hvor. Metode,
  * kartleggingsår, forbehold og kilde ligger bak utvideren, med samme ordlyd som før.
  */
+/** Støytypene som oppgir et Lden-intervall, til forskjell fra de rene sonekortene. */
+const LDEN_SUBTYPER: ReadonlySet<string> = new Set(["stoy_strategisk_veg", "stoy_strategisk_bane"]);
+
 export function stoyCluster(facts: AreaFact[], radiusM: number): FactCluster | null {
   const sortert = [...facts].sort(byRelevance);
   if (sortert.length === 0) return null;
@@ -219,17 +224,24 @@ export function stoyCluster(facts: AreaFact[], radiusM: number): FactCluster | n
   // har fått kort form ennå — bruker vi den fulle overskriften i stedet for å finne på noe.
   const kort = forste.compact;
 
+  // Strategisk støykartlegging oppgir Lden-intervaller. For dem gjelder kartnivå-forbeholdet og
+  // Lden-forklaringen, én gang i gruppen. Rene T-1442-sonekort (støyvarsel veg, fly) er uendret.
+  const harLden = sortert.some((fact) => LDEN_SUBTYPER.has(fact.subtype));
+  const forbehold = harLden ? STOY_KARTNIVA : STOY_FORBEHOLD;
+
   return {
     sectionId: "stoy",
     id: "stoy",
     label: flere
       ? `${sortert.length} støykilder ${forste.contains ? "ved søkepunktet" : `innen ${formatRadius(radiusM)}`}`
       : (kort?.headline ?? forste.headline),
-    summary: flere ? STOY_FORBEHOLD : (kort?.context ?? forste.distanceLabel),
-    facts: sortert,
+    summary: flere ? forbehold : (kort?.context ?? forste.distanceLabel),
+    // Gruppen sier allerede at funnene gjelder søkepunktet. Kortene gjentar det ikke; en sone
+    // som ligger i nærheten og ikke på punktet, beholder avstanden.
+    facts: sortert.map((fact) => (fact.contains ? { ...fact, distanceLabel: "" } : fact)),
     lists: [],
     overview: null,
-    caveat: null,
+    caveat: harLden ? (flere ? LDEN_FORKLARING : `${STOY_KARTNIVA} ${LDEN_FORKLARING}`) : null,
     sourceName: kilder.join(" · "),
   };
 }

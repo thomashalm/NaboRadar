@@ -431,6 +431,50 @@ function kvikkleireSone(title: string, a: AreaAttributes, contains: boolean): Fa
  * Støyens ene forbehold. Står én gang, i oppsummeringen av støygruppen — ikke på hvert kort.
  */
 export const STOY_FORBEHOLD = "Modellberegnet, ikke målt ved boligen";
+
+/**
+ * Forbeholdet for strategisk støykartlegging.
+ *
+ * «Ved søkepunktet» alene var for bastant. Kartet er beregnet 4 m over bakken, punktet er et
+ * adressepunkt og ikke en fasade, og intervallgrensene ligger få meter fra hverandre: i
+ * Langmyrgrenda i Oslo skiller 26 m mellom en adresse med 50–54 dB og en uten treff, og den ene
+ * ligger 20 cm fra grensen (docs/research/stoy-langmyrgrenda.md). Teksten sier derfor hva
+ * tallet er — et kartnivå — og at det flytter seg over korte avstander.
+ *
+ * «Søkepunktet», ikke «adressepunktet»: et søk kan også være et stedsnavn.
+ */
+export const STOY_KARTNIVA = "Modellberegnet kartnivå ved søkepunktet. Kan variere over korte avstander.";
+
+/** Står én gang, nederst i støygruppen — aldri per kort. Definisjonen er T-1442s. */
+export const LDEN_FORKLARING = "Lden er gjennomsnittlig støynivå over døgnet, der kveld og natt teller ekstra.";
+
+/**
+ * T-1442/2021, tabell 1: nedre grense for gul og rød støysone, Lden. Grensene er ulike for vei
+ * og bane, og de er referansepunkter — strategisk støykartlegging er ikke et støysonekart, og
+ * Miljødirektoratet sier selv at kartene ikke viser gul og rød sone.
+ */
+const T1442_GRENSER = {
+  stoy_strategisk_veg: { gul: 55, rod: 65 },
+  stoy_strategisk_bane: { gul: 58, rod: 68 },
+} as const;
+
+/**
+ * Referanselinjen under et Lden-intervall.
+ *
+ * Ligger hele intervallet under gul grense, sier vi det. Ellers oppgir vi bare grensene: et
+ * intervall på 5 dB kan ligge på begge sider av en grense (bane 55–59 mot gul fra 58), og da
+ * kan vi ikke si hvilken side nivået er på. Vi påstår aldri at nivået *er* en støysone.
+ */
+export function describeStoyReferanse(subtype: string, ovre: number | null): string | null {
+  const grenser = T1442_GRENSER[subtype as keyof typeof T1442_GRENSER];
+  if (!grenser) return null;
+  return ovre !== null && ovre < grenser.gul
+    ? `Under gul støysone (gul fra ${grenser.gul} dB)`
+    : `Gul støysone fra ${grenser.gul} dB, rød fra ${grenser.rod} dB (T-1442)`;
+}
+
+/** Storbylaget modellerer alle gater. Uten dette leses treffet som støy fra en stor vei. */
+export const STOY_BYOMRADE = "Modellert for alle gater i byområdet.";
 const STOY_FORBEHOLD_VED_PUNKTET = `Ved søkepunktet · ${STOY_FORBEHOLD.charAt(0).toLowerCase()}${STOY_FORBEHOLD.slice(1)}`;
 
 /**
@@ -733,13 +777,15 @@ export function describeFact(input: {
       const kilde = subtype === "stoy_strategisk_veg" ? "veitrafikk" : "bane (tog, T-bane eller trikk)";
       if (!level) return null;
       const kortKilde = subtype === "stoy_strategisk_veg" ? "veitrafikk" : "bane";
+      const referanse = describeStoyReferanse(subtype, num(a.ovre));
       return {
-        // «Ved søkepunktet» står som avstand på kortet, og forbeholdet i gruppens oppsummering.
+        // Forbeholdet og Lden-forklaringen står én gang i gruppen (lib/facts/clusters.ts).
         // Metode og kartleggingsår står i «Kilder og metode».
         headline: `Beregnet støy fra ${kilde}: Lden ${level}`,
-        details: [],
+        details: [referanse, a.byomrade === true ? STOY_BYOMRADE : null].filter((linje): linje is string => linje !== null),
         caveat: null,
-        compact: { headline: `Støy fra ${kortKilde} · Lden ${level}`, context: STOY_FORBEHOLD_VED_PUNKTET },
+        // Står kortet alene, bærer referansen linjen under nivået.
+        compact: { headline: `Støy fra ${kortKilde} · Lden ${level}`, context: referanse ?? STOY_KARTNIVA },
       };
     }
 

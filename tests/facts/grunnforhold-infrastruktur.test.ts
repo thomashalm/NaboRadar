@@ -284,8 +284,30 @@ describe("støy som kompakt gruppe", () => {
       1000,
     )!;
     expect(c.label).toBe("2 støykilder ved søkepunktet");
-    expect(c.summary).toBe("Modellberegnet, ikke målt ved boligen");
+    // Med et Lden-kort i gruppen gjelder kartnivå-forbeholdet, og Lden forklares én gang nederst.
+    expect(c.summary).toBe("Modellberegnet kartnivå ved søkepunktet. Kan variere over korte avstander.");
+    expect(c.caveat).toBe("Lden er gjennomsnittlig støynivå over døgnet, der kveld og natt teller ekstra.");
     expect(c.facts).toHaveLength(2);
+  });
+
+  it("gjentar ikke «ved søkepunktet» på kortene, men beholder avstand for soner i nærheten", () => {
+    const c = stoyCluster(
+      [
+        stoyFakta({ id: "veg", subtype: "stoy_strategisk_veg", contains: true, distanceLabel: "Omfatter valgt sted" }),
+        stoyFakta({ id: "sone", subtype: "stoysone_veg_t1442", contains: false, distanceLabel: "120 m unna" }),
+      ],
+      1000,
+    )!;
+    expect(c.facts.map((f) => f.distanceLabel)).toEqual(["", "120 m unna"]);
+  });
+
+  it("bare sonekort: forbeholdet er som før, og Lden forklares ikke", () => {
+    const c = stoyCluster(
+      [stoyFakta({ id: "fly", subtype: "stoysone_fly_t1442" }), stoyFakta({ id: "sone", subtype: "stoysone_veg_t1442" })],
+      1000,
+    )!;
+    expect(c.summary).toBe("Modellberegnet, ikke målt ved boligen");
+    expect(c.caveat).toBeNull();
   });
 
   it("faller tilbake på full overskrift for en støytype uten kort form", () => {
@@ -309,8 +331,8 @@ describe("kompaktformen kommer fra formuleringsregisteret", () => {
       contains: true,
     });
     expect(full?.compact?.headline).toBe("Støy fra veitrafikk · Lden 55–59 dB");
-    expect(full?.compact?.context).toBe("Ved søkepunktet · modellberegnet, ikke målt ved boligen");
-    // «Ved søkepunktet» står som avstand på kortet, ikke i overskriften.
+    // Står kortet alene, bærer referansen linjen under nivået. Forbeholdet står nederst i gruppen.
+    expect(full?.compact?.context).toBe("Gul støysone fra 55 dB, rød fra 65 dB (T-1442)");
     expect(full?.headline).toBe("Beregnet støy fra veitrafikk: Lden 55–59 dB");
   });
 });
