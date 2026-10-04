@@ -27,6 +27,8 @@ export async function hentAreaFeatures(
   client: SupabaseClient,
   providerId: string,
   area: ExploreArea,
+  /** Høyst 2 000: taket i databasefunksjonen. */
+  limit = AREA_FEATURE_LIMIT,
 ): Promise<{ rader: AreaFeatureRad[]; total: number; error: string | null }> {
   const { data, error } = await client.rpc("explore_area_features", {
     p_provider_id: providerId,
@@ -35,7 +37,7 @@ export async function hentAreaFeatures(
     p_max_lng: area.box.maxLng,
     p_max_lat: area.box.maxLat,
     p_area: area.polygon,
-    p_limit: AREA_FEATURE_LIMIT,
+    p_limit: limit,
   });
   if (error) return { rader: [], total: 0, error: error.message };
   const rader = (data ?? []) as AreaFeatureRad[];

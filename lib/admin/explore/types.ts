@@ -19,7 +19,8 @@ export type ExploreStyle =
   | "transformatorstasjon"
   | "forurenset_grunn"
   | "multefunn"
-  | "myr";
+  | "myr"
+  | "tyttebaerfunn";
 
 export interface ExploreFeature {
   id: string;

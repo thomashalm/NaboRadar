@@ -1,16 +1,16 @@
 import { z } from "zod";
 import { fetchJson } from "@/lib/http";
-import { MULTE_BOKS, MULTEFUNN_PROVIDER, NATUR_INTERN } from "@/lib/multe/omrade";
+import { MULTE_BOKS, MULTEFUNN_PROVIDER, NATUR_INTERN, TYTTEBAERFUNN_PROVIDER } from "@/lib/multe/omrade";
 import type { AreaFeatureProvider, NormalizeResult, ProviderHealth, RawBatch, RejectedRecord, SyncOptions } from "@/lib/providers/types";
 import type { NormalizedAreaFeature } from "@/types/area-feature";
 
 /**
- * Registrerte funn av multe (Rubus chamaemorus) i Oslo og Marka, fra GBIF. Internt researchlag.
+ * Registrerte artsfunn i Oslo og Marka, fra GBIF. Interne researchlag: multe og tyttebær.
  *
  * KILDE: GBIF samler Artsobservasjoner, museenes feltnotater og herbarier, ANO m.fl. Samme
  * registreringer som Artskart. Hver registrering har sin egen lisens.
  *
- * UTVALG (samme som researchen, docs/research/multer-oslo.md):
+ * UTVALG (samme for begge artene; docs/research/multer-oslo.md og tyttebaer-oslo.md):
  *   - til stede (ikke fraværsregistreringer)
  *   - år 2000 eller senere
  *   - oppgitt presisjon på 100 m eller bedre
@@ -22,14 +22,31 @@ import type { NormalizedAreaFeature } from "@/types/area-feature";
  * PERSONVERN: observatør og finner lagres ikke. Stedsbeskrivelsen (fritekst) lagres heller ikke.
  *
  * ET FUNN ER EN OBSERVASJON, IKKE EN BESTAND. Det sier at noen så planten der den dagen.
+ * Kildene sier ikke om planten hadde blomst eller bær: feltet for det er fylt ut for under én
+ * promille av registreringene, og lagres derfor ikke.
  *
  * Synkes ikke etter tidsplan: kjøres for hånd med `npm run sync:area -- --provider=<id>`.
  */
-const TAXON = 2998290;
+/** Hva én art trenger for å bli et eget researchlag. */
+export interface Artsfunn {
+  providerId: string;
+  /** Navnet på kilden i /admin/providers. */
+  name: string;
+  /** GBIFs nøkkel for arten. */
+  taxonKey: number;
+  /** `subtype` i area_features, og stilen i kartet. */
+  subtype: string;
+  /** `title` i area_features: artens norske navn. */
+  art: string;
+}
+
+export const MULTE: Artsfunn = { providerId: MULTEFUNN_PROVIDER, name: "Registrerte multefunn, Oslo og Marka", taxonKey: 2998290, subtype: "multefunn", art: "Multe" };
+export const TYTTEBAER: Artsfunn = { providerId: TYTTEBAERFUNN_PROVIDER, name: "Registrerte tyttebærfunn, Oslo og Marka", taxonKey: 2882835, subtype: "tyttebaerfunn", art: "Tyttebær" };
+
 const API = "https://api.gbif.org/v1/occurrence/search";
 const SIDE = 300;
-/** GBIF hadde 919 registreringer i boksen i oktober 2026. Vesentlig flere betyr at spørringen er feil. */
-const MAKS = 5000;
+/** GBIF hadde 919 multe- og 2 674 tyttebærregistreringer i boksen i oktober 2026. Vesentlig flere betyr at spørringen er feil. */
+const MAKS = 10_000;
 
 /** «Pl@ntNet automatically identified occurrences». Automatisk artsbestemt, og tas ikke inn. */
 const AUTOMATISK_BESTEMT = new Set(["14d5676a-2c54-4f94-9023-1e8dcd822aa0"]);
@@ -66,20 +83,26 @@ const BASIS: Record<string, string> = { HUMAN_OBSERVATION: "observasjon", PRESER
 const rute = (r: RawFunn) => `${Math.round((r.decimalLatitude * 111_320) / 100)}:${Math.round((r.decimalLongitude * 55_800) / 100)}`;
 const round6 = (n: number) => Math.round(n * 1e6) / 1e6;
 
-export class GbifMultefunnProvider implements AreaFeatureProvider {
-  readonly id = MULTEFUNN_PROVIDER;
-  readonly name = "Registrerte multefunn, Oslo og Marka";
+export class GbifArtsfunnProvider implements AreaFeatureProvider {
+  readonly id: string;
+  readonly name: string;
   readonly owner = "GBIF (Artsobservasjoner, museer m.fl.)";
   readonly recordKind = "area_feature" as const;
   readonly license = { name: "Per registrering: CC BY 4.0 eller CC0", url: "https://creativecommons.org/licenses/by/4.0/" };
   readonly defaultStatus = "active" as const;
   readonly statusReason = "Internt researchlag. Oslo og Marka. Synkes for hånd.";
 
-  constructor(private readonly fetchImpl: typeof fetch = fetch) {}
+  constructor(
+    private readonly art: Artsfunn,
+    private readonly fetchImpl: typeof fetch = fetch,
+  ) {
+    this.id = art.providerId;
+    this.name = art.name;
+  }
 
   private side(offset: number, limit: number, signal?: AbortSignal) {
     const params = new URLSearchParams({
-      taxonKey: String(TAXON),
+      taxonKey: String(this.art.taxonKey),
       country: "NO",
       decimalLatitude: `${MULTE_BOKS.minLat},${MULTE_BOKS.maxLat}`,
       decimalLongitude: `${MULTE_BOKS.minLng},${MULTE_BOKS.maxLng}`,
@@ -154,8 +177,8 @@ export class GbifMultefunnProvider implements AreaFeatureProvider {
       providerId: this.id,
       externalId: String(raw.key),
       category: NATUR_INTERN,
-      subtype: "multefunn",
-      title: "Multe",
+      subtype: this.art.subtype,
+      title: this.art.art,
       geometry: { type: "Point", coordinates: [round6(raw.decimalLongitude), round6(raw.decimalLatitude)] },
       attributes: {
         aar: raw.year!,
@@ -187,5 +210,18 @@ export class GbifMultefunnProvider implements AreaFeatureProvider {
     } catch (error) {
       return { ok: false, checkedAt: new Date().toISOString(), latencyMs: null, message: error instanceof Error ? error.name : "Ukjent feil" };
     }
+  }
+}
+
+/** Multefunnene. Egen klasse, så registeret og testene kan opprette den uten argumenter. */
+export class GbifMultefunnProvider extends GbifArtsfunnProvider {
+  constructor(fetchImpl: typeof fetch = fetch) {
+    super(MULTE, fetchImpl);
+  }
+}
+
+export class GbifTyttebaerfunnProvider extends GbifArtsfunnProvider {
+  constructor(fetchImpl: typeof fetch = fetch) {
+    super(TYTTEBAER, fetchImpl);
   }
 }

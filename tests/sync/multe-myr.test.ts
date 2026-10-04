@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aapenLisens, GbifMultefunnProvider } from "@/lib/providers/gbif/multefunn";
+import { aapenLisens, GbifMultefunnProvider, GbifTyttebaerfunnProvider, TYTTEBAER } from "@/lib/providers/gbif/multefunn";
 import { KartverketN50MyrProvider, parseN50Myr } from "@/lib/providers/kartverket/n50-myr";
 
 /**
@@ -62,6 +62,32 @@ describe("GbifMultefunnProvider", () => {
     const { records, rejected } = norm([{ ...funn(), key: undefined }, { ...funn({ key: 7 }), decimalLatitude: "60" }]);
     expect(records).toEqual([]);
     expect(rejected).toHaveLength(2);
+  });
+});
+
+describe("GbifTyttebaerfunnProvider", () => {
+  it("samme utvalg og samme felt som multe, med egen kilde-ID, art og takson", () => {
+    const p = new GbifTyttebaerfunnProvider();
+    expect([p.id, TYTTEBAER.taxonKey]).toEqual(["gbif-tyttebaerfunn-oslomarka", 2882835]);
+    const { records, skipped } = p.normalize({ features: [funn(), funn({ key: 2, year: 1995 }), funn({ key: 3, decimalLatitude: 60.2, datasetKey: "14d5676a-2c54-4f94-9023-1e8dcd822aa0" })], documents: [] });
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({ providerId: "gbif-tyttebaerfunn-oslomarka", category: "natur_intern", subtype: "tyttebaerfunn", title: "Tyttebær", externalId: "100" });
+    expect(skipped!.map((s) => s.externalId)).toEqual(["2", "3"]);
+  });
+
+  it("spør GBIF etter tyttebær, i samme boks som multe", async () => {
+    const urler: string[] = [];
+    const fetchImpl = (async (url: string) => {
+      urler.push(String(url));
+      return new Response(JSON.stringify(String(url).includes("/dataset/") ? { title: "Datasett" } : { results: [funn()], endOfRecords: true }), { status: 200, headers: { "content-type": "application/json" } });
+    }) as unknown as typeof fetch;
+    const p = new GbifTyttebaerfunnProvider(fetchImpl);
+    const bolker = [];
+    for await (const b of p.fetch({ mode: "full" } as never)) bolker.push(b);
+    expect(bolker).toHaveLength(1);
+    expect(urler[0]).toContain("taxonKey=2882835");
+    expect(urler[0]).toContain("decimalLatitude=59.78%2C60.3");
+    expect(urler[0]).toContain("decimalLongitude=10.3%2C11.1");
   });
 });
 

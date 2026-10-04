@@ -56,7 +56,8 @@ publisert 2026-10-02 ([ADR 009](../adr/009-public-admin-security-model.md)).
 | [eiendomskort.md](eiendomskort.md) | 2026-10-03 | Eiendomskort: åpne felt, juss for byggeår/BRA/salg, QA av 49 adresser, DB-måling av nasjonal adresse → bygning (46–1 306 MB). **Kortet er ikke bygget, avventer.** Samme dag rettet: bygningstyper fra SSB KLASS 31 og eiendomskartet flyttet fra WFS til Eiendom-API + WMS |
 | [fiskevann-fiskearter.md](fiskevann-fiskearter.md) | 2026-10-03 | **Ikke prioritert / ikke bygg nå.** Innsjøer nasjonalt fra NVE; arter bare med datert prøvefiske/kartlegging (~870 innsjøer); ingen åpen fiskekortkilde |
 | [multehabitat.md](multehabitat.md) | 2026-10-03 | **Ikke prioritert / ikke bygg nå.** ANO gir ekte fravær; åpne myrkart fanger ~30 % av forekomstene med ~50 % presisjon; observasjoner følger bebyggelse |
-| [multer-oslo.md](multer-oslo.md) | 2026-10-04 | Internt adminlag for mulig multeterreng i Oslo og Marka. 515 funn: myr har 31 % av funnene på 1,9 % av arealet, men ingen åpen variabel rangerer *mellom* myrer. **Ikke bygg score nå**; enkelt lag med funn og myr anbefales, og tre variabler bør testes først |
+| [multer-oslo.md](multer-oslo.md) | 2026-10-04 | Internt adminlag for mulig multeterreng i Oslo og Marka. 515 funn: myr har 31 % av funnene på 1,9 % av arealet, men ingen åpen variabel rangerer *mellom* myrer. Score ikke bygget. Bygget samme dag: funn og myr som interne datasett |
+| [tyttebaer-oslo.md](tyttebaer-oslo.md) | 2026-10-04 | Tyttebær i Oslo og Marka: 1 559 funn etter filter. Kildene skiller ikke plante fra bær (1 av 2 674 har feltet). Furu gir løft 2,2 — for svakt for score eller habitatlag. Bygget: funnene som internt datasett |
 
 ### Eldre discovery- og analysedokumenter (ligger i `docs/`)
 Disse er research i samme betydning, men ligger utenfor mappen fordi andre dokumenter lenker til

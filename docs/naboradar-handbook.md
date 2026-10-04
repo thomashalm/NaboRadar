@@ -421,7 +421,7 @@ finnes ingen anonym skrivevei.
 |---|---|
 | `/admin/adresse` | Hva finnes rundt denne adressen? Offentlig resultat pluss intern research |
 | `/admin/research` | Hva vet vi om dette funnet? Oversikt, søk, redigering, kilder og kildestatus |
-| `/admin/research/utforsk` | Hva finnes i dette datasettet, her? Kart først: plansaker, kvikkleire, kraftnett, forurenset grunn, datasentre, og internt multefunn og myr. Høyst to lag samtidig |
+| `/admin/research/utforsk` | Hva finnes i dette datasettet, her? Kart først: plansaker, kvikkleire, kraftnett, forurenset grunn, datasentre, og internt multefunn, tyttebærfunn og myr. Høyst to lag samtidig |
 | `/admin/kart` | Hvor i landet finnes denne typen funn? Nasjonal geografisk utforskning |
 
 ### `/admin/kart` — research-kartet
@@ -2790,6 +2790,7 @@ kjenner, utelates.
 | Datasenter | `datasenter`, `datasentre`, `datacenter`, `data center` m.fl. | research-funn med underkategori «Datasenter», via `research_map` | punkter | hele landet |
 | Multe: registrerte funn | `multer`, `multe`, `multefunn`, `registrerte multefunn`, `multebær`, `molte(r)` | `area_features`, `gbif-multefunn-oslomarka` (508 punkter), via `explore_area_features` | punkter | hele dekningsområdet (Oslo og Marka) |
 | Myr | `myr`, `myrer`, `myrflate(r)`, `myrområder` | `area_features`, `kartverket-n50-myr-oslomarka` (7 354 flater), via `explore_mires` | flater | krever område |
+| Tyttebær: registrerte funn | `tyttebær`, `tyttebaer`, `tyttebærfunn`, `tyttebær funn` | `area_features`, `gbif-tyttebaerfunn-oslomarka` (1 559 punkter), via `explore_area_features` | punkter | hele dekningsområdet (Oslo og Marka) |
 
 «Krever område» betyr kommune, fylke eller et kartutsnitt under 80 km.
 
@@ -2805,6 +2806,7 @@ feltet er der for at ingen skal bygge en offentlig visning uten å ha sett beslu
 | Datasenter | nei | egen beslutning |
 | Multe: registrerte funn | **nei** | **nei** |
 | Myr | **nei** | **nei** |
+| Tyttebær: registrerte funn | **nei** | **nei** |
 
 Forurenset grunn er og blir internt: ikke på `/omrade`, ikke i noe offentlig kart, og ikke
 gjennom noen offentlig RPC. Kategorien er upublisert i `area_feature_categories`.
@@ -2903,8 +2905,8 @@ egne kategorier (påvirkningsgrad, oppfølging, tilstandsklasse, arealbruk) med 
 som resten av løsningen, og gjør dem ikke sterkere. En registrering gjelder lokaliteten slik den
 er avgrenset, ikke hele eiendommen. Panelet sier at datasettet er internt.
 
-**Multefunn og myr (internt researchlag, bare Oslo og Marka).** To datasett for personlig
-research: hvor er multe registrert, og hvor ligger myrene. **Ingen score og ingen sannsynlighet**
+**Multefunn, tyttebærfunn og myr (interne researchlag, bare Oslo og Marka).** Tre datasett for
+personlig research: hvor er multe og tyttebær registrert, og hvor ligger myrene. **Ingen score og ingen sannsynlighet**
 — researchen ([multer-oslo.md](research/multer-oslo.md)) viste at en habitatmodell i praksis ble
 et myrkart, så vi lagrer dataene og lar kartet vise dem. Aldri offentlig: kategorien
 `natur_intern` er upublisert, og dataene leses bare gjennom admin-funksjonene.
@@ -2921,6 +2923,13 @@ et myrkart, så vi lagrer dataene og lar kartet vise dem. Aldri offentlig: kateg
   funnet kan åpnes fra panelet når funnlaget er aktivt. Blokken sier at dette er
   observasjonskontekst, ikke en sannsynlighet: en myr uten funn kan være en myr ingen har
   registrert noe på.
+- *Tyttebær: registrerte funn* — samme kilde, samme utvalg og samme panel som multefunnene, med
+  en annen art (`lib/providers/gbif/multefunn.ts` tar arten som parameter). 1 559 punkter.
+  **Ingen score og intet habitatlag:** furu og lav bonitet er reelle signaler, men gir bare løft
+  på rundt 2, og tyttebær står nesten overalt i skog
+  ([tyttebaer-oslo.md](research/tyttebaer-oslo.md)). Kildene sier ikke om planten hadde bær —
+  feltet er fylt ut for 7 av 2 674 registreringer — så datasettet sier at funnene gjelder planten.
+  Oppdateres med `npm run sync:area -- --provider=gbif-tyttebaerfunn-oslomarka`.
 - Avstanden regnes i databasen (`explore_mires`), fra myrflaten til punktet, i UTM 33. Avviket fra
   ellipsoiden er ca. 0,03 % ved Oslo. Arealet regnes på ellipsoiden.
 - **Dekning.** Datasettene har `coverage` i registeret. Et søk utenfor («multer Bergen») sier

@@ -15,6 +15,8 @@ export const NATUR_INTERN = "natur_intern" as const;
 
 export const MULTEFUNN_PROVIDER = "gbif-multefunn-oslomarka";
 export const MYR_PROVIDER = "kartverket-n50-myr-oslomarka";
+/** Tyttebær: samme område og samme utvalgsregler som multe. Se docs/research/tyttebaer-oslo.md. */
+export const TYTTEBAERFUNN_PROVIDER = "gbif-tyttebaerfunn-oslomarka";
 
 export const iBoksen = ([lng, lat]: readonly [number, number]) =>
   lng >= MULTE_BOKS.minLng && lng <= MULTE_BOKS.maxLng && lat >= MULTE_BOKS.minLat && lat <= MULTE_BOKS.maxLat;

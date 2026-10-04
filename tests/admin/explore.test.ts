@@ -7,7 +7,7 @@ import { boksFor, lesUtsnitt, punktIFlate, utsnittKm } from "@/lib/admin/explore
 import { forurensetGrunnFeature } from "@/lib/admin/explore/forurenset-grunn";
 import { kraftnettFeature } from "@/lib/admin/explore/kraftnett";
 import { kvikkleireFeature } from "@/lib/admin/explore/kvikkleire";
-import { multefunnFeature } from "@/lib/admin/explore/multefunn";
+import { multefunnFeature, tyttebaerfunnFeature } from "@/lib/admin/explore/multefunn";
 import { myrFeature } from "@/lib/admin/explore/myr";
 import { PLANSAK_OVERLAPP, plansakOverlapp } from "@/lib/admin/explore/plansak-overlapp";
 import { plansakFeature, plansakOverlappFeature } from "@/lib/admin/explore/plansaker";
@@ -192,6 +192,7 @@ describe("nye datasett i søket", () => {
       // Interne researchlag: aldri offentlige.
       multefunn: { openMap: "nei", omrade: "nei" },
       myr: { openMap: "nei", omrade: "nei" },
+      tyttebaerfunn: { openMap: "nei", omrade: "nei" },
     });
   });
 
@@ -204,6 +205,7 @@ describe("nye datasett i søket", () => {
       datasenter: false,
       multefunn: false,
       myr: true,
+      tyttebaerfunn: false,
     });
     expect(MAX_LAG).toBe(2);
   });
@@ -436,7 +438,7 @@ describe("multefunn og myr: interne researchlag", () => {
   });
 
   it("begge sier hvor de dekker", () => {
-    for (const id of ["multefunn", "myr"]) {
+    for (const id of ["multefunn", "myr", "tyttebaerfunn"]) {
       const d = EXPLORE_DATASETS.find((x) => x.id === id)!;
       expect(d.coverage).toEqual({ label: "Oslo og Marka", box: { minLng: 10.3, minLat: 59.78, maxLng: 11.1, maxLat: 60.3 } });
       expect(d.description).toContain("Dekker bare Oslo og Marka");
@@ -508,5 +510,39 @@ describe("multefunn og myr: interne researchlag", () => {
       EXPLORE_DATASETS.filter((d) => ["multefunn", "myr"].includes(d.id)).map((d) => d.description),
     ]).replace("Ikke en sannsynlighet", "");
     expect(alt).not.toMatch(/lovende|sannsynlig|score|poeng|egnet|her vokser|bekreftet/i);
+  });
+});
+
+describe("tyttebær: registrerte funn", () => {
+  it("søkeordene velger datasettet, med æ og med ae", () => {
+    for (const sok of ["tyttebær Oslo", "tyttebaer Oslo", "tyttebærfunn Oslo", "tyttebær funn Oslo", "Oslo tyttebær"]) expect(tolk(sok)).toMatchObject({ dataset: { id: "tyttebaerfunn" }, sted: { status: "ok", sted: { number: "0301" } } });
+    expect(tolk("tyttebær")).toMatchObject({ dataset: { id: "tyttebaerfunn" }, sted: { status: "ingen" } });
+    // Multe og tyttebær er to datasett: det ene ordet velger ikke det andre.
+    expect(tolk("multer Oslo").dataset?.id).toBe("multefunn");
+  });
+
+  it("ordet siden selv skriver i søkefeltet, velger datasettet", () => {
+    const d = EXPLORE_DATASETS.find((x) => x.id === "tyttebaerfunn")!;
+    expect(tolk(`${d.queryWord} Oslo`).dataset?.id).toBe("tyttebaerfunn");
+  });
+
+  it("et funn viser art, dato, presisjon, datasett og lisens — og samme forbehold som multe", () => {
+    const punkt = { type: "Point" as const, coordinates: [10.66, 60.03] };
+    const rad = { id: "t1", external_id: "42", title: "Tyttebær", subtype: "tyttebaerfunn", attributes: { aar: 2025, maaned: 9, dato: "2025-09-14", presisjonM: 5, datasett: "Norwegian Species Observation Service", lisens: "CC BY 4.0", funnIRuta: 1 }, source_url: "https://www.gbif.org/occurrence/42", source_updated_at: null, geometry: punkt, center: punkt, total: 1 } as Parameters<typeof tyttebaerfunnFeature>[0];
+    const f = tyttebaerfunnFeature(rad, 2026);
+    expect(f.title).toBe("Tyttebærfunn, september 2025");
+    expect(f.style).toBe("tyttebaerfunn");
+    expect(f.details.find((d) => d.label === "Art")!.value).toBe("Tyttebær (Vaccinium vitis-idaea)");
+    expect(f.explanation).toBe("Registrert observasjon – sier ikke noe sikkert om forekomst i dag.");
+    expect(f.notice).toBe("Internt researchlag. Ikke offentlig.");
+    // Samme rad lest som multe ville fått multens navn: arten kommer fra datasettet, ikke fra raden.
+    expect(multefunnFeature(rad, 2026).title).toBe("Multefunn, september 2025");
+  });
+
+  it("sier at funnene gjelder planten, ikke bær — og lover ingenting", () => {
+    const d = EXPLORE_DATASETS.find((x) => x.id === "tyttebaerfunn")!;
+    expect(d.description).toContain("Funnene gjelder planten: kildene sier ikke om den hadde bær.");
+    expect(d.description).not.toMatch(/lovende|sannsynlig|score|her vokser|bekreftet|moden/i);
+    expect(d.overlap).toBeUndefined();
   });
 });

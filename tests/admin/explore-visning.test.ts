@@ -50,7 +50,7 @@ describe("byggVisning", () => {
     if (v.status !== "treff") throw new Error(v.status);
     expect(v.lag.map((l) => l.dataset.id)).toEqual(["plansaker"]);
     expect(v.lag[0]!.features[0]).toMatchObject({ datasetId: "plansaker", datasetLabel: "Plansaker", place: "Bærum" });
-    expect(v.leggTil.map((l) => l.id)).toEqual(["kvikkleire", "kraftnett", "forurenset-grunn", "datasenter", "multefunn", "myr"]);
+    expect(v.leggTil.map((l) => l.id)).toEqual(["kvikkleire", "kraftnett", "forurenset-grunn", "datasenter", "multefunn", "myr", "tyttebaerfunn"]);
     expect(v.leggTil[0]!.href).toBe("/admin/research/utforsk?q=plansaker+B%C3%A6rum&lag=kvikkleire");
     expect(kall.map((k) => k.fn)).toEqual(["explore_events"]);
     expect(kall[0]!.args).toMatchObject({ p_min_lng: 10.4, p_max_lat: 60.0, p_area: flate });
@@ -245,6 +245,16 @@ describe("byggVisning", () => {
         expect(v.lag[0]).toMatchObject({ features: [], total: 0, utenforDekning: expect.stringContaining("dekker foreløpig bare Oslo og Marka") });
       }
       expect(kall).toEqual([]);
+    });
+
+    it("tyttebær: egen kilde, hele dekningsområdet uten sted, og taket på 2 000", async () => {
+      const { client, kall } = klient({ "explore_area_features:gbif-tyttebaerfunn-oslomarka": [{ ...funn, subtype: "tyttebaerfunn", title: "Tyttebær" }] });
+      const v = await byggVisning(client, { q: "tyttebær" }, omrade as never);
+      if (v.status !== "treff") throw new Error(v.status);
+      expect(v.lag[0]!.features[0]).toMatchObject({ datasetId: "tyttebaerfunn", datasetLabel: "Tyttebær: registrerte funn", style: "tyttebaerfunn" });
+      expect(kall[0]!.args).toMatchObject({ p_provider_id: "gbif-tyttebaerfunn-oslomarka", p_min_lng: 10.3, p_max_lat: 60.3, p_limit: 2000 });
+      const bergen = await byggVisning(client, { q: "tyttebær Bergen" }, utenfor as never);
+      expect(bergen.status === "treff" && bergen.lag[0]!.utenforDekning).toBe("Tyttebær: registrerte funn dekker foreløpig bare Oslo og Marka.");
     });
 
     it("myr uten sted ber om område", async () => {

@@ -23,6 +23,8 @@ export const EXPLORE_COLOR: Record<ExploreStyle, string> = {
   // Multefunn og myr vises sammen: varme punkter mot kjølige flater.
   multefunn: "#ea580c",
   myr: "#0891b2",
+  // Tyttebær: rød, tydelig forskjellig fra multefunnene når de to vises sammen.
+  tyttebaerfunn: "#be123c",
 };
 
 const SOURCE = "explore";
