@@ -35,6 +35,7 @@ ADR-er skrives ikke for spacing, tekststørrelse, små copy-endringer eller vanl
 | [014](014-county-pages-and-sitemap.md) | Fylkessider som eneste landingsnivå for hytter; sitemap uten kunstig lastmod | Aktiv | 2026-10-03 |
 | [015](015-publikumsprodukt-wms-og-kildefeil.md) | Spør etter det etaten viser publikum (stormflo, flystøy); kildefeil er ikke «ingen treff»; delvis cache | Aktiv | 2026-10-03 |
 | [016](016-plansaker-deterministisk-uttrekk-og-relevans.md) | Plansaker: tiltakstype og formål fra deterministisk dokumentuttrekk under synk, og forklarbar relevans | Aktiv | 2026-10-03 |
+| [017](017-romlig-analyse-utforsk-data.md) | Romlig analyse i Utforsk data: asymmetrisk, eksplisitt per kombinasjon, i databasen, minst 10 m² felles areal | Aktiv | 2026-10-04 |
 
 ## Mal
 

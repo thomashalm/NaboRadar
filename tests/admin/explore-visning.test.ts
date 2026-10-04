@@ -132,4 +132,81 @@ describe("byggVisning", () => {
     const v = await byggVisning(client, { q: "forurenset grunn Oslo" }, omrade as never);
     expect(v.status === "treff" && [v.lag[0]!.features.length, v.lag[0]!.total]).toEqual([1, 2899]);
   });
+
+  describe("Finn overlapp", () => {
+    const overlapprad = { ...plansak, hits: [{ id: "z1", external_id: "e", title: "Sone", subtype: "kvikkleire_sone", attributes: {} }], hit_count: 1, total: 1, area_total: 53, edge_only: 2 };
+    const sone = { ...ledning, id: "z1", subtype: "kvikkleire_sone", title: "Sone", attributes: {}, geometry: plansak.geometry };
+
+    it("to kompatible lag: valget finnes, og standard er «Vis sammen»", async () => {
+      const { client, kall } = klient({ explore_events: [plansak] });
+      const v = await byggVisning(client, { q: "planer Bærum", lag: "kvikkleire" }, omrade as never);
+      if (v.status !== "treff") throw new Error(v.status);
+      expect(v.analyse).toMatchObject({ stottet: true, aktiv: false, resultat: null });
+      expect(v.analyse!.overlappHref).toBe("/admin/research/utforsk?q=plansaker+B%C3%A6rum&lag=kvikkleire&analyse=overlapp");
+      expect(v.analyse!.visSammenHref).toBe("/admin/research/utforsk?q=plansaker+B%C3%A6rum&lag=kvikkleire");
+      expect(kall.some((k) => k.fn === "explore_events_overlap")).toBe(false);
+    });
+
+    it("analyse=overlapp: hovedlaget leses filtrert i databasen, referanselaget er kontekst", async () => {
+      const { client, kall } = klient({ explore_events_overlap: [overlapprad], "explore_area_features:nve-kvikkleire-soner": [sone] });
+      const v = await byggVisning(client, { q: "planer Bærum", lag: "kvikkleire", analyse: "overlapp" }, omrade as never);
+      if (v.status !== "treff") throw new Error(v.status);
+      // Ett kall per lag: analysen erstatter den vanlige lesingen, den kommer ikke i tillegg.
+      expect(kall.map((k) => k.fn).sort()).toEqual(["explore_area_features", "explore_events_overlap"]);
+      expect(kall.find((k) => k.fn === "explore_events_overlap")!.args).toMatchObject({ p_ref: "kvikkleire", p_area: flate });
+      expect(v.analyse!.resultat).toEqual({
+        tittel: "Plansaker som overlapper kvikkleire",
+        telling: "1 av 53 plansaker overlapper kartlagt kvikkleiresone.",
+        kantnotat: "2 plansaker til har under 10 m² felles med en kartlagt kvikkleiresone og er ikke regnet med.",
+      });
+      // Resultatet er hovedlagets objekter. Referanselaget er dempet og uten egen liste.
+      expect(v.lag[0]!.features[0]).toMatchObject({ datasetId: "plansaker", analysis: { heading: "Overlapper kvikkleire" } });
+      expect(v.lag[0]!.kontekst).toBeUndefined();
+      expect(v.lag[1]).toMatchObject({ kontekst: true });
+      expect(v.lag[1]!.features[0]).toMatchObject({ muted: true });
+      // Fjernes et lag, er analysen borte: den trenger to.
+      expect(v.lag[1]!.fjernHref).toBe("/admin/research/utforsk?q=plansaker+B%C3%A6rum");
+    });
+
+    it("ingen treff sier hvor mange det ble lett blant", async () => {
+      const { client } = klient({ explore_events_overlap: [], explore_events: [{ ...plansak, total: 39 }] });
+      const v = await byggVisning(client, { q: "planer Bærum", lag: "kraftnett", analyse: "overlapp" }, omrade as never);
+      if (v.status !== "treff") throw new Error(v.status);
+      expect(v.analyse!.resultat!.telling).toBe("Ingen av 39 plansaker har kraftledning som krysser eller transformatorstasjon innenfor planområdet.");
+      expect(v.lag[0]!.features).toEqual([]);
+    });
+
+    it("omvendt rekkefølge støttes ikke, men siden tilbyr å bytte hovedlag", async () => {
+      const { client, kall } = klient();
+      const v = await byggVisning(client, { q: "kvikkleire Bærum", lag: "plansaker", analyse: "overlapp" }, omrade as never);
+      if (v.status !== "treff") throw new Error(v.status);
+      expect(v.analyse).toMatchObject({ stottet: false, aktiv: false, grunn: "Finn overlapp går ut fra plansaker." });
+      expect(v.analyse!.bytt!.href).toBe("/admin/research/utforsk?q=plansaker+B%C3%A6rum&lag=kvikkleire&analyse=overlapp");
+      expect(kall.some((k) => k.fn === "explore_events_overlap")).toBe(false);
+      expect(v.lag.every((l) => !l.kontekst)).toBe(true);
+    });
+
+    it("kombinasjoner uten analyse later ikke som: datasenter + kraftnett vises bare sammen", async () => {
+      const { client, kall } = klient();
+      const v = await byggVisning(client, { q: "datasenter Innlandet", lag: "kraftnett", analyse: "overlapp" }, omrade as never);
+      if (v.status !== "treff") throw new Error(v.status);
+      expect(v.analyse).toMatchObject({ stottet: false, aktiv: false, bytt: null, grunn: "Finn overlapp er ikke laget for datasenter mot kraftnett." });
+      expect(kall.some((k) => k.fn === "explore_events_overlap")).toBe(false);
+    });
+
+    it("ett lag har ikke noe valg, og analyse i URL-en gjør ingenting", async () => {
+      const { client, kall } = klient({ explore_events: [plansak] });
+      const v = await byggVisning(client, { q: "planer Bærum", analyse: "overlapp" }, omrade as never);
+      expect(v.status === "treff" && v.analyse).toBeNull();
+      expect(kall.map((k) => k.fn)).toEqual(["explore_events"]);
+    });
+
+    it("feil i analysen er en feil, ikke «ingen overlapper»", async () => {
+      const { client } = klient({ explore_events_overlap: new Error("statement timeout") });
+      const v = await byggVisning(client, { q: "planer Bærum", lag: "kvikkleire", analyse: "overlapp" }, omrade as never);
+      if (v.status !== "treff") throw new Error(v.status);
+      expect(v.lag[0]).toMatchObject({ feil: "statement timeout" });
+      expect(v.analyse!.resultat).toBeNull();
+    });
+  });
 });

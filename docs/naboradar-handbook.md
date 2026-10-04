@@ -2808,8 +2808,8 @@ gjennom noen offentlig RPC. Kategorien er upublisert i `area_feature_categories`
 **To lag.** Søket velger hovedlaget. «+ Legg til lag» legger ett til, for samme område. Aktive
 lag står som brikker med ×; fjernes hovedlaget, blir det andre hovedlag med samme sted.
 **Høyst to** (`MAX_LAG`): dette er kontrollert research, ikke et GIS. Tilstanden ligger i
-URL-en — `q` (datasett og sted), `kommune` (valg ved flertydig sted), `utsnitt` og `lag` (det
-andre laget) — så en kombinasjon kan bokmerkes. `lib/admin/explore/visning.ts` gjør URL-en om
+URL-en — `q` (datasett og sted), `kommune` (valg ved flertydig sted), `utsnitt`, `lag` (det
+andre laget) og `analyse` — så en kombinasjon kan bokmerkes. `lib/admin/explore/visning.ts` gjør URL-en om
 til det siden viser, og leser begge lag samtidig: ett kall per lag, samme flate til begge.
 Kartet flytter seg når området endres, ikke når lag legges til eller byttes.
 
@@ -2823,10 +2823,54 @@ borte. Søket har ingen `+`-syntaks: veien er alltid søk først, så «Legg til
 
 Hvert objekt vet hvilket lag det hører til (`datasetId`, `datasetLabel`), og panelet sier det:
 «Plansaker · Varslet planoppstart». Ligger flere objekter under samme trykk — fra ett eller to
-lag — får admin en liste og velger; det åpnes aldri flere paneler. **Siden sier ingenting om
-hvordan lagene forholder seg til hverandre.** «Denne planen overlapper kvikkleire» er en
-analyse vi ikke gjør; brukeren ser selv. Begge lag ligger i samme kartkilde med lag-ID på hvert
-objekt, så overlapp, avstand eller snitt kan legges til senere uten å endre adapterne.
+lag — får admin en liste og velger; det åpnes aldri flere paneler.
+
+**To moduser ved kompatible lag: «Vis sammen» og «Finn overlapp»**
+([ADR 017](adr/017-romlig-analyse-utforsk-data.md)). «Vis sammen» er standard og påstår
+ingenting om hvordan lagene forholder seg til hverandre. «Finn overlapp» filtrerer hovedlaget
+til objektene som treffer det andre laget, og sier hvor mange det ble lett blant: «6 av 53
+plansaker overlapper kartlagt kvikkleiresone.» Valget ligger i URL-en (`analyse=overlapp`).
+
+| Hovedlag | Referanselag | Hva som er et treff | Slik sies det |
+|---|---|---|---|
+| Plansaker | Kvikkleire | minst 10 m² felles areal med en kartlagt sone. Områder utredet uten fare er ikke soner | «Planområdet overlapper 3 kartlagte kvikkleiresoner» |
+| Plansaker | Forurenset grunn | minst 10 m² felles areal med en registrert lokalitet | «Planområdet overlapper 2 registrerte lokaliteter for forurenset grunn» |
+| Plansaker | Kraftnett | ledningen eller stasjonen treffer planområdet | «2 kraftledninger krysser planområdet», «1 transformatorstasjon ligger innenfor» |
+
+- **Asymmetrisk.** Resultatlisten er hovedlagets objekter. Referanselaget ligger dempet i kartet
+  og kan trykkes der, men har ingen egen liste. «Kvikkleire + plansaker» støttes ikke; siden
+  sier det og tilbyr å bytte hovedlag.
+- **Ikke alle kombinasjoner.** Et datasett sier selv hva det kan testes mot
+  (`ExploreDataset.overlap`). For resten er «Finn overlapp» deaktivert med en kort forklaring.
+  Analysen krever et sted eller et kartutsnitt.
+- **Berøring og fliser.** Målt på ekte data berørte ingen par hverandre bare i grenselinjen, men
+  forurenset grunn hadde fliser på 1–6 m² der to flater følger samme eiendomsgrense. Derfor er
+  regelen 10 m², ikke «berører». Plansaker som bare har en flis, er ikke treff, men nevnes:
+  «3 plansaker til har under 10 m² felles med en registrert lokalitet og er ikke regnet med.»
+- **Presis geometri.** `explore_events_overlap` regner på geometrien slik den ligger i
+  databasen, med areal på ellipsoiden. Bare flaten som sendes til kartet, er forenklet.
+- **Soner telles etter navn.** NVE har løsneområde og utløpsområde som hver sin flate; panelet
+  viser én sone og hvilken del som treffes.
+- **Egen blokk i panelet**, merket «NaboRadars romlige analyse», under plansakens egne
+  opplysninger. Den lister det som ble truffet, med kildens egne ord for hvert objekt, og sier
+  at dette er en sammenligning av kartflater — ikke en faglig vurdering og ikke en del av
+  plansaken. For forurenset grunn står det at overlappet ikke betyr at hele planområdet er
+  forurenset.
+- **Ikke i UI:** overlappareal og andel av planområdet. Summen blir feil når sonene overlapper
+  hverandre, se ADR 017.
+- **Kartet kan vise færre referanseobjekter enn analysen bruker** (taket på 1 500). Da står det.
+
+Målt mot produksjon 2026-10-04 (varme kall; svaret fra databasen):
+
+| Område | Kvikkleire | Forurenset grunn | Kraftnett |
+|---|---|---|---|
+| Oslo (53 plansaker) | 6 treff, 0,08–0,13 s, 19 kB | 36 treff + 3 fliser, 0,13 s, 115 kB | 9 treff, 0,08 s, 27 kB |
+| Bærum (39) | 4 treff, 0,07 s, 14 kB | 15 treff, 0,10 s, 57 kB | 3 treff, 0,07 s, 12 kB |
+| Trondheim (55) | 5 treff, 0,06 s, 13 kB | 31 treff + 2 fliser, 0,08 s, 107 kB | 5 treff, 0,06 s, 12 kB |
+| Trøndelag (152) | 12 treff, 0,10 s, 28 kB | 47 treff + 4 fliser, 0,13 s, 160 kB | 9 treff, 0,10 s, 20 kB |
+
+Første kall var 0,2–0,8 s. Begge romlige indekser brukes (`events_geom_gix`,
+`area_features_geom_gix`).
 
 Farger: plansaker blå, kvikkleire oransje (grønn for «utredet uten fare»), forurenset grunn
 blågrønn, kraftnett lilla, datasentre mørk grå. Flatene har lavt fyll og tydelig kant, så to
@@ -2892,8 +2936,8 @@ Størrelsene er svaret fra databasen. Det siden sender til nettleseren er størr
 objekt har ferdige panelrader: forurenset grunn i Oslo er 2,4 MB. Det er det tyngste søket som
 finnes i dag, og grunnen til at taket står på 1 500.
 
-**Bare admin.** Siden sjekker sesjonen. `explore_area_features`, `explore_events` og
-`research_map` gir bare rader når `is_admin()` er sann, anon har ikke EXECUTE, og
+**Bare admin.** Siden sjekker sesjonen. `explore_area_features`, `explore_events`,
+`explore_events_overlap` og `research_map` gir bare rader når `is_admin()` er sann, anon har ikke EXECUTE, og
 aktsomhetssjekken er en server action som sjekker sesjonen selv. Ingen nye offentlige ruter
 eller API-er. `npm run db:verify` kontrollerer rettighetene.
 

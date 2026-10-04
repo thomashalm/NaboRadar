@@ -28,7 +28,7 @@ const første = (verdi: string | string[] | undefined) => (Array.isArray(verdi) 
  * samtidig, og ligger i samme kart. Høyst to — dette er kontrollert research, ikke et GIS. Siden
  * sier ingenting om hvordan lagene forholder seg til hverandre: det er brukeren som ser.
  *
- * Alt er URL-drevet (`q`, `kommune`, `utsnitt`, `lag`), så et søk kan bokmerkes. Dataene hentes
+ * Alt er URL-drevet (`q`, `kommune`, `utsnitt`, `lag`, `analyse`), så et søk kan bokmerkes. Dataene hentes
  * på serveren med admins egen sesjon; databasen håndhever `is_admin()` selv.
  */
 export default async function UtforskDataPage({ searchParams }: { searchParams: SearchParams }) {
@@ -42,6 +42,7 @@ export default async function UtforskDataPage({ searchParams }: { searchParams: 
     kommune: første(params.kommune),
     utsnitt: første(params.utsnitt),
     lag: første(params.lag),
+    analyse: første(params.analyse),
   });
   const forslag = EXPLORE_DATASETS.map((d) => ({ id: d.id, label: d.label, description: d.description }));
   return <Datautforsker q={q} tiles={getMapTileConfig()} forslag={forslag} visning={visning} />;

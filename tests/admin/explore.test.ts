@@ -7,7 +7,8 @@ import { boksFor, lesUtsnitt, punktIFlate, utsnittKm } from "@/lib/admin/explore
 import { forurensetGrunnFeature } from "@/lib/admin/explore/forurenset-grunn";
 import { kraftnettFeature } from "@/lib/admin/explore/kraftnett";
 import { kvikkleireFeature } from "@/lib/admin/explore/kvikkleire";
-import { plansakFeature } from "@/lib/admin/explore/plansaker";
+import { PLANSAK_OVERLAPP, plansakOverlapp } from "@/lib/admin/explore/plansak-overlapp";
+import { plansakFeature, plansakOverlappFeature } from "@/lib/admin/explore/plansaker";
 import { tolkSok } from "@/lib/admin/explore/parse";
 import { EKSEMPELKOMBINASJON, EKSEMPELSOK } from "@/lib/admin/explore/eksempler";
 import { datasetMedId, EXPLORE_DATASETS, MAX_LAG } from "@/lib/admin/explore/registry";
@@ -332,5 +333,88 @@ describe("eksemplene i tomtilstanden", () => {
     expect(t).toMatchObject({ dataset: { id: "plansaker" }, sted: { status: "ok" } });
     expect(datasetMedId(EKSEMPELKOMBINASJON.lag)?.id).toBe("kvikkleire");
     expect(EKSEMPELKOMBINASJON.q).not.toContain("+");
+  });
+});
+
+describe("Finn overlapp: hva en plansak traff", () => {
+  const treff = (id: string, title: string, subtype: string, attributes: Record<string, string | number | boolean | null> = {}) => ({ id, external_id: `e-${id}`, title, subtype, attributes });
+
+  it("kvikkleire: antall soner, og for hver sone det kilden har", () => {
+    const r = plansakOverlapp("kvikkleire", [
+      treff("1", "Bjørvika", "kvikkleire_sone", { stabilitet: "paavist", risikoklasse: 4, faregrad: "Middels", konsekvens: "megetAlvorlig" }),
+      treff("2", "Uten klasse", "kvikkleire_sone", {}),
+    ], 2)!;
+    expect(r.summary).toBe("Overlapper 2 kartlagte kvikkleiresoner");
+    expect(r.analysis.heading).toBe("Overlapper kvikkleire");
+    expect(r.analysis.lines).toEqual(["Planområdet overlapper 2 kartlagte kvikkleiresoner."]);
+    expect(r.analysis.items[0]).toMatchObject({ id: "1", title: "Bjørvika" });
+    expect(r.analysis.items[0]!.lines).toContain("Risikoklasse: 4 av 5");
+    expect(r.analysis.items[0]!.lines).toContain("Faregrad: middels");
+    // En sone uten risikoklasse får ingen risikoklasse — heller ikke «ukjent» eller 0.
+    expect(r.analysis.items[1]!.lines.join(" ")).not.toMatch(/Risikoklasse|Faregrad/);
+    expect(plansakOverlapp("kvikkleire", [treff("1", "A", "kvikkleire_sone")], 1)!.summary).toBe("Overlapper 1 kartlagt kvikkleiresone");
+  });
+
+  it("løsneområde og utløpsområde med samme navn er én sone, ikke to", () => {
+    const r = plansakOverlapp("kvikkleire", [
+      treff("1", "Kjelsås", "kvikkleire_sone", { risikoklasse: 5, omradetype: "losneomrade" }),
+      treff("2", "Frysja", "kvikkleire_sone", { risikoklasse: 3, omradetype: "utlopsomrade" }),
+      treff("3", "Kjelsås", "kvikkleire_sone", { risikoklasse: 5, omradetype: "utlopsomrade" }),
+    ], 3)!;
+    expect(r.summary).toBe("Overlapper 2 kartlagte kvikkleiresoner");
+    expect(r.analysis.items.map((i) => [i.id, i.title])).toEqual([["1", "Kjelsås"], ["2", "Frysja"]]);
+    expect(r.analysis.items[0]!.lines.at(-1)).toBe("Del av sonen som treffes: løsneområde og utløpsområde");
+    expect(r.analysis.items[1]!.lines.at(-1)).toBe("Del av sonen som treffes: utløpsområde");
+  });
+
+  it("forurenset grunn: sier ikke at planområdet er forurenset", () => {
+    const r = plansakOverlapp("forurenset-grunn", [treff("1", "Gamle verksted", "forurenset_grunn", { paavirkningsgrad: "liteForurensning", prosessStatus: "avsluttet" })], 3)!;
+    expect(r.summary).toBe("Overlapper 3 registrerte lokaliteter for forurenset grunn");
+    expect(r.analysis.lines[0]).toBe("Planområdet overlapper 3 registrerte lokaliteter for forurenset grunn.");
+    expect(r.analysis.lines[1]).toContain("Det sier ikke at hele planområdet er forurenset.");
+    expect(r.analysis.items[0]!.lines[0]).toBe("Vurdering: Påvirkningsgrad 1 – lite eller ikke forurenset, ikke behov for tiltak uansett arealbruk");
+    // Tre traff, én er beskrevet: resten sies fra om.
+    expect(r.analysis.more).toBe(2);
+  });
+
+  it("kraftnett: ledning krysser, stasjon ligger innenfor — to ulike ting", () => {
+    const r = plansakOverlapp("kraftnett", [
+      treff("1", "Kraftledning", "kraftledning", { spenningKv: 132 }),
+      treff("2", "Kraftledning", "kraftledning", { spenningKv: 47 }),
+      treff("3", "Sandvika", "transformatorstasjon", { spenningKv: 47 }),
+    ], 3)!;
+    expect(r.summary).toBe("2 kraftledninger krysser planområdet · 1 transformatorstasjon ligger innenfor");
+    expect(r.analysis.lines).toEqual(["2 kraftledninger krysser planområdet.", "1 transformatorstasjon ligger innenfor."]);
+    expect(r.analysis.items.map((i) => i.title)).toEqual(["Kraftledning 132 kV", "Kraftledning 47 kV", "Sandvika"]);
+    expect(plansakOverlapp("kraftnett", [treff("1", "Kraftledning", "kraftledning")], 1)!.summary).toBe("1 kraftledning krysser planområdet");
+  });
+
+  it("språket er en geometrisk observasjon, ikke en vurdering", () => {
+    const alt = JSON.stringify([
+      plansakOverlapp("kvikkleire", [treff("1", "A", "kvikkleire_sone", { risikoklasse: 5 })], 1),
+      plansakOverlapp("forurenset-grunn", [treff("1", "A", "forurenset_grunn", { paavirkningsgrad: "alvorligForurensning" })], 1),
+      plansakOverlapp("kraftnett", [treff("1", "A", "kraftledning")], 1),
+      PLANSAK_OVERLAPP,
+    ]);
+    expect(alt).not.toMatch(/farlig|problematisk|planlagt på|risikabel|utrygg|bør ikke|ST_|intersect/i);
+  });
+
+  it("bare plansaker kan filtreres, og bare mot de tre lagene", () => {
+    expect(EXPLORE_DATASETS.filter((d) => d.overlap).map((d) => d.id)).toEqual(["plansaker"]);
+    expect(Object.keys(PLANSAK_OVERLAPP)).toEqual(["kvikkleire", "forurenset-grunn", "kraftnett"]);
+    expect(plansakOverlapp("datasenter", [], 0)).toBeNull();
+  });
+
+  it("analysen legges ved plansaken, ikke inn i kildens felt", () => {
+    const rad = {
+      id: "sak-1", title: "Storgata 1", type: "planning_started", municipality_number: "0301", announced_at: "2026-03-10", source_url: null, area_m2: 100,
+      attributes: {}, documents: [], geometry: { type: "Polygon", coordinates: [] }, center: { type: "Point", coordinates: [10, 59] }, total: 1,
+      hits: [treff("1", "Bjørvika", "kvikkleire_sone")], hit_count: 1, area_total: 53, edge_only: 0,
+    } as Parameters<typeof plansakOverlappFeature>[0];
+    const f = plansakOverlappFeature(rad, "Oslo", "kvikkleire");
+    expect(f.summary).toMatch(/^Overlapper 1 kartlagt kvikkleiresone · /);
+    expect(f.analysis?.heading).toBe("Overlapper kvikkleire");
+    expect(JSON.stringify(f.details)).not.toMatch(/kvikkleire/i);
+    expect(f.explanation).toBe("Vi vet ikke om planene senere er vedtatt, endret eller lagt bort.");
   });
 });

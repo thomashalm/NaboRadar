@@ -9,7 +9,7 @@ import { NORGE } from "@/lib/admin/kart-bounds";
 import { AKTSOMHET_TEKST, type Aktsomhet } from "@/lib/admin/explore/aktsomhet";
 import { EKSEMPELKOMBINASJON, EKSEMPELSOK } from "@/lib/admin/explore/eksempler";
 import { utforskHref } from "@/lib/admin/explore/href";
-import type { ExploreFeature, LngLatBox } from "@/lib/admin/explore/types";
+import type { ExploreAnalysis, ExploreFeature, LngLatBox } from "@/lib/admin/explore/types";
 import type { LngLatBounds } from "@/lib/geo/bounds";
 import type { MapTileConfig } from "@/lib/map/config";
 import { EXPLORE_COLOR, exploreLayer } from "@/lib/map/layers/explore";
@@ -35,6 +35,22 @@ export interface Lagvisning {
   /** Laget er for stort uten sted eller utsnitt. */
   trengerOmrade: boolean;
   fjernHref: string;
+  /** Referanselaget i «Finn overlapp»: vises i kartet, men har ingen egen resultatliste. */
+  kontekst?: boolean;
+}
+
+/** «Vis sammen» eller «Finn overlapp», når to lag er aktive. */
+export interface Analysevalg {
+  /** Om kombinasjonen kan analyseres, med hovedlaget som det som filtreres. */
+  stottet: boolean;
+  aktiv: boolean;
+  visSammenHref: string;
+  overlappHref: string;
+  /** Hvorfor «Finn overlapp» ikke kan velges. */
+  grunn: string | null;
+  /** Kombinasjonen støttes den andre veien: lenke som bytter hovedlag. */
+  bytt: { label: string; href: string } | null;
+  resultat: { tittel: string; telling: string; kantnotat: string | null } | null;
 }
 
 /** Hva siden har kommet fram til. Hver tilstand har sin egen, ærlige melding. */
@@ -47,6 +63,8 @@ export type UtforskVisning =
   | { status: "feil"; dataset: DatasettInfo; melding: string }
   | {
       status: "treff";
+      /** Null med ett lag: det er ingenting å sammenligne med. */
+      analyse: Analysevalg | null;
       omrade: { kind: "kommune" | "fylke" | "utsnitt"; navn: string | null; fylke: string | null; box: LngLatBox } | null;
       /** Ett eller to lag. Det første er hovedlaget fra søket. */
       lag: Lagvisning[];
@@ -230,6 +248,7 @@ export function Datautforsker({
         </div>
 
         {visning.status === "treff" && <Lagrad lag={visning.lag} leggTil={visning.leggTil} />}
+        {visning.status === "treff" && visning.analyse && <Modusvalg valg={visning.analyse} />}
 
         {kreverOmrade && (visning.status === "treff" || visning.status === "trenger_omrade") && (
           <div className="mt-3">
@@ -252,7 +271,7 @@ export function Datautforsker({
       <div className="order-3 flex flex-col px-5 pb-10 sm:px-8 lg:order-none lg:col-start-1 lg:row-start-2 lg:overflow-y-auto">
         <div ref={panelRef} className="mt-5 scroll-mt-4">
           {valgtFeature ? (
-            <Detaljpanel feature={valgtFeature} lukk={() => setValgt(null)} />
+            <Detaljpanel feature={valgtFeature} lukk={() => setValgt(null)} velg={velg} finnes={(id) => features.some((f) => f.id === id)} />
           ) : underMarkor.length > 1 ? (
             <Velgpanel features={underMarkor.flatMap((id) => features.find((f) => f.id === id) ?? [])} velg={velg} lukk={() => setUnderMarkor([])} />
           ) : punkt ? (
@@ -260,7 +279,20 @@ export function Datautforsker({
           ) : null}
         </div>
 
-        {lagene.map((lag) => (
+        {lagene.map((lag) =>
+          lag.kontekst ? (
+            // Resultatet er hovedlagets treff. Referanselaget ligger i kartet, og kan trykkes der.
+            <p key={lag.dataset.id} className="mt-6 flex items-center gap-2 text-[13px] text-muted">
+              <span aria-hidden="true" className="size-2.5 rounded-full opacity-60" style={{ background: farge(lag) }} />
+              {lag.dataset.label} vises i kartet som referanse
+              {lag.feil
+                ? " (kunne ikke hentes)"
+                : lag.features.length < lag.total
+                  ? ` (de første ${lag.features.length.toLocaleString("nb-NO")} av ${lag.total.toLocaleString("nb-NO")} — analysen bruker alle)`
+                  : ` (${tellTekst(lag)})`}
+              .
+            </p>
+          ) : (
           <Lagliste
             key={lag.dataset.id}
             lag={lag}
@@ -270,7 +302,8 @@ export function Datautforsker({
             velg={velgFraListe}
             mer={() => setVist((n) => ({ ...n, [lag.dataset.id]: (n[lag.dataset.id] ?? LISTE_SIDE) + LISTE_SIDE }))}
           />
-        ))}
+          ),
+        )}
 
         <Link href="/admin/research" className="mt-8 text-[15px] font-medium text-accent hover:underline">
           Til research
@@ -569,8 +602,15 @@ function Status({ visning, forslag }: { visning: UtforskVisning; forslag: { id: 
       const hoved = visning.lag[0]!;
       return (
         <div>
-          <h2 className="text-[17px] font-medium text-ink">{[visning.lag.map((l) => l.dataset.label).join(" + "), sted ?? "hele landet"].join(" · ")}</h2>
-          {visning.lag.length === 1 ? (
+          <h2 className="text-[17px] font-medium text-ink">
+            {[visning.analyse?.resultat?.tittel ?? visning.lag.map((l) => l.dataset.label).join(" + "), sted ?? "hele landet"].join(" · ")}
+          </h2>
+          {visning.analyse?.resultat ? (
+            <>
+              <p className="mt-0.5 text-[15px] text-ink">{visning.analyse.resultat.telling}</p>
+              {visning.analyse.resultat.kantnotat && <p className="mt-1 text-[13px] text-muted">{visning.analyse.resultat.kantnotat}</p>}
+            </>
+          ) : visning.lag.length === 1 ? (
             <p className="mt-0.5 text-[15px] text-ink">
               {hoved.feil ? "" : hoved.total === 0 ? `Ingen ${hoved.dataset.unit.many} ${sted ? `i ${sted}` : "registrert"}.` : tellTekst(hoved)}
             </p>
@@ -584,7 +624,7 @@ function Status({ visning, forslag }: { visning: UtforskVisning; forslag: { id: 
   }
 }
 
-function Detaljpanel({ feature, lukk }: { feature: ExploreFeature; lukk: () => void }) {
+function Detaljpanel({ feature, lukk, velg, finnes }: { feature: ExploreFeature; lukk: () => void; velg: (id: string) => void; finnes: (id: string) => boolean }) {
   return (
     <section aria-label="Detaljer" className="rounded-2xl border border-line bg-surface px-4 py-4">
       <div className="flex items-start justify-between gap-3">
@@ -621,6 +661,7 @@ function Detaljpanel({ feature, lukk }: { feature: ExploreFeature; lukk: () => v
         </ul>
       )}
       {feature.explanation && <p className="mt-3 text-[13px] leading-relaxed text-muted">{feature.explanation}</p>}
+      {feature.analysis && <Analyseblokk analyse={feature.analysis} velg={velg} finnes={finnes} />}
       <p className="mt-3 text-[13px] text-muted">
         Kilde:{" "}
         {feature.sourceUrl ? (
@@ -637,6 +678,81 @@ function Detaljpanel({ feature, lukk }: { feature: ExploreFeature; lukk: () => v
         </Link>
       )}
     </section>
+  );
+}
+
+/**
+ * Det den romlige analysen fant for objektet. Egen, merket blokk: dette er NaboRadars
+ * sammenligning av kartflater, ikke noe kilden til objektet sier.
+ */
+function Analyseblokk({ analyse, velg, finnes }: { analyse: ExploreAnalysis; velg: (id: string) => void; finnes: (id: string) => boolean }) {
+  return (
+    <section aria-label={analyse.heading} className="mt-4 rounded-xl border border-line bg-canvas px-3 py-3">
+      <p className="text-[11px] font-semibold tracking-[0.06em] text-muted uppercase">NaboRadars romlige analyse</p>
+      <h3 className="mt-0.5 text-[15px] font-medium text-ink">{analyse.heading}</h3>
+      {analyse.lines.map((linje) => (
+        <p key={linje} className="mt-1 text-[14px] text-ink">
+          {linje}
+        </p>
+      ))}
+      <ul className="mt-2 divide-y divide-line">
+        {analyse.items.map((item) => (
+          <li key={item.id} className="py-2">
+            {finnes(item.id) ? (
+              <button type="button" onClick={() => velg(item.id)} className="text-left text-[14px] font-medium text-accent hover:underline [overflow-wrap:anywhere]">
+                {item.title}
+              </button>
+            ) : (
+              <span className="text-[14px] font-medium text-ink [overflow-wrap:anywhere]">{item.title}</span>
+            )}
+            {item.lines.map((linje) => (
+              <span key={linje} className="block text-[13px] text-muted">
+                {linje}
+              </span>
+            ))}
+          </li>
+        ))}
+      </ul>
+      {analyse.more > 0 && <p className="text-[13px] text-muted">… og {analyse.more} til.</p>}
+      <p className="mt-2 text-[12px] leading-relaxed text-muted">{ANALYSE_FORBEHOLD}</p>
+    </section>
+  );
+}
+
+const ANALYSE_FORBEHOLD = "En sammenligning av kartflatene, ikke en faglig vurdering. Den er ikke en del av plansaken og står ikke i kildene.";
+
+/** «Vis sammen» eller «Finn overlapp». Lenker, så valget ligger i URL-en. */
+function Modusvalg({ valg }: { valg: Analysevalg }) {
+  const knapp = "inline-flex min-h-9 items-center px-3.5 text-[14px] font-medium";
+  const paa = "bg-ink text-surface";
+  const av = "text-ink hover:bg-ink/[0.05]";
+  return (
+    <div className="mt-3">
+      <div className="inline-flex overflow-hidden rounded-full border border-line bg-surface" role="group" aria-label="Hvordan lagene vises">
+        <Link href={valg.visSammenHref} aria-current={valg.aktiv ? undefined : "true"} className={`${knapp} ${valg.aktiv ? av : paa}`}>
+          Vis sammen
+        </Link>
+        {valg.stottet ? (
+          <Link href={valg.overlappHref} aria-current={valg.aktiv ? "true" : undefined} className={`${knapp} border-l border-line ${valg.aktiv ? paa : av}`}>
+            Finn overlapp
+          </Link>
+        ) : (
+          <span aria-disabled="true" className={`${knapp} cursor-not-allowed border-l border-line text-muted/70`}>
+            Finn overlapp
+          </span>
+        )}
+      </div>
+      {valg.grunn && (
+        <p className="mt-1.5 text-[13px] text-muted">
+          {valg.grunn}{" "}
+          {valg.bytt && (
+            <Link href={valg.bytt.href} className="text-accent hover:underline">
+              {valg.bytt.label}
+            </Link>
+          )}
+        </p>
+      )}
+    </div>
   );
 }
 

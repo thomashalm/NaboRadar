@@ -31,6 +31,8 @@ const WIRE_HIT = "explore-wire-hit";
 const POINT = "explore-point";
 
 const selected: ExpressionSpecification = ["boolean", ["feature-state", "selected"], false];
+/** Referanselaget i «Finn overlapp»: synlig som kontekst, men bak hovedlagets treff. */
+const dempet: ExpressionSpecification = ["boolean", ["get", "dempet"], false];
 const erFlate: ExpressionSpecification = ["==", ["geometry-type"], "Polygon"];
 const erLinje: ExpressionSpecification = ["==", ["geometry-type"], "LineString"];
 const erPunkt: ExpressionSpecification = ["==", ["geometry-type"], "Point"];
@@ -49,14 +51,14 @@ export const exploreLayer: MapLayer<readonly ExploreFeature[]> = {
       source: SOURCE,
       filter: erFlate,
       // Lavt fyll og tydelig kant: to flatelag oppå hverandre skal begge kunne ses.
-      paint: { "fill-color": ["get", "farge"], "fill-opacity": ["case", selected, 0.45, 0.16] },
+      paint: { "fill-color": ["get", "farge"], "fill-opacity": ["case", selected, 0.45, dempet, 0.07, 0.16] },
     });
     map.addLayer({
       id: LINE,
       type: "line",
       source: SOURCE,
       filter: erFlate,
-      paint: { "line-color": ["get", "farge"], "line-width": ["case", selected, 3, 1.4], "line-opacity": 0.95 },
+      paint: { "line-color": ["get", "farge"], "line-width": ["case", selected, 3, 1.4], "line-opacity": ["case", selected, 0.95, dempet, 0.5, 0.95] },
     });
     map.addLayer({
       id: WIRE,
@@ -64,7 +66,7 @@ export const exploreLayer: MapLayer<readonly ExploreFeature[]> = {
       source: SOURCE,
       filter: erLinje,
       layout: { "line-cap": "round", "line-join": "round" },
-      paint: { "line-color": ["get", "farge"], "line-width": ["case", selected, 5, 2], "line-opacity": 0.9 },
+      paint: { "line-color": ["get", "farge"], "line-width": ["case", selected, 5, 2], "line-opacity": ["case", selected, 0.9, dempet, 0.45, 0.9] },
     });
     map.addLayer({
       id: WIRE_HIT,
@@ -83,6 +85,7 @@ export const exploreLayer: MapLayer<readonly ExploreFeature[]> = {
         "circle-color": ["get", "farge"],
         "circle-stroke-color": "#ffffff",
         "circle-stroke-width": ["case", selected, 3, 2],
+        "circle-opacity": ["case", selected, 1, dempet, 0.45, 1],
       },
     });
   },
@@ -102,7 +105,7 @@ function collection(features: readonly ExploreFeature[]) {
     type: "FeatureCollection" as const,
     features: features.map((feature) => ({
       type: "Feature" as const,
-      properties: { featureId: feature.id, farge: EXPLORE_COLOR[feature.style] },
+      properties: { featureId: feature.id, farge: EXPLORE_COLOR[feature.style], dempet: feature.muted === true },
       geometry: feature.geometry,
     })),
   };

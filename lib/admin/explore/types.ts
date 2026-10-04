@@ -45,9 +45,28 @@ export interface ExploreFeature {
   sourceUrl: string | null;
   /** Lenker som hører til objektet, f.eks. saksdokumenter. */
   links?: { label: string; url: string }[];
+  /** NaboRadars romlige analyse av objektet mot referanselaget. Bare i «Finn overlapp». */
+  analysis?: ExploreAnalysis;
+  /** Tegnes dempet: referanselaget når hovedlaget er filtrert. Settes av siden. */
+  muted?: boolean;
   /** Intern lenke for mer, f.eks. research-funnet. */
   href: string | null;
   hrefLabel: string | null;
+}
+
+/**
+ * Resultatet av en romlig sammenligning for ett objekt. Dette er vår geometriske observasjon,
+ * ikke noe kilden til objektet sier, og panelet viser det i en egen, merket blokk.
+ */
+export interface ExploreAnalysis {
+  /** «Overlapper kvikkleire». */
+  heading: string;
+  /** Setninger om hva som ble funnet: «Planområdet overlapper 2 kartlagte kvikkleiresoner.» */
+  lines: string[];
+  /** Referanseobjektene som ble truffet. `id` er objektets ID i referanselaget. */
+  items: { id: string; title: string; lines: string[] }[];
+  /** Hvor mange flere som ble truffet enn dem som er listet. */
+  more: number;
 }
 
 export interface LngLatBox {
@@ -78,6 +97,24 @@ export interface ExploreResult {
   error: string | null;
 }
 
+/** Svaret på «Finn overlapp»: hovedlagets treff, og hvor mange det ble lett blant. */
+export interface OverlapResult extends ExploreResult {
+  /** Alle hovedobjekter i området, også dem uten treff. */
+  areaTotal: number;
+  /** Objekter som bare har en flis felles med referanselaget, og derfor ikke er regnet med. */
+  edgeOnly: number;
+}
+
+/** Tekstene for én støttet kombinasjon. Nøytrale: en geometrisk observasjon, ikke en vurdering. */
+export interface OverlapTexts {
+  /** «Plansaker som overlapper kvikkleire». */
+  title: string;
+  /** «overlapper kartlagt kvikkleiresone» — settes etter «12 av 53 plansaker». */
+  predicate: string;
+  /** Hva en flis er, til notatet om dem som ikke er regnet med. Null der fliser ikke finnes. */
+  edgeNote: string | null;
+}
+
 export interface ExploreDataset {
   id: string;
   /** Navnet i overskrifter og forslag. */
@@ -98,6 +135,14 @@ export interface ExploreDataset {
    * står ved datasettet, slik at ingen bygger en offentlig visning uten å ha sett beslutningen.
    */
   policy: { openMap: "ja" | "nei" | "vurderes"; omrade: "ja" | "nei" | "egen beslutning" };
+  /**
+   * «Finn overlapp»: referanselagene dette datasettet kan testes mot, som hovedlag. Analysen er
+   * asymmetrisk og eksplisitt — en kombinasjon som ikke står her, støttes ikke.
+   */
+  overlap?: {
+    refs: Record<string, OverlapTexts>;
+    load(client: SupabaseClient, area: ExploreArea, refId: string): Promise<OverlapResult>;
+  };
   /** Om et trykk i kartet uten objekt skal sjekke punktet mot en ekstern kilde. */
   pointCheck?: "kvikkleire_aktsomhet";
   load(client: SupabaseClient, area: ExploreArea | null): Promise<ExploreResult>;
