@@ -24,7 +24,7 @@ import type { NormalizedAreaFeature } from "@/types/area-feature";
  * Fram til 2026-10-04 leste syncen `wfs.geonorge.no/skwms1/wfs.tilfluktsrom_offentlige`. Den
  * svarte HTTP 500 fra slutten av september («Connect to rin-ap2261:8081 timed out»), og syncen
  * sto fra 2026-09-26. Nedlastingsfila er samme datasett fra samme utgiver, lagt ut som en ferdig
- * fil som bygges på nytt hver natt, og er distribusjonen datasettets metadata peker på
+ * fil, og er distribusjonen datasettets metadata peker på
  * («Geonorge nedlastning»). Den står også i datasettets ATOM-feed. Ved byttet var alle 556 rom
  * identiske med det WFS-en sist ga. Se docs/research/tilfluktsrom-naermeste-rom.md.
  *

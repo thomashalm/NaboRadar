@@ -149,7 +149,7 @@ UI, radius eller oppslag.
 | Utgiver | Direktoratet for samfunnssikkerhet og beredskap (eier og utgiver i Geonorge-metadata) |
 | Distribusjon | «Geonorge nedlastning» er distribusjonen metadataposten oppgir. Fila står også i datasettets ATOM-feed (`…/ATOM-feeds/TilfluktsromOffentlige_AtomFeedGML.xml`), som er laget for maskinell henting |
 | Lisens | NLOD 1.0. «Åpne data», «Ugradert», «Ingen begrensninger på bruk er oppgitt» |
-| Oppdatering | Metadata: «Etter behov», «Kontinuerlig oppdatert». Fila bygges på nytt hver natt (`last-modified` 2026-10-02 23:43 UTC, `datauttaksdato` 2026-10-03T01:40:56) |
+| Oppdatering | Metadata oppgir oppdatering «etter behov» (status «Kontinuerlig oppdatert»). Uttrekket kontrollert 3. oktober 2026 var bygget samme natt (`last-modified` 2026-10-02 23:43 UTC, `datauttaksdato` 2026-10-03T01:40:56). Faktisk publiseringsfrekvens er ikke bekreftet: bare ett uttrekk er observert |
 | Format | Zip med én GML 3.2-fil, EUREF89 UTM sone 33 (EPSG:25833). Finnes også som GeoJSON, FGDB og PostGIS, og i UTM 32 og 35 |
 
 Samme datasett-ID (`dbae9aae-…`) som WFS-en, altså like autoritativ. WFS-en var en tjeneste over

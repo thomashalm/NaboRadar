@@ -1120,8 +1120,9 @@ ikke alt svarer på. Skal det inn senere, hører det sammen med valgt rad, ikke 
 
 - **Kilden er den landsdekkende nedlastingsfila, ikke WFS-en** (fra 2026-10-04).
   `https://nedlasting.geonorge.no/geonorge/Samfunnssikkerhet/TilfluktsromOffentlige/GML/Samfunnssikkerhet_0000_Norge_25833_TilfluktsromOffentlige_GML.zip`
-  — utgitt av DSB, NLOD 1.0, bygget på nytt hver natt, og distribusjonen datasettets metadata
-  peker på. WFS-en (`wfs.geonorge.no/skwms1/wfs.tilfluktsrom_offentlige`) svarte HTTP 500 og er
+  — utgitt av DSB, NLOD 1.0, og distribusjonen datasettets metadata peker på. Metadata oppgir
+  oppdatering «etter behov». Uttrekket kontrollert 3. oktober 2026 var bygget samme natt.
+  Faktisk publiseringsfrekvens er ikke bekreftet. WFS-en (`wfs.geonorge.no/skwms1/wfs.tilfluktsrom_offentlige`) svarte HTTP 500 og er
   ikke lenger i bruk, heller ikke som reserve: én kilde skriver til datasettet.
 - **Fila valideres før noe skrives.** Tom fil, manglende nøkkelfelt (`romnr`, `posisjon`,
   `plasser`, `adresse` i under 90 % av rommene), annet koordinatsystem enn EPSG:25833, eller
