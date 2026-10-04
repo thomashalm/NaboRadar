@@ -27,6 +27,8 @@ export const EXPLORE_COLOR: Record<ExploreStyle, string> = {
   tyttebaerfunn: "#be123c",
   // Kantarell: gul. Mørk nok til å synes mot det lyse kartet.
   kantarellfunn: "#ca8a04",
+  // Steinsopp: brun, så den skiller seg fra kantarell når de to vises sammen.
+  steinsoppfunn: "#78350f",
 };
 
 const SOURCE = "explore";

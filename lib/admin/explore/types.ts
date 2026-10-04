@@ -21,7 +21,8 @@ export type ExploreStyle =
   | "multefunn"
   | "myr"
   | "tyttebaerfunn"
-  | "kantarellfunn";
+  | "kantarellfunn"
+  | "steinsoppfunn";
 
 export interface ExploreFeature {
   id: string;

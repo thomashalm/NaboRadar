@@ -19,6 +19,8 @@ export const MYR_PROVIDER = "kartverket-n50-myr-oslomarka";
 export const TYTTEBAERFUNN_PROVIDER = "gbif-tyttebaerfunn-oslomarka";
 /** Kantarell: samme område. Se docs/research/kantarell-oslo.md. */
 export const KANTARELLFUNN_PROVIDER = "gbif-kantarellfunn-oslomarka";
+/** Steinsopp (Boletus edulis, strengt). Se docs/research/steinsopp-oslo.md. */
+export const STEINSOPPFUNN_PROVIDER = "gbif-steinsoppfunn-oslomarka";
 
 export const iBoksen = ([lng, lat]: readonly [number, number]) =>
   lng >= MULTE_BOKS.minLng && lng <= MULTE_BOKS.maxLng && lat >= MULTE_BOKS.minLat && lat <= MULTE_BOKS.maxLat;

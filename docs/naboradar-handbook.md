@@ -421,7 +421,7 @@ finnes ingen anonym skrivevei.
 |---|---|
 | `/admin/adresse` | Hva finnes rundt denne adressen? Offentlig resultat pluss intern research |
 | `/admin/research` | Hva vet vi om dette funnet? Oversikt, søk, redigering, kilder og kildestatus |
-| `/admin/research/utforsk` | Hva finnes i dette datasettet, her? Kart først: plansaker, kvikkleire, kraftnett, forurenset grunn, datasentre, og internt multefunn, tyttebærfunn, kantarellfunn og myr. Høyst to lag samtidig |
+| `/admin/research/utforsk` | Hva finnes i dette datasettet, her? Kart først: plansaker, kvikkleire, kraftnett, forurenset grunn, datasentre, og internt multefunn, tyttebærfunn, kantarellfunn, steinsoppfunn og myr. Høyst to lag samtidig |
 | `/admin/kart` | Hvor i landet finnes denne typen funn? Nasjonal geografisk utforskning |
 
 ### `/admin/kart` — research-kartet
@@ -2792,6 +2792,7 @@ kjenner, utelates.
 | Myr | `myr`, `myrer`, `myrflate(r)`, `myrområder` | `area_features`, `kartverket-n50-myr-oslomarka` (7 354 flater), via `explore_mires` | flater | krever område |
 | Tyttebær: registrerte funn | `tyttebær`, `tyttebaer`, `tyttebærfunn`, `tyttebær funn` | `area_features`, `gbif-tyttebaerfunn-oslomarka` (1 559 punkter), via `explore_area_features` | punkter | hele dekningsområdet (Oslo og Marka) |
 | Kantarell: registrerte funn | `kantarell`, `kantareller`, `kantarellfunn`, `kantarell funn` | `area_features`, `gbif-kantarellfunn-oslomarka` (457 punkter), via `explore_area_features` | punkter | hele dekningsområdet (Oslo og Marka) |
+| Steinsopp: registrerte funn | `steinsopp`, `steinsopper`, `steinsoppfunn`, `boletus edulis` | `area_features`, `gbif-steinsoppfunn-oslomarka` (313 punkter), via `explore_area_features` | punkter | hele dekningsområdet (Oslo og Marka) |
 
 «Krever område» betyr kommune, fylke eller et kartutsnitt under 80 km.
 
@@ -2809,6 +2810,7 @@ feltet er der for at ingen skal bygge en offentlig visning uten å ha sett beslu
 | Myr | **nei** | **nei** |
 | Tyttebær: registrerte funn | **nei** | **nei** |
 | Kantarell: registrerte funn | **nei** | **nei** |
+| Steinsopp: registrerte funn | **nei** | **nei** |
 
 Forurenset grunn er og blir internt: ikke på `/omrade`, ikke i noe offentlig kart, og ikke
 gjennom noen offentlig RPC. Kategorien er upublisert i `area_feature_categories`.
@@ -2907,9 +2909,9 @@ egne kategorier (påvirkningsgrad, oppfølging, tilstandsklasse, arealbruk) med 
 som resten av løsningen, og gjør dem ikke sterkere. En registrering gjelder lokaliteten slik den
 er avgrenset, ikke hele eiendommen. Panelet sier at datasettet er internt.
 
-**Multefunn, tyttebærfunn, kantarellfunn og myr (interne researchlag, bare Oslo og Marka).** Fire
-datasett for personlig research: hvor er multe, tyttebær og kantarell registrert, og hvor ligger
-myrene. **Ingen score og ingen sannsynlighet**
+**Multefunn, tyttebærfunn, kantarellfunn, steinsoppfunn og myr (interne researchlag, bare Oslo og
+Marka).** Fem datasett for personlig research: hvor er multe, tyttebær, kantarell og steinsopp
+registrert, og hvor ligger myrene. **Ingen score og ingen sannsynlighet**
 — researchen ([multer-oslo.md](research/multer-oslo.md)) viste at en habitatmodell i praksis ble
 et myrkart, så vi lagrer dataene og lar kartet vise dem. Aldri offentlig: kategorien
 `natur_intern` er upublisert, og dataene leses bare gjennom admin-funksjonene.
@@ -2939,9 +2941,16 @@ et myrkart, så vi lagrer dataene og lar kartet vise dem. Aldri offentlig: kateg
   flest sesonger først, og panelet har blokken «Registrert her før» («Registrert i 5 ulike år»,
   «12 registrerte funn innen 250 m, fra 2018–2026»). Det er en opptelling, merket som det — ikke
   en sannsynlighet. Observatørnavn brukes til å telle og lagres ikke. Registreringer kilden
-  merker som uverifiserte eller automatisk godkjent, tas ikke inn (gjelder alle tre artene).
+  merker som uverifiserte eller automatisk godkjent, tas ikke inn (gjelder alle artene).
   Ingen habitatmodell og intet værvarsel ([kantarell-oslo.md](research/kantarell-oslo.md)).
   Oppdateres med `npm run sync:area -- --provider=gbif-kantarellfunn-oslomarka`.
+- *Steinsopp: registrerte funn* — *Boletus edulis* strengt, 313 punkter, med samme gjentak og
+  samme panel som kantarell. Bleklodden og rødbrun steinsopp er egne arter og er ikke med.
+  Gamle funn får teksten «Et gammelt funn kan fortsatt være interessant, men sier ikke om det
+  kommer steinsopp her i år.» Ingen habitatmodell: steinsopp står på rikere og mer kalkholdig
+  grunn enn kantarell, men ikke mer enn andre soppfunn
+  ([steinsopp-oslo.md](research/steinsopp-oslo.md)). Oppdateres med
+  `npm run sync:area -- --provider=gbif-steinsoppfunn-oslomarka`.
 - Avstanden regnes i databasen (`explore_mires`), fra myrflaten til punktet, i UTM 33. Avviket fra
   ellipsoiden er ca. 0,03 % ved Oslo. Arealet regnes på ellipsoiden.
 - **Dekning.** Datasettene har `coverage` i registeret. Et søk utenfor («multer Bergen») sier

@@ -1,10 +1,11 @@
 import "server-only";
-import { KANTARELLFUNN_PROVIDER, MULTE_BOKS, MULTE_DEKNING, MULTEFUNN_PROVIDER, TYTTEBAERFUNN_PROVIDER } from "@/lib/multe/omrade";
+import { KANTARELLFUNN_PROVIDER, MULTE_BOKS, MULTE_DEKNING, MULTEFUNN_PROVIDER, STEINSOPPFUNN_PROVIDER, TYTTEBAERFUNN_PROVIDER } from "@/lib/multe/omrade";
 import { dato, hentAreaFeatures, rader, tall, tekst, type AreaFeatureRad } from "./area-features";
 import type { ExploreDataset, ExploreFeature } from "./types";
 
 /**
- * Registrerte artsfunn i Utforsk data: multe og tyttebær. Interne researchlag, bare Oslo og Marka.
+ * Registrerte artsfunn i Utforsk data: multe, tyttebær, kantarell og steinsopp. Interne
+ * researchlag, bare Oslo og Marka.
  *
  * Et funn er en observasjon: noen så planten der den dagen. Det sier ikke at den står der nå, og
  * ingenting om bær. Panelet sier det, og gjør ikke et gammelt funn til en bestand.
@@ -28,7 +29,7 @@ interface Art {
   art: string;
   /** «Multefunn» — første ord i tittelen på et funn. */
   funnord: string;
-  style: "multefunn" | "tyttebaerfunn" | "kantarellfunn";
+  style: "multefunn" | "tyttebaerfunn" | "kantarellfunn" | "steinsoppfunn";
   description: string;
   /** Setningen et funn på ti år eller mer får i tillegg. Standard gjelder planter. */
   gammeltTekst?: (aar: number) => string;
@@ -105,7 +106,24 @@ const KANTARELL: Art = {
   description: `Registrerte funn av kantarell fra GBIF (Artsobservasjoner m.fl.), fra 2000 og med presisjon på 100 m eller bedre. Dekker bare ${MULTE_DEKNING}. Steder med funn i flere sesonger står først. ${FUNN_FORBEHOLD}`,
 };
 
+const STEINSOPP: Art = {
+  id: "steinsoppfunn",
+  label: "Steinsopp: registrerte funn",
+  queryWord: "steinsoppfunn",
+  aliases: ["registrerte steinsoppfunn", "steinsopp funn", "steinsoppfunn", "steinsopper", "steinsopp", "boletus edulis", "karljohan"],
+  providerId: STEINSOPPFUNN_PROVIDER,
+  art: "Steinsopp (Boletus edulis)",
+  funnord: "Steinsoppfunn",
+  style: "steinsoppfunn",
+  gjentak: true,
+  // Mycelet kan leve lenge, men fruktlegemene varierer mye fra år til år. Ingen påstand om at
+  // stedet fortsatt gir sopp.
+  gammeltTekst: (aar) => `Funnet er fra ${aar}. Et gammelt funn kan fortsatt være interessant, men sier ikke om det kommer steinsopp her i år.`,
+  description: `Registrerte funn av steinsopp (Boletus edulis) fra GBIF (Artsobservasjoner m.fl.), fra 2000 og med presisjon på 100 m eller bedre. Bleklodden og rødbrun steinsopp er egne arter og er ikke med. Dekker bare ${MULTE_DEKNING}. Steder med funn i flere sesonger står først. ${FUNN_FORBEHOLD}`,
+};
+
 export const multefunnDataset = artsfunnDataset(MULTE);
+export const steinsoppfunnDataset = artsfunnDataset(STEINSOPP);
 export const kantarellfunnDataset = artsfunnDataset(KANTARELL);
 export const tyttebaerfunnDataset = artsfunnDataset(TYTTEBAER);
 
@@ -113,6 +131,7 @@ export const tyttebaerfunnDataset = artsfunnDataset(TYTTEBAER);
 export const multefunnFeature = (rad: AreaFeatureRad, iAar = new Date().getFullYear()) => artsfunnFeature(rad, MULTE, iAar);
 export const tyttebaerfunnFeature = (rad: AreaFeatureRad, iAar = new Date().getFullYear()) => artsfunnFeature(rad, TYTTEBAER, iAar);
 export const kantarellfunnFeature = (rad: AreaFeatureRad, iAar = new Date().getFullYear()) => artsfunnFeature(rad, KANTARELL, iAar);
+export const steinsoppfunnFeature = (rad: AreaFeatureRad, iAar = new Date().getFullYear()) => artsfunnFeature(rad, STEINSOPP, iAar);
 
 /** `iAar` er året «nå», så teksten om alder kan testes. */
 function artsfunnFeature(rad: AreaFeatureRad, art: Art, iAar = new Date().getFullYear()): Omit<ExploreFeature, "datasetId" | "datasetLabel"> & { sort: number } {

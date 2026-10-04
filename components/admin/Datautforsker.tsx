@@ -428,6 +428,7 @@ const LAGFARGE: Record<string, keyof typeof EXPLORE_COLOR> = {
   myr: "myr",
   tyttebaerfunn: "tyttebaerfunn",
   kantarellfunn: "kantarellfunn",
+  steinsoppfunn: "steinsoppfunn",
 };
 const farge = (lag: Lagvisning) => EXPLORE_COLOR[lag.features[0]?.style ?? LAGFARGE[lag.dataset.id] ?? "datasenter"];
 

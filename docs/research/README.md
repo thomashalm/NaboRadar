@@ -59,6 +59,7 @@ publisert 2026-10-02 ([ADR 009](../adr/009-public-admin-security-model.md)).
 | [multer-oslo.md](multer-oslo.md) | 2026-10-04 | Internt adminlag for mulig multeterreng i Oslo og Marka. 515 funn: myr har 31 % av funnene på 1,9 % av arealet, men ingen åpen variabel rangerer *mellom* myrer. Score ikke bygget. Bygget samme dag: funn og myr som interne datasett |
 | [tyttebaer-oslo.md](tyttebaer-oslo.md) | 2026-10-04 | Tyttebær i Oslo og Marka: 1 559 funn etter filter. Kildene skiller ikke plante fra bær (1 av 2 674 har feltet). Furu gir løft 2,2 — for svakt for score eller habitatlag. Bygget: funnene som internt datasett |
 | [kantarell-oslo.md](kantarell-oslo.md) | 2026-10-04 | Kantarell i Oslo og Marka: 457 funn etter filter. Funn i flere sesonger på samme sted er det sterkeste signalet (15 steder med 3+ år og 3+ observatører). Habitat: eldre, sluttet skog, løft 2 — ikke bygget. Nedbør siste 14 dager gir 2,5 ganger flere funn. Bygget: funnene med gjentak i panelet |
+| [steinsopp-oslo.md](steinsopp-oslo.md) | 2026-10-04 | Steinsopp (*Boletus edulis* strengt) i Oslo og Marka: 313 funn etter filter. Sterkeste område har 58 funn over 13 år fra 11 observatører (Lillomarka). Står på rikere og mer kalkholdig grunn enn kantarell, men ikke mer enn andre soppfunn. Kort sesong med topp i slutten av august; nedbør 8–21 dager før betyr mest. Bygget: funnene med gjentak i panelet |
 
 ### Eldre discovery- og analysedokumenter (ligger i `docs/`)
 Disse er research i samme betydning, men ligger utenfor mappen fordi andre dokumenter lenker til

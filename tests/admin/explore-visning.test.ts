@@ -50,7 +50,7 @@ describe("byggVisning", () => {
     if (v.status !== "treff") throw new Error(v.status);
     expect(v.lag.map((l) => l.dataset.id)).toEqual(["plansaker"]);
     expect(v.lag[0]!.features[0]).toMatchObject({ datasetId: "plansaker", datasetLabel: "Plansaker", place: "Bærum" });
-    expect(v.leggTil.map((l) => l.id)).toEqual(["kvikkleire", "kraftnett", "forurenset-grunn", "datasenter", "multefunn", "myr", "tyttebaerfunn", "kantarellfunn"]);
+    expect(v.leggTil.map((l) => l.id)).toEqual(["kvikkleire", "kraftnett", "forurenset-grunn", "datasenter", "multefunn", "myr", "tyttebaerfunn", "kantarellfunn", "steinsoppfunn"]);
     expect(v.leggTil[0]!.href).toBe("/admin/research/utforsk?q=plansaker+B%C3%A6rum&lag=kvikkleire");
     expect(kall.map((k) => k.fn)).toEqual(["explore_events"]);
     expect(kall[0]!.args).toMatchObject({ p_min_lng: 10.4, p_max_lat: 60.0, p_area: flate });

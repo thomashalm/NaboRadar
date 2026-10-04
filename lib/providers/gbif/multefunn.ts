@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { fetchJson } from "@/lib/http";
-import { KANTARELLFUNN_PROVIDER, MULTE_BOKS, MULTEFUNN_PROVIDER, NATUR_INTERN, TYTTEBAERFUNN_PROVIDER } from "@/lib/multe/omrade";
+import { KANTARELLFUNN_PROVIDER, MULTE_BOKS, MULTEFUNN_PROVIDER, NATUR_INTERN, STEINSOPPFUNN_PROVIDER, TYTTEBAERFUNN_PROVIDER } from "@/lib/multe/omrade";
 import type { AreaFeatureProvider, NormalizeResult, ProviderHealth, RawBatch, RejectedRecord, SyncOptions } from "@/lib/providers/types";
 import type { NormalizedAreaFeature } from "@/types/area-feature";
 
 /**
- * Registrerte artsfunn i Oslo og Marka, fra GBIF. Interne researchlag: multe, tyttebær og kantarell.
+ * Registrerte artsfunn i Oslo og Marka, fra GBIF. Interne researchlag: multe, tyttebær, kantarell og steinsopp.
  *
  * KILDE: GBIF samler Artsobservasjoner, museenes feltnotater og herbarier, ANO m.fl. Samme
  * registreringer som Artskart. Hver registrering har sin egen lisens.
@@ -21,7 +21,7 @@ import type { NormalizedAreaFeature } from "@/types/area-feature";
  *
  *   - ikke registreringer kilden selv merker som uverifiserte eller automatisk godkjent.
  *
- * GJENTAK (bare arter der det er slått på — kantarell): for hvert funn telles alle brukbare
+ * GJENTAK (bare arter der det er slått på — kantarell og steinsopp): for hvert funn telles alle brukbare
  * registreringer innen 250 m, også dem som tynnes bort: hvor mange, i hvor mange ulike år, og av
  * hvor mange ulike observatører. Soppens mycel lever i bakken i mange år, så «registrert her i
  * fem ulike sesonger» sier mer enn ett funn. Det er en opptelling, ikke en sannsynlighet.
@@ -53,6 +53,13 @@ export interface Artsfunn {
 export const MULTE: Artsfunn = { providerId: MULTEFUNN_PROVIDER, name: "Registrerte multefunn, Oslo og Marka", taxonKey: 2998290, subtype: "multefunn", art: "Multe" };
 export const TYTTEBAER: Artsfunn = { providerId: TYTTEBAERFUNN_PROVIDER, name: "Registrerte tyttebærfunn, Oslo og Marka", taxonKey: 2882835, subtype: "tyttebaerfunn", art: "Tyttebær" };
 export const KANTARELL: Artsfunn = { providerId: KANTARELLFUNN_PROVIDER, name: "Registrerte kantarellfunn, Oslo og Marka", taxonKey: 5249504, subtype: "kantarellfunn", art: "Kantarell", gjentak: true };
+
+/**
+ * Steinsopp er *Boletus edulis* og bare den. De nærstående artene bleklodden steinsopp
+ * (*B. reticulatus*, 65 registreringer i området) og rødbrun steinsopp (*B. pinophilus*, 44) er
+ * registrert som egne arter og har andre vertstrær og sesonger. De slås ikke sammen med denne.
+ */
+export const STEINSOPP: Artsfunn = { providerId: STEINSOPPFUNN_PROVIDER, name: "Registrerte steinsoppfunn, Oslo og Marka", taxonKey: 5954958, subtype: "steinsoppfunn", art: "Steinsopp", gjentak: true };
 
 /** Radius for opptellingen av funn i nærheten. */
 export const GJENTAK_RADIUS_M = 250;
@@ -268,5 +275,11 @@ export class GbifTyttebaerfunnProvider extends GbifArtsfunnProvider {
 export class GbifKantarellfunnProvider extends GbifArtsfunnProvider {
   constructor(fetchImpl: typeof fetch = fetch) {
     super(KANTARELL, fetchImpl);
+  }
+}
+
+export class GbifSteinsoppfunnProvider extends GbifArtsfunnProvider {
+  constructor(fetchImpl: typeof fetch = fetch) {
+    super(STEINSOPP, fetchImpl);
   }
 }

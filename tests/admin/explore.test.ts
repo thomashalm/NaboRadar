@@ -7,7 +7,7 @@ import { boksFor, lesUtsnitt, punktIFlate, utsnittKm } from "@/lib/admin/explore
 import { forurensetGrunnFeature } from "@/lib/admin/explore/forurenset-grunn";
 import { kraftnettFeature } from "@/lib/admin/explore/kraftnett";
 import { kvikkleireFeature } from "@/lib/admin/explore/kvikkleire";
-import { kantarellfunnFeature, multefunnFeature, tyttebaerfunnFeature } from "@/lib/admin/explore/multefunn";
+import { kantarellfunnFeature, multefunnFeature, steinsoppfunnFeature, tyttebaerfunnFeature } from "@/lib/admin/explore/multefunn";
 import { myrFeature } from "@/lib/admin/explore/myr";
 import { PLANSAK_OVERLAPP, plansakOverlapp } from "@/lib/admin/explore/plansak-overlapp";
 import { plansakFeature, plansakOverlappFeature } from "@/lib/admin/explore/plansaker";
@@ -194,6 +194,7 @@ describe("nye datasett i søket", () => {
       myr: { openMap: "nei", omrade: "nei" },
       tyttebaerfunn: { openMap: "nei", omrade: "nei" },
       kantarellfunn: { openMap: "nei", omrade: "nei" },
+      steinsoppfunn: { openMap: "nei", omrade: "nei" },
     });
   });
 
@@ -208,6 +209,7 @@ describe("nye datasett i søket", () => {
       myr: true,
       tyttebaerfunn: false,
       kantarellfunn: false,
+      steinsoppfunn: false,
     });
     expect(MAX_LAG).toBe(2);
   });
@@ -440,7 +442,7 @@ describe("multefunn og myr: interne researchlag", () => {
   });
 
   it("begge sier hvor de dekker", () => {
-    for (const id of ["multefunn", "myr", "tyttebaerfunn", "kantarellfunn"]) {
+    for (const id of ["multefunn", "myr", "tyttebaerfunn", "kantarellfunn", "steinsoppfunn"]) {
       const d = EXPLORE_DATASETS.find((x) => x.id === id)!;
       expect(d.coverage).toEqual({ label: "Oslo og Marka", box: { minLng: 10.3, minLat: 59.78, maxLng: 11.1, maxLat: 60.3 } });
       expect(d.description).toContain("Dekker bare Oslo og Marka");
@@ -596,5 +598,41 @@ describe("kantarell: registrerte funn og funn i flere sesonger", () => {
     const d = EXPLORE_DATASETS.find((x) => x.id === "kantarellfunn")!;
     const alt = JSON.stringify([d.description, kantarellfunnFeature(rad({ ...felles, funnINaerheten: 12, aarINaerheten: 5, aarliste: "2018, 2026", observatorerINaerheten: 4 }), 2026)]).replace("ikke en sannsynlighet", "");
     expect(alt).not.toMatch(/sannsynlig|score|lovende|garant|her vokser|sikkert funn/i);
+  });
+});
+
+describe("steinsopp: registrerte funn", () => {
+  const punkt = { type: "Point" as const, coordinates: [10.836, 59.949] };
+  const rad = (attributes: Record<string, string | number | boolean | null>) =>
+    ({ id: "s1", external_id: "88", title: "Steinsopp", subtype: "steinsoppfunn", attributes, source_url: "https://www.gbif.org/occurrence/88", source_updated_at: null, geometry: punkt, center: punkt, total: 1 }) as Parameters<typeof steinsoppfunnFeature>[0];
+  const felles = { aar: 2024, maaned: 8, dato: "2024-08-24", presisjonM: 5, datasett: "Norwegian Species Observation Service", lisens: "CC BY 4.0", funnIRuta: 1, bilde: true, validert: false };
+
+  it("søkeordene velger datasettet, også det vitenskapelige navnet", () => {
+    for (const sok of ["steinsopp Oslo", "steinsoppfunn Oslo", "boletus edulis Oslo", "steinsopp funn Oslo"]) expect(tolk(sok)).toMatchObject({ dataset: { id: "steinsoppfunn" }, sted: { status: "ok" } });
+    const d = EXPLORE_DATASETS.find((x) => x.id === "steinsoppfunn")!;
+    expect(tolk(`${d.queryWord} Oslo`).dataset?.id).toBe("steinsoppfunn");
+    // Kantarell og steinsopp er to datasett.
+    expect(tolk("kantarell Oslo").dataset?.id).toBe("kantarellfunn");
+  });
+
+  it("panelet: art, kvalitet og «Registrert her før» med år, antall og observatører", () => {
+    const f = steinsoppfunnFeature(rad({ ...felles, funnINaerheten: 14, aarINaerheten: 6, aarliste: "2015, 2017, 2019, 2021, 2024, 2026", observatorerINaerheten: 4 }), 2026);
+    expect(f.title).toBe("Steinsoppfunn, august 2024");
+    expect(f.style).toBe("steinsoppfunn");
+    expect(f.details.find((d) => d.label === "Art")!.value).toBe("Steinsopp (Boletus edulis)");
+    expect(f.details.find((d) => d.label === "Bilde")!.value).toBe("ja, hos kilden");
+    expect(f.analysis).toMatchObject({ label: "Registrert her før", heading: "Registrert i 6 ulike år", lines: ["14 registrerte funn innen 250 m, fra 2015–2026.", "År: 2015, 2017, 2019, 2021, 2024, 2026.", "4 ulike observatører."] });
+  });
+
+  it("et gammelt funn: kan være interessant, men lover ingenting om i år", () => {
+    const f = steinsoppfunnFeature(rad({ ...felles, aar: 2012, dato: "2012-09-01", funnINaerheten: 1, aarINaerheten: 1, aarliste: "2012" }), 2026);
+    expect(f.explanation).toBe("Registrert observasjon – sier ikke noe sikkert om forekomst i dag. Funnet er fra 2012. Et gammelt funn kan fortsatt være interessant, men sier ikke om det kommer steinsopp her i år.");
+    expect(f.explanation).not.toMatch(/fortsatt aktiv|vokser her/i);
+  });
+
+  it("sier hva som ikke er med: de nærstående artene", () => {
+    const d = EXPLORE_DATASETS.find((x) => x.id === "steinsoppfunn")!;
+    expect(d.description).toContain("Bleklodden og rødbrun steinsopp er egne arter og er ikke med.");
+    expect(d.description).not.toMatch(/sannsynlig|score|lovende|garant/i);
   });
 });

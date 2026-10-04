@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aapenLisens, GbifKantarellfunnProvider, GbifMultefunnProvider, GbifTyttebaerfunnProvider, KANTARELL, TYTTEBAER } from "@/lib/providers/gbif/multefunn";
+import { aapenLisens, GbifKantarellfunnProvider, GbifMultefunnProvider, GbifSteinsoppfunnProvider, GbifTyttebaerfunnProvider, KANTARELL, STEINSOPP, TYTTEBAER } from "@/lib/providers/gbif/multefunn";
 import { KartverketN50MyrProvider, parseN50Myr } from "@/lib/providers/kartverket/n50-myr";
 
 /**
@@ -133,6 +133,20 @@ describe("GbifKantarellfunnProvider", () => {
     const a = new GbifMultefunnProvider().normalize({ features: sett, documents: [] }).records[0]!.attributes;
     expect(a.funnINaerheten).toBeUndefined();
     expect(a.aarliste).toBeUndefined();
+  });
+});
+
+describe("GbifSteinsoppfunnProvider", () => {
+  it("Boletus edulis strengt, med gjentak — og samme kvalitetskrav som kantarell", () => {
+    const p = new GbifSteinsoppfunnProvider();
+    expect([p.id, STEINSOPP.taxonKey, STEINSOPP.gjentak]).toEqual(["gbif-steinsoppfunn-oslomarka", 5954958, true]);
+    const { records, skipped } = p.normalize({
+      features: [funn({ key: 1, year: 2024, recordedBy: "A" }), funn({ key: 2, year: 2016, recordedBy: "B", decimalLatitude: 60.0375 }), funn({ key: 3, decimalLatitude: 60.2, identificationVerificationStatus: "unverified" })],
+      documents: [],
+    });
+    expect(records.map((r) => [r.externalId, r.subtype, r.title])).toEqual([["1", "steinsoppfunn", "Steinsopp"], ["2", "steinsoppfunn", "Steinsopp"]]);
+    expect(records[0]!.attributes).toMatchObject({ funnINaerheten: 2, aarINaerheten: 2, aarliste: "2016, 2024", observatorerINaerheten: 2 });
+    expect(skipped!.map((s) => s.reason)).toEqual(["uverifisert eller automatisk godkjent i kilden"]);
   });
 });
 

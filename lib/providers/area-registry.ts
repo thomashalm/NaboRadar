@@ -1,5 +1,5 @@
 import { DsbTilfluktsromProvider } from "./dsb/tilfluktsrom";
-import { GbifKantarellfunnProvider, GbifMultefunnProvider, GbifTyttebaerfunnProvider } from "./gbif/multefunn";
+import { GbifKantarellfunnProvider, GbifMultefunnProvider, GbifSteinsoppfunnProvider, GbifTyttebaerfunnProvider } from "./gbif/multefunn";
 import { SykehusProvider } from "./helse/sykehus";
 import { KartverketN50HytterProvider } from "./kartverket/n50-hytter";
 import { KartverketN50MyrProvider } from "./kartverket/n50-myr";
@@ -35,11 +35,12 @@ export const areaFeatureProviders: readonly AreaFeatureProvider[] = [
   // Hovedkilden først, slik at den oppretter hyttene og sekundærkilden kobler seg på.
   new KartverketN50HytterProvider(),
   new KartverketTurrutebasenHytterProvider(),
-  // Internt researchlag i admin (Utforsk data): multefunn, tyttebærfunn, kantarellfunn og myr i Oslo og Marka. Upublisert
+  // Internt researchlag i admin (Utforsk data): multefunn, tyttebærfunn, kantarellfunn, steinsoppfunn og myr i Oslo og Marka. Upublisert
   // kategori, og uten tidsplan i providers-tabellen — synkes for hånd.
   new GbifMultefunnProvider(),
   new GbifTyttebaerfunnProvider(),
   new GbifKantarellfunnProvider(),
+  new GbifSteinsoppfunnProvider(),
   new KartverketN50MyrProvider(),
 ];
 
