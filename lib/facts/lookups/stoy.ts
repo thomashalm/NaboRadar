@@ -60,7 +60,27 @@ const BYOMRADE = "roadsInAgglomeration";
  * Miljødirektoratets strategiske støykartlegging (EU-støydirektivet, kartlagt 2022).
  * Polygonene er ~300 MB nasjonalt og spørres derfor direkte, punkt-i-polygon.
  * Storbylagene (5) dekker Oslo; lag 7 dekker øvrige kartlagte veger.
+ *
+ * DEKNING. Tjenestene har egne dekningslag, og vi spør dem i samme oppslag:
+ *
+ * - lag 0, `byomrader`: de seks byområdene (Oslo, Bergen, Trondheim, Stavanger/Sandnes, Drammen,
+ *   Fredrikstad/Sarpsborg). Der er alle gater og banestrekninger modellert.
+ * - lag 1, `stoy_veg_dekning` / `stoy_bane_dekning`: områdene utenfor byene der bare de mest
+ *   trafikkerte veiene (over 3 millioner passeringer i året) og jernbanestrekningene (over 30 000
+ *   tog i året) er kartlagt.
+ *
+ * Det gir fire utfall per kilde, og de skal aldri blandes:
+ *
+ * 1. treff — et Lden-intervall, som før
+ * 2. dekket, uten treff — punktet ligger under laveste kartlagte intervall. Et resultat.
+ * 3. ikke dekket — kilden har ikke noe kart her. Ikke et resultat om støy.
+ * 4. feil — et av kallene feilet. Hele oppslaget kaster, og kilden står som «svarte ikke». En
+ *    feil blir aldri til «ingen støy»: statusen bygges bare når alle kallene har svart.
+ *
+ * Utfall 2 og 3 sendes som ett eget treff, `stoy_strategisk_status`. Formuleringen bor i
+ * lib/facts/wording.ts.
  */
+export type StoyDekning = "by" | "hoved" | "ingen";
 export class StrategiskStoyLookup implements AreaLookup {
   readonly id = "mdir-stoy-strategisk";
   readonly name = "Strategisk støykartlegging";
@@ -78,7 +98,17 @@ export class StrategiskStoyLookup implements AreaLookup {
       { service: `${MDIR_STOY}/stoykart_strategisk_bane/MapServer`, subtype: "stoy_strategisk_bane", title: "Beregnet banestøy" },
     ];
 
-    const results = await Promise.all(
+    // Dekningen hentes sammen med nivåene. Feiler ett kall, feiler hele oppslaget (Promise.all).
+    const dekningFor = async (service: string): Promise<StoyDekning> => {
+      const [by, hoved] = await Promise.all(
+        [0, 1].map((layer) => this.client.query(service, layer, { point: { lat, lng }, returnGeometry: false, signal })),
+      );
+      return by!.length > 0 ? "by" : hoved!.length > 0 ? "hoved" : "ingen";
+    };
+    // Ventes samlet, slik at ingen avvisning blir hengende uhåndtert.
+    const [dekning, results] = await Promise.all([
+      Promise.all(sources.map((source) => dekningFor(source.service))),
+      Promise.all(
       sources.flatMap((source) =>
         // Lag 5 = storbyområder (bl.a. Oslo), lag 7 = øvrige kartlagte strekninger.
         [5, 7].map(async (layer) => {
@@ -90,7 +120,8 @@ export class StrategiskStoyLookup implements AreaLookup {
           return features.map((raw) => ({ source, raw }));
         }),
       ),
-    );
+      ),
+    ]);
 
     const hits: LookupHit[] = [];
     const seen = new Set<string>();
@@ -116,6 +147,23 @@ export class StrategiskStoyLookup implements AreaLookup {
           enhet: "Lden",
           kartlagtAar: 2022,
         },
+        distanceM: 0,
+        contains: true,
+      });
+    }
+
+    const [vegDekning = "ingen", baneDekning = "ingen"] = dekning;
+    const vegTreff = seen.has("stoy_strategisk_veg");
+    const baneTreff = seen.has("stoy_strategisk_bane");
+    // Statusen har noe å si når en dekket kilde er uten treff, eller når ingenting er dekket og
+    // ingenting traff. Har alle dekkede kilder treff, sier kortene det som er å si.
+    const dekketUtenTreff = (vegDekning !== "ingen" && !vegTreff) || (baneDekning !== "ingen" && !baneTreff);
+    const ingenDekning = vegDekning === "ingen" && baneDekning === "ingen" && !vegTreff && !baneTreff;
+    if (dekketUtenTreff || ingenDekning) {
+      hits.push({
+        subtype: "stoy_strategisk_status",
+        title: "Strategisk støykartlegging",
+        attributes: { vegDekning, baneDekning, vegTreff, baneTreff },
         distanceM: 0,
         contains: true,
       });

@@ -146,7 +146,7 @@ export interface FactCluster {
    * lenken til de nærmeste rommene. `nearestLink` er satt bare når lenken faktisk fører til et
    * treff.
    */
-  emptyNote?: { text: string; nearestLink: boolean } | null;
+  emptyNote?: { text: string; nearestLink: boolean; /** Én dempet linje under, f.eks. et forbehold. */ detail?: string | null } | null;
 }
 
 /** Et objekt som skal tegnes i kartet. Flate eller punkt, avhengig av kilden. */

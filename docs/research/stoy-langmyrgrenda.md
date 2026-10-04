@@ -58,7 +58,36 @@ Bare tekst. Oppslaget, lagene og dataene er de samme.
 | Nederst i gruppen | – | Modellberegnet kartnivå ved søkepunktet. Kan variere over korte avstander. Lden er gjennomsnittlig støynivå over døgnet, der kveld og natt teller ekstra. |
 | Bane ved Majorstuen | Lden 60 dB eller mer · «Ved søkepunktet» | Lden 60–64 dB / Gul støysone fra 58 dB, rød fra 68 dB (T-1442) |
 
+## Oppfølging samme dag: resultat også uten treff
+
+Etter tekstendringen forsvant støyseksjonen helt på 26C. Brukeren kunne ikke se om området var
+kartlagt med lavt nivå, ikke kartlagt, eller om kilden hadde feilet.
+
+Kilden har egne dekningslag: `byomrader` (lag 0) — de seks byområdene Oslo, Bergen, Trondheim,
+Stavanger/Sandnes, Drammen og Fredrikstad/Sarpsborg — og `stoy_veg_dekning` / `stoy_bane_dekning`
+(lag 1) for de mest trafikkerte strekningene utenfor (61 vegpolygoner, 8 banepolygoner).
+Oppslaget spør dem sammen med støynivåene, og skiller fire utfall: treff, kartlagt uten treff,
+ikke kartlagt, og feil. Reglene står i håndboka.
+
+| | Før | Etter |
+|---|---|---|
+| Langmyrgrenda 26C | ingen støyseksjon | **Støy:** Ingen kartlagt vei- eller banestøy over 50 dB ved søkepunktet. / Modellberegnet kartnivå ved søkepunktet. Kan variere over korte avstander. |
+| Langmyrgrenda 26 | støykort for vei | samme kort, og nederst: Ingen kartlagt banestøy over 50 dB ved søkepunktet. |
+| Finse, Karasjok | ingen støyseksjon | Området er ikke med i den strategiske støykartleggingen av vei og bane. |
+| Ålesund sentrum | ingen støyseksjon | Ingen kartlagt støy over 50 dB fra de mest trafikkerte veiene ved søkepunktet. |
+
+Kontrollert at byområdet er modellert helt ut til kanten: punkter i Sørumsand, Sørkedalen og
+Hurum, alle i byområdet «Oslo», har støypolygoner innen én kilometer.
+
 ## Begrensninger
+
+- Dekningslaget utenfor byene (lag 1) har ingen beskrivelse i tjenesten. Vi leser det som
+  områdene der de mest trafikkerte veiene og banene er kartlagt, slik navnet og
+  tjenestebeskrivelsen tilsier.
+- Tjenestebeskrivelsen for bane sier at kartene viser situasjonen i 2017, mens vår metodetekst
+  sier «kartlagt 2022» for hele kilden. Ikke avklart.
+- Oppslaget gjør åtte kall i stedet for fire. Målt svartid var uendret, rundt fire sekunder i
+  Oslo og ett sekund utenfor byområdene.
 
 - Miljødirektoratets nettkart er ikke åpnet i nettleser. Uttegningen er laget fra samme
   karttjeneste.

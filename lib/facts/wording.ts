@@ -473,6 +473,45 @@ export function describeStoyReferanse(subtype: string, ovre: number | null): str
     : `Gul støysone fra ${grenser.gul} dB, rød fra ${grenser.rod} dB (T-1442)`;
 }
 
+/**
+ * Støystatus når strategisk kartlegging er uten treff.
+ *
+ * Fravær av treff er tre forskjellige ting, og bare én av dem er et resultat:
+ *
+ * - **Kartlagt, under laveste intervall:** «Ingen kartlagt … over 50 dB ved søkepunktet.» Vi
+ *   sier nivået det er snakk om, og «kartlagt» — aldri «ingen støy», og ikke «lavt», som ingen
+ *   offisiell kilde bruker om dB-nivåer. Laveste intervall er 50 dB, unntatt for jernbane utenfor
+ *   byområdene, der det er 55 dB.
+ * - **Ikke kartlagt:** vi sier at kartet ikke finnes her. Det er ikke et funn om støy.
+ * - **Kildefeil:** kommer aldri hit. Oppslaget kaster, og kilden står som «svarte ikke».
+ *
+ * Bare kilder som faktisk er dekket nevnes. Er bare vei kartlagt, sier vi ingenting om bane.
+ * Utenfor byområdene er det bare de mest trafikkerte veiene og banene som er kartlagt, og det
+ * står i setningen — ellers leses den som om gata utenfor også var vurdert.
+ *
+ * `dekket` sier om setningen er et resultat (kartlagt) eller bare en opplysning om dekning.
+ */
+export function describeStoyStatus(a: AreaAttributes): { text: string; dekket: boolean } | null {
+  const veg = a.vegTreff === true ? null : str(a.vegDekning);
+  const bane = a.baneTreff === true ? null : str(a.baneDekning);
+  const slutt = "ved søkepunktet.";
+
+  if (veg === "by" && bane === "by") return { text: `Ingen kartlagt vei- eller banestøy over 50 dB ${slutt}`, dekket: true };
+
+  const deler: string[] = [];
+  if (veg === "by") deler.push(`Ingen kartlagt veitrafikkstøy over 50 dB ${slutt}`);
+  if (veg === "hoved") deler.push(`Ingen kartlagt støy over 50 dB fra de mest trafikkerte veiene ${slutt}`);
+  if (bane === "by") deler.push(`Ingen kartlagt banestøy over 50 dB ${slutt}`);
+  if (bane === "hoved") deler.push(`Ingen kartlagt støy over 55 dB fra de mest trafikkerte jernbanestrekningene ${slutt}`);
+  if (deler.length > 0) return { text: deler.join(" "), dekket: true };
+
+  // Ingen av kildene har kart her, og ingen traff.
+  if (a.vegTreff !== true && a.baneTreff !== true) return { text: STOY_IKKE_KARTLAGT, dekket: false };
+  return null;
+}
+
+export const STOY_IKKE_KARTLAGT = "Området er ikke med i den strategiske støykartleggingen av vei og bane.";
+
 /** Storbylaget modellerer alle gater. Uten dette leses treffet som støy fra en stor vei. */
 export const STOY_BYOMRADE = "Modellert for alle gater i byområdet.";
 const STOY_FORBEHOLD_VED_PUNKTET = `Ved søkepunktet · ${STOY_FORBEHOLD.charAt(0).toLowerCase()}${STOY_FORBEHOLD.slice(1)}`;
@@ -787,6 +826,14 @@ export function describeFact(input: {
         // Står kortet alene, bærer referansen linjen under nivået.
         compact: { headline: `Støy fra ${kortKilde} · Lden ${level}`, context: referanse ?? STOY_KARTNIVA },
       };
+    }
+
+    case "stoy_strategisk_status": {
+      const status = describeStoyStatus(a);
+      if (!status) return null;
+      // `caveat` bærer kartnivå-forbeholdet bare når setningen er et resultat. Støygruppen
+      // (lib/facts/clusters.ts) bruker det til å skille «kartlagt» fra «ikke kartlagt».
+      return { headline: status.text, details: [], caveat: status.dekket ? STOY_KARTNIVA : null };
     }
 
     case "stoysone_veg_t1442": {

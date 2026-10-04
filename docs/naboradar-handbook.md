@@ -909,6 +909,27 @@ Hele poenget er at NaboRadar ikke skal si mer enn kilden gjør.
 - Alltid **modellberegning, aldri måling ved boligen**.
 - **Lden** er et døgnnivå med tillegg for kveld og natt — ikke «hvor høyt det er nå».
 - Strategisk kartlegging dekker bare utvalgte områder og kilder. Ingen treff betyr *ikke* stille.
+- **Fravær av støytreff skal skilles fra manglende dekning og kildefeil. Når området er kartlagt
+  og ligger under laveste kartlagte nivå, vises dette som et eksplisitt resultat.** Fire utfall
+  per kilde (vei, bane), avgjort av kildens egne dekningslag i samme oppslag:
+
+  | Utfall | Hvordan vi vet det | Hva som vises |
+  |---|---|---|
+  | Treff | Punktet ligger i et Lden-polygon | Støykort |
+  | Kartlagt, uten treff | Punktet ligger i et byområde (lag 0) eller dekningspolygon (lag 1), men ikke i noe Lden-polygon | «Ingen kartlagt vei- eller banestøy over 50 dB ved søkepunktet.» + kartnivå-forbeholdet |
+  | Ikke kartlagt | Punktet ligger utenfor begge dekningslagene | «Området er ikke med i den strategiske støykartleggingen av vei og bane.» |
+  | Kildefeil | Et av kallene feilet | Ingen status. Kilden står som «svarte ikke» nederst på siden |
+
+  - I de seks byområdene er alle gater og baner modellert. Utenfor er bare de mest trafikkerte
+    veiene (over 3 mill. passeringer i året) og jernbanestrekningene kartlagt, og setningen sier
+    det: «… fra de mest trafikkerte veiene …».
+  - Bare kilder som faktisk er dekket nevnes. Er bare vei kartlagt, sier vi ingenting om bane.
+  - 50 dB er laveste intervall i kilden (55 dB for jernbane utenfor byområdene). Vi skriver aldri
+    «ingen støy», «stille» eller «lavt».
+  - Finnes det andre støyfunn, står et resultat for den andre kilden nederst i gruppen («Ingen
+    kartlagt banestøy over 50 dB ved søkepunktet.»). «Ikke kartlagt» tas ikke med da.
+  - Statusen gjelder bare strategisk kartlegging. Støyvarselkartet for veg og flystøysonene har
+    ikke dekningslag, så der sier fravær av treff ingenting.
 - **Tallet er et kartnivå, ikke et nivå ved huset** (regler fra 2026-10-04). Strategisk
   kartlegging er beregnet 4 m over bakken, punktet er et adressepunkt og ikke en fasade, og
   intervallgrensene ligger få meter fra hverandre. Teksten er derfor «Modellberegnet kartnivå ved

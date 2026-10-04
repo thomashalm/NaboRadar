@@ -301,6 +301,30 @@ describe("støy som kompakt gruppe", () => {
     expect(c.facts.map((f) => f.distanceLabel)).toEqual(["", "120 m unna"]);
   });
 
+  it("uten støyfunn: én statuslinje i stedet for en tom seksjon", () => {
+    const kartlagt = stoyFakta({ id: "s", subtype: "stoy_strategisk_status", headline: "Ingen kartlagt vei- eller banestøy over 50 dB ved søkepunktet.", caveat: "Modellberegnet kartnivå ved søkepunktet. Kan variere over korte avstander." });
+    const c = stoyCluster([kartlagt], 1000)!;
+    expect(c.facts).toEqual([]);
+    expect(c.emptyNote).toEqual({ text: kartlagt.headline, detail: kartlagt.caveat, nearestLink: false });
+
+    const ikke = stoyFakta({ id: "s", subtype: "stoy_strategisk_status", headline: "Området er ikke med i den strategiske støykartleggingen av vei og bane.", caveat: null });
+    expect(stoyCluster([ikke], 1000)!.emptyNote).toEqual({ text: ikke.headline, detail: null, nearestLink: false });
+  });
+
+  it("med støyfunn: statusen teller ikke som støykilde, og et resultat står nederst", () => {
+    const status = stoyFakta({ id: "s", subtype: "stoy_strategisk_status", headline: "Ingen kartlagt banestøy over 50 dB ved søkepunktet.", caveat: "x" });
+    const c = stoyCluster([stoyFakta({ id: "veg", subtype: "stoy_strategisk_veg" }), status], 1000)!;
+    expect(c.facts.map((f) => f.id)).toEqual(["veg"]);
+    expect(c.label).not.toContain("2 støykilder");
+    expect(c.caveat).toMatch(/^Ingen kartlagt banestøy over 50 dB ved søkepunktet\. /);
+
+    // «Ikke kartlagt» er ikke et resultat, og tas ikke med når det finnes andre funn (f.eks. fly).
+    const ikke = stoyFakta({ id: "s", subtype: "stoy_strategisk_status", headline: "Området er ikke med …", caveat: null });
+    const fly = stoyCluster([stoyFakta({ id: "fly", subtype: "stoysone_fly_t1442" }), ikke], 1000)!;
+    expect(fly.caveat).toBeNull();
+    expect(fly.facts).toHaveLength(1);
+  });
+
   it("bare sonekort: forbeholdet er som før, og Lden forklares ikke", () => {
     const c = stoyCluster(
       [stoyFakta({ id: "fly", subtype: "stoysone_fly_t1442" }), stoyFakta({ id: "sone", subtype: "stoysone_veg_t1442" })],

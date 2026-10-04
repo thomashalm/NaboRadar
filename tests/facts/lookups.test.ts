@@ -92,8 +92,61 @@ describe("strategisk støy", () => {
     );
     expect((await topp.run(CTX))[0]!.attributes).toMatchObject({ niva: "over 75 dB", nedre: 75, ovre: null });
 
-    const nightOnly = new StrategiskStoyLookup(jsonFetch(() => fc([point({ stoyintervall: 65, stoyenhet: "LNIGHT" })])));
-    expect(await nightOnly.run(CTX)).toEqual([]);
+    const nightOnly = new StrategiskStoyLookup(
+      jsonFetch((url) => (/\/[57]\/query/.test(url) ? fc([point({ stoyintervall: 65, stoyenhet: "LNIGHT" })]) : fc([]))),
+    );
+    // Lnight gir ingen støykort. Uten dekning står bare statusen igjen.
+    expect((await nightOnly.run(CTX)).map((h) => h.subtype)).toEqual(["stoy_strategisk_status"]);
+  });
+
+  /**
+   * Fravær av treff er tre forskjellige ting (2026-10-04, Langmyrgrenda 26C): kartlagt uten
+   * treff, ikke kartlagt, og kildefeil. Lag 0 er byområdene, lag 1 dekningen utenfor, lag 5 og 7
+   * selve støynivåene.
+   */
+  describe("dekning og fravær av treff", () => {
+    const lag = (url: string) => Number(/\/(\d)\/query/.exec(url)![1]);
+    const kilde = (url: string) => (url.includes("_veg") ? "veg" : "bane");
+    const status = async (svar: (kilde: string, lag: number) => unknown[]) => {
+      const hits = await new StrategiskStoyLookup(jsonFetch((url) => fc(svar(kilde(url), lag(url))))).run(CTX);
+      return { hits, status: hits.find((h) => h.subtype === "stoy_strategisk_status")?.attributes ?? null };
+    };
+
+    it("byområde uten treff: kartlagt for både vei og bane", async () => {
+      const r = await status((_, l) => (l === 0 ? [point({ agglomerationname: "Oslo" })] : []));
+      expect(r.hits).toHaveLength(1);
+      expect(r.status).toEqual({ vegDekning: "by", baneDekning: "by", vegTreff: false, baneTreff: false });
+    });
+
+    it("byområde med veitreff: statusen gjelder bare bane", async () => {
+      const r = await status((k, l) => (l === 0 ? [point({})] : k === "veg" && l === 5 ? [point({ category: "Lden5054", source: "roadsInAgglomeration" })] : []));
+      expect(r.hits.map((h) => h.subtype)).toEqual(["stoy_strategisk_veg", "stoy_strategisk_status"]);
+      expect(r.status).toMatchObject({ vegTreff: true, baneTreff: false, baneDekning: "by" });
+    });
+
+    it("treff på alt som er dekket: ingen status", async () => {
+      const r = await status((k, l) => (l === 0 ? [point({})] : l === 5 ? [k === "veg" ? point({ category: "Lden5559" }) : point({ stoyintervall: 60, stoyenhet: "LDEN" })] : []));
+      expect(r.status).toBeNull();
+    });
+
+    it("utenfor byene: bare de mest trafikkerte veiene er dekket, og bane nevnes ikke", async () => {
+      const r = await status((k, l) => (k === "veg" && l === 1 ? [point({ objectid: 20 })] : []));
+      expect(r.status).toEqual({ vegDekning: "hoved", baneDekning: "ingen", vegTreff: false, baneTreff: false });
+    });
+
+    it("ingen dekning: sier det, og ikke noe om støy", async () => {
+      const r = await status(() => []);
+      expect(r.status).toEqual({ vegDekning: "ingen", baneDekning: "ingen", vegTreff: false, baneTreff: false });
+    });
+
+    it("kildefeil blir aldri til «ingen støy»: feiler ett kall, kaster hele oppslaget", async () => {
+      for (const feilLag of [0, 1, 5, 7]) {
+        const lookup = new StrategiskStoyLookup(
+          jsonFetch((url) => (lag(url) === feilLag && kilde(url) === "bane" ? { error: { code: 500, message: "timeout" } } : fc([point({})]))),
+        );
+        await expect(lookup.run(CTX)).rejects.toThrow();
+      }
+    });
   });
 });
 

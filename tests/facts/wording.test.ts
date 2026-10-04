@@ -213,6 +213,47 @@ describe("støy", () => {
     });
   });
 
+  describe("status uten treff", () => {
+    const tekst = (a: Record<string, string | boolean>) => describe_("stoy_strategisk_status", a, true);
+
+    it("kartlagt i byområde: nivået og «kartlagt» står i setningen", () => {
+      const s = tekst({ vegDekning: "by", baneDekning: "by", vegTreff: false, baneTreff: false })!;
+      expect(s.headline).toBe("Ingen kartlagt vei- eller banestøy over 50 dB ved søkepunktet.");
+      expect(s.caveat).toBe("Modellberegnet kartnivå ved søkepunktet. Kan variere over korte avstander.");
+    });
+
+    it("nevner bare kilden som er dekket og uten treff", () => {
+      expect(tekst({ vegDekning: "by", baneDekning: "by", vegTreff: true, baneTreff: false })!.headline).toBe("Ingen kartlagt banestøy over 50 dB ved søkepunktet.");
+      expect(tekst({ vegDekning: "by", baneDekning: "by", vegTreff: false, baneTreff: true })!.headline).toBe("Ingen kartlagt veitrafikkstøy over 50 dB ved søkepunktet.");
+      expect(tekst({ vegDekning: "hoved", baneDekning: "ingen", vegTreff: false, baneTreff: false })!.headline).toBe(
+        "Ingen kartlagt støy over 50 dB fra de mest trafikkerte veiene ved søkepunktet.",
+      );
+      expect(tekst({ vegDekning: "ingen", baneDekning: "hoved", vegTreff: false, baneTreff: false })!.headline).toBe(
+        "Ingen kartlagt støy over 55 dB fra de mest trafikkerte jernbanestrekningene ved søkepunktet.",
+      );
+    });
+
+    it("ikke kartlagt er ikke et funn om støy", () => {
+      const s = tekst({ vegDekning: "ingen", baneDekning: "ingen", vegTreff: false, baneTreff: false })!;
+      expect(s.headline).toBe("Området er ikke med i den strategiske støykartleggingen av vei og bane.");
+      expect(s.caveat).toBeNull();
+      expect(s.headline).not.toMatch(/ingen kartlagt|over \d+ dB/i);
+    });
+
+    it("sier aldri «ingen støy», «stille» eller «lavt»", () => {
+      const alle = [
+        { vegDekning: "by", baneDekning: "by", vegTreff: false, baneTreff: false },
+        { vegDekning: "hoved", baneDekning: "hoved", vegTreff: false, baneTreff: false },
+        { vegDekning: "ingen", baneDekning: "ingen", vegTreff: false, baneTreff: false },
+      ].map((a) => tekst(a)!.headline);
+      for (const s of alle) expect(s).not.toMatch(/ingen støy|stille|lavt|rolig/i);
+    });
+
+    it("har ingenting å si når alt som er dekket har treff", () => {
+      expect(tekst({ vegDekning: "by", baneDekning: "by", vegTreff: true, baneTreff: true })).toBeNull();
+    });
+  });
+
   it("uten dB-verdi vises ingenting", () => {
     expect(describe_("stoy_strategisk_veg", {}, true)).toBeNull();
   });

@@ -253,6 +253,7 @@ function FactSection({
             <EmptyNote
               key={cluster.id}
               text={cluster.emptyNote.text}
+              detail={cluster.emptyNote.detail}
               href={cluster.emptyNote.nearestLink ? nearestShelterHref : undefined}
             />
           ) : (
@@ -298,10 +299,11 @@ const ANKERSEKSJONER: ReadonlySet<string> = new Set(["tilfluktsrom"]);
  * Ikke en utvider — det er ingenting å åpne. Lenken går til samme søk i spesialverktøyets
  * visning, der de nærmeste rommene står, merket som utenfor radius.
  */
-function EmptyNote({ text, href }: { text: string; href?: string }) {
+function EmptyNote({ text, detail, href }: { text: string; detail?: string | null; href?: string }) {
   return (
     <div className="rounded-2xl border border-line bg-surface px-5 py-3.5 text-[15px]">
       <p className="text-ink">{text}</p>
+      {detail && <p className="mt-0.5 text-[13px] leading-relaxed text-muted">{detail}</p>}
       {href && (
         <Link href={href} className="mt-1 inline-flex h-9 items-center font-medium text-accent hover:underline">
           {TILFLUKTSROM_NAERMESTE_LENKE} →

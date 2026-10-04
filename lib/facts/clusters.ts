@@ -212,9 +212,33 @@ export function grunnforholdCluster(facts: AreaFact[], radiusM: number): FactClu
 /** Støytypene som oppgir et Lden-intervall, til forskjell fra de rene sonekortene. */
 const LDEN_SUBTYPER: ReadonlySet<string> = new Set(["stoy_strategisk_veg", "stoy_strategisk_bane"]);
 
+/** Statusen fra strategisk kartlegging: «ingen kartlagt støy over 50 dB» eller «ikke kartlagt». */
+const STOY_STATUS = "stoy_strategisk_status";
+
 export function stoyCluster(facts: AreaFact[], radiusM: number): FactCluster | null {
-  const sortert = [...facts].sort(byRelevance);
-  if (sortert.length === 0) return null;
+  const status = facts.find((fact) => fact.subtype === STOY_STATUS) ?? null;
+  const sortert = facts.filter((fact) => fact.subtype !== STOY_STATUS).sort(byRelevance);
+
+  // Ingen støyfunn, men kilden har svart: én statuslinje, ikke en tom seksjon. Er området
+  // kartlagt, står kartnivå-forbeholdet under; er det ikke kartlagt, står bare det.
+  if (sortert.length === 0) {
+    if (!status) return null;
+    return {
+      sectionId: "stoy",
+      id: "stoy",
+      label: status.headline,
+      summary: status.headline,
+      facts: [],
+      lists: [],
+      overview: null,
+      caveat: null,
+      sourceName: status.sourceName,
+      emptyNote: { text: status.headline, detail: status.caveat, nearestLink: false },
+    };
+  }
+  // Med andre støyfunn: et resultat («ingen kartlagt veitrafikkstøy over 50 dB») er verdt å ta
+  // med nederst. «Ikke kartlagt» er det ikke — da sier kortene det som finnes.
+  const resultat = status?.caveat ? status.headline : null;
 
   const kilder = [...new Set(sortert.map((fact) => fact.sourceName))];
   const forste = sortert[0]!;
@@ -241,7 +265,10 @@ export function stoyCluster(facts: AreaFact[], radiusM: number): FactCluster | n
     facts: sortert.map((fact) => (fact.contains ? { ...fact, distanceLabel: "" } : fact)),
     lists: [],
     overview: null,
-    caveat: harLden ? (flere ? LDEN_FORKLARING : `${STOY_KARTNIVA} ${LDEN_FORKLARING}`) : null,
+    caveat:
+      [resultat, harLden ? (flere ? LDEN_FORKLARING : `${STOY_KARTNIVA} ${LDEN_FORKLARING}`) : null]
+        .filter((del): del is string => del !== null)
+        .join(" ") || null,
     sourceName: kilder.join(" · "),
   };
 }
