@@ -4,6 +4,7 @@ import { forurensetGrunnDataset } from "./forurenset-grunn";
 import { kraftnettDataset } from "./kraftnett";
 import { kvikkleireDataset } from "./kvikkleire";
 import { kantarellfunnDataset, multefunnDataset, steinsoppfunnDataset, tyttebaerfunnDataset } from "./multefunn";
+import { multeWebsporDataset } from "./multe-webspor";
 import { myrDataset } from "./myr";
 import { plansakerDataset } from "./plansaker";
 import type { ExploreDataset } from "./types";
@@ -28,6 +29,8 @@ export const EXPLORE_DATASETS: readonly ExploreDataset[] = [
   datasenterDataset,
   // Interne researchlag, bare Oslo og Marka. Se lib/multe og docs/research/multer-oslo.md.
   multefunnDataset,
+  // Anekdoter fra nettet, ikke artsdata: eget datasett. Se docs/research/multer-web-discovery.md.
+  multeWebsporDataset,
   myrDataset,
   tyttebaerfunnDataset,
   kantarellfunnDataset,

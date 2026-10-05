@@ -191,6 +191,7 @@ describe("nye datasett i søket", () => {
       datasenter: { openMap: "nei", omrade: "egen beslutning" },
       // Interne researchlag: aldri offentlige.
       multefunn: { openMap: "nei", omrade: "nei" },
+      "multe-webspor": { openMap: "nei", omrade: "nei" },
       myr: { openMap: "nei", omrade: "nei" },
       tyttebaerfunn: { openMap: "nei", omrade: "nei" },
       kantarellfunn: { openMap: "nei", omrade: "nei" },
@@ -206,6 +207,7 @@ describe("nye datasett i søket", () => {
       "forurenset-grunn": true,
       datasenter: false,
       multefunn: false,
+      "multe-webspor": false,
       myr: true,
       tyttebaerfunn: false,
       kantarellfunn: false,
@@ -442,7 +444,7 @@ describe("multefunn og myr: interne researchlag", () => {
   });
 
   it("begge sier hvor de dekker", () => {
-    for (const id of ["multefunn", "myr", "tyttebaerfunn", "kantarellfunn", "steinsoppfunn"]) {
+    for (const id of ["multefunn", "multe-webspor", "myr", "tyttebaerfunn", "kantarellfunn", "steinsoppfunn"]) {
       const d = EXPLORE_DATASETS.find((x) => x.id === id)!;
       expect(d.coverage).toEqual({ label: "Oslo og Marka", box: { minLng: 10.3, minLat: 59.78, maxLng: 11.1, maxLat: 60.3 } });
       expect(d.description).toContain("Dekker bare Oslo og Marka");

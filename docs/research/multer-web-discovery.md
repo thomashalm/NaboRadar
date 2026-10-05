@@ -8,6 +8,14 @@
 > **Runde 2 samme dag:** dypere søk ga 19 nye omtaler og 14 nye steder. Se
 > [Deep discovery – runde 2](#deep-discovery--runde-2) nederst, med oppdatert shortlist. Runde 1
 > står som den ble skrevet, med én rettet dato (spor 5).
+> **Bygget samme dag:** adminlaget «Multe: web-spor» med 16 spor. Se
+> [Adminlaget Multe: web-spor](#adminlaget-multe-web-spor).
+> **Rettelser funnet da laget ble bygget** (teksten under er ikke skrevet om):
+> - **Langbru (spor 2)** er hyttetunet ved Gråbergtjern i Ringerike, 350 m sør for Atjern, ikke
+>   Langebru i Hole. Samme tur og dag som spor 1 (22. juli 2020). Tallene «1 / 1» og «147 dekar»
+>   gjelder feil sted, og Langbru er ikke en egen kandidat: den hører til Atjern.
+> - **«Kleiva» 2024 (spor 4)** er ikke et funn. Kilden sier at årets multer var sikret før
+>   blåbærturen, ikke at de sto ved Kleiva.
 
 ## Hva dette er, og ikke er
 Sporene her er **offentlige anekdoter**: noen skrev at de fant multer et sted et år. Det er ikke
@@ -343,7 +351,7 @@ Alle daterte observasjoner fra begge runder, der kilden sier noe om bærene.
 | 2020 | Tvetjerna | 610 | 18. juli | Umodne |
 | 2020 | Atjern | 540 | 22. juli | Litt modne |
 | 2020 | Retthelltjernet–Bureheim | 425–441 | 24. juli | Litt bær, lite |
-| 2020 | Langbru | 293 | juli | Modne |
+| 2020 | Langbru, ved Atjern | 540 | 22. juli | Modne |
 | 2021 | Kleivstua | 383 | 16. juli | Mye modent, «rekordtidlig» |
 | 2021 | Storflåtan | 451 | 28. juli | Modne |
 | 2022 | Haklokroktjern | 443 | 5. august | «Masse»; modenhet ikke oppgitt |
@@ -446,6 +454,66 @@ myr.
 
 Forbeholdet fra runde 1 står: et spor sier at noen fant multer et sted ett år. Det gjør ikke
 stedet til et godt multested, og 2026 var etter kildene et uvanlig godt år.
+
+## Adminlaget Multe: web-spor
+
+> Bygget 2026-10-05. Bare admin, i `/admin/research/utforsk`. Søk: `multe web-spor`.
+
+**Hva som er med.** 16 spor i 9 trakter: de sporene fra begge rundene som har et navngitt sted
+innenfor dekningsområdet. Ikke med: omtaler uten sted (spor 5, 9, 11, 12, 25, 35), rene
+habitattips (Heikampen, Møllbakk), brede stedstips (spor 13–15), Stryken (historie om bær
+generelt), «Kleiva» 2024 (ikke et funn), Store Klattertjernet (for løst plassert) og
+Marifjell–Tøletjernet (nord for dekningsområdet).
+
+**Hvor dataene ligger.** I en fil i repoet: `lib/multe/web-spor.ts`. Ikke i databasen. Det er 16
+rader som bare endres når noen gjør ny research; en tabell ville krevd migrasjon, lese-RPC,
+tilgangsregler og en importvei for det som i praksis er et notat. Filen gir historikk og
+gjennomgang gjennom Git. Denne researchfilen er sannhetskilden; filen i koden er utvalget.
+Adapteren er `lib/admin/explore/multe-webspor.ts`.
+
+**Georeferering.** Ingen spor er et punkt. Hvert spor er en sirkel rundt stedsnavnets punkt i
+Kartverkets register: «omtrentlig område» (radius 500–1 000 m, et navngitt tjern eller en myr)
+eller «bredt område» (1 200–1 500 m, to navn eller en ås). Panelet sier «Omtrentlig område –
+ikke eksakt funnsted» og oppgir radius. Sirkelen er ikke en avgrensning av hvor bærene sto.
+
+**Skillet mot artsfunn.** Eget datasett, egen farge (lilla), stiplet sirkel i stedet for fylt
+punkt, og en åpen ring når kartet er zoomet ut. Typen heter «Rapportert multefunn», «Stedstips
+om multer» eller «Historisk omtale av multer» — aldri «Registrert funn». Hvert panel har den
+faste merknaden «Anekdotisk nettkilde – ikke artsregistrering.» Det finnes ingen «Finn overlapp»
+mot myr eller funn: sirklene er omtrentlige, og en overlappsanalyse ville late som noe annet.
+
+**Flere omtaler på samme sted** er ett spor med hver omtale listet for seg, med dato, stadium,
+mengde og lenke. Uavhengige kilder er satt for hånd og telt konservativt: samme blogg over flere
+år er én kilde. Bare Klekkenputten–Tvetjerna har to (tre omtaler; bildet og foruminnlegget fra
+2026 kan være samme person). Der trakten har flere kilder enn stedet, står det som en merknad.
+Datoene vises som enkeltobservasjoner. Ingen «beste dato».
+
+**Mot våre data.** Registrerte multefunn innen 1 km, avstand til nærmeste og myr innen 1 km
+(areal innenfor sirkelen) er regnet fra sirkelens sentrum 2026-10-05 og ligger statisk i filen.
+De følger ikke med når funn- og myrlagene synkes på nytt. Tallene avviker litt fra tabellene
+over der sentrum er flyttet (Klekkenputten–Tvetjerna: 252 dekar mellom de to navnene).
+
+**Shortlist.** `anbefaltRang` og `anbefaltNotat` følger tabellen «Oppdatert shortlist». Panelet
+viser «Research-kandidat #1». Ingen score. Kandidat 3 og 4 består av flere spor.
+
+**Modenhet** er bare satt der kilden sier det. «Fortsatt multer» 21. august og «masse multer»
+5. august står som «ikke oppgitt», ikke som «modne».
+
+**Personvern.** Ingen navn, brukernavn, profiler eller kontaktopplysninger. Kildene står med
+nettstedets navn og lenke til siden. Steder skribenter holder hemmelige, er ikke med.
+
+**Admin-policy.** `policy: { openMap: "nei", omrade: "nei" }`. Siden krever admin, og datasettet
+spør i tillegg databasen (`is_admin()`) før det gir fra seg noe, siden det ikke finnes en
+database-RPC som kan stoppe en ikke-admin. Dataene finnes ikke i databasen og kan derfor ikke
+komme ut gjennom `features_near` eller andre offentlige funksjoner. Testet i
+`tests/admin/multe-webspor.test.ts`.
+
+**Kjente svakheter.**
+- To lenker går ikke til selve omtalen: Skiforeningens bildearkiv har ingen varig adresse per
+  bilde, og blogginnlegget om Bislingflaka er lenket via bloggens søk.
+- Tallene mot våre data er statiske.
+- Sirklene i Hole overlapper (Kleivstua og Retthelltjernet–Bureheim).
+- Radius er satt på skjønn ut fra hva kilden navngir.
 
 ## Kilder
 - Aftenposten, «Mye multer i Marka» (21. juli 2006): https://www.aftenposten.no/oslo/i/93akr/mye-multer-i-marka

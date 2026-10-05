@@ -421,7 +421,7 @@ finnes ingen anonym skrivevei.
 |---|---|
 | `/admin/adresse` | Hva finnes rundt denne adressen? Offentlig resultat pluss intern research |
 | `/admin/research` | Hva vet vi om dette funnet? Oversikt, søk, redigering, kilder og kildestatus |
-| `/admin/research/utforsk` | Hva finnes i dette datasettet, her? Kart først: plansaker, kvikkleire, kraftnett, forurenset grunn, datasentre, og internt multefunn, tyttebærfunn, kantarellfunn, steinsoppfunn og myr. Høyst to lag samtidig |
+| `/admin/research/utforsk` | Hva finnes i dette datasettet, her? Kart først: plansaker, kvikkleire, kraftnett, forurenset grunn, datasentre, og internt multefunn, multe-web-spor, tyttebærfunn, kantarellfunn, steinsoppfunn og myr. Høyst to lag samtidig |
 | `/admin/kart` | Hvor i landet finnes denne typen funn? Nasjonal geografisk utforskning |
 
 ### `/admin/kart` — research-kartet
@@ -2789,6 +2789,7 @@ kjenner, utelates.
 | Forurenset grunn | `forurenset grunn`, `forurensning`, `grunnforurensning`, `forurenset`, `forurensede lokaliteter` | `area_features`, `mdir-forurenset-grunn` (15 974), via `explore_area_features` | flater | krever område |
 | Datasenter | `datasenter`, `datasentre`, `datacenter`, `data center` m.fl. | research-funn med underkategori «Datasenter», via `research_map` | punkter | hele landet |
 | Multe: registrerte funn | `multer`, `multe`, `multefunn`, `registrerte multefunn`, `multebær`, `molte(r)` | `area_features`, `gbif-multefunn-oslomarka` (508 punkter), via `explore_area_features` | punkter | hele dekningsområdet (Oslo og Marka) |
+| Multe: web-spor | `multe web-spor`, `multe web`, `multe webspor`, `multespor`, `web-spor`, `nettspor` | fil i repoet: `lib/multe/web-spor.ts` (16 spor). Ikke i databasen | stiplede sirkler (omtrentlige områder) | hele dekningsområdet (Oslo og Marka) |
 | Myr | `myr`, `myrer`, `myrflate(r)`, `myrområder` | `area_features`, `kartverket-n50-myr-oslomarka` (7 354 flater), via `explore_mires` | flater | krever område |
 | Tyttebær: registrerte funn | `tyttebær`, `tyttebaer`, `tyttebærfunn`, `tyttebær funn` | `area_features`, `gbif-tyttebaerfunn-oslomarka` (1 559 punkter), via `explore_area_features` | punkter | hele dekningsområdet (Oslo og Marka) |
 | Kantarell: registrerte funn | `kantarell`, `kantareller`, `kantarellfunn`, `kantarell funn` | `area_features`, `gbif-kantarellfunn-oslomarka` (457 punkter), via `explore_area_features` | punkter | hele dekningsområdet (Oslo og Marka) |
@@ -2909,8 +2910,8 @@ egne kategorier (påvirkningsgrad, oppfølging, tilstandsklasse, arealbruk) med 
 som resten av løsningen, og gjør dem ikke sterkere. En registrering gjelder lokaliteten slik den
 er avgrenset, ikke hele eiendommen. Panelet sier at datasettet er internt.
 
-**Multefunn, tyttebærfunn, kantarellfunn, steinsoppfunn og myr (interne researchlag, bare Oslo og
-Marka).** Fem datasett for personlig research: hvor er multe, tyttebær, kantarell og steinsopp
+**Multefunn, multe-web-spor, tyttebærfunn, kantarellfunn, steinsoppfunn og myr (interne
+researchlag, bare Oslo og Marka).** Seks datasett for personlig research: hvor er multe, tyttebær, kantarell og steinsopp
 registrert, og hvor ligger myrene. **Ingen score og ingen sannsynlighet**
 — researchen ([multer-oslo.md](research/multer-oslo.md)) viste at en habitatmodell i praksis ble
 et myrkart, så vi lagrer dataene og lar kartet vise dem. Aldri offentlig: kategorien
@@ -2921,6 +2922,16 @@ et myrkart, så vi lagrer dataene og lar kartet vise dem. Aldri offentlig: kateg
   Observatør og stedsbeskrivelse lagres ikke. Panelet viser dato, år, presisjon, datasett,
   lisens og lenke til GBIF, og sier: «Registrert observasjon – sier ikke noe sikkert om forekomst
   i dag.» Et funn som er ti år eller eldre, får i tillegg at det sier lite om hva som står der nå.
+- *Multe: web-spor* — steder der offentlige nettkilder (turblogger, forum, Skiforeningen) omtaler
+  multer. **Anekdoter, ikke artsdata**, og derfor et eget datasett: lilla, stiplet sirkel rundt
+  et navngitt sted (åpen ring når kartet er zoomet ut), aldri et punkt. Panelet har den faste
+  merknaden «Anekdotisk nettkilde – ikke artsregistrering.», sier «Omtrentlig område – ikke
+  eksakt funnsted», lister hver omtale med dato og lenke, teller uavhengige kilder konservativt
+  og viser registrerte funn og myr innen 1 km (statiske tall fra da sporet ble lagt inn).
+  Dataene er en fil, `lib/multe/web-spor.ts`, ikke en tabell: 16 rader som bare endres ved ny
+  research. Fordi databasen da ikke kan stoppe en ikke-admin, kaller datasettet `is_admin()`
+  selv. Ingen personnavn eller brukernavn. Ingen «Finn overlapp». Utvalg, georeferering og
+  shortlist: [multer-web-discovery.md](research/multer-web-discovery.md).
 - *Myr* — flater fra Kartverkets N50 (CC BY 4.0), 1:50 000. Små myrer mangler. FKB-AR5 er ikke
   åpne data og brukes ikke. Panelet viser areal og kommune, og en egen blokk «Registrerte
   multefunn i nærheten»: antall funn innen 500 m, og avstanden til det nærmeste hvis det ligger

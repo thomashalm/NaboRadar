@@ -425,6 +425,7 @@ const LAGFARGE: Record<string, keyof typeof EXPLORE_COLOR> = {
   "forurenset-grunn": "forurenset_grunn",
   datasenter: "datasenter",
   multefunn: "multefunn",
+  "multe-webspor": "multe_webspor",
   myr: "myr",
   tyttebaerfunn: "tyttebaerfunn",
   kantarellfunn: "kantarellfunn",

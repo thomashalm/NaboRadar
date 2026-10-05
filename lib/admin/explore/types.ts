@@ -19,6 +19,7 @@ export type ExploreStyle =
   | "transformatorstasjon"
   | "forurenset_grunn"
   | "multefunn"
+  | "multe_webspor"
   | "myr"
   | "tyttebaerfunn"
   | "kantarellfunn"
