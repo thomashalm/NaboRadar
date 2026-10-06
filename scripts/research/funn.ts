@@ -6839,8 +6839,33 @@ export const FUNN: Funn[] = [
       "Sognekraft var medeier, ville ifølge Sogn Avis 27.01.2021 bygge datasenter rett ved " +
       "Bluefjords' anlegg. KB Sogn Datasenter AS (925885037, stiftet 25.09.2020) har samme " +
       "adresse i Bergen som Kitebrook AS. Koblingen bygger på felles adresse og sted; " +
-      "eierforholdet er ikke verifisert. Ført som alias-notat, ikke som eget anlegg.",
+      "eierforholdet er ikke verifisert. Ført som alias-notat, ikke som eget anlegg." +
+      "Runde 17 (2026-10-06): nevnt i BT 06.10.2026 som «Kitebrook – Luster». Statnett 06.10.2026: " +
+      "100 MW reservert til Kitebrook Infrastructure AS ved Leirdøla TRA (23/01051, reservert " +
+      "28.05.2026), uendret. Kitebrooks pressemelding 28.04.2026 omtalte kraftavtalen som " +
+      "«underway»; reservasjonen kom en måned senere.",
     kilder: [
+      {
+        source_name: "Statnett: reservasjoner, liste over saker (lest 06.10.2026)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/#reservasjoner",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-10-06",
+        primary_source: true,
+        excerpt_or_summary:
+          "Leirdøla TRA: Kitebrook Infrastructure AS 100 MW reservert 28.05.2026 (23/01051).",
+      },
+      {
+        source_name: "Bergens Tidende: «20 datasentre planlagt bare i Vestland» (kun tittel og ingress lest)",
+        source_url: "https://www.bt.no/politikk/i/mK6qW0/datasenter-planlagt-rundt-i-vestland-som-i-dale-gulen-matre-luster-og-samnanger",
+        publisher: "Bergens Tidende",
+        source_type: "news",
+        source_date: "2026-10-06",
+        excerpt_or_summary:
+          "Navngir datasenterprosjekter i Dale, Gulen, Matre, Luster og Samnanger og oppgir at " +
+          "flere står i kø for strøm. Bak betalingsmur; brukt som lead, ikke som kilde for " +
+          "enkeltfakta.",
+      },
       {
         source_name: "DataCenterMap: Kitebrook Leirdøla, Gaupne",
         source_url: "https://www.datacentermap.com/norway/gaupne/",
@@ -6894,9 +6919,36 @@ export const FUNN: Funn[] = [
       "Runde 16 (2026-10-02): Reguleringsplanen for Gaupnegrandane var på tredje gangs offentlige " +
       "ettersyn i september 2026 (datasenter-delen), og Luster kommune har kalt inn til " +
       "folkemøte. Planen er ikke sluttbehandlet. Samme utvikler (Sognekraft/Sogn Utvikling) står " +
-      "bak «Vangsnes Datapark» i Vik, som er ført som eget anlegg.",
+      "bak «Vangsnes Datapark» i Vik, som er ført som eget anlegg." +
+      "Runde 17 (2026-10-06): BT 06.10.2026 navngir «Gaupne utvikling – Luster»; det er dette " +
+      "anlegget. Statnett 06.10.2026: 120 MW reservert til Gaupne Utvikling AS ved Leirdøla TRA " +
+      "(24/01783), fortsatt uten reservasjonsdato. Luster kommunestyre har utsatt reguleringssaken, " +
+      "og det er varslet folkemøte etter krav fra bygdelaget (Porten og Sogn Avis, september 2026; " +
+      "bare tittel og ingress er lest).",
     public_candidate: false,
     kilder: [
+      {
+        source_name: "Statnett: reservasjoner, liste over saker (lest 06.10.2026)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/#reservasjoner",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-10-06",
+        primary_source: true,
+        excerpt_or_summary:
+          "Leirdøla TRA: Gaupne Utvikling AS 120 MW reservert (24/01783). Feltet for " +
+          "reservasjonsdato er tomt.",
+      },
+      {
+        source_name: "Bergens Tidende: «20 datasentre planlagt bare i Vestland» (kun tittel og ingress lest)",
+        source_url: "https://www.bt.no/politikk/i/mK6qW0/datasenter-planlagt-rundt-i-vestland-som-i-dale-gulen-matre-luster-og-samnanger",
+        publisher: "Bergens Tidende",
+        source_type: "news",
+        source_date: "2026-10-06",
+        excerpt_or_summary:
+          "Navngir datasenterprosjekter i Dale, Gulen, Matre, Luster og Samnanger og oppgir at " +
+          "flere står i kø for strøm. Bak betalingsmur; brukt som lead, ikke som kilde for " +
+          "enkeltfakta.",
+      },
       {
         source_name: "Statnett: liste over reservasjoner (forbruk)",
         source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/#reservasjoner",
@@ -7019,8 +7071,27 @@ export const FUNN: Funn[] = [
       "utbygging på samme campus, ikke et nytt anlegg. «Datasenter Reiarmoen» er et alias: " +
       "Bluesite AS (samme ledelse som Bluefjords) søkte i 2020 NVE om 22 kV fordelingsanlegg «på " +
       "Gaupne, i Reiarmoen», og NVE avviste søknaden 30.06.2026 på grunn av manglende fremdrift " +
-      "(bare journaltittel lest).",
+      "(bare journaltittel lest)." +
+      "Runde 17 (2026-10-06): BT 06.10.2026 navngir «Bluefjords – Årdal». Det gjelder kjøpet av " +
+      "Årdal Næringssenter (den tidligere Dooria-fabrikken på Årdalstangen), meldt av NRK " +
+      "14.08.2026 med Sogn Avis som kilde: nytt KI-datasenter, om lag 1 mrd. kr og rundt 50 " +
+      "arbeidsplasser. Ingen kilde oppgir effekt, og Bluefjords står ikke i Statnetts kø- eller " +
+      "reservasjonsliste. Adresse, gnr/bnr, plansak og kjøpende selskap er ikke funnet; Årdal " +
+      "Næringssenter AS (929735072) har datainfrastruktur som formål, men eierskapet er ikke " +
+      "dokumentert. Fortsatt et lead uten stedfesting og bare dokumentert gjennom presse; ikke " +
+      "opprettet som eget anlegg.",
     kilder: [
+      {
+        source_name: "NRK Vestland: «Milliardinvestering i Sogn skal gi 50 arbeidsplassar»",
+        source_url: "https://www.nrk.no/vestland/milliardinvestering-i-sogn-skal-gi-50-arbeidsplassar--1.17989594",
+        publisher: "NRK",
+        source_type: "news",
+        source_date: "2026-08-14",
+        excerpt_or_summary:
+          "Bluefjords kjøper Årdal Næringssenter og vil etablere et KI-datasenter; om lag 1 mrd. " +
+          "kr og rundt 50 arbeidsplasser. NRK viser til Sogn Avis. Ingen effekt eller tidsplan er " +
+          "oppgitt.",
+      },
       {
         source_name: "DataCenterMap: Bluefjords og Compute Nordic, Gaupne",
         source_url: "https://www.datacentermap.com/norway/gaupne/",
@@ -9861,9 +9932,53 @@ export const FUNN: Funn[] = [
       "Fensfjorden ved sjøkjøling. Historikk: Regn Infrastructure AS fikk i august 2018 " +
       "anleggskonsesjon fra NVE for nettanlegg til et datasenter på 5–10 MW i Skipavika " +
       "Næringspark, med utsatt frist i november 2021. Det ble ikke bygget, og det er ikke " +
-      "dokumentert at det gjaldt samme tomt.",
+      "dokumentert at det gjaldt samme tomt." +
+      "Runde 17 (2026-10-06): BT 06.10.2026 navngir «Regn Data Center – Gulen». Regn Datacenters AS " +
+      "er det tidligere navnet på Kitebrook AS (917810214, navneendring 30.10.2024). Regn " +
+      "Infrastructure AS søkte NVE rundt 2018 om nettanlegg for et datasenter i Skipavika " +
+      "Næringspark med forventet last 5–10 MW, trinnvis opp til 20 MW (NVE-sak 201835154); vedtak " +
+      "og senere aktivitet er ikke funnet, og Kitebrook nevner ikke Gulen i 2026. Det er ikke " +
+      "dokumentert at BT mener dette anlegget og ikke Regns gamle prosjekt i samme næringspark. " +
+      "Statnetts kø 06.10.2026: Skipavika Næringspark AS 45 MW (25/03004, moden bestilling " +
+      "09.01.2026) og BW Velora Skipavika Digital Sikkerhet AS 50 MW (25/03021, 13.02.2026), begge " +
+      "ved Lindås TRA. Det er køplasser, til sammen 95 MW, og ingenting er reservert.",
     public_candidate: false,
     kilder: [
+      {
+        source_name: "Statnett: kapasitetskø, liste over saker (lest 06.10.2026)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/#kapasitetsko",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-10-06",
+        primary_source: true,
+        excerpt_or_summary:
+          "Lindås TRA: Skipavika Næringspark AS 45 MW (25/03004, moden bestilling 09.01.2026) og " +
+          "BW Velora Skipavika Digital Sikkerhet AS 50 MW (25/03021, 13.02.2026). Begge i kø, " +
+          "ingen reservert.",
+      },
+      {
+        source_name: "NVE-sak 201835154: søknad om nettanlegg for datasenter i Skipavika Næringspark (Regn Infrastructure AS)",
+        source_url: "https://webfileservice.nve.no/API/PublishedFiles/Download/201835154/2416318",
+        publisher: "NVE",
+        source_type: "document",
+        primary_source: true,
+        excerpt_or_summary:
+          "Regn Infrastructure AS søkte rundt 2018 om elektrisk anlegg for et datasenter eid av " +
+          "Regn Datacenters AS, med forventet last 5–10 MW og trinn opp til 20 MW. BKK Nett oppga " +
+          "5 MW kapasitet i nettet til næringsparken. Historisk prosjekt fra en annen aktør enn " +
+          "dagens.",
+      },
+      {
+        source_name: "Bergens Tidende: «20 datasentre planlagt bare i Vestland» (kun tittel og ingress lest)",
+        source_url: "https://www.bt.no/politikk/i/mK6qW0/datasenter-planlagt-rundt-i-vestland-som-i-dale-gulen-matre-luster-og-samnanger",
+        publisher: "Bergens Tidende",
+        source_type: "news",
+        source_date: "2026-10-06",
+        excerpt_or_summary:
+          "Navngir datasenterprosjekter i Dale, Gulen, Matre, Luster og Samnanger og oppgir at " +
+          "flere står i kø for strøm. Bak betalingsmur; brukt som lead, ikke som kilde for " +
+          "enkeltfakta.",
+      },
       {
         source_name: "Høyring – Reguleringsendring – Skipavika Næringspark, plan-ID 4635-2023002",
         source_url: "https://gulen.kommune.no/artikkel/hoeyring---reguleringsendring---skipavika-naeringspark-plan-id-4635-2023002",
@@ -10889,8 +11004,36 @@ export const FUNN: Funn[] = [
       "Koordinaten er omtrentlig, ca. 600 m nord for Samnanger transformatorstasjon; tomta er ikke " +
       "stedfestet. 100 MW i kø er ikke ført som sikret kraft. Runde 4: Krefter AS (927511983, nå " +
       "Ugna Properties AS) hadde et eget planinitiativ nord for Samnanger transformatorstasjon i " +
-      "2022, som ble frarådet. Det er et annet selskap og ingen del av dette prosjektet.",
+      "2022, som ble frarådet. Det er et annet selskap og ingen del av dette prosjektet." +
+      "Runde 17 (2026-10-06): BT 06.10.2026 navngir «Regn / Kitebrook – Børdalen». Det er én aktør: " +
+      "KB DC Børdalen AS (922363307) het Regn DC Børdalen AS til 30.10.2024. Detaljreguleringen " +
+      "«Børdalen næringsområde» ble vedtatt enstemmig i Samnanger kommunestyre i oktober 2019 " +
+      "(NRK); plan-ID er ikke funnet. Statnett 06.10.2026: 100 MW i kø ved Samnanger TRA til «Regn " +
+      "/ Kitebrook» (25/02232, moden bestilling 18.11.2024), ingenting reservert. Kitebrook skriver " +
+      "selv «100 MW grid reservation in progress».",
     kilder: [
+      {
+        source_name: "Statnett: kapasitetskø, liste over saker (lest 06.10.2026)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/#kapasitetsko",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-10-06",
+        primary_source: true,
+        excerpt_or_summary:
+          "Samnanger TRA: «Regn / Kitebrook» 100 MW i kø (25/02232, moden bestilling 18.11.2024). " +
+          "Ingen reservasjon.",
+      },
+      {
+        source_name: "Bergens Tidende: «20 datasentre planlagt bare i Vestland» (kun tittel og ingress lest)",
+        source_url: "https://www.bt.no/politikk/i/mK6qW0/datasenter-planlagt-rundt-i-vestland-som-i-dale-gulen-matre-luster-og-samnanger",
+        publisher: "Bergens Tidende",
+        source_type: "news",
+        source_date: "2026-10-06",
+        excerpt_or_summary:
+          "Navngir datasenterprosjekter i Dale, Gulen, Matre, Luster og Samnanger og oppgir at " +
+          "flere står i kø for strøm. Bak betalingsmur; brukt som lead, ikke som kilde for " +
+          "enkeltfakta.",
+      },
       {
         source_name: "DataCenterMap: Kitebrook Børdalen",
         source_url: "https://www.datacentermap.com/norway/bergen/",
@@ -10941,9 +11084,58 @@ export const FUNN: Funn[] = [
       "(ca. 161 daa); bygg og tomt er ikke stedfestet nærmere. Statnett-reservasjonen på 30 MW " +
       "(21/00206) står på «Regn / Kitebrook», ikke på prosjektselskapet, og er derfor ikke ført " +
       "som sikret kraft. Kitebrook er utvikler; operatøren er ikke dokumentert. Eget anlegg, ikke " +
-      "Kitebrook Børdalen eller Leirdøla.",
+      "Kitebrook Børdalen eller Leirdøla." +
+      "Runde 17 (2026-10-06): nevnt i BT 06.10.2026. «Regn» er Kitebrooks tidligere navn: Kitebrook " +
+      "AS (917810214) het Regn Datacenters AS til 30.10.2024, så «Regn / Kitebrook» i Statnetts " +
+      "lister er samme konsern. Statnett 06.10.2026: 30 MW reservert (21/00206, 27.10.2020) og 70 " +
+      "MW i kø til KB IFS Matre AS (25/02560, moden bestilling 06.05.2026), uendret. Kitebrooks " +
+      "kost-nytteanalyse for overskuddsvarme (21.04.2026) oppgir IT-effekt 27,5 MW i fase 1, 55 MW " +
+      "i fase 2 og 82,5 MW i fase 3, og tilførsel fra om lag 40 MVA til rundt 100 MVA. Kommunen " +
+      "meldte 02.05.2025 grunnundersøkelser på tomta. Vedtak i reguleringsendringen er ikke funnet.",
     public_candidate: false,
     kilder: [
+      {
+        source_name: "Statnett: kapasitetskø, liste over saker (lest 06.10.2026)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/#kapasitetsko",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-10-06",
+        primary_source: true,
+        excerpt_or_summary:
+          "Haugsvær TRA: KB IFS Matre AS 70 MW i kø (25/02560, moden bestilling 06.05.2026).",
+      },
+      {
+        source_name: "Statnett: reservasjoner, liste over saker (lest 06.10.2026)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/#reservasjoner",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-10-06",
+        primary_source: true,
+        excerpt_or_summary:
+          "Haugsvær TRA: «Regn / Kitebrook» 30 MW reservert 27.10.2020 (21/00206).",
+      },
+      {
+        source_name: "Kitebrook: kost-nytteanalyse for utnyttelse av overskuddsvarme, Matre",
+        source_url: "https://aimblob.blob.core.windows.net/aimfiles/486e8dbd-968c-4574-b3da-0de54e0e291d.pdf",
+        publisher: "Masfjorden kommune (dokumentarkiv)",
+        source_type: "document",
+        source_date: "2026-04-21",
+        primary_source: true,
+        excerpt_or_summary:
+          "IT-effekt om lag 27,5 MW i fase 1, 55 MW i fase 2 og 82,5 MW i fase 3. Tilførsel fra " +
+          "om lag 40 MVA innledende til rundt 100 MVA ved full utbygging.",
+      },
+      {
+        source_name: "Bergens Tidende: «20 datasentre planlagt bare i Vestland» (kun tittel og ingress lest)",
+        source_url: "https://www.bt.no/politikk/i/mK6qW0/datasenter-planlagt-rundt-i-vestland-som-i-dale-gulen-matre-luster-og-samnanger",
+        publisher: "Bergens Tidende",
+        source_type: "news",
+        source_date: "2026-10-06",
+        excerpt_or_summary:
+          "Navngir datasenterprosjekter i Dale, Gulen, Matre, Luster og Samnanger og oppgir at " +
+          "flere står i kø for strøm. Bak betalingsmur; brukt som lead, ikke som kilde for " +
+          "enkeltfakta.",
+      },
       {
         source_name: "Masfjorden kommune: ROS-analyse, reguleringsendring Områdeplan for Matre",
         source_url: "https://aimblob.blob.core.windows.net/aimfiles/fbe14975-258f-4cbd-af75-a15fd467fdd0.pdf",
@@ -11057,8 +11249,112 @@ export const FUNN: Funn[] = [
       "DataCenterMap fører anlegget under markedet «Bergen», men Dalekvam ligger i Vaksdal " +
       "kommune. Kommunen er satt fra geokodet adresse. Runde 10 (2026-10-02): Statnett-sak " +
       "23/01416 (Dale TRA, sluttkunde «Dale Fabrikker», 20 MW reservert 11.12.2023) er nå kilde " +
-      "for sikret kraft. 10 MW til ASP Eiendom AS (26/03066) står i kø og er ikke ført.",
+      "for sikret kraft. 10 MW til ASP Eiendom AS (26/03066) står i kø og er ikke ført." +
+      "Runde 17 (2026-10-06): Statnetts lister er lest på nytt. Reservasjonen 23/01416 (20 MW, " +
+      "11.12.2023) står med næringstype «Industri» og sluttkunde «Dale Fabrikker». Den er eldre enn " +
+      "Asps kjøp (kunngjort 10.09.2025) og følger eiendommen, ikke Asp. 10 MW til Asp Eiendom AS " +
+      "(26/03066) står fortsatt i kø (moden bestilling 16.06.2026). Asp skriver selv «initial 20 MW " +
+      "capacity» og «potential to expand up to 300 MW». 110 MW på kort sikt og 300–1000 MW finnes " +
+      "bare i selskapsutsagn og bransjepresse; etter Statnetts lister er ingenting utover de 10 MW " +
+      "bestilt. Dispensasjon fra kommuneplanen: formannskapet innstilte 10.09.2026 mot SVs stemme, " +
+      "og kommunestyret vedtok den 24.09.2026 med 13 mot 7 stemmer (Vaksdalposten). Tre " +
+      "SV-representanter, blant dem varaordføreren, har krevd lovlighetskontroll (Vaksdalposten " +
+      "02.10.2026). Om Statsforvalteren har mottatt saken, er ikke dokumentert. Saksnummer, " +
+      "vedtakstekst og vilkår, også om støy, er ikke funnet i kommunens egne dokumenter; plansporet " +
+      "bygger på presse og et leserinnlegg. Leserinnlegget oppgir eiendommen som gnr 22 bnr 253 og " +
+      "skriver at oppstart av områdeplan for Dale ble behandlet i samme møte, med datasentertomta " +
+      "holdt utenfor (ikke bekreftet i kommunalt dokument). Selskaper: Asp Data Center AS " +
+      "(931764225), Dale Eigedom AS (830729992, c/o Asp DC AS) og Asp Eiendom AS (992298863). " +
+      "Statnetts nye Dalekvam transformatorstasjon erstatter Dale-stasjonen; Statnett nevner ikke " +
+      "økt forbrukskapasitet eller datasenter. Nevnt i BT 06.10.2026.",
     kilder: [
+      {
+        source_name: "Statnett: reservasjoner, liste over saker (lest 06.10.2026)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/#reservasjoner",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-10-06",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak 23/01416, Dale TRA, Statnetts kunde BKK AS, sluttkunde «Dale Fabrikker», " +
+          "næringstype «Industri», 20 MW reservert 11.12.2023.",
+      },
+      {
+        source_name: "Statnett: kapasitetskø, liste over saker (lest 06.10.2026)",
+        source_url: "https://www.statnett.no/nettkapasitet-til-produksjon-og-forbruk/foresporsler-og-reservasjon-i-nettet/#kapasitetsko",
+        publisher: "Statnett",
+        source_type: "register",
+        source_date: "2026-10-06",
+        primary_source: true,
+        excerpt_or_summary:
+          "Sak 26/03066, Dale TRA, sluttkunde Asp Eiendom AS, næringstype «Datasenter», 10 MW i " +
+          "kø, moden bestilling 16.06.2026. Køplass, ikke tildelt kapasitet.",
+      },
+      {
+        source_name: "Vaksdalposten: «Fleirtalet for dispensasjon – SV krev lovlegkontroll om datasenter i fabrikken» (ingress)",
+        source_url: "https://www.vp.no/fleirtalet-for-dispensasjon-sv-krev-lovlegkontroll-om-datasenter-i-fabrikken/s/80-134-4058",
+        publisher: "Vaksdalposten",
+        source_type: "news",
+        source_date: "2026-09-25",
+        excerpt_or_summary:
+          "Kommunestyret vedtok dispensasjon med 13 mot 7 stemmer etter om lag to timers debatt. " +
+          "SV varslet krav om lovlighetskontroll. Bak betalingsmur; bare tittel og ingress er " +
+          "lest.",
+      },
+      {
+        source_name: "Vaksdalposten: «Tre politikarar krev lovlegkontroll etter strid om datasenter» (ingress)",
+        source_url: "https://www.vp.no/tre-politikarar-krev-lovlegkontroll-etter-strid-om-datasenter/s/80-134-4121",
+        publisher: "Vaksdalposten",
+        source_type: "news",
+        source_date: "2026-10-02",
+        excerpt_or_summary:
+          "Tre SV-representanter, blant dem varaordføreren, krever lovlighetskontroll av " +
+          "kommunestyrets dispensasjonsvedtak. Bak betalingsmur; bare tittel og ingress er lest.",
+      },
+      {
+        source_name: "Vaksdalposten, leserinnlegg: «Datasenter og demokrati»",
+        source_url: "https://www.vp.no/datasenter-og-demokrati/s/80-134-2929",
+        publisher: "Vaksdalposten",
+        source_type: "news",
+        source_date: "2026-09-15",
+        excerpt_or_summary:
+          "Partsinnlegg fra SV. Oppgir at formannskapet 10.09.2026 innstilte på dispensasjon fra " +
+          "kommuneplanen mot SVs stemme, at eiendommen er gnr 22 bnr 253, og at SV ville regulere " +
+          "området før bruksendring. Ikke bekreftet i kommunalt dokument.",
+      },
+      {
+        source_name: "Asp Data Center: «ASP acquires Dale Fabrikker»",
+        source_url: "https://www.aspdatacenter.no/news/asp-acquires-dalefabrikker",
+        publisher: "Asp Data Center AS",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Selskapets egen omtale av kjøpet: om lag 48 500 m² bygningsmasse og 733 dekar tomt, " +
+          "«initial 20 MW capacity» og «potential to expand up to 300 MW in the long term». " +
+          "Udatert, trolig september 2025.",
+      },
+      {
+        source_name: "Statnett: Dalekvam transformatorstasjon",
+        source_url: "https://www.statnett.no/vare-prosjekter/region-vest/dalekvam-transformatorstasjon/",
+        publisher: "Statnett",
+        source_type: "web",
+        primary_source: true,
+        excerpt_or_summary:
+          "Ny stasjon som erstatter Dale transformatorstasjon og bygges for 420 kV, med " +
+          "byggestart i mai 2024. Statnett skriver at stasjonen får samme funksjon som i dag og " +
+          "nevner ikke ny forbrukskapasitet.",
+      },
+      {
+        source_name: "Bergens Tidende: «20 datasentre planlagt bare i Vestland» (kun tittel og ingress lest)",
+        source_url: "https://www.bt.no/politikk/i/mK6qW0/datasenter-planlagt-rundt-i-vestland-som-i-dale-gulen-matre-luster-og-samnanger",
+        publisher: "Bergens Tidende",
+        source_type: "news",
+        source_date: "2026-10-06",
+        excerpt_or_summary:
+          "Navngir datasenterprosjekter i Dale, Gulen, Matre, Luster og Samnanger og oppgir at " +
+          "flere står i kø for strøm. Bak betalingsmur; brukt som lead, ikke som kilde for " +
+          "enkeltfakta.",
+      },
       {
         source_name: "DataCenterMap: ASP Dalekvam",
         source_url: "https://www.datacentermap.com/norway/bergen/",
