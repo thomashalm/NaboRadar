@@ -26,6 +26,7 @@
     "plans:enrich": "tsx scripts/enrich-plans.ts",
     "schools:classify": "tsx scripts/classify-schools.ts",
     "research:seed": "tsx scripts/seed-research.ts",
+    "review:cleanup": "tsx scripts/research-review-cleanup.ts",
     "review:backfill": "tsx scripts/research-review-backfill.ts",
     "fix:dsb-identitet": "tsx scripts/fix-dsb-identity.ts",
     "qa:naturfare": "tsx scripts/qa-naturfare.ts",

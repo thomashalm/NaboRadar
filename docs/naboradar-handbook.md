@@ -3463,7 +3463,8 @@ Sikringene:
 Til og med runde 17 (2026-10-06) logget `--review` en review for hvert funn som fantes i basen.
 Runde 16 og 17 ga 537 falske reviews på 275 funn; se
 [research-review-opprydding.md](research/research-review-opprydding.md). Kjernen ligger nå i
-`scripts/research/seed.ts`, og `tests/db/research-seed.test.ts` holder regelen.
+`scripts/research/seed.ts`, og `tests/db/research-seed.test.ts` holder regelen. De falske reviewene ble fjernet
+2026-10-06 med `npm run review:cleanup`; skriptet finner nå ingenting å rydde.
 
 Skriptet kaller `record_research_review_unchecked()`, som er revoked fra alle roller og bare kan
 kalles av eieren. Alternativet — å skrive tabellene direkte fra skriptet — ville gitt to steder som
@@ -3483,6 +3484,7 @@ npm run review:backfill        # gir eksisterende funn en reviewplan
 npm run review:backfill -- --dry
 npm run research:seed                                  # bare innhold, ingen reviews
 npm run research:seed -- --review="<rundeetikett>"     # + review for funn merket gjennomgatt_i
+npm run review:cleanup                                 # engangsopprydding etter runde 16 og 17. Tørrkjøring; --apply skriver
 ```
 
 Backfillen setter `last_verified_at` fra nyeste kildedato og gir prioritetsklassene en første
