@@ -57,6 +57,14 @@ export interface Funn {
   public_candidate?: boolean;
   public_candidate_note?: string;
   notes?: string;
+  /**
+   * Etiketten på researchrunden der funnet sist ble uttrykkelig kontrollert.
+   *
+   * `research:seed --review="<etikett>"` registrerer en review bare for funn der dette feltet er
+   * lik etiketten. At et funn står i denne fila, betyr ikke at det er gjennomgått. Feltet lagres
+   * ikke i basen; det er instruksen til seeden, og historikken over hvem som ble kontrollert når.
+   */
+  gjennomgatt_i?: string;
   kilder: Kilde[];
 }
 
@@ -6844,6 +6852,7 @@ export const FUNN: Funn[] = [
       "100 MW reservert til Kitebrook Infrastructure AS ved Leirdøla TRA (23/01051, reservert " +
       "28.05.2026), uendret. Kitebrooks pressemelding 28.04.2026 omtalte kraftavtalen som " +
       "«underway»; reservasjonen kom en måned senere.",
+    gjennomgatt_i: "Datasenter runde 17 – Vestland og kraftkø 2026-10-06",
     kilder: [
       {
         source_name: "Statnett: reservasjoner, liste over saker (lest 06.10.2026)",
@@ -6926,6 +6935,7 @@ export const FUNN: Funn[] = [
       "og det er varslet folkemøte etter krav fra bygdelaget (Porten og Sogn Avis, september 2026; " +
       "bare tittel og ingress er lest).",
     public_candidate: false,
+    gjennomgatt_i: "Datasenter runde 17 – Vestland og kraftkø 2026-10-06",
     kilder: [
       {
         source_name: "Statnett: reservasjoner, liste over saker (lest 06.10.2026)",
@@ -7080,6 +7090,7 @@ export const FUNN: Funn[] = [
       "Næringssenter AS (929735072) har datainfrastruktur som formål, men eierskapet er ikke " +
       "dokumentert. Fortsatt et lead uten stedfesting og bare dokumentert gjennom presse; ikke " +
       "opprettet som eget anlegg.",
+    gjennomgatt_i: "Datasenter runde 17 – Vestland og kraftkø 2026-10-06",
     kilder: [
       {
         source_name: "NRK Vestland: «Milliardinvestering i Sogn skal gi 50 arbeidsplassar»",
@@ -9943,6 +9954,7 @@ export const FUNN: Funn[] = [
       "09.01.2026) og BW Velora Skipavika Digital Sikkerhet AS 50 MW (25/03021, 13.02.2026), begge " +
       "ved Lindås TRA. Det er køplasser, til sammen 95 MW, og ingenting er reservert.",
     public_candidate: false,
+    gjennomgatt_i: "Datasenter runde 17 – Vestland og kraftkø 2026-10-06",
     kilder: [
       {
         source_name: "Statnett: kapasitetskø, liste over saker (lest 06.10.2026)",
@@ -11011,6 +11023,7 @@ export const FUNN: Funn[] = [
       "(NRK); plan-ID er ikke funnet. Statnett 06.10.2026: 100 MW i kø ved Samnanger TRA til «Regn " +
       "/ Kitebrook» (25/02232, moden bestilling 18.11.2024), ingenting reservert. Kitebrook skriver " +
       "selv «100 MW grid reservation in progress».",
+    gjennomgatt_i: "Datasenter runde 17 – Vestland og kraftkø 2026-10-06",
     kilder: [
       {
         source_name: "Statnett: kapasitetskø, liste over saker (lest 06.10.2026)",
@@ -11093,6 +11106,7 @@ export const FUNN: Funn[] = [
       "i fase 2 og 82,5 MW i fase 3, og tilførsel fra om lag 40 MVA til rundt 100 MVA. Kommunen " +
       "meldte 02.05.2025 grunnundersøkelser på tomta. Vedtak i reguleringsendringen er ikke funnet.",
     public_candidate: false,
+    gjennomgatt_i: "Datasenter runde 17 – Vestland og kraftkø 2026-10-06",
     kilder: [
       {
         source_name: "Statnett: kapasitetskø, liste over saker (lest 06.10.2026)",
@@ -11267,6 +11281,7 @@ export const FUNN: Funn[] = [
       "(931764225), Dale Eigedom AS (830729992, c/o Asp DC AS) og Asp Eiendom AS (992298863). " +
       "Statnetts nye Dalekvam transformatorstasjon erstatter Dale-stasjonen; Statnett nevner ikke " +
       "økt forbrukskapasitet eller datasenter. Nevnt i BT 06.10.2026.",
+    gjennomgatt_i: "Datasenter runde 17 – Vestland og kraftkø 2026-10-06",
     kilder: [
       {
         source_name: "Statnett: reservasjoner, liste over saker (lest 06.10.2026)",

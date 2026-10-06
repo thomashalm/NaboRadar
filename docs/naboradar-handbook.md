@@ -3437,10 +3437,33 @@ at det ikke skal skje igjen.
 
 ### Reviews fra en researchrunde
 
-`npm run research:seed -- --review="<rundeetikett>"` registrerer en review per funn seeden
-oppdaterte, knyttet til den navngitte runden, med utfall `updated` eller `unchanged` basert på en
-faktisk sammenligning av feltene før og etter. Da får en stor runde reviewhistorikk uten at noen
-klikker gjennom UI-et for hvert funn.
+**Seed er ikke review.** `npm run research:seed` skriver innhold for alle funn i `funn.ts`, hver
+gang. En review sier at noen faktisk har kontrollert funnet, og den må bes om uttrykkelig, per
+funn.
+
+Slik markeres et funn som gjennomgått i en runde:
+
+1. Logg runden i `admin_research_runs` med en etikett.
+2. Sett `gjennomgatt_i: "<rundeetikett>"` på hvert funn i `funn.ts` som faktisk ble kontrollert —
+   også dem der kontrollen ikke endret noe.
+3. Kjør `npm run research:seed -- --review="<rundeetikett>"`.
+
+Seeden registrerer da en review bare for funnene med den etiketten, med utfall `updated` (felt
+eller kilder endret) eller `unchanged`. Alle andre funn får innholdet sitt skrevet og ingenting
+annet. Feltet lagres ikke i basen; det er instruksen til seeden, og Git-historikken viser hvem som
+ble kontrollert i hvilken runde.
+
+Sikringene:
+- `--review` uten et eneste funn merket med etiketten stopper **før noe er skrevet**.
+- En etikett som ikke finnes i `admin_research_runs`, er en feil.
+- Samme runde to ganger gir ikke to reviews.
+- Kommandoen skriver ut tallene hver for seg: «Seed: 277 funn i fila (0 nye, 7 endret, 270
+  uendret)», «Review: 7 funn i runden …», «Ikke reviewet: 270 funn».
+
+Til og med runde 17 (2026-10-06) logget `--review` en review for hvert funn som fantes i basen.
+Runde 16 og 17 ga 537 falske reviews på 275 funn; se
+[research-review-opprydding.md](research/research-review-opprydding.md). Kjernen ligger nå i
+`scripts/research/seed.ts`, og `tests/db/research-seed.test.ts` holder regelen.
 
 Skriptet kaller `record_research_review_unchecked()`, som er revoked fra alle roller og bare kan
 kalles av eieren. Alternativet — å skrive tabellene direkte fra skriptet — ville gitt to steder som
@@ -3458,7 +3481,8 @@ minst like interne som funnene selv.
 ```bash
 npm run review:backfill        # gir eksisterende funn en reviewplan
 npm run review:backfill -- --dry
-npm run research:seed -- --review="National VA and mineral extraction discovery v1"
+npm run research:seed                                  # bare innhold, ingen reviews
+npm run research:seed -- --review="<rundeetikett>"     # + review for funn merket gjennomgatt_i
 ```
 
 Backfillen setter `last_verified_at` fra nyeste kildedato og gir prioritetsklassene en første
@@ -3701,10 +3725,10 @@ Terskelen er den samme — det var kilden som kom på plass.
 Runde 1 dekket 13 anlegg fra køen pluss Green Mountain OSL2-Hamar, TikTok-anlegget. Der er TikTok
 kunde, Green Mountain Innlandet AS eier og operatør, og Azrieli Group Ltd. ultimat eier. Resten av
 køen ble markert `skipped` med «utsatt til runde 2», slik at kjøringen lukkes og ikke blokkerer
-neste. `research:seed --review` passer ikke for slike runder: det skriver en review for alle
-funn i fila, også de som ikke ble kontrollert. Statusendringer registreres derfor gjennom
-`record_research_review_unchecked` med `new_status` og `research_run_id`, og speiles i
-`funn.ts` før seeden kjøres.
+neste. Statusendringer registreres gjennom `record_research_review_unchecked` med `new_status`
+og `research_run_id`, og speiles i `funn.ts` før seeden kjøres. (Da dette ble skrevet, logget
+`research:seed --review` en review for alle funn i fila. Det er rettet 2026-10-06: bare funn
+merket med `gjennomgatt_i` får review. Se §36.)
 
 ---
 
