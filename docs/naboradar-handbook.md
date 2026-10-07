@@ -17,7 +17,7 @@ Sist kryssjekket mot repoet: **2026-09-25**. Databasekapitlene (6, 7, 12, 27) bl
 
 **Hva vi bestemte og hvorfor står i [ADR-ene](adr/README.md); hva vi undersøkte står i
 [research](research/README.md).** Oversikten over all dokumentasjon er [docs/README.md](README.md),
-og regelen for hva som dokumenteres hvor, er [§38](#38-dokumentasjon).
+og regelen for hva som dokumenteres hvor, er [§39](#39-dokumentasjon).
 
 > ## Vedlikehold av dokumentet
 >
@@ -28,7 +28,7 @@ og regelen for hva som dokumenteres hvor, er [§38](#38-dokumentasjon).
 > **Ikke oppdater** for copy-endringer, styling eller trivielle bugfikser uten systempåvirkning.
 >
 > Håndboka beskriver dagens løsning. Historikk og forkastede spor hører hjemme i research og ADR
-> — se [§38](#38-dokumentasjon).
+> — se [§39](#39-dokumentasjon).
 
 ---
 
@@ -55,7 +55,8 @@ og regelen for hva som dokumenteres hvor, er [§38](#38-dokumentasjon).
 [35. Privat research](#35-privat-research) ·
 [36. Research lifecycle](#36-research-lifecycle-freshness-og-review-kø) ·
 [37. Datasenter-enrichment](#37-datasenter-enrichment-og-refresh) ·
-[38. Dokumentasjon](#38-dokumentasjon) ·
+[38. Adresselenke og nettleserutvidelse](#38-adresselenke-og-nettleserutvidelse) ·
+[39. Dokumentasjon](#39-dokumentasjon) ·
 [Data-roadmap (eget dokument)](data-roadmap.md) · [Dataarkitektur (eget dokument)](data-architecture.md)
 
 ---
@@ -3734,7 +3735,46 @@ merket med `gjennomgatt_i` får review. Se §36.)
 
 ---
 
-## 38. Dokumentasjon
+## 38. Adresselenke og nettleserutvidelse
+
+### `/omrade?adresse=` — adressebasert dyplenke
+
+Resultatsiden krever koordinater. Den som bare kjenner en adresse — en nettleserutvidelse,
+delingsarket på iOS, en lenke i en e-post, en partner — bruker i stedet:
+
+```
+/omrade?adresse=Kirkeveien 60, 0368 Oslo
+```
+
+| Utfall | Hva brukeren får |
+|---|---|
+| Nøyaktig én registrert adresse passer | Videresending til den kanoniske `/omrade?lat=…&lng=…&radius=1000&label=…` |
+| Flere passer, eller ingen passer nøyaktig | «Hvilken adresse mente du?» med høyst fem kandidater og søkefeltet |
+| Ingen adresser funnet, eller Kartverket svarer ikke | «Vi fant ikke denne adressen.» og søkefeltet |
+
+- Logikken er ren og ligger i `lib/area-address.ts`; siden (`app/omrade/page.tsx`) gjør oppslaget
+  med den vanlige geokoderen. Ingen nye endepunkter, tabeller eller RPC-er.
+- **Vi gjetter ikke.** Gate og husnummer må være like (mellomrom og store bokstaver ses bort fra),
+  og postnummeret må stemme når det er oppgitt. Stedsnavn regnes ikke som adresser.
+- Koordinater i URL-en vinner alltid over `adresse`. Verdien er 3–100 tegn.
+- `/omrade` har en `loading.tsx`, så videresendingen skjer i den strømmede siden (klient +
+  `meta refresh`), ikke som HTTP 307. Det virker i nettlesere; en klient som ikke kjører siden,
+  må følge `meta refresh` selv.
+- Siden er `noindex` som resten av `/omrade`.
+
+### Chrome-utvidelsen for Finn.no (prototype)
+
+`chrome-extension/` — se `chrome-extension/README.md`. Kort:
+
+- Leser adressen fra boligannonsen brukeren har åpen, etter et trykk, og åpner adresselenken over.
+  Tillatelser: `activeTab` og `scripting`. Ingen bakgrunnsskript, nettverkskall, lagring eller nøkler.
+- Bygges med `npm run ext:build` til `chrome-extension/dist/` (ikke i Git). Ikke publisert.
+- **Ikke verifisert mot Finn.** Koden er skrevet uten å hente Finn-sider — Finn forbyr automatisert
+  bruk, og vi skraper ikke Finn. Den manuelle testen på ti annonser står i README-en.
+- Utvidelsen viser ingen signaler selv. Det finnes ikke noe offentlig JSON-endepunkt for
+  områdesammendrag, og det skal ikke lages et bare for dette.
+
+## 39. Dokumentasjon
 
 Dokumentasjonen er prosjektets hukommelse. Om et år skal det gå an å se hva vi undersøkte, hvilke
 kilder vi brukte, hva vi fant, hva vi valgte bort, hvorfor, og hva som skal til for å vurdere det

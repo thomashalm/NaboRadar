@@ -10,5 +10,5 @@ export default defineConfig([
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
     },
   },
-  globalIgnores(["public/vendor/**", ".next/**", "out/**", "build/**", "next-env.d.ts", "coverage/**"]),
+  globalIgnores(["public/vendor/**", ".next/**", "out/**", "build/**", "next-env.d.ts", "coverage/**", "chrome-extension/dist/**"]),
 ]);

@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "NaboRadar for Finn (prototype)",
+  "version": "0.1.0",
+  "description": "Leser adressen fra boligannonsen du har åpen på Finn.no, og åpner den i NaboRadar. Gjør ingenting før du trykker på knappen.",
+  "permissions": ["activeTab", "scripting"],
+  "action": {
+    "default_title": "Åpne boligen i NaboRadar",
+    "default_popup": "popup.html"
+  }
+}

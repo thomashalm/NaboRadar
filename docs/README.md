@@ -30,4 +30,4 @@ Research- og arkitekturrunder dokumenteres **i samme commit** som endringen. Det
 
 For hver slik endring vurderes tre ting: må **håndboka** rettes, trengs en **researchfil**, og
 trengs en **ADR**? Ikke for spacing, tekststørrelse, små copy-endringer eller vanlige bugfikser.
-Detaljene står i [håndbok §38](naboradar-handbook.md#38-dokumentasjon).
+Detaljene står i [håndbok §39](naboradar-handbook.md#39-dokumentasjon).

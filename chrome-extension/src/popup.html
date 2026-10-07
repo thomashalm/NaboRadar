@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="nb">
+  <head>
+    <meta charset="utf-8" />
+    <title>NaboRadar</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>NaboRadar</header>
+
+    <p id="loading">Leser adressen …</p>
+
+    <section id="found" hidden>
+      <p class="status">Adresse funnet</p>
+      <p id="address" class="address"></p>
+      <p id="uncertain" class="note" hidden>Usikkert treff. Kontroller adressen — NaboRadar ber deg bekrefte den.</p>
+      <button id="open" type="button">Åpne denne boligen i NaboRadar</button>
+      <p id="details" class="details"></p>
+    </section>
+
+    <section id="missing" hidden>
+      <p id="missing-text" class="status"></p>
+      <button id="search" type="button" class="secondary">Søk etter adressen i NaboRadar</button>
+    </section>
+
+    <section id="not-listing" hidden>
+      <p class="status">Ingen boligannonse her</p>
+      <p class="note">Åpne en boligannonse på Finn.no, og trykk på NaboRadar igjen.</p>
+    </section>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
