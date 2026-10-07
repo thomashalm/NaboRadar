@@ -1,5 +1,6 @@
 import { TtlCache } from "@/lib/cache";
 import { fetchJson } from "@/lib/http";
+import { joinHouseLetter } from "../house-letter";
 import { mergeGeocodingResults, normalizeForMatch } from "../merge";
 import {
   GeocodingUnavailableError,
@@ -33,10 +34,10 @@ export interface DetailedSearchResult {
 
 /**
  * Bygger søkestreng. Slutter søket med et husnummer («Karl Johans gate 1») søkes eksakt,
- * ellers som prefiks («sognsv*»). Verifisert: prefiks på «Karl Johans gate 1*» gir ikke Oslo blant de 10 første.
+ * ellers som prefiks («sognsv*»). «10 D» søkes som «10D» (se house-letter.ts). Verifisert: prefiks på «Karl Johans gate 1*» gir ikke Oslo blant de 10 første.
  */
 export function buildSearchTerm(query: string): string {
-  const cleaned = query.replace(/[*?]/g, " ").replace(/\s+/g, " ").trim();
+  const cleaned = joinHouseLetter(query.replace(/[*?]/g, " ").replace(/\s+/g, " ").trim());
   const lastToken = cleaned.split(" ").at(-1) ?? "";
   return /\d/.test(lastToken) ? cleaned : `${cleaned}*`;
 }

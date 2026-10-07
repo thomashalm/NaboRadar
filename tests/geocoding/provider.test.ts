@@ -106,6 +106,23 @@ describe("buildSearchTerm", () => {
     expect(buildSearchTerm("Sognsveien 220B")).toBe("Sognsveien 220B");
   });
 
+  it("søker husnummer og husbokstav sammenskrevet, også foran komma og postnummer", () => {
+    // Kartverket gir null treff på «10 D, 9411 Harstad», men finner «10D, 9411 Harstad».
+    expect(buildSearchTerm("Kanebogåsen 10 D, 9411 Harstad")).toBe("Kanebogåsen 10D, 9411 Harstad*");
+    expect(buildSearchTerm("Kanebogåsen 10 d, 9411 Harstad")).toBe("Kanebogåsen 10d, 9411 Harstad*");
+    expect(buildSearchTerm("Kanebogåsen 10 D 9411 Harstad")).toBe("Kanebogåsen 10D 9411 Harstad*");
+    expect(buildSearchTerm("Kanebogåsen 10 D")).toBe("Kanebogåsen 10D");
+    expect(buildSearchTerm("Egne Hjems vei 5 B")).toBe("Egne Hjems vei 5B");
+    expect(buildSearchTerm("Kanebogåsen 10D, 9411 Harstad")).toBe("Kanebogåsen 10D, 9411 Harstad*");
+  });
+
+  it("rører ikke adresser uten husbokstav eller andre mellomrom", () => {
+    expect(buildSearchTerm("Kirkeveien 60, 0368 Oslo")).toBe("Kirkeveien 60, 0368 Oslo*");
+    expect(buildSearchTerm("Storgata 5 i Oslo")).toBe("Storgata 5 i Oslo*");
+    expect(buildSearchTerm("Storgata 5 Oslo")).toBe("Storgata 5 Oslo*");
+    expect(buildSearchTerm("Rv 4 Gjøvik")).toBe("Rv 4 Gjøvik*");
+  });
+
   it("fjerner brukerens egne jokertegn og ekstra mellomrom", () => {
     expect(buildSearchTerm("  oslo**  s ")).toBe("oslo s*");
   });

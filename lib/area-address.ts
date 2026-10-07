@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { joinHouseLetter } from "@/lib/geocoding/house-letter";
 import type { SearchLocation } from "@/lib/geocoding/types";
 
 /**
@@ -45,14 +46,9 @@ export function parseAddressQuery(query: string): ParsedAddressQuery {
   return { street: (query.split(",")[0] ?? query).trim(), postalCode: null };
 }
 
-/** «Storgata 1 B» og «storgata 1b» er samme adresse. */
+/** «Storgata 1 B» og «storgata 1b» er samme adresse — samme regel som søket bruker. */
 export function normalizeStreet(value: string): string {
-  return value
-    .toLocaleLowerCase("nb-NO")
-    .replace(/[.,]/g, " ")
-    .replace(/(\d)\s+([a-zæøå])(?=$|\s)/g, "$1$2")
-    .replace(/\s+/g, " ")
-    .trim();
+  return joinHouseLetter(value.toLocaleLowerCase("nb-NO").replace(/[.,]/g, " ").replace(/\s+/g, " ").trim());
 }
 
 export type AddressMatch =

@@ -53,6 +53,29 @@ describe("/omrade?adresse= — valg av treff", () => {
     expect(resolveAddressMatch("storgata 1 b, 0155 Oslo", [riktig])).toEqual({ kind: "match", location: riktig });
   });
 
+  it("finner samme adresse for «10 D», «10 d» og «10D»", () => {
+    const riktig = address("Kanebogåsen 10D", "9411 Harstad · Harstad");
+    const svar = [riktig, address("Kanebogåsen 10A", "9411 Harstad · Harstad"), address("Kanebogåsen 10", "9411 Harstad · Harstad")];
+    for (const q of [
+      "Kanebogåsen 10 D, 9411 Harstad",
+      "Kanebogåsen 10D, 9411 Harstad",
+      "kanebogåsen 10 d, 9411 harstad",
+      "Kanebogåsen 10 D",
+      "Kanebogåsen 10D",
+    ]) {
+      expect(resolveAddressMatch(q, svar), q).toEqual({ kind: "match", location: riktig });
+    }
+    const egne = address("Egne Hjems vei 5B", "1365 Blommenholm · Bærum");
+    expect(resolveAddressMatch("Egne Hjems vei 5 B", [egne])).toEqual(resolveAddressMatch("Egne Hjems vei 5B", [egne]));
+    expect(resolveAddressMatch("Egne Hjems vei 5 B", [egne])).toEqual({ kind: "match", location: egne });
+  });
+
+  it("lar adresser uten husbokstav være som de er", () => {
+    const uten = address("Kanebogåsen 10", "9411 Harstad · Harstad");
+    const med = address("Kanebogåsen 10D", "9411 Harstad · Harstad");
+    expect(resolveAddressMatch("Kanebogåsen 10, 9411 Harstad", [med, uten])).toEqual({ kind: "match", location: uten });
+  });
+
   it("velger ikke når samme adresse finnes flere steder og postnummeret mangler", () => {
     const kandidater = [address("Storgata 1", "0155 Oslo · Oslo"), address("Storgata 1", "9008 Tromsø · Tromsø")];
     expect(resolveAddressMatch("Storgata 1", kandidater)).toEqual({ kind: "candidates", candidates: kandidater });

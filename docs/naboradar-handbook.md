@@ -3756,6 +3756,10 @@ delingsarket på iOS, en lenke i en e-post, en partner — bruker i stedet:
   med den vanlige geokoderen. Ingen nye endepunkter, tabeller eller RPC-er.
 - **Vi gjetter ikke.** Gate og husnummer må være like (mellomrom og store bokstaver ses bort fra),
   og postnummeret må stemme når det er oppgitt. Stedsnavn regnes ikke som adresser.
+- **Husbokstav:** «10 D» søkes som «10D» (`lib/geocoding/house-letter.ts`). Kartverkets adressesøk
+  gir null treff når en frittstående husbokstav følges av komma («Kanebogåsen 10 D, 9411 Harstad»),
+  men finner «10D, 9411 Harstad». Regelen ligger i `buildSearchTerm`, så søkefeltet og adresselenken
+  forstår adresser likt. Bare husnummer + én bokstav foran komma, postnummer eller slutten slås sammen.
 - Koordinater i URL-en vinner alltid over `adresse`. Verdien er 3–100 tegn.
 - `/omrade` har en `loading.tsx`, så videresendingen skjer i den strømmede siden (klient +
   `meta refresh`), ikke som HTTP 307. Det virker i nettlesere; en klient som ikke kjører siden,
