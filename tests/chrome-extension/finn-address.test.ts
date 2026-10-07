@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildNaboRadarUrl, parseNorwegianAddress } from "@/chrome-extension/src/address";
+import { buildNaboRadarUrl, hasHouseNumber, parseNorwegianAddress } from "@/chrome-extension/src/address";
 import { extractFinnAddress, isFinnListingUrl } from "@/chrome-extension/src/extractors/finn";
 import { parseHtml } from "../helpers/mini-dom";
 
@@ -31,6 +31,7 @@ describe("extractFinnAddress", () => {
       postalCode: "0368",
       city: "Oslo",
       fullAddress: "Eksempelveien 12B, 0368 Oslo",
+      placeName: null,
       confidence: "high",
       source: "json-ld",
     });
@@ -79,6 +80,7 @@ describe("extractFinnAddress", () => {
       postalCode: null,
       city: null,
       fullAddress: "Eksempelveien 12B",
+      placeName: null,
       confidence: "medium",
       source: "json-ld",
     });
@@ -91,6 +93,7 @@ describe("extractFinnAddress", () => {
       postalCode: null,
       city: null,
       fullAddress: null,
+      placeName: null,
       confidence: "none",
       source: "none",
     });
@@ -120,6 +123,36 @@ describe("extractFinnAddress", () => {
     expect(
       extractFinnAddress(page("", '<div class="AdAddress__line">Eksempelveien 12, 0368 Oslo</div>'), LISTING),
     ).toMatchObject({ source: "css-selector", confidence: "low" });
+  });
+
+  it("kaller ikke et prosjektnavn med postnummer og sted for en gateadresse", () => {
+    const forventet = {
+      addressLine: null,
+      postalCode: "5983",
+      city: "Haugsvær",
+      fullAddress: null,
+      placeName: "Haugsvær Panorama",
+      confidence: "none",
+    };
+    const prosjekt = { "@type": "Place", address: { "@type": "PostalAddress", streetAddress: "Haugsvær Panorama", postalCode: "5983", addressLocality: "Haugsvær" } };
+    for (const doc of [
+      page("", '<span data-testid="object-address">Haugsvær Panorama, 5983 Haugsvær</span>'),
+      page(jsonLd(prosjekt), ""),
+      page("", "<address>Haugsvær Panorama, 5983 Haugsvær</address>"),
+      page("", '<div class="address">Haugsvær Panorama, 5983 Haugsvær</div>'),
+    ]) {
+      expect(extractFinnAddress(doc, "https://www.finn.no/realestate/project/ad.html?finnkode=123456789")).toMatchObject(forventet);
+    }
+    // Tittelen alene gir ikke engang et navn: fritekst må være en hel adresse.
+    expect(extractFinnAddress(page("<title>Haugsvær Panorama, 5983 Haugsvær | FINN</title>", ""), LISTING)).toMatchObject({
+      fullAddress: null,
+      placeName: null,
+    });
+  });
+
+  it("finner gateadressen i en senere kilde når den første bare har et prosjektnavn", () => {
+    const doc = page("", '<span data-testid="object-address">Eksempel Panorama, 0368 Oslo</span><address>Eksempelveien 12, 0368 Oslo</address>');
+    expect(extractFinnAddress(doc, LISTING)).toMatchObject({ fullAddress: "Eksempelveien 12, 0368 Oslo", placeName: null, source: "address-element" });
   });
 
   it("velger ikke mellom to ulike adresser i samme kilde", () => {
@@ -154,6 +187,17 @@ describe("parseNorwegianAddress", () => {
   it("avviser tekst som ikke er en adresse", () => {
     for (const text of ["0368 Oslo", "Oslo", "Lys treroms med balkong", "Prisantydning: 4 500 000 kr, 0368 Oslo", ""]) {
       expect(parseNorwegianAddress(text)).toBeNull();
+    }
+  });
+});
+
+describe("hasHouseNumber", () => {
+  it("krever et husnummer til slutt i linjen", () => {
+    for (const line of ["Storgata 1", "Storgata 12B", "Øvre Eksempelgate 3 A", "Storgata 1-3", "St. Olavs gate 21"]) {
+      expect(hasHouseNumber(line), line).toBe(true);
+    }
+    for (const line of ["Haugsvær Panorama", "Fjellveien", "Felt B2 Panorama", "Storgata 0", "Trinn 2 Panorama", "12345"]) {
+      expect(hasHouseNumber(line), line).toBe(false);
     }
   });
 });

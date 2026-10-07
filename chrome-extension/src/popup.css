@@ -42,6 +42,13 @@ p {
   font-weight: 600;
   letter-spacing: -0.02em;
 }
+.place {
+  margin-top: 8px;
+  font-weight: 600;
+}
+.place + .note {
+  margin-top: 0;
+}
 .note {
   margin-top: 8px;
   color: var(--muted);

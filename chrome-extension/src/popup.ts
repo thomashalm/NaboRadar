@@ -1,4 +1,10 @@
-import { buildNaboRadarUrl, NOT_FOUND_MESSAGE, notFound, type ExtractedAddress } from "./address";
+import {
+  buildNaboRadarUrl,
+  NO_STREET_ADDRESS_MESSAGE,
+  NOT_FOUND_MESSAGE,
+  notFound,
+  type ExtractedAddress,
+} from "./address";
 import { isFinnListingUrl } from "./extractors/finn";
 
 /** Settes ved bygging (build.mjs). Standard er produksjon. */
@@ -46,7 +52,12 @@ function render(address: ExtractedAddress): void {
     return;
   }
   if (!address.fullAddress) {
-    element("missing-text").textContent = NOT_FOUND_MESSAGE;
+    element("missing-text").textContent = address.placeName ? NO_STREET_ADDRESS_MESSAGE : NOT_FOUND_MESSAGE;
+    if (address.placeName) {
+      element("place-name").textContent = address.placeName;
+      element("place-location").textContent = [address.postalCode, address.city].filter(Boolean).join(" ");
+      element("place").hidden = false;
+    }
     element("missing").hidden = false;
     return;
   }

@@ -24,11 +24,17 @@ export interface ExtractedAddress {
   city: string | null;
   /** Det som sendes til NaboRadar: «Storgata 1B, 0155 Oslo». */
   fullAddress: string | null;
+  /**
+   * Et navn som sto der adressen skulle stått, uten husnummer: «Haugsvær Panorama». Vises for
+   * seg, sammen med postnummer og sted. Det er ikke en adresse og sendes aldri til NaboRadar.
+   */
+  placeName: string | null;
   confidence: AddressConfidence;
   source: AddressSource;
 }
 
 export const NOT_FOUND_MESSAGE = "Fant ikke adressen automatisk.";
+export const NO_STREET_ADDRESS_MESSAGE = "Fant ikke en entydig gateadresse i annonsen.";
 
 /** Det lille av DOM-et ekstraksjonen trenger. Et ekte `Document` oppfyller det. */
 export interface ElementLike {
@@ -46,7 +52,15 @@ export interface AddressParts {
 }
 
 export function notFound(source: "none" | "not-listing-page" = "none"): ExtractedAddress {
-  return { addressLine: null, postalCode: null, city: null, fullAddress: null, confidence: "none", source };
+  return {
+    addressLine: null,
+    postalCode: null,
+    city: null,
+    fullAddress: null,
+    placeName: null,
+    confidence: "none",
+    source,
+  };
 }
 
 export function cleanText(value: string | null | undefined): string {
@@ -66,8 +80,16 @@ export function isPostalCode(value: string): boolean {
 export function isCity(value: string): boolean {
   return CITY_OK.test(value) && value.split(" ").length <= 4;
 }
+/**
+ * Slutter linjen med et husnummer? «Storgata 1», «Storgata 12 B», «Storgata 1-3».
+ *
+ * Uten husnummer kan vi ikke skille en gate fra et prosjektnavn — «Haugsvær Panorama, 5983
+ * Haugsvær» har samme form som en adresse. Da er det ikke en gateadresse.
+ */
 export function hasHouseNumber(addressLine: string): boolean {
-  return /\d/.test(addressLine);
+  return new RegExp(`[${LETTER}.'’]\\s+[1-9]\\d{0,3}(\\s?[${LETTER}])?(\\s?[-/]\\s?[1-9]\\d{0,3}(\\s?[${LETTER}])?)?$`).test(
+    addressLine.trim(),
+  );
 }
 
 /**
@@ -107,16 +129,17 @@ const STEP_DOWN: Record<AddressConfidence, AddressConfidence> = {
 };
 
 /**
- * Sikkerheten er kildens utgangspunkt, senket ett trinn for hver del som mangler. Uten gate er
- * det ingen adresse i det hele tatt.
+ * Sikkerheten er kildens utgangspunkt, senket ett trinn når postnummer eller poststed mangler.
+ *
+ * Uten husnummer er det ingen gateadresse: linjen returneres som `placeName`, med
+ * sikkerhet «none» og uten `fullAddress`.
  */
 export function toExtracted(parts: AddressParts, source: AddressSource, base: AddressConfidence): ExtractedAddress {
-  if (!parts.addressLine) return notFound();
-  let confidence = base;
-  if (!hasHouseNumber(parts.addressLine)) confidence = STEP_DOWN[confidence];
-  if (!parts.postalCode || !parts.city) confidence = STEP_DOWN[confidence];
   const { addressLine, postalCode, city } = parts;
-  return { addressLine, postalCode, city, fullAddress: composeFullAddress(parts), confidence, source };
+  if (!addressLine) return notFound();
+  if (!hasHouseNumber(addressLine)) return { ...notFound(), postalCode, city, placeName: addressLine, source };
+  const confidence = postalCode && city ? base : STEP_DOWN[base];
+  return { addressLine, postalCode, city, fullAddress: composeFullAddress(parts), placeName: null, confidence, source };
 }
 
 function addressKey(parts: AddressParts): string {

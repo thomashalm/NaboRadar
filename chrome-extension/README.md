@@ -52,8 +52,13 @@ NABORADAR_BASE_URL=http://localhost:3100 npm run ext:build
 | 5 | `css-selector` | elementer med «address» i klasse eller id | lav |
 
 Hvert trinn svarer bare når det finner nøyaktig én adresse. Finner det to ulike, går vi videre.
-Sikkerheten senkes ett trinn når husnummeret mangler, og ett til når postnummer eller poststed
-mangler. Er ingenting igjen, er svaret «Fant ikke adressen automatisk.» Utvidelsen gjetter aldri.
+Sikkerheten senkes ett trinn når postnummer eller poststed mangler. Er ingenting igjen, er svaret
+«Fant ikke adressen automatisk.» Utvidelsen gjetter aldri.
+
+**Uten husnummer er det ikke en gateadresse.** En prosjektannonse kan ha «Haugsvær Panorama, 5983
+Haugsvær» der adressen pleier å stå — samme form som en adresse, men et prosjektnavn. Da viser
+popupen «Fant ikke en entydig gateadresse i annonsen.», navnet og stedet for seg, og ingen knapp
+til NaboRadar.
 
 NaboRadar er neste sikring: `/omrade?adresse=` sender bare videre når adressen passer med
 nøyaktig én adresse i Kartverkets register. Ellers får brukeren velge blant kandidatene.

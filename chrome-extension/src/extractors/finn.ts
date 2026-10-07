@@ -1,5 +1,6 @@
 import {
   cleanText,
+  hasHouseNumber,
   isCity,
   isAddressLine,
   isPostalCode,
@@ -92,7 +93,7 @@ function fromTextPattern(doc: DocumentLike): ExtractedAddress | null {
   ];
   const segments = texts.flatMap((t) => t.split(SEGMENT_SEPARATORS)).map(cleanText).filter(Boolean);
   // Fritekst må være en hel adresse med husnummer og postnummer for å telle.
-  const complete = parsedTexts(segments).filter((p) => p.postalCode && /\d/.test(p.addressLine ?? ""));
+  const complete = parsedTexts(segments).filter((p) => p.postalCode && hasHouseNumber(p.addressLine ?? ""));
   const address = onlyDistinct(complete);
   return address ? toExtracted(address, "text-pattern", "medium") : null;
 }
@@ -106,9 +107,13 @@ const STRATEGIES = [fromJsonLd, fromSemanticAttributes, fromAddressElement, from
 
 export function extractFinnAddress(doc: DocumentLike, url: string): ExtractedAddress {
   if (!isFinnListingUrl(url)) return notFound("not-listing-page");
+  // Et navn uten husnummer er ikke en adresse, men en senere kilde kan ha den. Finnes den ikke,
+  // får brukeren se navnet og stedet — uten lenke til NaboRadar.
+  let placeOnly: ExtractedAddress | null = null;
   for (const strategy of STRATEGIES) {
     const result = strategy(doc);
     if (result && result.confidence !== "none") return result;
+    if (result?.placeName) placeOnly ??= result;
   }
-  return notFound();
+  return placeOnly ?? notFound();
 }
