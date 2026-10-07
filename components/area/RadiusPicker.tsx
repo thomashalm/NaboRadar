@@ -33,7 +33,7 @@ export function RadiusPicker({ radius, hrefFor, onNavigate, pending = false }: R
 
   return (
     <nav aria-label="Velg radius" className="flex flex-wrap items-center gap-x-3 gap-y-2">
-      <ul className="inline-flex gap-0.5 rounded-full border border-line bg-surface p-1 shadow-float">
+      <ul className="inline-flex gap-0.5 rounded-control bg-sunken p-0.5">
         {RADIUS_OPTIONS_M.map((option) => {
           const selected = option === selectedRadius;
           const href = hrefFor(option);
@@ -51,10 +51,10 @@ export function RadiusPicker({ radius, hrefFor, onNavigate, pending = false }: R
                   setTap({ option, from: radius });
                   onNavigate(href);
                 }}
-                className={`flex h-12 min-w-[4.25rem] touch-manipulation items-center justify-center rounded-full px-4 text-[15px] font-semibold transition-transform duration-100 active:scale-[0.96] sm:h-11 sm:min-w-[4.5rem] ${
+                className={`flex h-11 min-w-[4.25rem] touch-manipulation items-center justify-center rounded-[0.625rem] px-4 text-[15px] font-medium transition-transform duration-100 active:scale-[0.97] ${
                   selected
-                    ? "bg-ink text-white shadow-[0_1px_3px_rgb(21_23_27_/_0.25)]"
-                    : "text-muted active:bg-line/70 sm:font-medium sm:hover:bg-canvas sm:hover:text-ink"
+                    ? "bg-surface text-ink shadow-[0_1px_2px_rgb(20_23_26/0.14)]"
+                    : "text-muted active:bg-line/70 sm:hover:text-ink"
                 }`}
               >
                 {formatRadius(option)}
@@ -66,7 +66,7 @@ export function RadiusPicker({ radius, hrefFor, onNavigate, pending = false }: R
 
       {/* Vises bare når det var radiusvalget som startet navigasjonen — ikke ved sortering. */}
       {busy && (
-        <p role="status" className="inline-flex items-center gap-2 text-[13px] font-medium text-muted">
+        <p role="status" className="type-meta inline-flex items-center gap-2">
           <span
             aria-hidden="true"
             className="size-3.5 animate-spin rounded-full border-2 border-line-strong border-t-ink"

@@ -9,14 +9,16 @@ import {
   SKOLEKRETS_UTENFOR,
   SKOLEKRETS_UTILGJENGELIG,
 } from "@/lib/facts/wording";
+import { Chevron } from "@/components/ui/Chevron";
 import { DeepLinkTarget } from "./DeepLinkTarget";
+import { SectionShell } from "./SectionShell";
 
 /**
- * Liten notis under adressen: hvilket veiledende inntaksområde for barneskole adressen
+ * Én rad i kapittelet «Hverdagen»: hvilket veiledende inntaksområde for barneskole adressen
  * ligger i.
  *
- * Bevisst en notis og ikke et kort. Dette er én opplysning, og den skal ikke konkurrere med
- * selve resultatsiden om oppmerksomheten. Utenfor Oslo, ved flertydig treff eller når kilden
+ * Bevisst én rad med detaljene bak en utvider. Dette er én opplysning, og den skal ikke
+ * konkurrere med resten av resultatsiden om oppmerksomheten. Utenfor Oslo, ved flertydig treff eller når kilden
  * ikke svarer, vises ingenting i det hele tatt — vi later ikke som om fravær av data er et
  * svar.
  *
@@ -48,13 +50,12 @@ async function SkolekretsInnhold({ lat, lng, fraVerktoy }: { lat: number; lng: n
   if (resultat.status !== "ok") {
     if (!fraVerktoy) return null;
     return (
-      <DeepLinkTarget id="skolekrets" className="mt-5">
-        <p className="rounded-xl border border-line bg-surface px-4 py-2.5 text-[15px] leading-relaxed text-ink">
-          <span className="font-medium">{SKOLEKRETS_LABEL}</span>
-          <span className="mt-0.5 block text-muted">
+      <DeepLinkTarget id="skolekrets">
+        <SectionShell label={SKOLEKRETS_LABEL}>
+          <p className="type-support">
             {resultat.status === "utenfor" ? SKOLEKRETS_UTENFOR : SKOLEKRETS_UTILGJENGELIG}
-          </span>
-        </p>
+          </p>
+        </SectionShell>
       </DeepLinkTarget>
     );
   }
@@ -64,34 +65,31 @@ async function SkolekretsInnhold({ lat, lng, fraVerktoy }: { lat: number; lng: n
   const overskrift = navn.length > 0 ? navn.join(" og ") : resultat.krets;
 
   return (
-    <DeepLinkTarget id="skolekrets" className="mt-5">
-    <details className="rounded-xl border border-line bg-surface">
-      <summary className="cursor-pointer list-none px-4 py-2.5 text-[15px] text-ink [&::-webkit-details-marker]:hidden">
-        <span className="font-medium">{SKOLEKRETS_LABEL}</span>
-        <span aria-hidden="true" className="px-1.5 text-muted">
-          ·
-        </span>
-        <span>{overskrift}</span>
-        <span className="mt-0.5 block text-[13px] text-muted">{SKOLEKRETS_UNDERTEKST}</span>
-      </summary>
+    <DeepLinkTarget id="skolekrets">
+      <SectionShell label={SKOLEKRETS_LABEL} hideLabel>
+        <details className="disclosure">
+          <summary className="-mx-2 flex items-start gap-3 rounded-control px-2 py-1.5 hover:bg-sunken">
+            <span className="min-w-0 flex-1">
+              <h3 className="type-h3 text-ink">{SKOLEKRETS_LABEL}</h3>
+              <span className="type-support mt-0.5 block text-ink">{overskrift}</span>
+              <span className="type-meta block">{SKOLEKRETS_UNDERTEKST}</span>
+            </span>
+            <Chevron className="mt-1.5" />
+          </summary>
 
-      <div className="border-t border-line px-4 py-3 text-[15px] leading-relaxed">
-        <p className="text-ink">{describeSkolekrets(navn, resultat.krets)}</p>
-        <p className="mt-2 text-muted">{SKOLEKRETS_FORBEHOLD}</p>
-        <p className="mt-2 text-muted">{SKOLEKRETS_UNGDOMSTRINN}</p>
-        <p className="mt-3 text-[13px] text-muted">
-          Kilde:{" "}
-          <a
-            href={resultat.kildeUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-accent hover:underline"
-          >
-            Oslo kommune
-          </a>
-        </p>
-      </div>
-    </details>
+          <div className="pt-3 text-[15px] leading-relaxed">
+            <p className="text-ink">{describeSkolekrets(navn, resultat.krets)}</p>
+            <p className="type-support mt-2">{SKOLEKRETS_FORBEHOLD}</p>
+            <p className="type-support mt-2">{SKOLEKRETS_UNGDOMSTRINN}</p>
+            <p className="type-meta mt-3">
+              Kilde:{" "}
+              <a href={resultat.kildeUrl} target="_blank" rel="noopener noreferrer" className="link font-normal">
+                Oslo kommune
+              </a>
+            </p>
+          </div>
+        </details>
+      </SectionShell>
     </DeepLinkTarget>
   );
 }

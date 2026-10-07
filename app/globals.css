@@ -1,24 +1,45 @@
 @import "tailwindcss";
 
+/*
+ * Designsystemet. Alt offentlig UI bygger på tokenene her — ikke på løse verdier i komponentene.
+ *
+ *   Farge      canvas / surface / sunken, ink / muted / subtle, line / line-strong, én aksent.
+ *              Statusfarger (plan, danger) brukes bare der de bærer mening.
+ *   Type       sju trinn, se «Typografi» under. To vekter: 400 og 600 (500 for kontroller).
+ *   Rom        gutter (sidemarg), measure (lesebredde), og en fast seksjonsrytme.
+ *   Form       radius-control for felt og knapper, radius-panel for kart og flater.
+ *              To skygger: float (hevet kontroll) og pop (meny, popup).
+ *   Mønster    Seksjoner og rader med skillelinjer er normalen. Et kort — flate, kant, radius —
+ *              brukes bare for det som faktisk er et eget objekt: kartet, søkefeltet, en popup.
+ */
 @theme {
   --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  --color-canvas: #fafaf8;
+  --color-canvas: #fbfbfa;
   --color-surface: #ffffff;
-  --color-ink: #15171b;
-  --color-muted: #5b616b;
-  --color-line: #e8e6e1;
-  --color-line-strong: #d6d3cc;
-  --color-accent: #2447d4;
-  --color-accent-hover: #1c39ad;
-  --color-accent-soft: #eef1fd;
-  --color-plan: #c2410c;
-  --color-plan-soft: #fff4ed;
+  --color-sunken: #f3f3f0;
+  --color-ink: #14171a;
+  --color-muted: #555c64;
+  --color-subtle: #7b828a;
+  --color-line: #e7e6e2;
+  --color-line-strong: #d3d1ca;
+  /* Én dempet hovedfarge: dyp grønn. Lenker, valgt tilstand og søkepunktet. */
+  --color-accent: #1e5a4b;
+  --color-accent-hover: #17473b;
+  --color-accent-soft: #e9f1ee;
+  --color-plan: #b4470f;
+  --color-plan-soft: #fdf3ec;
   --color-danger: #b42318;
   --color-danger-soft: #fef3f2;
 
-  --shadow-float: 0 1px 2px rgb(21 23 27 / 0.04), 0 8px 24px -6px rgb(21 23 27 / 0.1);
-  --shadow-pop: 0 2px 4px rgb(21 23 27 / 0.04), 0 18px 48px -12px rgb(21 23 27 / 0.2);
+  --radius-control: 0.75rem;
+  --radius-panel: 1.125rem;
+
+  --container-measure: 40rem;
+  --container-page: 72rem;
+
+  --shadow-float: 0 1px 2px rgb(20 23 26 / 0.05), 0 6px 20px -8px rgb(20 23 26 / 0.12);
+  --shadow-pop: 0 2px 4px rgb(20 23 26 / 0.04), 0 18px 48px -12px rgb(20 23 26 / 0.2);
 }
 
 @layer base {
@@ -37,6 +58,90 @@
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
   }
+}
+
+/*
+ * Typografi. Få trinn, brukt konsekvent. Supporting-tekst er aldri under 14 px.
+ */
+@utility type-display {
+  font-size: clamp(2.25rem, 1.4rem + 3.6vw, 3.75rem);
+  line-height: 1.04;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+@utility type-h1 {
+  font-size: clamp(1.875rem, 1.5rem + 1.6vw, 2.5rem);
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+@utility type-h2 {
+  font-size: 1.375rem;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+@utility type-h3 {
+  font-size: 1.0625rem;
+  line-height: 1.35;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+@utility type-lead {
+  font-size: clamp(1.0625rem, 1rem + 0.4vw, 1.25rem);
+  line-height: 1.5;
+  color: var(--color-muted);
+  text-wrap: pretty;
+}
+@utility type-body {
+  font-size: 1rem;
+  line-height: 1.55;
+}
+@utility type-support {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+@utility type-meta {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--color-subtle);
+}
+/* Sidemarg. Samme på alle offentlige sider. */
+@utility gutter {
+  padding-inline: 1.25rem;
+  @media (width >= 40rem) {
+    padding-inline: 2rem;
+  }
+  @media (width >= 64rem) {
+    padding-inline: 2.5rem;
+  }
+}
+/* Tekstlenke i aksentfargen. */
+@utility link {
+  color: var(--color-accent);
+  font-weight: 500;
+  text-underline-offset: 3px;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* Utvidere: egen pil, så native trekant ikke blander seg i typografien. */
+.disclosure > summary {
+  list-style: none;
+  cursor: pointer;
+}
+.disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+.disclosure > summary .chevron {
+  transition: transform 0.15s ease;
+}
+.disclosure[open] > summary .chevron {
+  transform: rotate(90deg);
 }
 
 /* MapLibre: diskret attribution og kontroller i samme uttrykk som resten. */

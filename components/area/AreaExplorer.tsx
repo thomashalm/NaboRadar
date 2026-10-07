@@ -20,6 +20,8 @@ import { planAreasLayer } from "@/lib/map/layers/plan-areas";
 import { radiusLayer } from "@/lib/map/layers/radius";
 import { bindLayer } from "@/lib/map/layers/types";
 import type { AreaEvent, AreaSort } from "@/types/event";
+import { buildAreaSummary } from "@/lib/area-summary";
+import { AreaSummary } from "./AreaSummary";
 import { PropertyCard, type PropertyState } from "./PropertyCard";
 import { AreaFacts } from "./AreaFacts";
 import { MapSelectionProvider } from "./map-selection";
@@ -181,6 +183,21 @@ export function AreaExplorer({
     return db ?? oppslag ?? null;
   }, [storedStream, lookupStream]);
 
+
+  // Oppsummeringen bygges av de samme delsvarene som seksjonene, så de to sier alltid det samme.
+  const summary = useMemo(
+    () =>
+      buildAreaSummary({
+        stored: storedStream.status === "ready" ? storedStream.data : null,
+        lookups: lookupStream.status === "ready" ? lookupStream.data : lookupStream.status === "failed" ? "failed" : null,
+        events: eventStream.status === "ready" ? eventStream.data : null,
+        radius,
+      }),
+    [storedStream, lookupStream, eventStream, radius],
+  );
+  // «Kirkeveien 60, 0368 Oslo» deles i adresse og sted. Uten komma står navnet alene.
+  const [gate, ...stedDeler] = label.split(", ");
+  const sted = stedDeler.join(", ");
 
   const [pending, startTransition] = useTransition();
   const [selection, setSelection] = useState<{ id: string; from: "map" | "list" } | null>(null);
@@ -356,13 +373,13 @@ export function AreaExplorer({
   }, [selection, selectedId]);
 
   return (
-    <main className="lg:grid lg:grid-cols-[minmax(24rem,30rem)_1fr] lg:grid-rows-[auto_1fr]">
-      <section className="px-5 pt-7 pb-5 sm:px-8 lg:col-start-1 lg:row-start-1 lg:px-10 lg:pt-12">
-        {/* Adressen alene. Radien står på velgeren under og ved hvert funn. */}
-        <h1 className="mt-1 text-[2rem] leading-tight font-semibold tracking-[-0.03em] text-balance sm:text-4xl">
-          {label}
-        </h1>
-        <div className="mt-6 flex flex-wrap items-center gap-x-1.5 gap-y-3 sm:gap-x-3">
+    <main className="mx-auto w-full max-w-[104rem] lg:grid lg:grid-cols-[minmax(0,38rem)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] xl:grid-cols-[minmax(0,42rem)_minmax(0,1fr)]">
+      <section className="gutter pt-8 pb-8 lg:col-start-1 lg:row-start-1 lg:pt-12 lg:pb-6">
+        {/* Adressen alene, og stedet under. Radien står på velgeren og ved hvert funn. */}
+        <p className="type-meta">Områdesjekk</p>
+        <h1 className="type-h1 mt-1 text-ink [overflow-wrap:anywhere]">{gate}</h1>
+        {sted && <p className="mt-1.5 text-lg text-muted">{sted}</p>}
+        <div className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-3">
           <RadiusPicker
             radius={radius}
             hrefFor={(r) => buildAreaHref({ ...context, radius: r })}
@@ -371,33 +388,38 @@ export function AreaExplorer({
           />
           <ChangeLocation radius={radius} onNavigate={navigateToLocation} basePath={basePath} />
         </div>
-        {skolekrets}
+        <AreaSummary items={summary} />
       </section>
 
-      <div ref={mapRef} className="relative mx-5 h-[48vh] min-h-72 overflow-hidden rounded-2xl border border-line sm:mx-8 lg:sticky lg:top-16 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:m-0 lg:h-[calc(100dvh-4rem)] lg:rounded-none lg:border-0 lg:border-l">
-        <AreaMap
-          tiles={tiles}
-          title={`Kart over området innen ${formatRadius(radius)} fra ${label}${events.length ? `, ${events.length} planområder` : ""}${sites.length ? `, ${sites.length} registrerte lokaliteter med forurenset grunn` : ""}${places.length ? `, ${places.length} steder i nærområdet` : ""}`}
-          layers={layers}
-          fitBounds={radiusBounds(lat, lng, radius)}
-          fitKey={`${lat},${lng},${radius}`}
-          selectedId={selectedId}
-          onSelect={(id) => setSelection(id ? { id, from: "map" } : null)}
-          onPropertyClick={handlePropertyClick}
-          propertyLookupActive={zoom >= MIN_PROPERTY_ZOOM}
-          onZoomChange={setZoom}
-          popupFor={popupFor}
-          onNavigate={(href) => router.push(href)}
-        />
-        {zoom > 0 && zoom < MIN_PROPERTY_ZOOM && (
-          <p className="pointer-events-none absolute inset-x-0 bottom-3 text-center text-[13px] text-muted">
-            <span className="rounded-full bg-surface/90 px-3 py-1.5">Zoom inn for å utforske eiendommer</span>
-          </p>
-        )}
+      <div
+        ref={mapRef}
+        className="gutter scroll-mt-20 lg:sticky lg:top-16 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:h-[calc(100dvh-4rem)] lg:self-start lg:py-6 lg:pr-6 lg:pl-0"
+      >
+        <div className="relative h-[56vh] min-h-80 overflow-hidden rounded-panel border border-line bg-sunken lg:h-full">
+          <AreaMap
+            tiles={tiles}
+            title={`Kart over området innen ${formatRadius(radius)} fra ${label}${events.length ? `, ${events.length} planområder` : ""}${sites.length ? `, ${sites.length} registrerte lokaliteter med forurenset grunn` : ""}${places.length ? `, ${places.length} steder i nærområdet` : ""}`}
+            layers={layers}
+            fitBounds={radiusBounds(lat, lng, radius)}
+            fitKey={`${lat},${lng},${radius}`}
+            selectedId={selectedId}
+            onSelect={(id) => setSelection(id ? { id, from: "map" } : null)}
+            onPropertyClick={handlePropertyClick}
+            propertyLookupActive={zoom >= MIN_PROPERTY_ZOOM}
+            onZoomChange={setZoom}
+            popupFor={popupFor}
+            onNavigate={(href) => router.push(href)}
+          />
+          {zoom > 0 && zoom < MIN_PROPERTY_ZOOM && (
+            <p className="pointer-events-none absolute inset-x-0 bottom-3 text-center text-sm text-muted">
+              <span className="rounded-full bg-surface/95 px-3 py-1.5 shadow-float">Zoom inn for å utforske eiendommer</span>
+            </p>
+          )}
+        </div>
       </div>
 
-      <div className="px-5 pt-7 pb-16 sm:px-8 lg:col-start-1 lg:row-start-2 lg:px-10 lg:pt-1">
-        <div ref={propertyRef} className={property.status === "idle" ? "" : "mb-8"}>
+      <div className="gutter pt-10 pb-20 lg:col-start-1 lg:row-start-2 lg:pt-2">
+        <div ref={propertyRef} className={property.status === "idle" ? "" : "mb-10"}>
           <PropertyCard
             state={property}
             coveringPlans={coveringPlans}
@@ -407,38 +429,37 @@ export function AreaExplorer({
             }}
           />
         </div>
-        <MapSelectionProvider
-          selectedId={selectedId}
-          onSelect={velgFraListe}
-          ids={mapFeatureIds}
-        >
-        {leadSections}
-        <AreaFacts
-          storedFacts={storedFactsPromise}
-          lookupFacts={lookupFactsPromise}
-          radius={radius}
-          pending={pending}
-          nearestShelterHref={buildToolHref({ ...context, tool: "tilfluktsrom" })}
-          friluft={friluft}
-          saker={
-          <EventFeed
-            events={eventsPromise}
-            radius={radius}
-            sort={sort}
-            pending={pending}
-            selectedId={selectedId}
-            onSelect={(id) => setSelection({ id, from: "list" })}
-            expanded={eventsExpanded}
-            onExpandedChange={setEventsExpanded}
-            hrefForEvent={(event) => buildEventHref(event.id, context)}
-            hrefForSort={(s) => buildAreaHref({ ...context, sort: s })}
-            hrefForRadius={(r) => buildAreaHref({ ...context, radius: r })}
-            onNavigate={navigate}
-            cardRefs={cardRefs}
-          />
-          }
-        />
-        {extraSections}
+        <MapSelectionProvider selectedId={selectedId} onSelect={velgFraListe} ids={mapFeatureIds}>
+          <div className="flex flex-col gap-12">
+            {leadSections}
+            <AreaFacts
+              storedFacts={storedFactsPromise}
+              lookupFacts={lookupFactsPromise}
+              radius={radius}
+              pending={pending}
+              nearestShelterHref={buildToolHref({ ...context, tool: "tilfluktsrom" })}
+              friluft={friluft}
+              skolekrets={skolekrets}
+              saker={
+                <EventFeed
+                  events={eventsPromise}
+                  radius={radius}
+                  sort={sort}
+                  pending={pending}
+                  selectedId={selectedId}
+                  onSelect={(id) => setSelection({ id, from: "list" })}
+                  expanded={eventsExpanded}
+                  onExpandedChange={setEventsExpanded}
+                  hrefForEvent={(event) => buildEventHref(event.id, context)}
+                  hrefForSort={(s) => buildAreaHref({ ...context, sort: s })}
+                  hrefForRadius={(r) => buildAreaHref({ ...context, radius: r })}
+                  onNavigate={navigate}
+                  cardRefs={cardRefs}
+                />
+              }
+            />
+            {extraSections}
+          </div>
         </MapSelectionProvider>
       </div>
     </main>

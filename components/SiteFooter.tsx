@@ -11,21 +11,23 @@ import { footerVises, KONTAKT_EPOST } from "@/lib/site";
 export function SiteFooter() {
   if (!footerVises(usePathname() ?? "/")) return null;
 
-  const lenke = "rounded-sm py-1 underline-offset-2 hover:text-ink hover:underline";
+  const lenke = "rounded-sm py-1 underline-offset-3 hover:text-ink hover:underline";
   return (
-    <footer className="mx-auto w-full max-w-6xl px-5 py-6 text-xs leading-relaxed text-muted sm:px-8">
-      <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <span>NaboRadar</span>
-        <span aria-hidden="true">·</span>
-        <a href={`mailto:${KONTAKT_EPOST}`} className={`${lenke} break-all`}>
-          {KONTAKT_EPOST}
-        </a>
-        <span aria-hidden="true">·</span>
-        <Link href="/personvern" className={lenke}>
-          Personvern
-        </Link>
-      </p>
-      <p className="mt-1">Stedsdata og kart © Kartverket</p>
+    <footer className="border-t border-line">
+      <div className="gutter mx-auto flex w-full max-w-[104rem] flex-wrap items-center justify-between gap-x-8 gap-y-2 py-6 text-sm text-subtle">
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="font-medium text-muted">NaboRadar</span>
+          <span aria-hidden="true">·</span>
+          <a href={`mailto:${KONTAKT_EPOST}`} className={`${lenke} break-all`}>
+            {KONTAKT_EPOST}
+          </a>
+          <span aria-hidden="true">·</span>
+          <Link href="/personvern" className={lenke}>
+            Personvern
+          </Link>
+        </p>
+        <p>Stedsdata og kart © Kartverket</p>
+      </div>
     </footer>
   );
 }

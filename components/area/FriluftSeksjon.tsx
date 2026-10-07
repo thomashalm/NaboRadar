@@ -35,30 +35,22 @@ async function FriluftInnhold({ lat, lng, label }: { lat: number; lng: number; l
   const kartHref = buildHutMapHref({ lat, lng, from: label ?? "valgt sted", radiusM: resultat.radiusM });
 
   return (
-    <div>
-      <SectionShell label={HUT_SECTION_LABEL} id="friluft">
-        <div className="rounded-2xl border border-line bg-surface">
-          <p className="px-4 pt-3.5 text-[15px] font-medium text-ink">
-            {hutCountLine(resultat.count, resultat.radiusM, resultat.capped)}
-          </p>
-          {/* Hytter har sin egen radius. Uten denne linjen leses «innen 10 km» mot sirkelen i kartet. */}
-          <p className="px-4 pt-0.5 text-[13px] leading-snug text-muted">
-            Luftlinje fra adressen, i større radius enn resten av siden.
-          </p>
-          <ul className="mt-2 divide-y divide-line">
-            {resultat.cards.map((hut) => (
-              <HytteKort key={hut.id} hut={hut} href={buildHutHref(hut)} />
-            ))}
-          </ul>
-          <div className="border-t border-line px-4 py-3">
-            <Link href={kartHref} className="text-[15px] font-medium text-accent hover:underline">
-              {resultat.count > resultat.cards.length ? "Se alle i kart" : "Se i kart"}
-            </Link>
-            <p className="mt-1.5 text-[13px] leading-snug text-muted">Kilde: Kartverket</p>
-          </div>
-        </div>
-      </SectionShell>
-    </div>
+    <SectionShell label={HUT_SECTION_LABEL} id="friluft">
+      <p className="type-support">{hutCountLine(resultat.count, resultat.radiusM, resultat.capped)}</p>
+      {/* Hytter har sin egen radius. Uten denne linjen leses «innen 10 km» mot sirkelen i kartet. */}
+      <p className="type-meta">Luftlinje fra adressen, i større radius enn resten av siden.</p>
+      <ul className="mt-2 divide-y divide-line">
+        {resultat.cards.map((hut) => (
+          <HytteKort key={hut.id} hut={hut} href={buildHutHref(hut)} />
+        ))}
+      </ul>
+      <p className="mt-1 flex flex-wrap items-center justify-between gap-x-4">
+        <Link href={kartHref} className="link inline-flex min-h-11 items-center text-[15px]">
+          {resultat.count > resultat.cards.length ? "Se alle i kart" : "Se i kart"} →
+        </Link>
+        <span className="type-meta">Kilde: Kartverket</span>
+      </p>
+    </SectionShell>
   );
 }
 
@@ -69,13 +61,13 @@ function HytteKort({ hut, href }: { hut: Hut; href: string }) {
   const status = hutStatusBadge(hut.accessStatus);
   return (
     <li>
-      <Link href={href} className="block px-4 py-2.5 hover:bg-ink/[0.03]">
+      <Link href={href} className="-mx-2 block rounded-control px-2 py-2.5 hover:bg-sunken">
         <span className="block text-[15px] font-medium text-ink">{hut.name}</span>
-        <span className="block text-[13px] text-muted">{hutSummaryLine(hut)}</span>
+        <span className="type-meta block">{hutSummaryLine(hut)}</span>
         {status ? (
-          <span className="block text-[13px] font-medium text-ink">{status}</span>
+          <span className="block text-sm font-medium text-ink">{status}</span>
         ) : (
-          detaljer.length > 0 && <span className="block text-[13px] text-muted">{detaljer.slice(0, 2).join(" · ")}</span>
+          detaljer.length > 0 && <span className="type-meta block">{detaljer.slice(0, 2).join(" · ")}</span>
         )}
         {/* Ingen knapp på kortet: lenken til den som driver hytta står på hyttas egen side. */}
       </Link>

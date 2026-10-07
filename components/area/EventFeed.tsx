@@ -4,6 +4,8 @@ import { STATUS_FORBEHOLD } from "@/lib/plans/visning";
 import Link from "next/link";
 import { Suspense, use, type RefObject } from "react";
 import type { AreaEventsResult } from "@/lib/events/queries";
+import { eventCountLabel, eventEmptyLabel } from "@/lib/events/summary";
+import { Chevron } from "@/components/ui/Chevron";
 import { formatDate, formatRadius } from "@/lib/format";
 import { SectionShell } from "./SectionShell";
 import { DEFAULT_ANNOUNCED_WITHIN_MONTHS } from "@/lib/geo/constants";
@@ -38,18 +40,6 @@ export { STATUS_FORBEHOLD };
 /** Hvor mange saker som vises når gruppen åpnes. Resten ligger bak «Se alle saker». */
 const PREVIEW = 3;
 
-/**
- * «2 varslede planoppstarter innen 1 km». Er alle sakene planoppstarter — som i dag, med DiBK som
- * eneste kilde — sier linjen hva de er. Kommer det andre typer, faller den tilbake på «saker».
- */
-function countLabel(events: readonly { type: string }[], radius: number) {
-  const n = events.length;
-  if (n === 0) return "Ingen saker i området";
-  const planoppstarter = events.every((e) => e.type === "planning_started");
-  const ord = planoppstarter ? (n === 1 ? "varslet planoppstart" : "varslede planoppstarter") : n === 1 ? "sak" : "saker";
-  return `${n} ${ord} innen ${formatRadius(radius)}`;
-}
-
 export function EventFeed(props: EventFeedProps) {
   const { pending } = props;
 
@@ -57,7 +47,7 @@ export function EventFeed(props: EventFeedProps) {
     // Samme ramme som de andre seksjonene: overskrift, innhold, detaljer bak utvider.
     <SectionShell label="Planer og saker" id="events-heading">
       {pending && (
-        <p role="status" className="mb-3 flex items-center gap-2 text-sm text-muted">
+        <p role="status" className="type-meta mb-3 flex items-center gap-2">
           <span className="block size-4 animate-spin rounded-full border-2 border-line-strong border-t-accent" aria-hidden="true" />
           Oppdaterer …
         </p>
@@ -81,8 +71,8 @@ function EventFeedBody(props: EventFeedProps) {
     <>
         {result.status === "unavailable" ? (
           <Notice>
-            <p className="font-medium text-ink">Vi får ikke hentet plansaker akkurat nå.</p>
-            <p className="mt-1 text-muted">Kart og søk fungerer fortsatt. Prøv igjen litt senere.</p>
+            <p className="text-ink">Vi får ikke hentet plansaker akkurat nå.</p>
+            <p className="type-meta mt-0.5">Kart og søk fungerer fortsatt. Prøv igjen litt senere.</p>
             {process.env.NODE_ENV === "development" && (
               <p className="mt-3 rounded-lg bg-danger-soft px-3 py-2 font-mono text-xs text-danger">
                 Dev: {result.devReason}
@@ -91,7 +81,7 @@ function EventFeedBody(props: EventFeedProps) {
           </Notice>
         ) : result.dataUpdatedAt === null ? (
           <Notice>
-            <p className="font-medium text-ink">Plandata er ikke hentet ennå.</p>
+            <p className="text-ink">Plandata er ikke hentet ennå.</p>
             {process.env.NODE_ENV === "development" && (
               <p className="mt-1 text-muted">
                 Kjør <code className="font-mono text-sm">npm run sync:dibk</code> eller «Sync now» på{" "}
@@ -104,8 +94,8 @@ function EventFeedBody(props: EventFeedProps) {
           // veien videre på samme linje.
           // Sier nøyaktig hva som er kontrollert. «Ingen planer» ville vært feil: kilden har bare
           // varsler fra private forslagsstillere. Resten står i «Kilde og metode».
-          <p className="text-[15px] leading-relaxed text-muted">
-            Ingen varslede planoppstarter fra private forslagsstillere innen {formatRadius(radius)} siste {MONTHS} måneder
+          <p className="type-support">
+            {eventEmptyLabel(radius)}
             {radius < 3000 && (
               <>
                 {" · "}
@@ -117,7 +107,7 @@ function EventFeedBody(props: EventFeedProps) {
                     e.preventDefault();
                     onNavigate(hrefForRadius(3000));
                   }}
-                  className="font-medium text-accent hover:underline"
+                  className="link"
                 >
                   Se {formatRadius(3000)}
                 </Link>
@@ -125,25 +115,28 @@ function EventFeedBody(props: EventFeedProps) {
             )}
           </p>
         ) : (
-          // Kompakt som gruppene i «Nærområdet»: antallet først, sakene når man åpner.
+          // Antallet først, sakene når man åpner — samme mønster som gruppene ellers på siden.
           <details
-            className="rounded-2xl border border-line bg-surface"
+            className="disclosure"
             open={expanded ?? result.events.length <= PREVIEW}
             onToggle={(event) => onExpandedChange(event.currentTarget.open)}
           >
-            <summary className="cursor-pointer px-5 py-3.5">
-              <span className="text-[15px] font-medium text-ink">{countLabel(result.events, radius)}</span>
-              <span className="mt-0.5 block text-[13px] text-muted">Siste {MONTHS} måneder</span>
+            <summary className="-mx-2 flex items-start gap-3 rounded-control px-2 py-1.5 hover:bg-sunken">
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] font-semibold text-ink">{eventCountLabel(result.events, radius)}</span>
+                <span className="type-meta block">Siste {MONTHS} måneder</span>
+              </span>
+              <Chevron className="mt-1" />
             </summary>
 
-            <div className="px-5 pb-4">
-              {/* Én gang for hele lista, ikke på hvert kort. */}
-              <p className="text-[13px] leading-relaxed text-muted">{STATUS_FORBEHOLD}</p>
-              {result.events.length > 1 && (
-                <div className="mb-3 flex justify-end">
+            <div className="pt-3">
+              <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+                {/* Én gang for hele lista, ikke på hver sak. */}
+                <p className="type-meta max-w-prose flex-1 basis-64">{STATUS_FORBEHOLD}</p>
+                {result.events.length > 1 && (
                   <SortToggle sort={sort} hrefForSort={hrefForSort} onNavigate={onNavigate} />
-                </div>
-              )}
+                )}
+              </div>
 
               <EventList
                 events={result.events.slice(0, PREVIEW)}
@@ -154,9 +147,10 @@ function EventFeedBody(props: EventFeedProps) {
               />
 
               {result.events.length > PREVIEW && (
-                <details className="mt-3">
-                  <summary className="inline-flex h-9 cursor-pointer items-center text-[15px] font-medium text-accent">
+                <details className="disclosure">
+                  <summary className="link inline-flex min-h-11 items-center gap-1 text-[15px]">
                     Se alle saker ({result.events.length})
+                    <Chevron className="size-3.5 text-accent" />
                   </summary>
                   <EventList
                     events={result.events.slice(PREVIEW)}
@@ -180,11 +174,12 @@ function EventFeedBody(props: EventFeedProps) {
         sak å ta forbehold om.
       */}
       {result.status === "ok" && result.dataUpdatedAt && (
-        <details className="mt-3">
-          <summary className="cursor-pointer text-[13px] font-medium text-muted hover:text-ink">
+        <details className="disclosure mt-2">
+          <summary className="inline-flex min-h-9 items-center gap-1 text-sm font-medium text-muted hover:text-ink">
             Kilde og metode
+            <Chevron className="size-3.5" />
           </summary>
-          <div className="mt-1.5 flex flex-col gap-1.5 text-[13px] leading-relaxed text-muted">
+          <div className="type-meta flex flex-col gap-1.5">
             <p>
               Kilde: Direktoratet for byggkvalitet, «Planlegging igangsatt» (NLOD 2.0). Sist hentet{" "}
               {formatDate(result.dataUpdatedAt)}.
@@ -208,16 +203,12 @@ function EventFeedBody(props: EventFeedProps) {
   );
 }
 
-/** Rolig plassholder i samme form som den ferdige gruppen. */
+/** Rolig plassholder i samme form som den ferdige raden. */
 export function SectionSkeleton({ label }: { label: string }) {
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="flex min-h-[4.5rem] flex-col justify-center rounded-2xl border border-line bg-surface px-5 py-3.5"
-    >
-      <span className="text-[15px] font-medium text-muted">{label}</span>
-      <span aria-hidden="true" className="mt-2 h-2 w-32 animate-pulse rounded-full bg-line" />
+    <div role="status" aria-live="polite" className="flex min-h-12 flex-col justify-center gap-2">
+      <span className="type-meta">{label}</span>
+      <span aria-hidden="true" className="h-2 w-40 animate-pulse rounded-full bg-line" />
     </div>
   );
 }
@@ -236,7 +227,7 @@ function EventList({
   cardRefs: RefObject<Map<string, HTMLElement>>;
 }) {
   return (
-    <ul className="mt-3 flex flex-col gap-3">
+    <ul className="mt-2 divide-y divide-line">
       {events.map((event) => (
         <li key={event.id}>
           <EventCard
@@ -256,7 +247,7 @@ function EventList({
 }
 
 function Notice({ children }: { children: React.ReactNode }) {
-  return <div className="rounded-2xl border border-dashed border-line-strong px-5 py-6 text-[15px]">{children}</div>;
+  return <div className="text-[15px] leading-relaxed">{children}</div>;
 }
 
 function SortToggle({
@@ -274,7 +265,7 @@ function SortToggle({
     { value: "newest", label: "Nyeste" },
   ];
   return (
-    <nav aria-label="Sortering" className="inline-flex rounded-full bg-canvas p-0.5 ring-1 ring-line">
+    <nav aria-label="Sortering" className="inline-flex shrink-0 rounded-control bg-sunken p-0.5">
       {options.map((option) => {
         const selected = option.value === sort;
         const href = hrefForSort(option.value);
@@ -290,8 +281,8 @@ function SortToggle({
               event.preventDefault();
               if (!selected) onNavigate(href);
             }}
-            className={`flex h-9 items-center rounded-full px-3.5 text-sm font-medium ${
-              selected ? "bg-surface text-ink shadow-float" : "text-muted hover:text-ink"
+            className={`flex h-9 items-center rounded-[0.625rem] px-3 text-sm font-medium ${
+              selected ? "bg-surface text-ink shadow-[0_1px_2px_rgb(20_23_26/0.12)]" : "text-muted hover:text-ink"
             }`}
           >
             {option.label}

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import type { GeocodeResponse } from "@/app/api/geocode/route";
+import { addressLabel } from "@/lib/area-address";
 import { buildAreaHref, buildToolHref, type AreaBasePath, type AreaTool } from "@/lib/area-params";
 import type { SearchLocation } from "@/lib/geocoding/types";
 
@@ -91,7 +92,9 @@ export function SearchBox({ radius, size = "compact", autoFocus, onSelected, onN
   function select(location: SearchLocation) {
     setOpen(false);
     setQuery(location.label);
-    const context = { lat: location.latitude, lng: location.longitude, radius, label: location.label, basePath };
+    // Adresser får poststedet med i etiketten, så resultatsiden kan vise «Kirkeveien 60» og «0368 Oslo».
+    const label = location.type === "address" ? addressLabel(location) : location.label;
+    const context = { lat: location.latitude, lng: location.longitude, radius, label, basePath };
     const href = tool ? buildToolHref({ ...context, tool }) : buildAreaHref(context);
     if (onNavigate) onNavigate(href);
     else {
@@ -144,14 +147,14 @@ export function SearchBox({ radius, size = "compact", autoFocus, onSelected, onN
 
   return (
     <div ref={containerRef} className="relative">
-      <label htmlFor={inputId} className={large ? "mb-2.5 block text-sm font-medium text-ink" : "sr-only"}>
+      <label htmlFor={inputId} className="sr-only">
         Søk etter adresse eller sted
       </label>
 
       <div
-        className={`group relative flex items-center rounded-2xl border bg-surface transition-shadow ${
-          showList ? "border-line-strong shadow-pop" : "border-line shadow-float"
-        } focus-within:border-accent`}
+        className={`group relative flex items-center border bg-surface transition-shadow focus-within:border-accent focus-within:ring-4 focus-within:ring-accent/10 ${
+          large ? "rounded-panel" : "rounded-control"
+        } ${showList ? "border-line-strong shadow-pop" : large ? "border-line-strong shadow-float" : "border-line-strong"}`}
       >
         <SearchIcon className={`pointer-events-none absolute text-muted ${large ? "left-5 size-6" : "left-4 size-5"}`} />
         <input
@@ -167,7 +170,7 @@ export function SearchBox({ radius, size = "compact", autoFocus, onSelected, onN
           spellCheck={false}
           enterKeyHint="search"
           autoFocus={autoFocus}
-          placeholder="Sognsvann, Majorstuen eller Karl Johans gate 1"
+          placeholder={large ? "Søk etter en adresse" : "Adresse eller sted"}
           value={query}
           onChange={(event) => {
             setQuery(event.target.value);
@@ -175,7 +178,7 @@ export function SearchBox({ radius, size = "compact", autoFocus, onSelected, onN
           }}
           onFocus={() => setOpen(true)}
           onKeyDown={onKeyDown}
-          className={`w-full min-w-0 rounded-2xl bg-transparent text-ink placeholder:text-muted/70 focus:outline-none ${
+          className={`w-full min-w-0 rounded-[inherit] bg-transparent text-ink placeholder:text-subtle focus:outline-none ${
             large ? "h-16 pr-14 pl-14 text-lg sm:h-[4.5rem] sm:text-xl" : "h-13 pr-12 pl-12 text-base"
           }`}
         />
@@ -189,7 +192,7 @@ export function SearchBox({ radius, size = "compact", autoFocus, onSelected, onN
       </div>
 
       {showList && (
-        <div className="absolute inset-x-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border border-line bg-surface shadow-pop">
+        <div className="absolute inset-x-0 top-full z-30 mt-2 overflow-hidden rounded-panel border border-line bg-surface text-left shadow-pop">
           {visibleStatus === "error" ? (
             <Message tone="error">Vi får ikke søkt etter steder akkurat nå. Prøv igjen.</Message>
           ) : visibleStatus === "success" && results.length === 0 ? (
@@ -213,13 +216,13 @@ export function SearchBox({ radius, size = "compact", autoFocus, onSelected, onN
                 onMouseDown={(event) => event.preventDefault()}
                 onMouseMove={() => setActiveIndex(index)}
                 onClick={() => select(location)}
-                className={`mx-1.5 flex min-h-14 cursor-pointer items-center gap-3.5 rounded-xl px-3 py-2.5 ${
+                className={`mx-1.5 flex min-h-14 cursor-pointer items-center gap-3.5 rounded-control px-3 py-2.5 ${
                   index === activeIndex ? "bg-accent-soft" : ""
                 }`}
               >
                 <span
                   className={`flex size-9 shrink-0 items-center justify-center rounded-full ${
-                    index === activeIndex ? "bg-surface text-accent" : "bg-canvas text-muted"
+                    index === activeIndex ? "bg-surface text-accent" : "bg-sunken text-muted"
                   }`}
                   aria-hidden="true"
                 >

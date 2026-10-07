@@ -2,31 +2,18 @@
 
 import Link from "next/link";
 import { Suspense, use } from "react";
+import { Chevron } from "@/components/ui/Chevron";
 import { DeepLinkTarget } from "./DeepLinkTarget";
 import { useMapSelection } from "./map-selection";
-import {
-  grunnforholdCluster,
-  infrastrukturCluster,
-  stoyCluster,
-} from "@/lib/facts/clusters";
+import { buildChapters, HVERDAG_CLUSTER, type Chapter, type ChapterPart } from "@/lib/area-chapters";
+import { sectionAnchor } from "@/lib/area-summary";
+import { assembleSection } from "@/lib/facts/assemble";
 import { mergeFactResults } from "@/lib/facts/merge";
-import type {
-  AreaFactGroup,
-  AreaFactsResult,
-  FactCluster,
-  OverviewItem,
-  SectionOverview,
-} from "@/lib/facts/queries";
+import type { AreaFactsResult, FactCluster, OverviewItem, SectionOverview } from "@/lib/facts/queries";
 import { combineStates } from "@/lib/facts/section-state";
 import { formatRadius } from "@/lib/format";
 import { TILFLUKTSROM_NAERMESTE_LENKE } from "@/lib/facts/wording";
-import {
-  AREA_SECTIONS,
-  PUBLIC_AREA_SECTIONS,
-  SAKER_SECTION_ID,
-  sectionWaitsForLookups,
-  type AreaFact,
-} from "@/types/area-feature";
+import { AREA_SECTIONS, PUBLIC_AREA_SECTIONS, sectionWaitsForLookups, type AreaFact } from "@/types/area-feature";
 import { SectionSkeleton } from "./EventFeed";
 import { SectionShell } from "./SectionShell";
 
@@ -56,6 +43,8 @@ interface AreaFactsProps {
    * forhold ved adressen, og har sin egen radius.
    */
   friluft?: React.ReactNode;
+  /** Skolekretsnotisen, rendret på serveren. Står først i «Hverdagen». */
+  skolekrets?: React.ReactNode;
   /** Samme søk, men med de nærmeste tilfluktsrommene vist også utenfor valgt radius. */
   nearestShelterHref?: string;
 }
@@ -71,56 +60,78 @@ export function AreaFacts({
   pending,
   saker,
   friluft,
+  skolekrets,
   nearestShelterHref,
 }: AreaFactsProps) {
   return (
-    <section
-      aria-labelledby="facts-heading"
-      aria-busy={pending}
-      className="mt-9"
-    >
-      {/*
-        Bare for skjermlesere. Seksjonene under er H3, og hovedinnholdet trenger en H2 over dem.
-        Synlig sa den det samme som adressen og radiusvelgeren rett over.
-      */}
-      <h2 id="facts-heading" className="sr-only">
-        Funn i området
-      </h2>
+    <div aria-busy={pending} className={`transition-opacity ${pending ? "pointer-events-none opacity-40" : ""}`}>
+      <Suspense fallback={<AlleSkjeletter />}>
+        <FactsBody
+          storedFacts={storedFacts}
+          lookupFacts={lookupFacts}
+          radius={radius}
+          saker={saker}
+          friluft={friluft}
+          skolekrets={skolekrets}
+          nearestShelterHref={nearestShelterHref}
+        />
+      </Suspense>
+    </div>
+  );
+}
 
-      <div
-        className={`mt-4 transition-opacity ${pending ? "pointer-events-none opacity-40" : ""}`}
-      >
-        <Suspense fallback={<AlleSkjeletter />}>
-          <FactsBody
-            storedFacts={storedFacts}
-            lookupFacts={lookupFacts}
-            radius={radius}
-            saker={saker}
-            friluft={friluft}
-            nearestShelterHref={nearestShelterHref}
-          />
-        </Suspense>
-      </div>
+/**
+ * Ett kapittel: overskrift, eventuelt én linje, og seksjonene.
+ *
+ * Kapittelet vet ikke på forhånd om det får innhold — seksjonene strømmer inn hver for seg, og
+ * noen faller bort. Det viser seg derfor bare når minst én seksjon (`data-section`) finnes i det.
+ */
+function ChapterShell({ chapter, children }: { chapter: Pick<Chapter, "id" | "label" | "lead">; children: React.ReactNode }) {
+  const headingId = `kapittel-${chapter.id}`;
+  return (
+    <section aria-labelledby={headingId} className="hidden border-t border-ink/15 pt-7 has-[[data-section]]:block">
+      <h2 id={headingId} className="type-h2 text-ink">
+        {chapter.label}
+      </h2>
+      {chapter.lead && <p className="type-meta mt-1">{chapter.lead}</p>}
+      <div className={SEKSJONER}>{children}</div>
     </section>
   );
 }
 
-/** Mens vi venter på den første kilden: én rolig linje per seksjon, i standardrekkefølge. */
+/**
+ * Seksjonene i et kapittel: lik luft over og under hver, og en tynn linje mellom dem. Rytmen
+ * settes her og ikke i seksjonene, fordi de ligger i innpakninger av ulik dybde (anker, Suspense).
+ */
+const SEKSJONER = "flex flex-col divide-y divide-line *:py-5 *:last:pb-0";
+
+/** Mens vi venter på den første kilden: kapitlene i standardrekkefølge, med rolige plassholdere. */
 function AlleSkjeletter() {
+  const { chapters } = buildChapters(PUBLIC_AREA_SECTIONS.map((section) => section.id));
   return (
-    <div className="flex flex-col gap-7">
-      {PUBLIC_AREA_SECTIONS.map((section) => (
-        <SectionShell key={section.id} label={section.label}>
-          <SectionSkeleton label="Henter data …" />
-        </SectionShell>
+    <div className="flex flex-col gap-12">
+      {chapters.map((chapter) => (
+        <ChapterShell key={chapter.id} chapter={chapter}>
+          {chapter.parts.map((part) =>
+            part.kind === "saker" ? (
+              <SectionShell key="saker" label="Planer og saker">
+                <SectionSkeleton label="Henter plansaker …" />
+              </SectionShell>
+            ) : part.kind === "section" && part.clusters !== "hverdag" ? (
+              <SectionShell key={part.sectionId} label={SECTION_LABELS[part.sectionId] ?? part.sectionId}>
+                <SectionSkeleton label="Henter data …" />
+              </SectionShell>
+            ) : null,
+          )}
+        </ChapterShell>
       ))}
     </div>
   );
 }
 
 /**
- * Databasen bestemmer rekkefølgen, så resten av siden venter på den — men bare på den.
- * Seksjoner som også trenger et direkte oppslag får sin egen venteboks.
+ * Databasen bestemmer hvilke seksjoner som finnes, så resten av siden venter på den — men bare
+ * på den. Seksjoner som også trenger et direkte oppslag får sin egen venteboks.
  */
 function FactsBody({
   storedFacts,
@@ -128,6 +139,7 @@ function FactsBody({
   radius,
   saker,
   friluft,
+  skolekrets,
   nearestShelterHref,
 }: {
   storedFacts: Promise<AreaFactsResult>;
@@ -135,45 +147,65 @@ function FactsBody({
   radius: number;
   saker: React.ReactNode;
   friluft?: React.ReactNode;
+  skolekrets?: React.ReactNode;
   nearestShelterHref?: string;
 }) {
   const db = use(storedFacts);
-  const order =
-    db.status === "ok" ? db.order : PUBLIC_AREA_SECTIONS.map((section) => section.id);
+  const order = db.status === "ok" ? db.order : PUBLIC_AREA_SECTIONS.map((section) => section.id);
+  const { lifted, chapters } = buildChapters(order);
+
+  const seksjon = (sectionId: string, clusters?: "hverdag" | "ovrige") => {
+    const key = `${sectionId}:${clusters ?? ""}`;
+    return sectionWaitsForLookups(sectionId) ? (
+      <Suspense
+        key={key}
+        fallback={
+          <SectionShell label={SECTION_LABELS[sectionId] ?? sectionId}>
+            <SectionSkeleton label="Henter data …" />
+          </SectionShell>
+        }
+      >
+        <FactSection sectionId={sectionId} db={db} lookupFacts={lookupFacts} radius={radius} />
+      </Suspense>
+    ) : (
+      <FactSection
+        key={key}
+        sectionId={sectionId}
+        clusters={clusters}
+        db={db}
+        radius={radius}
+        nearestShelterHref={nearestShelterHref}
+      />
+    );
+  };
+
+  const del = (part: ChapterPart) => {
+    switch (part.kind) {
+      case "saker":
+        return (
+          <div key="saker" id={sectionAnchor("saker")} className="scroll-mt-24">
+            {saker}
+          </div>
+        );
+      case "skolekrets":
+        // Notisen finnes bare for noen adresser. En tom innpakning skal ikke etterlate en linje.
+        return skolekrets ? <div key="skolekrets" className="empty:hidden">{skolekrets}</div> : null;
+      case "friluft":
+        return friluft ? <div key="friluft" className="empty:hidden">{friluft}</div> : null;
+      case "section":
+        return seksjon(part.sectionId, part.clusters);
+    }
+  };
 
   return (
     <>
-      <div className="flex flex-col gap-7">
-        {order.map((sectionId) =>
-          sectionId === SAKER_SECTION_ID ? (
-            <div key={sectionId}>{saker}</div>
-          ) : sectionWaitsForLookups(sectionId) ? (
-            <Suspense
-              key={sectionId}
-              fallback={
-                <SectionShell label={SECTION_LABELS[sectionId] ?? sectionId}>
-                  <SectionSkeleton label="Henter data …" />
-                </SectionShell>
-              }
-            >
-              <FactSection
-                sectionId={sectionId}
-                db={db}
-                lookupFacts={lookupFacts}
-                radius={radius}
-              />
-            </Suspense>
-          ) : (
-            <FactSection
-              key={sectionId}
-              sectionId={sectionId}
-              db={db}
-              radius={radius}
-              nearestShelterHref={nearestShelterHref}
-            />
-          ),
-        )}
-        {friluft}
+      <div className="flex flex-col gap-12">
+        {lifted.length > 0 && <div className={SEKSJONER}>{lifted.map((sectionId) => seksjon(sectionId))}</div>}
+        {chapters.map((chapter) => (
+          <ChapterShell key={chapter.id} chapter={chapter}>
+            {chapter.parts.map(del)}
+          </ChapterShell>
+        ))}
       </div>
       <Suspense fallback={null}>
         <Kildelinjer db={db} lookupFacts={lookupFacts} radius={radius} />
@@ -182,15 +214,24 @@ function FactsBody({
   );
 }
 
+/** Seksjonene oppsummeringen øverst lenker til. «Skoler og barnehager» er en gruppe i Nærområdet. */
+function ankerFor(sectionId: string, clusters?: "hverdag" | "ovrige"): string | undefined {
+  if (sectionId === "naeromradet") return clusters === "hverdag" ? sectionAnchor("skoler") : undefined;
+  return sectionAnchor(sectionId);
+}
+
 /** Én seksjon, satt sammen av de kildene den faktisk bruker. */
 function FactSection({
   sectionId,
+  clusters,
   db,
   lookupFacts,
   radius,
   nearestShelterHref,
 }: {
   sectionId: string;
+  /** Bare for Nærområdet: hvilken del av gruppene som hører til dette kapittelet. */
+  clusters?: "hverdag" | "ovrige";
   db: AreaFactsResult;
   /** Satt bare for seksjoner som faktisk bruker et direkte oppslag. */
   lookupFacts?: Promise<AreaFactsResult>;
@@ -200,74 +241,65 @@ function FactSection({
   // use() kan stå i en betingelse; hvorvidt en seksjon har oppslag er dessuten fast.
   const lookups = lookupFacts ? use(lookupFacts) : null;
   const deler = [db, ...(lookups ? [lookups] : [])];
-  const state = combineStates(
-    deler.map((del) => (del.status === "ok" ? "klar" : "feilet")),
-  );
-
-  const group = deler
-    .flatMap((del) => (del.status === "ok" ? del.groups : []))
-    .filter((g) => g.sectionId === sectionId)
-    .reduce<AreaFactGroup | null>(
-      (samlet, del) =>
-        samlet === null
-          ? del
-          : {
-              ...samlet,
-              facts: [...samlet.facts, ...del.facts].sort(
-                (a, b) =>
-                  Number(b.contains) - Number(a.contains) ||
-                  (a.distanceM ?? 0) - (b.distanceM ?? 0),
-              ),
-              clusters: [...samlet.clusters, ...del.clusters],
-              overview: samlet.overview ?? del.overview,
-            },
-      null,
-    );
-
-  // Grunnforhold og infrastruktur får kilder fra begge hold, så gruppen bygges her — når
-  // delene er slått sammen. Ellers ville seksjonen fått én gruppe per kilde.
-  const samlet = group ? byggGruppe(sectionId, group, radius) : null;
+  const state = combineStates(deler.map((d) => (d.status === "ok" ? "klar" : "feilet")));
+  const hele = assembleSection(deler, sectionId, radius);
+  // Kapitlene deler Nærområdet i to. Løse kort og oversikt følger «øvrige», så de står ett sted.
+  const samlet =
+    hele && clusters
+      ? {
+          ...hele,
+          clusters: hele.clusters.filter((c) => (c.id === HVERDAG_CLUSTER) === (clusters === "hverdag")),
+          facts: clusters === "hverdag" ? [] : hele.facts,
+          overview: clusters === "hverdag" ? null : hele.overview,
+        }
+      : hele;
 
   const label = SECTION_LABELS[sectionId] ?? sectionId;
-  // Seksjonene med stabilt anker. Ankeret står også på feilmeldingen: en lenke til
+  const anker = ankerFor(sectionId, clusters);
+  // Seksjonene med stabilt anker i URL-en. Ankeret står også på feilmeldingen: en lenke til
   // #tilfluktsrom skal lande på forklaringen, ikke øverst på siden.
   const ramme = (innhold: React.ReactNode) =>
-    ANKERSEKSJONER.has(sectionId) ? <DeepLinkTarget id={sectionId}>{innhold}</DeepLinkTarget> : innhold;
+    ANKERSEKSJONER.has(sectionId) ? (
+      <DeepLinkTarget id={sectionId}>{innhold}</DeepLinkTarget>
+    ) : (
+      <div id={anker} className="scroll-mt-24">
+        {innhold}
+      </div>
+    );
 
   if (state === "feilet") {
+    // Én melding per seksjon, også når kapitlene deler den i to.
+    if (clusters === "hverdag") return null;
     return ramme(
       <SectionShell label={label}>
-        <p className="rounded-2xl border border-dashed border-line-strong px-5 py-4 text-[15px] text-muted">
-          Kunne ikke hente {label.toLowerCase()} akkurat nå.
-        </p>
+        <p className="type-support">Kunne ikke hente {label.toLowerCase()} akkurat nå.</p>
       </SectionShell>,
     );
   }
-  if (!samlet) return null;
+  if (!samlet || (samlet.clusters.length === 0 && samlet.facts.length === 0 && !samlet.overview)) return null;
+
+  // Gruppene bærer navnet sitt selv. Da trenger ikke seksjonen en egen overskrift over.
+  const bareGrupper = samlet.clusters.length > 0 && samlet.facts.length === 0 && !samlet.overview;
 
   return ramme(
-    <SectionShell label={samlet.label} intro={samlet.intro}>
-      <div className="flex flex-col gap-3">
+    <SectionShell label={samlet.label} intro={bareGrupper ? null : samlet.intro} hideLabel={bareGrupper}>
+      <div className="flex flex-col gap-5">
         {samlet.clusters.map((cluster) =>
           cluster.emptyNote ? (
             <EmptyNote
               key={cluster.id}
+              // Noen grupper bruker selve meldingen som navn. Da står seksjonsnavnet over, ikke meldingen to ganger.
+              label={cluster.label === cluster.emptyNote.text ? samlet.label : cluster.label}
               text={cluster.emptyNote.text}
               detail={cluster.emptyNote.detail}
               href={cluster.emptyNote.nearestLink ? nearestShelterHref : undefined}
             />
           ) : (
-            // Er gruppen hele seksjonen, gjentar vi ikke navnet. Undertypene i Nærområdet
-            // trenger sitt eget navn, fordi seksjonen rommer flere av dem.
-            <ClusterDetails
-              key={cluster.id}
-              cluster={cluster}
-              showLabel={cluster.label !== samlet.label}
-            />
+            <ClusterDetails key={cluster.id} cluster={cluster} />
           ),
         )}
         {samlet.facts.length > 0 && (
-          <ul className="flex flex-col gap-3">
+          <ul className="flex flex-col gap-5">
             {samlet.facts.map((fact) => (
               <li key={fact.id}>
                 <FactItem fact={fact} />
@@ -277,11 +309,7 @@ function FactSection({
         )}
         {samlet.overview && (
           <>
-            {samlet.overview.noAttentionNote && (
-              <p className="text-[15px] leading-relaxed text-muted">
-                {samlet.overview.noAttentionNote}
-              </p>
-            )}
+            {samlet.overview.noAttentionNote && <p className="type-support">{samlet.overview.noAttentionNote}</p>}
             <OverviewDetails overview={samlet.overview} />
           </>
         )}
@@ -299,41 +327,29 @@ const ANKERSEKSJONER: ReadonlySet<string> = new Set(["tilfluktsrom"]);
  * Ikke en utvider — det er ingenting å åpne. Lenken går til samme søk i spesialverktøyets
  * visning, der de nærmeste rommene står, merket som utenfor radius.
  */
-function EmptyNote({ text, detail, href }: { text: string; detail?: string | null; href?: string }) {
+function EmptyNote({
+  label,
+  text,
+  detail,
+  href,
+}: {
+  label: string;
+  text: string;
+  detail?: string | null;
+  href?: string;
+}) {
   return (
-    <div className="rounded-2xl border border-line bg-surface px-5 py-3.5 text-[15px]">
-      <p className="text-ink">{text}</p>
-      {detail && <p className="mt-0.5 text-[13px] leading-relaxed text-muted">{detail}</p>}
+    <div>
+      <h3 className="type-h3 text-ink">{label}</h3>
+      <p className="type-support mt-0.5">{text}</p>
+      {detail && <p className="type-meta mt-1">{detail}</p>}
       {href && (
-        <Link href={href} className="mt-1 inline-flex h-9 items-center font-medium text-accent hover:underline">
+        <Link href={href} className="link mt-1 inline-flex min-h-11 items-center text-[15px]">
           {TILFLUKTSROM_NAERMESTE_LENKE} →
         </Link>
       )}
     </div>
   );
-}
-
-/** Seksjoner hvis gruppe bygges av de ferdige faktaene, ikke av delsvarene hver for seg. */
-const BYGGES_AV_FAKTA: Record<
-  string,
-  (facts: AreaFact[], radiusM: number) => FactCluster | null
-> = {
-  grunnforhold: grunnforholdCluster,
-  infrastruktur: infrastrukturCluster,
-  stoy: stoyCluster,
-};
-
-function byggGruppe(
-  sectionId: string,
-  group: AreaFactGroup,
-  radiusM: number,
-): AreaFactGroup {
-  const bygg = BYGGES_AV_FAKTA[sectionId];
-  if (!bygg || group.facts.length === 0) return group;
-  const cluster = bygg(group.facts, radiusM);
-  return cluster
-    ? { ...group, facts: [], clusters: [...group.clusters, cluster] }
-    : group;
 }
 
 /** Kildelisten nederst kan først skrives når alle kildene har svart. */
@@ -348,127 +364,99 @@ function Kildelinjer({
 }) {
   const samlet = mergeFactResults(db, use(lookupFacts));
   if (samlet.status !== "ok") {
-    return (
-      <Notice>
-        <p className="font-medium text-ink">
-          Vi får ikke hentet områdedata akkurat nå.
-        </p>
-      </Notice>
-    );
+    return <Notice>Vi får ikke hentet områdedata akkurat nå.</Notice>;
   }
   if (samlet.groups.length === 0) {
-    return (
-      <Notice>
-        <p className="font-medium text-ink">
-          Ingen registrerte forhold i kildene våre innen {formatRadius(radius)}.
-        </p>
-      </Notice>
-    );
+    return <Notice>Ingen registrerte forhold i kildene våre innen {formatRadius(radius)}.</Notice>;
   }
 
   return (
-    <>
+    <div className="mt-12 border-t border-ink/15 pt-5">
       {samlet.unavailableSources.length > 0 && (
-        <p className="mt-5 text-[13px] text-muted">
-          Disse kildene svarte ikke akkurat nå:{" "}
-          {samlet.unavailableSources.join(", ")}. Resten av oversikten er
+        <p className="type-meta mb-3">
+          Disse kildene svarte ikke akkurat nå: {samlet.unavailableSources.join(", ")}. Resten av oversikten er
           fullstendig.
         </p>
       )}
       {samlet.sources.length > 0 && (
         /*
-         * Samlet provenance, bak en utvider.
-         *
-         * Listen sto tidligere som et avsnitt rett under siste seksjon, og var da den lengste
-         * sammenhengende teksten på siden — den konkurrerte visuelt med selve funnene. Den er
-         * fortsatt komplett og ett trykk unna; det er rekkefølgen som er endret, ikke innholdet.
+         * Samlet provenance, bak en utvider. Listen er komplett og ett trykk unna, men skal ikke
+         * konkurrere visuelt med funnene.
          */
-        <details className="mt-8 rounded-2xl border border-line bg-surface">
-          <summary className="cursor-pointer px-5 py-3.5 text-[13px] font-medium text-muted hover:text-ink">
+        <details className="disclosure">
+          <summary className="flex min-h-11 items-center justify-between gap-3 text-[15px] font-medium text-ink">
             Kilder og metode ({samlet.sources.length})
+            <Chevron />
           </summary>
-          <div className="px-5 pb-4">
-            <ul className="divide-y divide-line border-t border-line">
-              {samlet.sources.map((source) => (
-                <li
-                  key={source.name}
-                  className="py-2.5 text-[13px] leading-relaxed"
-                >
-                  {source.url ? (
-                    <a
-                      href={source.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-ink underline decoration-line underline-offset-2 hover:decoration-ink"
-                    >
-                      {source.name}
-                    </a>
-                  ) : (
-                    <span className="text-ink">{source.name}</span>
-                  )}
-                  <span className="block text-muted">
-                    {source.owner} · {source.licenseName}
-                  </span>
-                  {source.method && (
-                    <span className="mt-0.5 block text-muted">
-                      {source.method}
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-            <p className="mt-3 text-[13px] leading-relaxed text-muted">
-              Datasettene over er de som faktisk inngikk i dette resultatet.
-              NaboRadar vurderer ikke forholdene eller stedene, og viser bare
-              det kildene selv oppgir.
-            </p>
-          </div>
+          <ul className="mt-1 divide-y divide-line">
+            {samlet.sources.map((source) => (
+              <li key={source.name} className="py-3">
+                {source.url ? (
+                  <a
+                    href={source.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[15px] text-ink underline decoration-line-strong underline-offset-3 hover:decoration-ink"
+                  >
+                    {source.name}
+                  </a>
+                ) : (
+                  <span className="text-[15px] text-ink">{source.name}</span>
+                )}
+                <span className="type-meta block">
+                  {source.owner} · {source.licenseName}
+                </span>
+                {source.method && <span className="type-meta mt-0.5 block">{source.method}</span>}
+              </li>
+            ))}
+          </ul>
+          <p className="type-meta mt-3">
+            Datasettene over er de som faktisk inngikk i dette resultatet. NaboRadar vurderer ikke forholdene eller
+            stedene, og viser bare det kildene selv oppgir.
+          </p>
         </details>
       )}
-    </>
+    </div>
   );
 }
 
+/**
+ * Ett funn med full tekst. Ikke et kort: en tynn strek til venstre holder funnet sammen, og
+ * resten er typografi. Kilden står alltid sist, på egen linje.
+ */
 function FactItem({ fact }: { fact: AreaFact }) {
   return (
-    <article className="rounded-2xl border border-line bg-surface px-5 py-4">
+    <article className="border-l-2 border-line pl-4">
       <div className="flex items-baseline justify-between gap-3">
-        <h4 className="text-[15px] leading-snug font-medium text-balance text-ink [overflow-wrap:anywhere]">
+        <h4 className="text-[15px] leading-snug font-semibold text-balance text-ink [overflow-wrap:anywhere]">
           {fact.headline}
         </h4>
         {fact.distanceLabel && (
-          <span
-            className={`shrink-0 text-sm ${fact.contains ? "font-medium text-ink" : "text-muted"}`}
-          >
+          <span className={`shrink-0 text-sm tabular-nums ${fact.contains ? "font-semibold text-ink" : "text-subtle"}`}>
             {fact.distanceLabel}
           </span>
         )}
       </div>
 
       {fact.details.map((detail) => (
-        <p key={detail} className="mt-1 text-[15px] leading-relaxed text-muted">
+        <p key={detail} className="type-support mt-1">
           {detail}
         </p>
       ))}
 
-      {fact.caveat && (
-        <p className="mt-2 text-[13px] leading-relaxed text-muted">
-          {fact.caveat}
-        </p>
-      )}
+      {fact.caveat && <p className="type-meta mt-2">{fact.caveat}</p>}
 
       {fact.technical.length > 0 && (
-        <details className="mt-2">
-          <summary className="cursor-pointer text-[13px] font-medium text-muted hover:text-ink">
+        <details className="disclosure mt-1">
+          <summary className="inline-flex min-h-9 items-center gap-1 text-sm font-medium text-muted hover:text-ink">
             Detaljer
+            <Chevron className="size-3.5" />
           </summary>
-          <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
-            {fact.technical.join(" · ")}
-          </p>
+          <p className="type-meta">{fact.technical.join(" · ")}</p>
         </details>
       )}
 
-      <p className="mt-2 text-[13px] text-muted">
+      <p className="type-meta mt-2">
         Kilde: {fact.sourceName}
         {fact.sourceDateLabel ? ` · ${fact.sourceDateLabel}` : ""}
       </p>
@@ -478,7 +466,7 @@ function FactItem({ fact }: { fact: AreaFact }) {
           href={fact.link.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 inline-flex h-9 items-center text-[15px] font-medium text-accent hover:underline"
+          className="link mt-1 inline-flex min-h-9 items-center text-[15px]"
         >
           {fact.link.label} ↗
         </a>
@@ -487,30 +475,28 @@ function FactItem({ fact }: { fact: AreaFact }) {
   );
 }
 
-/** Kompakte rader: navn, kort undertekst og avstand. Samme markup i grupper og oversikter. */
 /**
- * Rader i en kompakt gruppe.
+ * Rader i en kompakt gruppe: navn, kort undertekst og avstand.
  *
  * Når raden har et tilsvarende objekt i kartet, blir den en knapp som velger det: markøren
  * utheves, kartet panorerer hvis objektet ligger utenfor utsnittet, og popupen åpner seg —
- * samme tilstand som ved klikk direkte i kartet. Mekanismen er generell og gjelder alle
- * gruppene, ikke bare én type.
+ * samme tilstand som ved klikk direkte i kartet. Slike rader har en liten kartnål til høyre.
  *
- * Rader uten kartobjekt oppfører seg som før. En ekstern kildelenke ligger ved siden av
+ * Rader uten kartobjekt oppfører seg som vanlig tekst. En ekstern kildelenke ligger ved siden av
  * valget, slik at de to ikke konkurrerer om det samme trykket.
  */
 function PlaceRows({ items }: { items: OverviewItem[] }) {
   const { selectedId, select, selectable } = useMapSelection();
   return (
-    <ul className="mt-2 divide-y divide-line border-t border-line">
+    <ul className="divide-y divide-line">
       {items.map((item) => {
         const kanVelges = selectable.has(item.id);
         const valgt = selectedId === item.id;
         return (
           <li
             key={item.id}
-            className={`relative flex items-baseline justify-between gap-3 py-2.5 ${
-              valgt ? "bg-accent-soft" : kanVelges ? "hover:bg-ink/[0.03]" : ""
+            className={`relative -mx-2 flex items-baseline justify-between gap-3 rounded-control px-2 py-2.5 ${
+              valgt ? "bg-accent-soft" : kanVelges ? "hover:bg-sunken" : ""
             }`}
           >
             {/*
@@ -523,18 +509,16 @@ function PlaceRows({ items }: { items: OverviewItem[] }) {
                 type="button"
                 onClick={() => select(item.id)}
                 aria-pressed={valgt}
-                className="absolute inset-0 z-10 cursor-pointer rounded-lg focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+                className="absolute inset-0 z-10 cursor-pointer rounded-control focus-visible:outline-2 focus-visible:outline-accent"
               >
                 <span className="sr-only">Vis {item.title} i kartet</span>
               </button>
             )}
             <span className="min-w-0">
-              <span
-                className={`text-[15px] text-ink [overflow-wrap:anywhere] ${valgt ? "font-medium" : ""}`}
-              >
+              <span className={`text-[15px] text-ink [overflow-wrap:anywhere] ${valgt ? "font-semibold" : ""}`}>
                 {item.title}
               </span>
-              <span className="block text-[13px] text-muted">
+              <span className="type-meta block">
                 {item.subtitle}
                 {item.href && (
                   <>
@@ -543,7 +527,7 @@ function PlaceRows({ items }: { items: OverviewItem[] }) {
                       href={item.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="relative z-20 text-accent hover:underline"
+                      className="link relative z-20 font-normal"
                     >
                       Kilde ↗
                     </a>
@@ -551,24 +535,22 @@ function PlaceRows({ items }: { items: OverviewItem[] }) {
                 )}
               </span>
             </span>
-            <span className="flex shrink-0 items-baseline gap-1.5">
-              <span
-                className={`text-sm ${item.contains ? "font-medium text-ink" : "text-muted"}`}
-              >
+            <span className="flex shrink-0 items-center gap-1.5 self-center">
+              <span className={`text-sm tabular-nums ${item.contains ? "font-semibold text-ink" : "text-subtle"}`}>
                 {item.distanceLabel}
               </span>
-              {/*
-                Diskret markør for at raden hører til et punkt i kartet. Den er alltid til
-                stede for rader som kan velges, men nesten usynlig til man er på den — nok til
-                å skille dem fra radene uten kartobjekt, uten å bli et ikonbatteri.
-              */}
               {kanVelges && (
-                <span
+                <svg
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
                   aria-hidden="true"
-                  className={`text-[13px] transition-colors ${valgt ? "text-accent" : "text-line-strong"}`}
+                  className={`size-3.5 ${valgt ? "text-accent" : "text-line-strong"}`}
                 >
-                  ›
-                </span>
+                  <path d="M8 14s-4.5-3.9-4.5-7.4a4.5 4.5 0 0 1 9 0C12.5 10.1 8 14 8 14Z" strokeLinejoin="round" />
+                  <circle cx="8" cy="6.5" r="1.5" />
+                </svg>
               )}
             </span>
           </li>
@@ -579,40 +561,26 @@ function PlaceRows({ items }: { items: OverviewItem[] }) {
 }
 
 /**
- * En gruppe av relaterte stedstyper, f.eks. «Skoler og barnehager». Standardvisningen er
- * bare navn og antall; listene ligger bak utvideren, og hver undertype viser de nærmeste
- * få før resten. Slik kan mange like steder finnes i området uten å fylle siden.
+ * En gruppe: navn, én oppsummerende linje, og detaljene bak utvideren.
+ *
+ * Dette er grunnmønsteret på resultatsiden. Støy, naturfare, infrastruktur og hver stedstype i
+ * nærområdet er alle én slik rad — lukket sier den hovedsaken, åpen viser den funnene, listene,
+ * forbeholdet og kilden. Slik kan mange like steder finnes i området uten å fylle siden.
  */
-function ClusterDetails({
-  cluster,
-  showLabel = true,
-}: {
-  cluster: FactCluster;
-  showLabel?: boolean;
-}) {
+function ClusterDetails({ cluster }: { cluster: FactCluster }) {
   return (
-    <details open={cluster.defaultOpen || undefined} className="rounded-2xl border border-line bg-surface">
-      <summary className="cursor-pointer px-5 py-3.5">
-        {showLabel ? (
-          <>
-            <span className="text-[15px] font-medium text-ink">
-              {cluster.label}
-            </span>
-            <span className="mt-0.5 block text-[13px] text-muted">
-              {cluster.summary}
-            </span>
-          </>
-        ) : (
-          // Seksjonsoverskriften står rett over; da bærer oppsummeringen linjen alene.
-          <span className="text-[15px] font-medium text-ink">
-            {cluster.summary}
-          </span>
-        )}
+    <details open={cluster.defaultOpen || undefined} className="disclosure">
+      <summary className="-mx-2 flex items-start gap-3 rounded-control px-2 py-1.5 hover:bg-sunken">
+        <span className="min-w-0 flex-1">
+          <h3 className="type-h3 text-ink">{cluster.label}</h3>
+          <span className="type-support mt-0.5 block">{cluster.summary}</span>
+        </span>
+        <Chevron className="mt-1.5" />
       </summary>
 
-      <div className="px-5 pb-4">
+      <div className="pt-4 pb-1">
         {cluster.facts.length > 0 && (
-          <ul className="mt-1 flex flex-col gap-3">
+          <ul className="flex flex-col gap-5">
             {cluster.facts.map((fact) => (
               <li key={fact.id}>
                 <FactItem fact={fact} />
@@ -622,15 +590,16 @@ function ClusterDetails({
         )}
 
         {cluster.lists.map((list) => (
-          <div key={list.id} className="mt-3">
-            <h5 className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">
-              {list.label}
-            </h5>
-            <PlaceRows items={list.items.slice(0, list.previewCount)} />
+          <div key={list.id} className="mt-4 first:mt-0">
+            <h4 className="text-sm font-semibold text-muted">{list.label}</h4>
+            <div className="mt-1">
+              <PlaceRows items={list.items.slice(0, list.previewCount)} />
+            </div>
             {list.toggleLabel && (
-              <details className="mt-1">
-                <summary className="inline-flex h-9 cursor-pointer items-center text-[15px] font-medium text-accent">
+              <details className="disclosure">
+                <summary className="link inline-flex min-h-11 items-center gap-1 text-[15px]">
                   {list.toggleLabel}
+                  <Chevron className="size-3.5 text-accent" />
                 </summary>
                 <PlaceRows items={list.items.slice(list.previewCount)} />
               </details>
@@ -638,25 +607,17 @@ function ClusterDetails({
           </div>
         ))}
 
-        {cluster.caveat && (
-          <p className="mt-3 text-[13px] leading-relaxed whitespace-pre-line text-muted">
-            {cluster.caveat}
-          </p>
-        )}
+        {cluster.caveat && <p className="type-meta mt-4 whitespace-pre-line">{cluster.caveat}</p>}
         {cluster.overview && (
-          <div className="mt-3">
+          <div className="mt-4">
             <OverviewDetails overview={cluster.overview} />
           </div>
         )}
         {/*
-          Kortene og oversikten oppgir sin egen kilde. Står alle gruppens kilder allerede der,
+          Funnene og oversikten oppgir sin egen kilde. Står alle gruppens kilder allerede der,
           skal de ikke stå én gang til nederst.
         */}
-        {!kilderStårAllerede(cluster) && (
-          <p className="mt-2 text-[13px] text-muted">
-            Kilde: {cluster.sourceName}
-          </p>
-        )}
+        {!kilderStårAllerede(cluster) && <p className="type-meta mt-3">Kilde: {cluster.sourceName}</p>}
       </div>
     </details>
   );
@@ -676,38 +637,30 @@ function kilderStårAllerede(cluster: FactCluster): boolean {
  */
 function OverviewDetails({ overview }: { overview: SectionOverview }) {
   return (
-    <details className="rounded-2xl border border-line bg-surface px-5 py-4">
-      <summary className="cursor-pointer text-[15px] font-medium text-ink">
+    <details className="disclosure">
+      <summary className="link inline-flex min-h-11 items-center gap-1 text-[15px]">
         {overview.toggleLabel} ({overview.total})
+        <Chevron className="size-3.5 text-accent" />
       </summary>
 
-      <p className="mt-3 text-[15px] leading-relaxed text-ink">
-        {overview.headline}
-      </p>
+      <p className="mt-1 text-[15px] leading-relaxed text-ink">{overview.headline}</p>
       {overview.details.map((detail) => (
-        <p key={detail} className="mt-1 text-[15px] leading-relaxed text-muted">
+        <p key={detail} className="type-support mt-1">
           {detail}
         </p>
       ))}
 
-      <PlaceRows items={overview.items} />
+      <div className="mt-2">
+        <PlaceRows items={overview.items} />
+      </div>
 
-      {overview.caveat && (
-        <p className="mt-3 text-[13px] leading-relaxed text-muted">
-          {overview.caveat}
-        </p>
-      )}
-      <p className="mt-2 text-[13px] text-muted">
-        Kilde: {overview.sourceName}
-      </p>
+      {overview.caveat && <p className="type-meta mt-3">{overview.caveat}</p>}
+      <p className="type-meta mt-2">Kilde: {overview.sourceName}</p>
     </details>
   );
 }
 
+/** Hele oversikten mangler, eller er tom. Én rolig linje — ikke en advarsel. */
 function Notice({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="rounded-2xl border border-dashed border-line-strong px-5 py-6 text-[15px]">
-      {children}
-    </div>
-  );
+  return <p className="type-support mt-10 border-t border-line pt-5 text-ink">{children}</p>;
 }

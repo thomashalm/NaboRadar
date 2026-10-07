@@ -107,11 +107,11 @@ function AddressNotResolved({ adresse, treff }: { adresse: string; treff: Exclud
   const kandidater = treff.kind === "candidates" ? treff.candidates : [];
   return (
     <AreaShell>
-      <main className="mx-auto max-w-xl px-5 pt-[12vh] pb-24 sm:px-8">
-        <h1 className="text-3xl font-semibold tracking-[-0.03em]">
+      <main className="gutter mx-auto max-w-measure pt-[10vh] pb-24">
+        <h1 className="type-h1 text-ink">
           {kandidater.length > 0 ? "Hvilken adresse mente du?" : "Vi fant ikke denne adressen."}
         </h1>
-        <p className="mt-3 text-lg text-muted">
+        <p className="type-lead mt-4">
           {treff.kind === "unavailable"
             ? "Adressesøket svarer ikke akkurat nå. Prøv igjen om litt, eller søk etter stedet her."
             : kandidater.length > 0
@@ -119,7 +119,7 @@ function AddressNotResolved({ adresse, treff }: { adresse: string; treff: Exclud
               : `«${adresse}» finnes ikke i adresseregisteret slik den er skrevet. Søk etter stedet her.`}
         </p>
         {kandidater.length > 0 && (
-          <ul className="mt-8 divide-y divide-line/70 border-y border-line/70">
+          <ul className="mt-8 divide-y divide-line border-y border-line">
             {kandidater.map((k) => (
               <li key={k.id}>
                 <Link
@@ -129,10 +129,15 @@ function AddressNotResolved({ adresse, treff }: { adresse: string; treff: Exclud
                     radius: DEFAULT_RADIUS_M,
                     label: addressLabel(k),
                   })}
-                  className="block py-3.5 hover:text-accent"
+                  className="group flex min-h-14 items-center justify-between gap-3 py-3"
                 >
-                  <span className="block text-[15px] font-medium">{k.label}</span>
-                  <span className="block text-sm text-muted">{k.subtitle}</span>
+                  <span>
+                    <span className="block text-[15px] font-semibold text-ink group-hover:text-accent">{k.label}</span>
+                    <span className="type-meta block">{k.subtitle}</span>
+                  </span>
+                  <span aria-hidden="true" className="text-subtle group-hover:text-accent">
+                    →
+                  </span>
                 </Link>
               </li>
             ))}
@@ -141,7 +146,7 @@ function AddressNotResolved({ adresse, treff }: { adresse: string; treff: Exclud
         <div className="mt-8">
           <SearchBox radius={DEFAULT_RADIUS_M} />
         </div>
-        <Link href="/" className="mt-6 inline-block text-[15px] font-medium text-accent hover:underline">
+        <Link href="/" className="link mt-6 inline-flex min-h-11 items-center text-[15px]">
           Til forsiden
         </Link>
       </main>
@@ -152,13 +157,13 @@ function AddressNotResolved({ adresse, treff }: { adresse: string; treff: Exclud
 function InvalidArea() {
   return (
     <AreaShell>
-      <main className="mx-auto max-w-xl px-5 pt-[12vh] pb-24 sm:px-8">
-        <h1 className="text-3xl font-semibold tracking-[-0.03em]">Vi klarte ikke å finne dette området.</h1>
-        <p className="mt-3 text-lg text-muted">Lenken mangler en gyldig posisjon i Norge. Søk etter stedet på nytt.</p>
+      <main className="gutter mx-auto max-w-measure pt-[10vh] pb-24">
+        <h1 className="type-h1 text-ink">Vi klarte ikke å finne dette området.</h1>
+        <p className="type-lead mt-4">Lenken mangler en gyldig posisjon i Norge. Søk etter stedet på nytt.</p>
         <div className="mt-8">
           <SearchBox radius={DEFAULT_RADIUS_M} autoFocus />
         </div>
-        <Link href="/" className="mt-6 inline-block text-[15px] font-medium text-accent hover:underline">
+        <Link href="/" className="link mt-6 inline-flex min-h-11 items-center text-[15px]">
           Til forsiden
         </Link>
       </main>

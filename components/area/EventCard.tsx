@@ -31,13 +31,20 @@ export const EventCard = forwardRef<HTMLElement, EventCardProps>(function EventC
     <article
       ref={ref}
       onClick={onSelect}
-      className={`group relative cursor-pointer rounded-2xl border bg-surface px-5 py-4 transition-colors ${
-        selected ? "border-plan shadow-float ring-1 ring-plan" : "border-line hover:border-line-strong"
+      className={`relative -mx-2 cursor-pointer scroll-mt-24 rounded-control px-2 py-4 transition-colors ${
+        selected ? "bg-plan-soft" : "hover:bg-sunken"
       }`}
     >
-      <span className="text-xs font-semibold tracking-[0.08em] text-plan uppercase">{tiltakLabel(event)}</span>
-      {/* H4: kortet står under seksjonsoverskriften «Planer og saker» (H3). */}
-      <h4 className="mt-1.5 text-[17px] leading-snug font-semibold tracking-tight text-ink">
+      {/* Tiltakstypen og avstanden på én linje. Prikken er samme farge som planområdet i kartet. */}
+      <p className="flex items-baseline justify-between gap-3 text-sm">
+        <span className="flex items-center gap-2 font-medium text-muted">
+          <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-plan" />
+          {tiltakLabel(event)}
+        </span>
+        <span className="shrink-0 text-subtle tabular-nums">{formatDistance(event.distanceM)}</span>
+      </p>
+      {/* H4: saken står under seksjonsoverskriften «Planer og saker» (H3). */}
+      <h4 className="mt-1 text-[17px] leading-snug font-semibold tracking-[-0.012em] text-ink">
         <button
           type="button"
           onClick={(e) => {
@@ -52,28 +59,29 @@ export const EventCard = forwardRef<HTMLElement, EventCardProps>(function EventC
       </h4>
       {formaal && (
         // Ordrett fra saksdokumentet. Anførselstegnene sier at dette er kildens ord, ikke våre.
-        <p className="mt-1 text-[15px] leading-snug text-ink [overflow-wrap:anywhere]">
-          <span className="text-muted">Formål: </span>«{kortFormaal(formaal)}»
+        <p className="type-support mt-1 [overflow-wrap:anywhere]">
+          Formål: <span className="text-ink">«{kortFormaal(formaal)}»</span>
         </p>
       )}
-      <p className="mt-1 text-[15px] text-muted">
-        {[formatDistance(event.distanceM), date ? `${EVENT_CARD_DATE_LABELS[event.type]} ${date}` : null]
-          .filter(Boolean)
-          .join(" · ")}
+      <p className="type-meta mt-1.5 flex flex-wrap items-center gap-x-2">
+        {date && (
+          <span>
+            {EVENT_CARD_DATE_LABELS[event.type]} {date}
+          </span>
+        )}
+        {event.earlier && event.earlier.count > 0 && (
+          // Samme plan er varslet flere ganger. Vi viser det nyeste varselet og sier fra om resten.
+          <span>
+            {date ? "· " : ""}
+            {event.earlier.count === 1 ? "Varslet én gang før" : `Varslet ${event.earlier.count} ganger før`}
+            {formatDate(event.earlier.firstAnnouncedAt)
+              ? `, første gang ${formatDate(event.earlier.firstAnnouncedAt)}`
+              : ""}
+          </span>
+        )}
       </p>
-      {event.earlier && event.earlier.count > 0 && (
-        // Samme plan er varslet flere ganger. Vi viser det nyeste varselet og sier fra om resten.
-        <p className="mt-1 text-[13px] text-muted">
-          {event.earlier.count === 1 ? "Varslet én gang før" : `Varslet ${event.earlier.count} ganger før`}
-          {formatDate(event.earlier.firstAnnouncedAt) ? `, første gang ${formatDate(event.earlier.firstAnnouncedAt)}` : ""}
-        </p>
-      )}
 
-      <Link
-        href={href}
-        onClick={(e) => e.stopPropagation()}
-        className="mt-3 inline-flex h-9 items-center rounded-full text-[15px] font-medium text-accent hover:underline"
-      >
+      <Link href={href} onClick={(e) => e.stopPropagation()} className="link mt-1 inline-flex min-h-9 items-center text-[15px]">
         Se saken
         <span aria-hidden="true" className="ml-1">
           →

@@ -37,7 +37,7 @@ export function PropertyCard({
   if (state.status === "idle") return null;
 
   return (
-    <section aria-live="polite" className="rounded-2xl border border-line bg-surface px-5 py-4 shadow-float">
+    <section aria-live="polite" className="rounded-panel border border-line bg-surface px-5 py-4 shadow-float">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-[15px] font-semibold">Eiendom</h3>
         <button

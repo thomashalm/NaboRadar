@@ -30,7 +30,7 @@ export function ChangeLocation({
         ref={buttonRef}
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex h-11 items-center gap-2 rounded-full px-2.5 text-[15px] sm:px-3 font-medium text-accent hover:bg-accent-soft"
+        className="inline-flex h-11 items-center gap-2 rounded-control px-3 text-[15px] font-medium text-accent hover:bg-accent-soft"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="size-4" aria-hidden="true">
           <circle cx="11" cy="11" r="7" />
@@ -52,7 +52,7 @@ export function ChangeLocation({
       <button
         type="button"
         onClick={() => setOpen(false)}
-        className="mt-2 h-10 rounded-full px-3 text-sm font-medium text-muted hover:text-ink"
+        className="mt-1 h-11 rounded-control px-3 text-[15px] font-medium text-muted hover:text-ink"
       >
         Avbryt
       </button>
