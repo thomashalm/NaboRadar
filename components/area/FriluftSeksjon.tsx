@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cache, Suspense } from "react";
 import { getHutsNear, type Hut } from "@/lib/huts/queries";
+import { formatRadius } from "@/lib/format";
 import { buildHutHref, buildHutMapHref } from "@/lib/huts/href";
 import type { FriluftPoint } from "@/lib/huts/map-points";
 import { HUT_SECTION_LABEL, hutCountLine, hutDetailLines, hutStatusBadge, hutSummaryLine } from "@/lib/huts/wording";
@@ -77,8 +78,11 @@ async function FriluftInnhold({ lat, lng, label }: { lat: number; lng: number; l
       <p className="text-[17px] leading-snug font-semibold text-ink">
         {hutCountLine(resultat.count, resultat.radiusM, resultat.capped)}
       </p>
-      {/* Hytter har sin egen radius. Uten denne linjen leses «innen 10 km» mot sirkelen i kartet. */}
-      <p className="type-meta">Luftlinje fra adressen, i større radius enn resten av siden.</p>
+      {/* Friluft har sin egen radius. Den vanlige velgeren (500 m / 1 km / 3 km) er skjult her. */}
+      <p className="type-meta mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="rounded-full bg-sunken px-2.5 py-0.5 font-medium text-muted">Søker innen {formatRadius(resultat.radiusM)}</span>
+        <span>Luftlinje fra adressen. Friluft har egen radius.</span>
+      </p>
       <ul className="mt-2 divide-y divide-line">
         {resultat.cards.map((hut) => (
           <HytteKort key={hut.id} hut={hut} href={buildHutHref(hut)} />

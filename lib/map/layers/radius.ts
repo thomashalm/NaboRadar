@@ -11,10 +11,11 @@ export const RADIUS_COLOR = "#1e5a4b";
 export const CENTER_COLOR = "#14171a";
 /**
  * Radien er en hjelpelinje, ikke et funn: tynn, stiplet og halvt gjennomsiktig, med en nesten
- * usynlig flate. Den skal kunne leses når man ser etter den, og ellers ikke konkurrere med dataene.
+ * usynlig flate. Den skal kunne finnes når man ser etter den, og ellers ikke konkurrere med
+ * dataene. Justert opp ett hakk 2026-10-08: på 0,45 forsvant den i tette bykart.
  */
-const RADIUS_LINE = 0.45;
-const RADIUS_FILL = 0.025;
+const RADIUS_LINE = 0.62;
+const RADIUS_FILL = 0.03;
 
 export interface RadiusLayerData {
   lat: number;
@@ -46,7 +47,7 @@ export const radiusLayer: MapLayer<RadiusLayerData> = {
       id: "search-radius-line",
       type: "line",
       source: "search-radius",
-      paint: { "line-color": RADIUS_COLOR, "line-width": 1.25, "line-opacity": data.radiusM > 0 ? RADIUS_LINE : 0, "line-dasharray": [4, 3] },
+      paint: { "line-color": RADIUS_COLOR, "line-width": 1.4, "line-opacity": data.radiusM > 0 ? RADIUS_LINE : 0, "line-dasharray": [4, 3] },
     });
     map.addLayer({
       id: "search-center-halo",

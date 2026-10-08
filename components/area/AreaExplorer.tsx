@@ -22,7 +22,7 @@ import { internalFindingsLayer, type InternalMapFeature } from "@/lib/map/layers
 import { radiusLayer } from "@/lib/map/layers/radius";
 import { bindLayer } from "@/lib/map/layers/types";
 import type { AreaEvent, AreaSort } from "@/types/event";
-import { findTheme, mapFocus, themeHref, themesFor } from "@/lib/area-themes";
+import { findTheme, mapFocus, themeHref, themesFor, usesSearchRadius } from "@/lib/area-themes";
 import { PropertyCard, type PropertyState } from "./PropertyCard";
 import { AreaPanel } from "./AreaPanel";
 import { MapSelectionProvider } from "./map-selection";
@@ -352,7 +352,8 @@ export function AreaExplorer({
 
   const layers = useMemo(
     () => [
-      bindLayer(radiusLayer, { lat, lng, radiusM: radius }),
+      // Friluft har egen radius. Da tegnes bare søkepunktet, ikke ringen for 500 m / 1 km / 3 km.
+      bindLayer(radiusLayer, { lat, lng, radiusM: usesSearchRadius(theme) ? radius : 0 }),
       // Lokaliteter tegnes under planområdene, som er hovedinnholdet.
       bindLayer(contaminatedSitesLayer, contaminated),
       bindLayer(areaShapesLayer, { shapes, tone }),
@@ -363,7 +364,7 @@ export function AreaExplorer({
       // Valgt eiendom tegnes øverst, men med lav fyllopasitet.
       bindLayer(selectedPropertyLayer, { geometry: propertyGeometry }),
     ],
-    [lat, lng, radius, mapEvents, contaminated, shapes, points, tone, internalFeatures, propertyGeometry],
+    [lat, lng, radius, theme, mapEvents, contaminated, shapes, points, tone, internalFeatures, propertyGeometry],
   );
 
   const popupFor = useCallback(
@@ -458,9 +459,15 @@ export function AreaExplorer({
           </div>
           <ChangeLocation radius={radius} onNavigate={navigateToLocation} basePath={basePath} />
         </div>
-        <div className="mt-3">
-          <RadiusPicker radius={radius} hrefFor={radiusHref} onNavigate={navigate} pending={pending} />
-        </div>
+        {/* Velgeren står bare der den gjelder. Radien ligger i URL-en og er tilbake etter Friluft. */}
+        {usesSearchRadius(theme) ? (
+          <div className="mt-3">
+            <RadiusPicker radius={radius} hrefFor={radiusHref} onNavigate={navigate} pending={pending} />
+          </div>
+        ) : (
+          // Samme høyde som velgeren, så kartet og panelet ikke hopper når temaet byttes.
+          <p className="type-meta mt-3 flex min-h-12 items-center">Friluft har egen, større radius. Den står i panelet.</p>
+        )}
       </header>
 
       <div
@@ -488,9 +495,14 @@ export function AreaExplorer({
             {theme && <span aria-hidden="true" className="size-2 shrink-0 rounded-full" style={{ backgroundColor: theme.color }} />}
             <span className={`truncate ${theme ? "font-medium text-ink" : ""}`}>{mapChipLabel(theme, visibleCount, storedStream.status !== "loading" && lookupStream.status !== "loading" && hutStream.status !== "loading")}</span>
           </p>
-          {zoom > 0 && zoom < MIN_PROPERTY_ZOOM && (
-            <p className="pointer-events-none absolute inset-x-0 bottom-3 text-center text-sm text-muted">
-              <span className="rounded-full bg-surface/95 px-3 py-1.5 shadow-float">Zoom inn for å utforske eiendommer</span>
+          {/*
+            Hintet om eiendomsoppslag hører til utforsking av kartet. Med et valgt tema jobber
+            brukeren med noe annet, og da vises det ikke. Lite og lett: det skal ikke konkurrere
+            med søkepunktet, funnene eller merkelappen øverst.
+          */}
+          {!theme && zoom > 0 && zoom < MIN_PROPERTY_ZOOM && (
+            <p className="pointer-events-none absolute inset-x-0 bottom-2.5 text-center text-xs text-subtle">
+              <span className="rounded-full bg-surface/75 px-2.5 py-1">Zoom inn for å utforske eiendommer</span>
             </p>
           )}
         </div>

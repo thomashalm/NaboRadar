@@ -218,6 +218,17 @@ export function mapFocus(theme: Theme | null): MapFocus {
 }
 
 /**
+ * Om den vanlige radiusvelgeren (500 m / 1 km / 3 km) gjelder for temaet.
+ *
+ * Friluft har sin egen, større radius: en hytte en mil unna er i nærheten, et byggeprosjekt en
+ * mil unna er det ikke. Der skjules velgeren og radiusringen, så de ikke ser ut til å styre noe
+ * de ikke styrer. Valgt radius ligger fortsatt i URL-en og er tilbake når temaet forlates.
+ */
+export function usesSearchRadius(theme: Theme | null): boolean {
+  return theme?.source.kind !== "friluft";
+}
+
+/**
  * URL-en for et valgt tema: samme adresse, med `tema` satt eller fjernet.
  *
  * Temaet ligger i URL-en, så en visning kan deles og nettleserens tilbakeknapp går til

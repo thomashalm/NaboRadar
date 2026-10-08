@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findTheme, mapFocus, themeHref, themesFor } from "@/lib/area-themes";
+import { findTheme, mapFocus, themeHref, themesFor, usesSearchRadius } from "@/lib/area-themes";
 import { boundsAround, CLUSTER, mapChipLabel, mapTone, NEUTRAL_COLOR, POINT_STYLE } from "@/lib/map/presentation";
 
 const temaer = themesFor(null);
@@ -85,5 +85,24 @@ describe("utsnitt for temaer med funn langt unna", () => {
 describe("tema i URL-en etter kartendringene", () => {
   it("er fortsatt en søkeparameter", () => {
     expect(themeHref("/omrade", "lat=59.9&lng=10.7", "friluft")).toBe("/omrade?lat=59.9&lng=10.7&tema=friluft");
+  });
+});
+
+describe("radiusvelgeren og Friluft", () => {
+  it("skjules i Friluft, som har sin egen radius", () => {
+    expect(usesSearchRadius(tema("friluft"))).toBe(false);
+  });
+
+  it("står i oversikten og i alle andre temaer", () => {
+    expect(usesSearchRadius(null)).toBe(true);
+    for (const t of temaer.filter((t) => t.id !== "friluft")) expect(usesSearchRadius(t), t.id).toBe(true);
+  });
+
+  it("beholder valgt radius inn i Friluft og ut igjen", () => {
+    const inn = themeHref("/omrade", "lat=59.9&lng=10.7&radius=3000", "friluft");
+    expect(inn).toBe("/omrade?lat=59.9&lng=10.7&radius=3000&tema=friluft");
+    const ut = themeHref("/omrade", inn.split("?")[1]!, null);
+    expect(ut).toBe("/omrade?lat=59.9&lng=10.7&radius=3000");
+    expect(themeHref("/omrade", inn.split("?")[1]!, "skoler")).toContain("radius=3000");
   });
 });
