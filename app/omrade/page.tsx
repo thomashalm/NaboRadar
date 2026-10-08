@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AreaShell } from "@/components/area/AreaShell";
 import { AreaExplorer } from "@/components/area/AreaExplorer";
-import { FriluftOppsummering, FriluftSeksjon } from "@/components/area/FriluftSeksjon";
+import { FriluftOppsummering, FriluftSeksjon, friluftKartpunkter } from "@/components/area/FriluftSeksjon";
 import { SkolekretsNotis } from "@/components/area/SkolekretsNotis";
 import { SearchBox } from "@/components/search/SearchBox";
 import { addressLabel, addressQuerySchema, resolveAddressMatch, type AddressMatch } from "@/lib/area-address";
@@ -85,6 +85,7 @@ export default async function AreaPage({ searchParams }: { searchParams: SearchP
         skolekrets={<SkolekretsNotis lat={lat} lng={lng} fraVerktoy={tool === "skolekrets"} />}
         friluft={<FriluftSeksjon lat={lat} lng={lng} label={parsed.data.label} />}
         friluftSummary={<FriluftOppsummering lat={lat} lng={lng} />}
+        friluftPoints={friluftKartpunkter(lat, lng)}
       />
     </AreaShell>
   );

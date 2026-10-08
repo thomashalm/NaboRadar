@@ -12,11 +12,13 @@ import { mergeFactResults } from "@/lib/facts/merge";
 import { formatDate, formatDistance, formatRadius } from "@/lib/format";
 import { radiusBounds } from "@/lib/geo/radius";
 import type { MapTileConfig } from "@/lib/map/config";
+import { areaPointsLayer, type AreaPoint } from "@/lib/map/layers/area-points";
+import { areaShapesLayer, planAreasTonedLayer } from "@/lib/map/layers/area-shapes";
 import { contaminatedSitesLayer } from "@/lib/map/layers/contaminated-sites";
+import { boundsAround, mapChipLabel, mapTone } from "@/lib/map/presentation";
+import type { FriluftPoint } from "@/lib/huts/map-points";
 import { selectedPropertyLayer } from "@/lib/map/layers/selected-property";
 import { internalFindingsLayer, type InternalMapFeature } from "@/lib/map/layers/internal-findings";
-import { nearbyPlacesLayer } from "@/lib/map/layers/nearby-places";
-import { planAreasLayer } from "@/lib/map/layers/plan-areas";
 import { radiusLayer } from "@/lib/map/layers/radius";
 import { bindLayer } from "@/lib/map/layers/types";
 import type { AreaEvent, AreaSort } from "@/types/event";
@@ -57,6 +59,8 @@ interface AreaExplorerProps {
   friluft?: React.ReactNode;
   /** Én linje om friluft til temaoversikten, rendret på serveren. */
   friluftSummary?: React.ReactNode;
+  /** Hyttene som kartpunkter. Vises når temaet Friluft er valgt, og kan ligge langt utenfor radien. */
+  friluftPoints?: Promise<FriluftPoint[]>;
   /**
    * Innhold som legges **over** resultatet, før de offentlige seksjonene.
    *
@@ -125,6 +129,7 @@ function useStream<T>(promise: Promise<T>): Stream<T> {
 
 const NO_EVENTS: AreaEvent[] = [];
 const NO_SITES: AreaMapFeature[] = [];
+const NO_HUTS: Promise<FriluftPoint[]> = Promise.resolve([]);
 const NO_INTERNAL: readonly InternalMapFeature[] = [];
 /**
  * Eiendomsoppslag krever at brukeren faktisk ser enkelttomter.
@@ -164,6 +169,7 @@ export function AreaExplorer({
   tool,
   friluft,
   friluftSummary,
+  friluftPoints,
   leadSections,
   extraSections,
   internalFeatures = NO_INTERNAL,
@@ -173,6 +179,7 @@ export function AreaExplorer({
   const eventStream = useStream(eventsPromise);
   const storedStream = useStream(storedFactsPromise);
   const lookupStream = useStream(lookupFactsPromise);
+  const hutStream = useStream(friluftPoints ?? NO_HUTS);
 
 
   const result: AreaEventsResult | null = eventStream.status === "ready" ? eventStream.data : null;
@@ -247,6 +254,7 @@ export function AreaExplorer({
     selection &&
     (events.some((e) => e.id === selection.id) ||
       mapFeatures.some((f) => f.id === selection.id) ||
+      selection.id.startsWith("hytte:") ||
       internalFeatures.some((f) => f.id === selection.id))
       ? selection.id
       : null;
@@ -274,6 +282,22 @@ export function AreaExplorer({
     [allPlaces, focus],
   );
   const mapEvents = focus.plans ? events : NO_EVENTS;
+  const tone = useMemo(() => mapTone(theme), [theme]);
+  // Hyttene hører bare til temaet Friluft. De ligger ofte langt utenfor radien, og vises derfor
+  // ikke i oversikten, der utsnittet er radien.
+  const friluftValgt = theme?.source.kind === "friluft";
+  const huts = useMemo(() => (friluftValgt && hutStream.status === "ready" ? hutStream.data : []), [friluftValgt, hutStream]);
+  const points: AreaPoint[] = useMemo(
+    () => [...places.map((p) => ({ id: p.id, center: p.center })), ...huts.map((h) => ({ id: h.id, center: h.center }))],
+    [places, huts],
+  );
+  // Forurenset grunn (bare i admins visning) har sitt eget lag. Resten av flatene og linjene —
+  // kvikkleiresoner og kraftlinjer — følger temaet.
+  const contaminated = useMemo(() => sites.filter((f) => f.category === "miljo"), [sites]);
+  const shapes = useMemo(() => sites.filter((f) => f.category !== "miljo"), [sites]);
+  const visibleCount = points.length + sites.length + mapEvents.length;
+  // Friluft bruker større radius enn resten av siden. Da må utsnittet romme hyttene.
+  const hutBounds = useMemo(() => boundsAround([lng, lat], huts.map((h) => h.center)), [lng, lat, huts]);
 
 
   /** Klikk i tomt kartområde: finn eiendommen under punktet. Markører har allerede forrang. */
@@ -330,15 +354,16 @@ export function AreaExplorer({
     () => [
       bindLayer(radiusLayer, { lat, lng, radiusM: radius }),
       // Lokaliteter tegnes under planområdene, som er hovedinnholdet.
-      bindLayer(contaminatedSitesLayer, sites),
-      bindLayer(planAreasLayer, mapEvents),
-      bindLayer(nearbyPlacesLayer, places),
+      bindLayer(contaminatedSitesLayer, contaminated),
+      bindLayer(areaShapesLayer, { shapes, tone }),
+      bindLayer(planAreasTonedLayer, { events: mapEvents, tone }),
+      bindLayer(areaPointsLayer, { points, tone }),
       // Interne funn ligger over de offentlige punktene, men i en markør som ikke kan forveksles.
       bindLayer(internalFindingsLayer, internalFeatures),
       // Valgt eiendom tegnes øverst, men med lav fyllopasitet.
       bindLayer(selectedPropertyLayer, { geometry: propertyGeometry }),
     ],
-    [lat, lng, radius, mapEvents, sites, places, internalFeatures, propertyGeometry],
+    [lat, lng, radius, mapEvents, contaminated, shapes, points, tone, internalFeatures, propertyGeometry],
   );
 
   const popupFor = useCallback(
@@ -355,6 +380,8 @@ export function AreaExplorer({
           minZoom: INTERNAL_FOCUS_ZOOM,
         };
       }
+      const hytte = huts.find((h) => h.id === id);
+      if (hytte) return { lngLat: hytte.center, title: hytte.name, lines: hytte.lines, href: hytte.href, linkLabel: "Se hytta" };
       const place = mapFeatures.find((f) => f.id === id);
       if (place) {
         // Teksten er ferdig formulert i formuleringsregisteret — kartet finner aldri på noe eget.
@@ -379,7 +406,7 @@ export function AreaExplorer({
         linkLabel: "Se saken",
       };
     },
-    [events, mapFeatures, internalFeatures, context],
+    [events, mapFeatures, internalFeatures, huts, context],
   );
 
   /** Ids kartet faktisk tegner. En rad uten kartobjekt skal ikke se klikkbar ut. */
@@ -445,8 +472,9 @@ export function AreaExplorer({
             tiles={tiles}
             title={`Kart over området innen ${formatRadius(radius)} fra ${label}${theme ? `, tema ${theme.label}` : ""}${mapEvents.length ? `, ${mapEvents.length} planområder` : ""}${sites.length ? `, ${sites.length} registrerte lokaliteter` : ""}${places.length ? `, ${places.length} steder` : ""}`}
             layers={layers}
-            fitBounds={radiusBounds(lat, lng, radius)}
-            fitKey={`${lat},${lng},${radius}`}
+            basemap="muted"
+            fitBounds={hutBounds ?? radiusBounds(lat, lng, radius)}
+            fitKey={`${lat},${lng},${radius},${hutBounds ? "friluft" : ""}`}
             selectedId={selectedId}
             onSelect={(id) => setSelection(id ? { id, from: "map" } : null)}
             onPropertyClick={handlePropertyClick}
@@ -455,20 +483,10 @@ export function AreaExplorer({
             popupFor={popupFor}
             onNavigate={(href) => router.push(href)}
           />
-          {/* Hva kartet viser akkurat nå. Samme farge som temaet i panelet. */}
-          <p className="pointer-events-none absolute top-3 left-3 flex max-w-[calc(100%-5rem)] items-center gap-2 rounded-full bg-surface/95 py-1.5 pr-3.5 pl-3 text-sm font-medium text-ink shadow-float">
-            <span
-              aria-hidden="true"
-              className="size-2.5 shrink-0 rounded-full"
-              style={{ backgroundColor: theme ? theme.color : "var(--color-accent)" }}
-            />
-            <span className="truncate">
-              {!theme
-                ? "Viser: alle temaer"
-                : places.length + sites.length + mapEvents.length > 0
-                  ? `Viser: ${theme.label}`
-                  : `${theme.label}: ingen steder å vise i kartet`}
-            </span>
+          {/* Hva kartet viser akkurat nå. Nøytral i oversikten; temafargen bare når et tema er valgt. */}
+          <p className="pointer-events-none absolute top-3 left-3 flex max-w-[calc(100%-5rem)] items-center gap-2 rounded-full bg-surface/90 py-1 pr-3 pl-2.5 text-[13px] text-muted shadow-[0_1px_2px_rgb(20_23_26/0.12)]">
+            {theme && <span aria-hidden="true" className="size-2 shrink-0 rounded-full" style={{ backgroundColor: theme.color }} />}
+            <span className={`truncate ${theme ? "font-medium text-ink" : ""}`}>{mapChipLabel(theme, visibleCount, storedStream.status !== "loading" && lookupStream.status !== "loading" && hutStream.status !== "loading")}</span>
           </p>
           {zoom > 0 && zoom < MIN_PROPERTY_ZOOM && (
             <p className="pointer-events-none absolute inset-x-0 bottom-3 text-center text-sm text-muted">

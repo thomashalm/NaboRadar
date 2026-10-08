@@ -1,4 +1,4 @@
-import type { GeoJSONSource } from "maplibre-gl";
+import type { GeoJSONSource, Map as MapLibreMap, Marker } from "maplibre-gl";
 import { circlePolygon } from "@/lib/geo/radius";
 import type { MapLayer } from "./types";
 
@@ -9,6 +9,12 @@ import type { MapLayer } from "./types";
  */
 export const RADIUS_COLOR = "#1e5a4b";
 export const CENTER_COLOR = "#14171a";
+/**
+ * Radien er en hjelpelinje, ikke et funn: tynn, stiplet og halvt gjennomsiktig, med en nesten
+ * usynlig flate. Den skal kunne leses når man ser etter den, og ellers ikke konkurrere med dataene.
+ */
+const RADIUS_LINE = 0.45;
+const RADIUS_FILL = 0.025;
 
 export interface RadiusLayerData {
   lat: number;
@@ -34,13 +40,13 @@ export const radiusLayer: MapLayer<RadiusLayerData> = {
       id: "search-radius-fill",
       type: "fill",
       source: "search-radius",
-      paint: { "fill-color": RADIUS_COLOR, "fill-opacity": data.radiusM > 0 ? 0.05 : 0 },
+      paint: { "fill-color": RADIUS_COLOR, "fill-opacity": data.radiusM > 0 ? RADIUS_FILL : 0 },
     });
     map.addLayer({
       id: "search-radius-line",
       type: "line",
       source: "search-radius",
-      paint: { "line-color": RADIUS_COLOR, "line-width": 1.75, "line-opacity": data.radiusM > 0 ? 0.75 : 0 },
+      paint: { "line-color": RADIUS_COLOR, "line-width": 1.25, "line-opacity": data.radiusM > 0 ? RADIUS_LINE : 0, "line-dasharray": [4, 3] },
     });
     map.addLayer({
       id: "search-center-halo",
@@ -48,6 +54,7 @@ export const radiusLayer: MapLayer<RadiusLayerData> = {
       source: "search-center",
       paint: { "circle-radius": 15, "circle-color": CENTER_COLOR, "circle-opacity": 0.14 },
     });
+    void addSearchMarker(map, data);
     map.addLayer({
       id: "search-center-dot",
       type: "circle",
@@ -56,9 +63,28 @@ export const radiusLayer: MapLayer<RadiusLayerData> = {
     });
   },
   update(map, data) {
+    markers.get(map)?.setLngLat([data.lng, data.lat]);
     (map.getSource("search-radius") as GeoJSONSource | undefined)?.setData(radiusFeature(data));
     (map.getSource("search-center") as GeoJSONSource | undefined)?.setData(centerFeature(data));
-    map.setPaintProperty("search-radius-fill", "fill-opacity", data.radiusM > 0 ? 0.05 : 0);
-    map.setPaintProperty("search-radius-line", "line-opacity", data.radiusM > 0 ? 0.75 : 0);
+    map.setPaintProperty("search-radius-fill", "fill-opacity", data.radiusM > 0 ? RADIUS_FILL : 0);
+    map.setPaintProperty("search-radius-line", "line-opacity", data.radiusM > 0 ? RADIUS_LINE : 0);
   },
 };
+
+/**
+ * Søkepunktet som HTML-merke, i tillegg til punktet i kartbildet.
+ *
+ * Klynger og andre merker på resultatsiden er HTML-elementer og ligger alltid over kartbildet.
+ * Søkepunktet er det viktigste i kartet og skal aldri havne under en klynge, så det får sitt
+ * eget merke øverst. Punktet i kartbildet beholdes som reserve til merket er lastet.
+ */
+const markers = new WeakMap<MapLibreMap, Marker>();
+
+async function addSearchMarker(map: MapLibreMap, data: RadiusLayerData) {
+  const { Marker: MarkerClass } = await import("maplibre-gl");
+  if (markers.has(map)) return;
+  const element = document.createElement("div");
+  element.className = "naboradar-searchpoint";
+  element.setAttribute("aria-hidden", "true");
+  markers.set(map, new MarkerClass({ element }).setLngLat([data.lng, data.lat]).addTo(map));
+}

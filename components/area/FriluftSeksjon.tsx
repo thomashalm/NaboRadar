@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cache, Suspense } from "react";
 import { getHutsNear, type Hut } from "@/lib/huts/queries";
 import { buildHutHref, buildHutMapHref } from "@/lib/huts/href";
+import type { FriluftPoint } from "@/lib/huts/map-points";
 import { HUT_SECTION_LABEL, hutCountLine, hutDetailLines, hutStatusBadge, hutSummaryLine } from "@/lib/huts/wording";
 import { SectionShell } from "./SectionShell";
 
@@ -38,6 +39,22 @@ async function FriluftLinje({ lat, lng }: { lat: number; lng: number }) {
   const resultat = await hutsNear(lat, lng);
   if (resultat.status !== "ok" || resultat.count === 0) return null;
   return <span data-finnes>{hutCountLine(resultat.count, resultat.radiusM, resultat.capped)}</span>;
+}
+
+/**
+ * De samme hyttene som kartpunkter, til temaet «Friluft» i kartet. Tom liste når det ikke
+ * finnes noe eller oppslaget feiler — kartet viser da bare søkepunktet.
+ */
+export async function friluftKartpunkter(lat: number, lng: number): Promise<FriluftPoint[]> {
+  const resultat = await hutsNear(lat, lng);
+  if (resultat.status !== "ok") return [];
+  return resultat.cards.map((hut) => ({
+    id: `hytte:${hut.id}`,
+    name: hut.name,
+    center: [hut.lng, hut.lat],
+    lines: [hutSummaryLine(hut)],
+    href: buildHutHref(hut),
+  }));
 }
 
 export function FriluftSeksjon({ lat, lng, label }: { lat: number; lng: number; /** Adressen, slik den står i overskriften. */ label?: string }) {

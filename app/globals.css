@@ -219,3 +219,41 @@
 .naboradar-popup-link:hover {
   text-decoration: underline;
 }
+
+/* Klynge i kartet: antall steder som er slått sammen. Fargen settes av kartlaget (nøytral i
+   oversikten, temafargen når et tema er valgt). */
+.naboradar-cluster {
+  display: flex;
+  min-width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgb(20 23 26 / 0.25);
+}
+
+.naboradar-cluster:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+/* Søkepunktet. Ligger over klyngene (z-index), tar ikke imot trykk. */
+.naboradar-searchpoint {
+  z-index: 3;
+  width: 16px;
+  height: 16px;
+  border: 3px solid #ffffff;
+  border-radius: 999px;
+  background: #14171a;
+  box-shadow: 0 0 0 6px rgb(20 23 26 / 0.14), 0 1px 3px rgb(20 23 26 / 0.3);
+  pointer-events: none;
+}

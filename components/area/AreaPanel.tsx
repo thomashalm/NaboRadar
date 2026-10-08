@@ -360,6 +360,8 @@ function ClusterBlock({
     );
   }
 
+  // Med ett støyfunn står nivået i overskriften og i figuren. Funnet under gjentar det ikke.
+  const enesteStoyfunn = theme.id === "stoy" && cluster.facts.length === 1;
   const skalaer = cluster.facts.flatMap((fact) => {
     const scale = noiseScale(fact);
     return scale ? [{ fact, scale }] : [];
@@ -384,15 +386,18 @@ function ClusterBlock({
       <NearestStats cluster={cluster} />
 
       <div className="mt-5">
-        {cluster.facts.length > 0 && (
-          <ul className="flex flex-col gap-5">
-            {cluster.facts.map((fact) => (
-              <li key={fact.id}>
-                <FactItem fact={fact} />
-              </li>
-            ))}
-          </ul>
-        )}
+        {cluster.facts.length > 0 &&
+          (theme.id === "naturfare" ? (
+            <HazardRows facts={cluster.facts} />
+          ) : (
+            <ul className="flex flex-col gap-5">
+              {cluster.facts.map((fact) => (
+                <li key={fact.id}>
+                  <FactItem fact={enesteStoyfunn ? utenGjentakelse(fact, cluster) : fact} />
+                </li>
+              ))}
+            </ul>
+          ))}
 
         {cluster.lists.map((list) => (
           <div key={list.id} className="mt-5 first:mt-0">
@@ -420,6 +425,88 @@ function ClusterBlock({
         <SourceBlock caveat={cluster.caveat} source={kilderStårAllerede(cluster) ? null : cluster.sourceName} />
       </div>
     </section>
+  );
+}
+
+/** Funnet uten overskriften og linjen som allerede står rett over det. */
+function utenGjentakelse(fact: AreaFact, cluster: FactCluster): AreaFact {
+  return { ...fact, headline: "", details: fact.details.filter((linje) => linje !== cluster.summary) };
+}
+
+/**
+ * Naturfare: én rad per forhold — status først, én linje forklaring, og resten bak «Detaljer».
+ *
+ * Radene er sidestilte. Ingen samlet vurdering, ingen rangering og ingen trafikklysfarger:
+ * et aktsomhetsområde og en kartlagt sone er ulike ting, og det står i teksten på hver rad.
+ * Har forholdet en flate i kartet (kvikkleiresoner), velger et trykk på raden den.
+ */
+function HazardRows({ facts }: { facts: readonly AreaFact[] }) {
+  const { selectedId, select, selectable } = useMapSelection();
+  return (
+    <ul className="divide-y divide-line border-y border-line">
+      {facts.map((fact) => {
+        const kanVelges = selectable.has(fact.id);
+        const valgt = selectedId === fact.id;
+        const [forklaring, ...resten] = fact.details;
+        const harMer = resten.length > 0 || fact.caveat || fact.technical.length > 0 || fact.link;
+        return (
+          <li key={fact.id} className={`-mx-2 rounded-control px-2 py-3 ${valgt ? "bg-[color-mix(in_srgb,var(--tema)_8%,white)]" : ""}`}>
+            <div className="flex items-start gap-3">
+              <span aria-hidden="true" className="mt-[0.45rem] size-2 shrink-0 rounded-full bg-(--tema)" />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline justify-between gap-3">
+                  <h3 className="text-[15px] leading-snug font-semibold text-ink [overflow-wrap:anywhere]">
+                    {kanVelges ? (
+                      <button type="button" onClick={() => select(fact.id)} aria-pressed={valgt} className="text-left hover:underline hover:decoration-line-strong hover:underline-offset-3">
+                        {fact.headline}
+                        <span className="sr-only"> — vis i kartet</span>
+                      </button>
+                    ) : (
+                      fact.headline
+                    )}
+                  </h3>
+                  {fact.distanceLabel && (
+                    <span className={`shrink-0 text-sm tabular-nums ${fact.contains ? "font-semibold text-ink" : "text-subtle"}`}>
+                      {fact.distanceLabel}
+                    </span>
+                  )}
+                </div>
+                {forklaring && <p className="type-support mt-0.5">{forklaring}</p>}
+                {harMer ? (
+                  <details className="disclosure mt-0.5">
+                    <summary className="inline-flex min-h-9 items-center gap-1 text-sm font-medium text-muted hover:text-ink">
+                      Detaljer og kilde
+                      <Chevron className="size-3.5" />
+                    </summary>
+                    {resten.map((linje) => (
+                      <p key={linje} className="type-support mt-1">
+                        {linje}
+                      </p>
+                    ))}
+                    {fact.caveat && <p className="type-meta mt-2">{fact.caveat}</p>}
+                    {fact.technical.length > 0 && <p className="type-meta mt-2">{fact.technical.join(" · ")}</p>}
+                    <p className="type-meta mt-2">
+                      Kilde: {fact.sourceName}
+                      {fact.sourceDateLabel ? ` · ${fact.sourceDateLabel}` : ""}
+                    </p>
+                    {fact.link && (
+                      <a href={fact.link.href} target="_blank" rel="noopener noreferrer" className="link inline-flex min-h-9 items-center text-[15px]">
+                        {fact.link.label} ↗
+                      </a>
+                    )}
+                  </details>
+                ) : (
+                  <p className="type-meta mt-1">
+                    Kilde: {fact.sourceName}
+                    {fact.sourceDateLabel ? ` · ${fact.sourceDateLabel}` : ""}
+                  </p>
+                )}
+              </div>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
@@ -616,7 +703,7 @@ function Kildelinjer({
 function FactItem({ fact }: { fact: AreaFact }) {
   return (
     <article className="border-l-2 border-line pl-4">
-      <div className="flex items-baseline justify-between gap-3">
+      <div className={fact.headline ? "flex items-baseline justify-between gap-3" : "hidden"}>
         <h4 className="text-[15px] leading-snug font-semibold text-balance text-ink [overflow-wrap:anywhere]">
           {fact.headline}
         </h4>

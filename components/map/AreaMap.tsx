@@ -73,7 +73,21 @@ interface AreaMapProps {
   popupTakesFocus?: boolean;
   /** Klientnavigasjon for lenker i popup. */
   onNavigate?: (href: string) => void;
+  /**
+   * `muted` toner ned bakgrunnskartet: lysere, mindre kontrast, svakere etiketter. Brukes der
+   * NaboRadars egne data er forgrunnen. Kartflisene er de samme. Leses bare når kartet opprettes.
+   */
+  basemap?: "standard" | "muted";
 }
+
+/**
+ * Nedtonet bakgrunnskart. Flisene er ferdige bilder (Kartverkets gråtone), så veier og etiketter
+ * kan ikke styles hver for seg — men hele bildet kan gjøres lysere og flatere. Det demper de
+ * svarte linjene og tekstene mest, og lar funnene ligge tydelig oppå. Verdiene er valgt slik at
+ * gatenavn og vann fortsatt kan leses.
+ */
+const MUTED_BASEMAP = { "raster-brightness-min": 0.34, "raster-contrast": -0.3, "raster-saturation": -0.25 } as const;
+const MUTED_BACKGROUND = "#f1f1ee";
 
 function fitPadding(container: HTMLElement) {
   return Math.round(Math.min(container.clientWidth, container.clientHeight) * 0.08) + 16;
@@ -176,7 +190,13 @@ export function AreaMap(props: AreaMapProps) {
               attribution: tiles.attribution,
             },
           },
-          layers: [{ id: "base", type: "raster", source: "base" }],
+          layers:
+            latestProps.current.basemap === "muted"
+              ? [
+                  { id: "background", type: "background", paint: { "background-color": MUTED_BACKGROUND } },
+                  { id: "base", type: "raster", source: "base", paint: MUTED_BASEMAP },
+                ]
+              : [{ id: "base", type: "raster", source: "base" }],
         },
         bounds: latestProps.current.fitBounds,
         fitBoundsOptions: { padding: fitPadding(container), maxZoom: latestProps.current.maxFitZoom ?? 16 },

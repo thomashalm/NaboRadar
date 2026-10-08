@@ -1066,6 +1066,10 @@ export async function getAreaFacts(params: {
     if (!fact) continue;
     facts.push(fact);
     usedSources.add(row.provider_id);
+    // Kvikkleiresoner, transformatorstasjoner og regionale kraftlinjer ligger i databasen med
+    // geometri. De tegnes i kartet når temaet deres er valgt. Funn fra direkte oppslag (flom,
+    // radon, distribusjonsnett) har ingen geometri og kan ikke tegnes.
+    mapFeatures.push(...mapFeatureFromRow(row));
   }
 
   for (const result of lookupResults) {
