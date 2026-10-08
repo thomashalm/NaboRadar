@@ -477,8 +477,9 @@ En endring i den offentlige visningen slår derfor gjennom her av seg selv.
 | Lag | Delt mellom `/omrade` og `/admin/adresse` |
 |---|---|
 | `lib/area-view.ts` | Kildene og fristene (8 s / 8 s / 12 s) |
-| `components/area/AreaExplorer.tsx` | Layout, kart, valg, seksjoner, eiendomskort |
-| `components/area/AreaFacts.tsx` | Seksjoner, grupper, ordlyd |
+| `components/area/AreaExplorer.tsx` | Layout, kart, valgt tema i URL-en, eiendomskort |
+| `components/area/AreaPanel.tsx` | Temaoversikt og valgt tema (master/detail) |
+| `lib/area-themes.ts` | Temaene, oversiktsradene og hva kartet viser per tema |
 | `components/area/SkolekretsNotis.tsx` | Skolekretsnotisen |
 | `extraSections` | **Kun admin.** Offentlig side sender ingenting inn |
 | `basePath` | **Kun admin.** Hvilken side visningen står på |
@@ -1998,33 +1999,78 @@ Effekten er målt: første synlige innhold gikk fra **4 970 ms til 55 ms** (Oslo
 
 ## 22. UI-struktur
 
-### Hovedrekkefølge på `/omrade`
+### `/omrade`: panel og kart (redesign oktober 2026)
 
-1. **Nærområdet**
-2. **Støy**
-3. **Naturfare** (seksjons-id `grunnforhold`)
-4. **Infrastruktur**
-5. **Planer og saker**
-6. **Tilfluktsrom**
-7. **Friluft i nærheten** (hytter og koier)
+`/omrade` er en arbeidsflate, ikke en lang rapport. Fra 1024 px ligger et panel til venstre
+(45 % av bredden, høyst 46 rem) og kartet til høyre, begge i én skjermhøyde. Panelet ruller for
+seg; kartet står stille. Under 1024 px står adresse, kart og panel under hverandre i vanlig
+sideflyt.
 
-«Forurenset grunn» er ikke en offentlig seksjon (produktbeslutning 2026-10-03, se §14). I admins
-adressevisning ligger den mellom «Planer og saker» og «Tilfluktsrom».
+**Panelet er master/detail** (`components/area/AreaPanel.tsx`):
 
-Over seksjonene står bare adressen (H1), radiusvelgeren, «Endre sted» og skolekretsen. Det
-finnes ingen synlig mellomoverskrift eller ingress over funnene; en skjult H2 («Funn i området»)
-holder overskriftsnivåene riktige for skjermlesere.
+- **Oversikten** — «Området i korte trekk» — er temamenyen: én rad per tema med hovedfunnet.
+  De fem viktigste står først, resten under «Mer i området».
+- **Et valgt tema** bytter panelets innhold. Ingenting ruller. Øverst står «Tilbake til oversikt».
+- **Valgt tema ligger i URL-en** som `tema=stoy` — en søkeparameter, ikke et anker. Visningen kan
+  deles, og nettleserens tilbakeknapp går til oversikten. Søk fra `/tilfluktsrom` og `/skolekrets`
+  åpner rett på sitt tema; `tema=oversikt` er da veien tilbake.
+- **Oversikten formulerer ingenting selv.** Hver rad er gruppens egen oppsummering fra
+  formuleringsregisteret, eller tellingen av plansaker. Et tema uten svar står ikke der: fravær
+  av data er ikke et funn.
 
-Rekkefølgen følger **hvor nær funnet er adressen selv**. Nærområdet står først fordi det er det
-mest umiddelbart forståelige svaret, og fordi det nesten alltid har innhold. Så det som beskriver
-søkepunktet — støy og grunnforhold: du står i sonen, eller du gjør det ikke. Deretter det som
-oftere handler om nabolaget: plansaker.
+**Temaene** (`lib/area-themes.ts`), i visningsrekkefølge:
 
-**Unntak, bare i admins adressevisning:** ligger søkepunktet inne i en forurensningslokalitet med
-påvirkningsgrad 3 eller X, løftes «Forurenset grunn» øverst.
+| Tema | Kilde | I kartet |
+|---|---|---|
+| Støy | seksjonen `stoy` | Ingenting — vi har bare punktsvaret |
+| Naturfare | seksjonen `grunnforhold` | Kartlagte kvikkleiresoner. Flom, skred, radon og stormflo har ingen geometri |
+| Planer | plansakene | Planområdene |
+| Skoler og barnehager | gruppen `skoler-og-barnehager` i Nærområdet, pluss skolekretsen | Punkter |
+| Infrastruktur | seksjonen `infrastruktur` | Transformatorstasjoner og regionale kraftlinjer. Distribusjonsnettet har ingen geometri |
+| Helse og omsorg, Servering og uteliv, Virksomheter og anlegg | hver sin gruppe i Nærområdet | Punkter |
+| Friluft | hyttene (`FriluftSeksjon`) | Hyttene, med utsnitt som rommer dem |
+| Tilfluktsrom | seksjonen `tilfluktsrom` | Punkter |
 
-Det finnes **ingen** hovedseksjon som heter Naboklager, Lokale saker eller lignende. Slike saker
-hører hjemme som undertyper under «Planer og saker» hvis de noen gang bygges. Dette er testet.
+En seksjon eller en gruppe i Nærområdet uten eget tema får et generisk tema, så ingenting
+forsvinner. Et nytt tema — byggesaker, for eksempel — er én rad i `TEMAER` og én kilde.
+Seksjonene i `AREA_SECTIONS` er fortsatt hvordan dataene er ordnet; temaene er hvordan de
+utforskes. «Forurenset grunn» er ikke offentlig (produktbeslutning 2026-10-03, se §14). I admins
+visning er den et tema, og løftes øverst når søkepunktet ligger inne i en lokalitet med
+påvirkningsgrad 3 eller X.
+
+Det finnes **ingen** hovedseksjon eller tema som heter Naboklager, Lokale saker eller lignende.
+
+**Kartet følger temaet** (`lib/map/presentation.ts`). Bakgrunnskartet er bakgrunn, NaboRadars
+data er forgrunn, og bare ett tema om gangen får farge:
+
+- **Oversikt:** alle funn vises nøytralt — små grå punkter og svake flater. Søkepunktet er det
+  tydeligste i kartet og ligger alltid øverst.
+- **Valgt tema:** bare temaets egne funn vises, i temafargen. Resten skjules.
+- **Valgt objekt** tegnes fra en egen kilde, så det synes også inne i en klynge.
+- **Klynger:** punkter slås sammen under zoom 14 og vises med antall. Fra zoom 14 vises hvert
+  punkt — samme nivå som eiendomsoppslaget starter på.
+- **Radien** er en tynn, stiplet hjelpelinje.
+- **Bakgrunnskartet** er Kartverkets gråtonefliser, gjort lysere og flatere på denne siden.
+  Andre kart i appen er uendret.
+- **Friluft har egen radius.** Radiusvelgeren og radiusringen skjules når temaet er valgt, og
+  panelet sier «Søker innen 10 km». Valgt radius ligger i URL-en og er tilbake etterpå.
+
+**Temafargen er kategori, aldri vurdering.** Den kobler raden i panelet til markørene i kartet.
+Ingen score, ingen trafikklysfarger, ingen «bra» eller «dårlig».
+
+**Visualiseringer**, bare der de forklarer noe:
+
+- Støyskala: Lden-intervallet tegnet som et intervall på en dB-akse, med T-1442-grensene som
+  referansestreker. Vei og bane har hver sine grenser og slås aldri sammen. Uten nivå i kartet
+  vises området under 50 dB, uten punkt.
+- Nøkkeltall: antall og nærmeste for hver liste (skoler, barnehager, transformatorstasjoner …).
+- Plansaker som tidslinje: dato, tiltakstype og avstand.
+- Naturfare: én rad per forhold, uten samlet vurdering.
+
+**Designsystemet** står i `app/globals.css`: fargetokens med én dempet grønn aksent og ti
+temafarger, sju typografitrinn, felles sidemarg, to radier og to skygger. Rader og skillelinjer
+er normalen. Et kort brukes bare for det som er et eget objekt: nøkkeltall, figurer, valgt
+eiendom og søkefeltet.
 
 ### Tekstregelen
 
@@ -2043,7 +2089,9 @@ Gjelder alle seksjoner på `/omrade` (innført 2026-10-03):
 - **Det som gjelder hele datasettet** — metode, kartleggingsår, definisjoner og hva kilden ikke
   oppgir — står i «Kilder og metode» (`SOURCES[id].method` i `lib/facts/wording.ts`), ikke på
   hvert kort. Plansakenes forbehold står i seksjonens egen «Kilde og metode».
-- **Tomtilstand er én linje.**
+- **Tomtilstand er kort.** Plansakene bruker to linjer: hva som ikke ble funnet, og
+  avgrensningene under («Fra private forslagsstillere · innen 1 km · siste 24 måneder»). Ingen
+  avgrensning er tatt bort.
 - **Ingen rå kildekoder** i UI-et, heller ikke under «Detaljer». Kodene oversettes
   («Status: tiltak er igangsatt»), eller utelates.
 - **Ikke forklaring fordi det er plass.** Kilden står på kortet; gruppens kildelinje vises bare
@@ -2051,10 +2099,10 @@ Gjelder alle seksjoner på `/omrade` (innført 2026-10-03):
 
 ### Seksjonsrammen
 
-Alle seksjoner rendres gjennom `components/area/SectionShell.tsx`: overskrift, eventuelt **én**
-kort sekundærlinje, og så innholdet. Avstandene bor der, ett sted, slik at rytmen er den samme
-hele veien ned. Lå den tidligere i to nesten like varianter i `AreaFacts` og `EventFeed`, og
-seksjonene drev fra hverandre etter hvert som de fikk hvert sitt innhold.
+Etter redesignet (oktober 2026) vises ett tema om gangen, og temapanelet
+(`components/area/AreaPanel.tsx`) setter rammen: temaoverskrift, hovedfunn, eventuell figur,
+funn og lister, og til slutt forbehold og kilde. `components/area/SectionShell.tsx` brukes
+fortsatt av delene som rendres på serveren (plansaker, skolekrets, friluft).
 
 ### Kilder og metode hører ikke til i hovedflyten
 
