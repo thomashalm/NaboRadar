@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildChapters, HVERDAG_CLUSTER } from "@/lib/area-chapters";
 import { buildAreaSummary, sectionAnchor } from "@/lib/area-summary";
+import { eventEmptyLabel } from "@/lib/events/summary";
 import type { AreaEventsResult } from "@/lib/events/queries";
 import type { AreaFactGroup, AreaFactsResult, FactCluster } from "@/lib/facts/queries";
 import { PUBLIC_AREA_SECTIONS, AREA_SECTIONS } from "@/types/area-feature";
@@ -105,7 +106,13 @@ describe("«Området i korte trekk»", () => {
   it("gjentar seksjonenes egne linjer, ordrett, og lenker til dem", () => {
     expect(buildAreaSummary({ stored, lookups, events: events(2), radius: 1000 })).toEqual([
       { id: "stoy", label: "Støy", text: "Lavt modellert støynivå fra vei og bane ved søkepunktet", href: `#${sectionAnchor("stoy")}` },
-      { id: "saker", label: "Planer", text: "2 varslede planoppstarter innen 1 km", href: `#${sectionAnchor("saker")}` },
+      {
+        id: "saker",
+        label: "Planer",
+        text: "2 varslede planoppstarter innen 1 km",
+        detail: "Siste 24 måneder",
+        href: `#${sectionAnchor("saker")}`,
+      },
       { id: "skoler", label: "Skoler og barnehager", text: "2 skoler · 7 barnehager innen 1 km", href: `#${sectionAnchor("skoler")}` },
       { id: "infrastruktur", label: "Infrastruktur", text: "1 kraftlinje innen 1 km", href: `#${sectionAnchor("infrastruktur")}` },
     ]);
@@ -120,8 +127,13 @@ describe("«Området i korte trekk»", () => {
     const [planer] = buildAreaSummary({ stored: facts([]), lookups: facts([]), events: events(0), radius: 500 });
     expect(planer).toMatchObject({
       id: "saker",
-      text: "Ingen varslede planoppstarter fra private forslagsstillere innen 500 m siste 24 måneder",
+      text: "Ingen varslede planoppstarter",
+      // Avgrensningene står under, alle tre: hvem, hvor langt og hvor lenge.
+      detail: "Fra private forslagsstillere · innen 500 m · siste 24 måneder",
     });
+    expect(eventEmptyLabel(500)).toBe(
+      "Ingen varslede planoppstarter fra private forslagsstillere innen 500 m siste 24 måneder",
+    );
   });
 
   it("viser at en kilde lastes, og venter ikke på oppslagene for det databasen alene kan svare på", () => {

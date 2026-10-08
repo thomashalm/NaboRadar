@@ -16,7 +16,7 @@ const VERKTOY = [
 export function SiteHeader({ sticky = false }: { sticky?: boolean }) {
   return (
     <header
-      className={`h-16 border-b border-line/80 ${sticky ? "sticky top-0 z-40 bg-canvas/90 backdrop-blur" : ""}`}
+      className={`h-16 border-b border-line ${sticky ? "sticky top-0 z-40 bg-canvas/90 backdrop-blur" : ""}`}
     >
       <div className="gutter flex h-full items-center justify-between gap-6">
         <Logo />
@@ -25,7 +25,7 @@ export function SiteHeader({ sticky = false }: { sticky?: boolean }) {
             <Link
               key={href}
               href={href}
-              className="inline-flex h-10 items-center rounded-control px-3 text-[15px] text-muted hover:bg-sunken hover:text-ink"
+              className="inline-flex h-10 items-center rounded-control px-3 text-sm text-subtle hover:bg-accent-tint hover:text-accent"
             >
               {tekst}
             </Link>

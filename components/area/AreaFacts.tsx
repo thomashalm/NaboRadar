@@ -89,8 +89,10 @@ export function AreaFacts({
 function ChapterShell({ chapter, children }: { chapter: Pick<Chapter, "id" | "label" | "lead">; children: React.ReactNode }) {
   const headingId = `kapittel-${chapter.id}`;
   return (
-    <section aria-labelledby={headingId} className="hidden border-t border-ink/15 pt-7 has-[[data-section]]:block">
-      <h2 id={headingId} className="type-h2 text-ink">
+    <section aria-labelledby={headingId} className="hidden border-t border-ink/15 pt-6 has-[[data-section]]:block">
+      {/* Den lille streken i aksentfargen er kapittelmerket — samme farge som lenker og valg. */}
+      <h2 id={headingId} className="type-h2 flex items-center gap-2.5 text-ink">
+        <span aria-hidden="true" className="h-4 w-1 rounded-full bg-accent" />
         {chapter.label}
       </h2>
       {chapter.lead && <p className="type-meta mt-1">{chapter.lead}</p>}
@@ -103,13 +105,13 @@ function ChapterShell({ chapter, children }: { chapter: Pick<Chapter, "id" | "la
  * Seksjonene i et kapittel: lik luft over og under hver, og en tynn linje mellom dem. Rytmen
  * settes her og ikke i seksjonene, fordi de ligger i innpakninger av ulik dybde (anker, Suspense).
  */
-const SEKSJONER = "flex flex-col divide-y divide-line *:py-5 *:last:pb-0";
+const SEKSJONER = "flex flex-col divide-y divide-line *:py-4 *:last:pb-0";
 
 /** Mens vi venter på den første kilden: kapitlene i standardrekkefølge, med rolige plassholdere. */
 function AlleSkjeletter() {
   const { chapters } = buildChapters(PUBLIC_AREA_SECTIONS.map((section) => section.id));
   return (
-    <div className="flex flex-col gap-12">
+    <div className="flex flex-col gap-9">
       {chapters.map((chapter) => (
         <ChapterShell key={chapter.id} chapter={chapter}>
           {chapter.parts.map((part) =>
@@ -183,7 +185,7 @@ function FactsBody({
     switch (part.kind) {
       case "saker":
         return (
-          <div key="saker" id={sectionAnchor("saker")} className="scroll-mt-24">
+          <div key="saker" id={sectionAnchor("saker")} className="scroll-mt-24 outline-none">
             {saker}
           </div>
         );
@@ -199,7 +201,7 @@ function FactsBody({
 
   return (
     <>
-      <div className="flex flex-col gap-12">
+      <div className="flex flex-col gap-9">
         {lifted.length > 0 && <div className={SEKSJONER}>{lifted.map((sectionId) => seksjon(sectionId))}</div>}
         {chapters.map((chapter) => (
           <ChapterShell key={chapter.id} chapter={chapter}>
@@ -262,7 +264,8 @@ function FactSection({
     ANKERSEKSJONER.has(sectionId) ? (
       <DeepLinkTarget id={sectionId}>{innhold}</DeepLinkTarget>
     ) : (
-      <div id={anker} className="scroll-mt-24">
+      // Får fokus når brukeren kommer fra oppsummeringen. Det er en posisjon, ikke en kontroll.
+      <div id={anker} className="scroll-mt-24 outline-none">
         {innhold}
       </div>
     );
@@ -371,7 +374,7 @@ function Kildelinjer({
   }
 
   return (
-    <div className="mt-12 border-t border-ink/15 pt-5">
+    <div className="mt-9 border-t border-ink/15 pt-4">
       {samlet.unavailableSources.length > 0 && (
         <p className="type-meta mb-3">
           Disse kildene svarte ikke akkurat nå: {samlet.unavailableSources.join(", ")}. Resten av oversikten er

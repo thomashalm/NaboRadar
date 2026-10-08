@@ -31,7 +31,7 @@ const KAPITLER: readonly { id: string; label: string; lead: string | null; secti
   { id: "ved-adressen", label: "Ved adressen", lead: "Forhold som gjelder selve søkepunktet.", sections: ["stoy", "grunnforhold"] },
   { id: "endring", label: "Hva kan endre seg", lead: null, sections: [SAKER_SECTION_ID] },
   { id: "hverdagen", label: "Hverdagen", lead: null, sections: [] },
-  { id: "naeromradet", label: "I nærområdet", lead: "Steder og anlegg innenfor valgt radius.", sections: ["infrastruktur", "naeromradet"] },
+  { id: "naeromradet", label: "I nærområdet", lead: null, sections: ["infrastruktur", "naeromradet"] },
   { id: "utforsk", label: "Utforsk området", lead: null, sections: ["tilfluktsrom"] },
 ];
 

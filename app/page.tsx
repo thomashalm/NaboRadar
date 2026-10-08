@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ProductPreview } from "@/components/site/ProductPreview";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SearchBox } from "@/components/search/SearchBox";
 import { DEFAULT_RADIUS_M } from "@/lib/geo/constants";
@@ -89,42 +90,53 @@ export default async function HomePage() {
       <SiteHeader />
 
       <main className="flex-1">
-        {/* Første skjermbilde: hva dette er, og søket. Ingenting annet konkurrerer om plassen. */}
-        <section className="gutter mx-auto w-full max-w-page pt-[9vh] pb-20 sm:pt-[12vh] sm:pb-28">
-          <div className="max-w-3xl">
-            <h1 className="type-display text-ink">Sjekk hva som finnes og skjer rundt boligen før du kjøper.</h1>
-            <p className="type-lead mt-6 max-w-2xl">
-              NaboRadar samler offentlige data om området rundt en adresse – fra skoler og støy til naturfare og nye
-              planer.
-            </p>
+        {/* Første skjermbilde: hva dette er, søket, og et eksempel på hva man får. */}
+        <section className="border-b border-line bg-accent-tint">
+          <div className="gutter mx-auto grid w-full max-w-page items-center gap-x-14 gap-y-12 pt-12 pb-14 sm:pt-16 sm:pb-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,27rem)] lg:pt-20 lg:pb-24">
+            <div>
+              <h1 className="type-display max-w-2xl text-ink">
+                Sjekk hva som finnes og skjer rundt boligen før du kjøper.
+              </h1>
+              <p className="type-lead mt-5 max-w-xl">
+                NaboRadar samler offentlige data om området rundt en adresse – fra skoler og støy til naturfare og nye
+                planer.
+              </p>
 
-            <div className="mt-10 max-w-2xl sm:mt-12">
-              <SearchBox radius={DEFAULT_RADIUS_M} size="large" />
-              <p className="type-meta mt-4">Planer · Støy · Naturfare · Skoler · Infrastruktur</p>
+              <div className="mt-8 max-w-xl">
+                <SearchBox radius={DEFAULT_RADIUS_M} size="large" />
+                <p className="type-meta mt-3">Planer · Støy · Naturfare · Skoler · Infrastruktur</p>
+              </div>
+            </div>
+
+            <div className="mx-auto w-full max-w-md lg:max-w-none">
+              <ProductPreview />
             </div>
           </div>
         </section>
 
-        <section aria-labelledby="dekker" className="border-t border-line bg-surface">
-          <div className="gutter mx-auto w-full max-w-page py-16 sm:py-24">
+        <section aria-labelledby="dekker">
+          <div className="gutter mx-auto w-full max-w-page py-14 sm:py-16">
             <div className="max-w-2xl">
               <h2 id="dekker" className="type-h1 text-ink">
                 Det du bør vite om området
               </h2>
-              <p className="type-lead mt-4">
+              <p className="type-lead mt-3">
                 Søk opp en adresse, velg 500 meter, 1 kilometer eller 3 kilometer, og se hva som er offentlig kjent om
                 området.
               </p>
             </div>
 
-            <div className="mt-12 grid gap-x-12 gap-y-12 lg:grid-cols-3">
+            <div className="mt-9 grid gap-x-10 gap-y-9 lg:grid-cols-3">
               {TEMAER.map((tema, index) => {
                 const punkter = [...tema.punkter, ...(visHytter && index === TEMAER.length - 1 ? [HYTTER] : [])];
                 return (
-                  <div key={tema.tittel} className="border-t border-ink/15 pt-6">
-                    <h3 className="type-h2 text-ink">{tema.tittel}</h3>
+                  <div key={tema.tittel} className="border-t border-ink/15 pt-5">
+                    <h3 className="type-h2 flex items-center gap-2.5 text-ink">
+                      <span aria-hidden="true" className="h-4 w-1 rounded-full bg-accent" />
+                      {tema.tittel}
+                    </h3>
                     <p className="type-meta mt-1">{tema.ingress}</p>
-                    <dl className="mt-5 space-y-5">
+                    <dl className="mt-4 space-y-4">
                       {punkter.map(([tittel, tekst]) => (
                         <div key={tittel}>
                           <dt className="text-[15px] font-semibold text-ink">{tittel}</dt>
@@ -140,7 +152,7 @@ export default async function HomePage() {
         </section>
 
         <section className="border-t border-line">
-          <div className="gutter mx-auto grid w-full max-w-page gap-x-12 gap-y-12 py-16 sm:py-20 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <div className="gutter mx-auto grid w-full max-w-page gap-x-12 gap-y-9 py-12 sm:py-14 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <div className="max-w-measure">
               <h2 className="type-h2 text-ink">Offentlige data. Forklart enkelt.</h2>
               <p className="type-body mt-3 text-muted">

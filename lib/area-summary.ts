@@ -1,5 +1,6 @@
 import { HVERDAG_CLUSTER } from "@/lib/area-chapters";
-import { eventCountLabel, eventEmptyLabel } from "@/lib/events/summary";
+import { eventCountLabel, eventEmptyParts } from "@/lib/events/summary";
+import { DEFAULT_ANNOUNCED_WITHIN_MONTHS } from "@/lib/geo/constants";
 import type { AreaEventsResult } from "@/lib/events/queries";
 import { assembleSection } from "@/lib/facts/assemble";
 import type { AreaFactsResult } from "@/lib/facts/queries";
@@ -21,6 +22,8 @@ export interface SummaryItem {
   label: string;
   /** Ferdig formulert linje. null mens kilden lastes. */
   text: string | null;
+  /** Avgrensninger som hører til linjen, f.eks. radius og periode. */
+  detail?: string;
   /** Ankeret til seksjonen. */
   href: string;
 }
@@ -55,8 +58,13 @@ export function buildAreaSummary({ stored, lookups, events, radius }: SummaryInp
     if (tema.id === "saker") {
       if (events === null) items.push({ id: tema.id, label: tema.label, text: null, href });
       else if (events.status === "ok" && events.dataUpdatedAt !== null) {
-        const text = events.events.length > 0 ? eventCountLabel(events.events, radius) : eventEmptyLabel(radius);
-        items.push({ id: tema.id, label: tema.label, text, href });
+        if (events.events.length > 0) {
+          const text = eventCountLabel(events.events, radius);
+          items.push({ id: tema.id, label: tema.label, text, detail: `Siste ${DEFAULT_ANNOUNCED_WITHIN_MONTHS} måneder`, href });
+        } else {
+          const { headline, detail } = eventEmptyParts(radius);
+          items.push({ id: tema.id, label: tema.label, text: headline, detail, href });
+        }
       }
       continue;
     }

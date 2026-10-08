@@ -53,7 +53,7 @@ export function RadiusPicker({ radius, hrefFor, onNavigate, pending = false }: R
                 }}
                 className={`flex h-11 min-w-[4.25rem] touch-manipulation items-center justify-center rounded-[0.625rem] px-4 text-[15px] font-medium transition-transform duration-100 active:scale-[0.97] ${
                   selected
-                    ? "bg-surface text-ink shadow-[0_1px_2px_rgb(20_23_26/0.14)]"
+                    ? "bg-surface text-accent shadow-[0_1px_2px_rgb(20_23_26/0.14)] ring-1 ring-accent/25"
                     : "text-muted active:bg-line/70 sm:hover:text-ink"
                 }`}
               >

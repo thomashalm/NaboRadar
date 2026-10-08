@@ -4,7 +4,7 @@ import { STATUS_FORBEHOLD } from "@/lib/plans/visning";
 import Link from "next/link";
 import { Suspense, use, type RefObject } from "react";
 import type { AreaEventsResult } from "@/lib/events/queries";
-import { eventCountLabel, eventEmptyLabel } from "@/lib/events/summary";
+import { eventCountLabel, eventEmptyParts } from "@/lib/events/summary";
 import { Chevron } from "@/components/ui/Chevron";
 import { formatDate, formatRadius } from "@/lib/format";
 import { SectionShell } from "./SectionShell";
@@ -35,6 +35,8 @@ interface EventFeedProps {
 }
 
 const MONTHS = DEFAULT_ANNOUNCED_WITHIN_MONTHS;
+const SEKSJON = "Planer og saker";
+const Overskrift = () => <h3 className="type-h3 text-ink">{SEKSJON}</h3>;
 /** Kilden har bare varselet. Hva som skjedde etterpå, står ikke der. */
 export { STATUS_FORBEHOLD };
 /** Hvor mange saker som vises når gruppen åpnes. Resten ligger bak «Se alle saker». */
@@ -45,7 +47,8 @@ export function EventFeed(props: EventFeedProps) {
 
   return (
     // Samme ramme som de andre seksjonene: overskrift, innhold, detaljer bak utvider.
-    <SectionShell label="Planer og saker" id="events-heading">
+    // Raden bærer overskriften selv, som gruppene ellers på siden.
+    <SectionShell label={SEKSJON} hideLabel>
       {pending && (
         <p role="status" className="type-meta mb-3 flex items-center gap-2">
           <span className="block size-4 animate-spin rounded-full border-2 border-line-strong border-t-accent" aria-hidden="true" />
@@ -55,7 +58,14 @@ export function EventFeed(props: EventFeedProps) {
 
       <div className={`transition-opacity ${pending ? "pointer-events-none opacity-40" : ""}`} aria-busy={pending}>
         {/* Samme høyde som den ferdige gruppen, så siden ikke hopper når dataene kommer. */}
-        <Suspense fallback={<SectionSkeleton label="Henter plansaker …" />}>
+        <Suspense
+          fallback={
+            <>
+              <Overskrift />
+              <SectionSkeleton label="Henter plansaker …" />
+            </>
+          }
+        >
           <EventFeedBody {...props} />
         </Suspense>
       </div>
@@ -71,7 +81,8 @@ function EventFeedBody(props: EventFeedProps) {
     <>
         {result.status === "unavailable" ? (
           <Notice>
-            <p className="text-ink">Vi får ikke hentet plansaker akkurat nå.</p>
+            <Overskrift />
+            <p className="type-support mt-0.5">Vi får ikke hentet plansaker akkurat nå.</p>
             <p className="type-meta mt-0.5">Kart og søk fungerer fortsatt. Prøv igjen litt senere.</p>
             {process.env.NODE_ENV === "development" && (
               <p className="mt-3 rounded-lg bg-danger-soft px-3 py-2 font-mono text-xs text-danger">
@@ -81,7 +92,8 @@ function EventFeedBody(props: EventFeedProps) {
           </Notice>
         ) : result.dataUpdatedAt === null ? (
           <Notice>
-            <p className="text-ink">Plandata er ikke hentet ennå.</p>
+            <Overskrift />
+            <p className="type-support mt-0.5">Plandata er ikke hentet ennå.</p>
             {process.env.NODE_ENV === "development" && (
               <p className="mt-1 text-muted">
                 Kjør <code className="font-mono text-sm">npm run sync:dibk</code> eller «Sync now» på{" "}
@@ -94,11 +106,13 @@ function EventFeedBody(props: EventFeedProps) {
           // veien videre på samme linje.
           // Sier nøyaktig hva som er kontrollert. «Ingen planer» ville vært feil: kilden har bare
           // varsler fra private forslagsstillere. Resten står i «Kilde og metode».
-          <p className="type-support">
-            {eventEmptyLabel(radius)}
+          // To linjer: hva som ikke ble funnet, og avgrensningene under. Ingen av dem er tatt bort.
+          <div>
+            <Overskrift />
+            <p className="type-support mt-0.5 text-ink">{eventEmptyParts(radius).headline}</p>
+            <p className="type-meta">{eventEmptyParts(radius).detail}</p>
             {radius < 3000 && (
               <>
-                {" · "}
                 <Link
                   href={hrefForRadius(3000)}
                   replace
@@ -107,13 +121,13 @@ function EventFeedBody(props: EventFeedProps) {
                     e.preventDefault();
                     onNavigate(hrefForRadius(3000));
                   }}
-                  className="link"
+                  className="link inline-flex min-h-11 items-center text-[15px]"
                 >
-                  Se {formatRadius(3000)}
+                  Se innen {formatRadius(3000)} →
                 </Link>
               </>
             )}
-          </p>
+          </div>
         ) : (
           // Antallet først, sakene når man åpner — samme mønster som gruppene ellers på siden.
           <details
@@ -123,10 +137,12 @@ function EventFeedBody(props: EventFeedProps) {
           >
             <summary className="-mx-2 flex items-start gap-3 rounded-control px-2 py-1.5 hover:bg-sunken">
               <span className="min-w-0 flex-1">
-                <span className="block text-[15px] font-semibold text-ink">{eventCountLabel(result.events, radius)}</span>
-                <span className="type-meta block">Siste {MONTHS} måneder</span>
+                <Overskrift />
+                <span className="type-support mt-0.5 block">
+                  {eventCountLabel(result.events, radius)} · siste {MONTHS} måneder
+                </span>
               </span>
-              <Chevron className="mt-1" />
+              <Chevron className="mt-1.5" />
             </summary>
 
             <div className="pt-3">

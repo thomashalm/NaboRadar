@@ -18,5 +18,17 @@ export function eventCountLabel(events: readonly { type: string }[], radius: num
  * bare varsler fra private forslagsstillere.
  */
 export function eventEmptyLabel(radius: number): string {
-  return `Ingen varslede planoppstarter fra private forslagsstillere innen ${formatRadius(radius)} siste ${DEFAULT_ANNOUNCED_WITHIN_MONTHS} måneder`;
+  const { headline, detail } = eventEmptyParts(radius);
+  return `${headline} ${detail.charAt(0).toLocaleLowerCase("nb-NO")}${detail.slice(1).replaceAll(" · ", " ")}`;
+}
+
+/**
+ * Den samme tomtilstanden i to linjer: hva som ikke ble funnet, og avgrensningene under.
+ * Ingen avgrensning er tatt bort — hvem varslene kommer fra, radien og perioden står alle der.
+ */
+export function eventEmptyParts(radius: number): { headline: string; detail: string } {
+  return {
+    headline: "Ingen varslede planoppstarter",
+    detail: `Fra private forslagsstillere · innen ${formatRadius(radius)} · siste ${DEFAULT_ANNOUNCED_WITHIN_MONTHS} måneder`,
+  };
 }

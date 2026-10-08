@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { Suspense, use, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import type { PropertyLookupResult } from "@/lib/property/types";
 import { AreaMap, type MapPopupContent } from "@/components/map/AreaMap";
 import { buildAreaHref, buildEventHref, buildToolHref, type AreaBasePath, type AreaTool } from "@/lib/area-params";
@@ -122,6 +122,51 @@ function useStream<T>(promise: Promise<T>): Stream<T> {
 
 
 
+/**
+ * Oppsummeringen, strømmet i samme takt som seksjonene.
+ *
+ * Den leser de samme løftene med `use`, så linjene står i HTML-en fra serveren og kommer ikke
+ * etter seksjonene de oppsummerer. Tre trinn: alt venter, databasen og plansakene har svart, og
+ * til slutt de direkte oppslagene (støy, naturfare, infrastruktur), som kan bruke flere sekunder.
+ */
+function SummaryStream(props: {
+  stored: Promise<AreaFactsResult>;
+  lookups: Promise<AreaFactsResult>;
+  events: Promise<AreaEventsResult>;
+  radius: number;
+}) {
+  const venter = buildAreaSummary({ stored: null, lookups: null, events: null, radius: props.radius });
+  return (
+    <Suspense fallback={<AreaSummary items={venter} />}>
+      <SummaryPartial {...props} />
+    </Suspense>
+  );
+}
+
+function SummaryPartial({ stored, lookups, events, radius }: Parameters<typeof SummaryStream>[0]) {
+  const db = use(stored);
+  const saker = use(events);
+  return (
+    <Suspense fallback={<AreaSummary items={buildAreaSummary({ stored: db, lookups: null, events: saker, radius })} />}>
+      <SummaryFull db={db} saker={saker} lookups={lookups} radius={radius} />
+    </Suspense>
+  );
+}
+
+function SummaryFull({
+  db,
+  saker,
+  lookups,
+  radius,
+}: {
+  db: AreaFactsResult;
+  saker: AreaEventsResult;
+  lookups: Promise<AreaFactsResult>;
+  radius: number;
+}) {
+  return <AreaSummary items={buildAreaSummary({ stored: db, lookups: use(lookups), events: saker, radius })} />;
+}
+
 const NO_EVENTS: AreaEvent[] = [];
 const NO_SITES: AreaMapFeature[] = [];
 const NO_INTERNAL: readonly InternalMapFeature[] = [];
@@ -184,17 +229,6 @@ export function AreaExplorer({
   }, [storedStream, lookupStream]);
 
 
-  // Oppsummeringen bygges av de samme delsvarene som seksjonene, så de to sier alltid det samme.
-  const summary = useMemo(
-    () =>
-      buildAreaSummary({
-        stored: storedStream.status === "ready" ? storedStream.data : null,
-        lookups: lookupStream.status === "ready" ? lookupStream.data : lookupStream.status === "failed" ? "failed" : null,
-        events: eventStream.status === "ready" ? eventStream.data : null,
-        radius,
-      }),
-    [storedStream, lookupStream, eventStream, radius],
-  );
   // «Kirkeveien 60, 0368 Oslo» deles i adresse og sted. Uten komma står navnet alene.
   const [gate, ...stedDeler] = label.split(", ");
   const sted = stedDeler.join(", ");
@@ -373,13 +407,15 @@ export function AreaExplorer({
   }, [selection, selectedId]);
 
   return (
-    <main className="mx-auto w-full max-w-[104rem] lg:grid lg:grid-cols-[minmax(0,38rem)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] xl:grid-cols-[minmax(0,42rem)_minmax(0,1fr)]">
-      <section className="gutter pt-8 pb-8 lg:col-start-1 lg:row-start-1 lg:pt-12 lg:pb-6">
+    // Todelingen starter på 1024 px. Under det står kartet i flyten, etter oppsummeringen.
+    // Mellom 1024 og 1280 deler kolonnene plassen likt; over det har teksten fast lesebredde.
+    <main className="mx-auto w-full max-w-[100rem] lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] xl:grid-cols-[minmax(0,39rem)_minmax(0,1fr)] 2xl:grid-cols-[minmax(0,42rem)_minmax(0,1fr)]">
+      <section className="gutter pt-7 pb-7 lg:col-start-1 lg:row-start-1 lg:pt-9 lg:pb-5">
         {/* Adressen alene, og stedet under. Radien står på velgeren og ved hvert funn. */}
         <p className="type-meta">Områdesjekk</p>
         <h1 className="type-h1 mt-1 text-ink [overflow-wrap:anywhere]">{gate}</h1>
         {sted && <p className="mt-1.5 text-lg text-muted">{sted}</p>}
-        <div className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-3">
+        <div className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-2">
           <RadiusPicker
             radius={radius}
             hrefFor={(r) => buildAreaHref({ ...context, radius: r })}
@@ -388,14 +424,17 @@ export function AreaExplorer({
           />
           <ChangeLocation radius={radius} onNavigate={navigateToLocation} basePath={basePath} />
         </div>
-        <AreaSummary items={summary} />
+        <SummaryStream stored={storedFactsPromise} lookups={lookupFactsPromise} events={eventsPromise} radius={radius} />
       </section>
 
       <div
         ref={mapRef}
-        className="gutter scroll-mt-20 lg:sticky lg:top-16 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:h-[calc(100dvh-4rem)] lg:self-start lg:py-6 lg:pr-6 lg:pl-0"
+        // Kartet følger med nedover på desktop. Det ligger i samme rutenett som innholdet, så det
+        // slipper taket når innholdet er slutt og går aldri over bunnteksten. Høyden har et tak,
+        // slik at det ikke fyller en høy skjerm alene.
+        className="gutter scroll-mt-20 lg:sticky lg:top-16 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:h-[min(calc(100dvh-4rem),58rem)] lg:self-start lg:py-5 lg:pr-5 lg:pl-0"
       >
-        <div className="relative h-[56vh] min-h-80 overflow-hidden rounded-panel border border-line bg-sunken lg:h-full">
+        <div className="relative h-[52vh] min-h-80 overflow-hidden rounded-panel border border-line-strong/70 bg-sunken shadow-float lg:h-full">
           <AreaMap
             tiles={tiles}
             title={`Kart over området innen ${formatRadius(radius)} fra ${label}${events.length ? `, ${events.length} planområder` : ""}${sites.length ? `, ${sites.length} registrerte lokaliteter med forurenset grunn` : ""}${places.length ? `, ${places.length} steder i nærområdet` : ""}`}
@@ -418,8 +457,8 @@ export function AreaExplorer({
         </div>
       </div>
 
-      <div className="gutter pt-10 pb-20 lg:col-start-1 lg:row-start-2 lg:pt-2">
-        <div ref={propertyRef} className={property.status === "idle" ? "" : "mb-10"}>
+      <div className="gutter pt-9 pb-16 lg:col-start-1 lg:row-start-2 lg:pt-3">
+        <div ref={propertyRef} className={property.status === "idle" ? "" : "mb-8"}>
           <PropertyCard
             state={property}
             coveringPlans={coveringPlans}
@@ -430,7 +469,7 @@ export function AreaExplorer({
           />
         </div>
         <MapSelectionProvider selectedId={selectedId} onSelect={velgFraListe} ids={mapFeatureIds}>
-          <div className="flex flex-col gap-12">
+          <div className="flex flex-col gap-9">
             {leadSections}
             <AreaFacts
               storedFacts={storedFactsPromise}
