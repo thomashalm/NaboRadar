@@ -29,6 +29,21 @@
   --color-accent-soft: #e8f0ed;
   /* Svak tone til store flater. Aldri sterkere enn dette. */
   --color-accent-tint: #f4f8f6;
+  /*
+   * Temafarger. Kobler et tema i panelet til markørene i kartet (lib/area-themes.ts har de samme
+   * verdiene). De sier hvilket tema noe hører til — aldri om det er bra eller dårlig.
+   */
+  --color-tema-stoy: #b8690f;
+  --color-tema-naturfare: #7a4fa3;
+  --color-tema-planer: #2b5fb0;
+  --color-tema-skole: #0d7a6b;
+  --color-tema-infrastruktur: #8f7412;
+  --color-tema-helse: #9b3a55;
+  --color-tema-servering: #a8552f;
+  --color-tema-anlegg: #5a6472;
+  --color-tema-friluft: #3f7d3a;
+  --color-tema-tilfluktsrom: #3d4f6b;
+
   --color-plan: #b4470f;
   --color-plan-soft: #fdf3ec;
   --color-danger: #b42318;

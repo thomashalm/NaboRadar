@@ -1,4 +1,5 @@
-import { TemaIkon } from "@/components/area/AreaSummary";
+import { ThemeIcon } from "@/components/area/ThemeIcon";
+import { THEME_COLORS } from "@/lib/area-themes";
 
 /**
  * Forsidens produktbevis: en stilisert områdesjekk.
@@ -8,10 +9,10 @@ import { TemaIkon } from "@/components/area/AreaSummary";
  * søkepunkt og radius, og hovedfunnene ved siden av. Skjermlesere får én setning, ikke detaljene.
  */
 const FUNN = [
-  ["stoy", "Støy", "Støy fra veitrafikk ved søkepunktet"],
-  ["saker", "Planer", "2 varslede planoppstarter innen 1 km"],
-  ["skoler", "Skoler og barnehager", "3 skoler · 9 barnehager innen 1 km"],
-  ["infrastruktur", "Infrastruktur", "1 transformatorstasjon innen 1 km"],
+  ["stoy", THEME_COLORS.stoy, "Støy", "Støy fra veitrafikk ved søkepunktet"],
+  ["planer", THEME_COLORS.planer, "Planer", "2 varslede planoppstarter innen 1 km"],
+  ["skole", THEME_COLORS.skole, "Skoler og barnehager", "3 skoler · 9 barnehager innen 1 km"],
+  ["infrastruktur", THEME_COLORS.infrastruktur, "Infrastruktur", "1 transformatorstasjon innen 1 km"],
 ] as const;
 
 export function ProductPreview() {
@@ -32,9 +33,9 @@ export function ProductPreview() {
           <p className="text-xs font-medium text-subtle">Områdesjekk</p>
           <p className="text-lg leading-tight font-semibold tracking-[-0.02em] text-ink">Eksempelveien 12</p>
           <ul className="mt-2.5 divide-y divide-line border-t border-line">
-            {FUNN.map(([id, label, text]) => (
+            {FUNN.map(([id, color, label, text]) => (
               <li key={id} className="flex items-center gap-3 py-2">
-                <TemaIkon id={id} />
+                <ThemeIcon icon={id} color={color} />
                 <span className="min-w-0">
                   <span className="block text-xs font-medium text-subtle">{label}</span>
                   <span className="block truncate text-sm font-medium text-ink">{text}</span>
@@ -76,7 +77,7 @@ function ExampleMap() {
         <rect x="255" y="170" width="52" height="30" rx="2" />
       </g>
       {/* Planområde */}
-      <path d="M330 30 L385 28 L392 62 L338 66Z" fill="#b4470f" fillOpacity="0.16" stroke="#b4470f" strokeWidth="1.5" />
+      <path d="M330 30 L385 28 L392 62 L338 66Z" fill="#2b5fb0" fillOpacity="0.16" stroke="#2b5fb0" strokeWidth="1.5" />
       {/* Radius og søkepunkt */}
       <circle cx="240" cy="122" r="104" fill="#1e5a4b" fillOpacity="0.06" stroke="#1e5a4b" strokeOpacity="0.75" strokeWidth="1.75" />
       {/* Funn */}
@@ -84,10 +85,10 @@ function ExampleMap() {
         <circle cx="196" cy="60" r="5.5" fill="#0d7a6b" />
         <circle cx="300" cy="150" r="5.5" fill="#0d7a6b" />
         <circle cx="178" cy="176" r="5.5" fill="#0d7a6b" />
-        <circle cx="290" cy="64" r="5.5" fill="#2563a8" />
-        <circle cx="318" cy="104" r="5.5" fill="#b4622a" />
-        <circle cx="206" cy="150" r="5.5" fill="#b4622a" />
-        <circle cx="360" cy="46" r="5.5" fill="#b4470f" />
+        <circle cx="290" cy="64" r="5.5" fill="#9b3a55" />
+        <circle cx="318" cy="104" r="5.5" fill="#a8552f" />
+        <circle cx="206" cy="150" r="5.5" fill="#8f7412" />
+        <circle cx="360" cy="46" r="5.5" fill="#2b5fb0" />
       </g>
       <circle cx="240" cy="122" r="15" fill="#14171a" fillOpacity="0.14" />
       <circle cx="240" cy="122" r="7" fill="#14171a" stroke="#ffffff" strokeWidth="3" />

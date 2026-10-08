@@ -484,6 +484,11 @@ const T1442_GRENSER = {
   stoy_strategisk_bane: { gul: 58, rod: 68 },
 } as const;
 
+/** Grensene for en støytype, til referansemerkene i støyskalaen. null når typen ikke har Lden-intervall. */
+export function stoyGrenser(subtype: string): { gul: number; rod: number } | null {
+  return T1442_GRENSER[subtype as keyof typeof T1442_GRENSER] ?? null;
+}
+
 /**
  * Referanselinjen under et Lden-intervall.
  *

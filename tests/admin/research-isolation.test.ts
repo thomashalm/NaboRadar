@@ -40,10 +40,13 @@ describe("research holdes utenfor det offentlige", () => {
   it("setter intern research før det offentlige resultatet i admin", () => {
     // Rekkefølgen er hele poenget med `leadSections`: research er grunnen til at en operatør
     // åpner admin-visningen, og skal ikke ligge under alt det offentlige.
+    // Resultatet er nå et panel med temaoversikt. `leadSections` sendes inn som `lead`, og panelet
+    // legger det over oversikten — før «Området i korte trekk».
     const explorer = les("components/area/AreaExplorer.tsx");
-    expect(explorer.indexOf("{leadSections}")).toBeGreaterThan(-1);
-    // lastIndexOf, ikke indexOf: den første forekomsten av «AreaFacts» er importlinjen.
-    expect(explorer.indexOf("{leadSections}")).toBeLessThan(explorer.lastIndexOf("<AreaFacts"));
+    expect(explorer).toContain("lead={leadSections}");
+    const panel = les("components/area/AreaPanel.tsx");
+    expect(panel.indexOf("{lead &&")).toBeGreaterThan(-1);
+    expect(panel.indexOf("{lead &&")).toBeLessThan(panel.indexOf('aria-labelledby="korte-trekk"'));
     const side = les("app/admin/adresse/page.tsx");
     expect(side).toMatch(/leadSections=\{<InternSeksjon/);
   });
@@ -101,7 +104,7 @@ describe("research holdes utenfor det offentlige", () => {
   });
 
   it("leser aldri research i det offentlige faktalaget", () => {
-    for (const fil of ["lib/facts/queries.ts", "lib/area-view.ts", "components/area/AreaFacts.tsx"]) {
+    for (const fil of ["lib/facts/queries.ts", "lib/area-view.ts", "components/area/AreaPanel.tsx", "lib/area-themes.ts"]) {
       expect(les(fil)).not.toMatch(/research|admin_research/i);
     }
   });

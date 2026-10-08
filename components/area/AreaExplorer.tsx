@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { Suspense, use, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import type { PropertyLookupResult } from "@/lib/property/types";
 import { AreaMap, type MapPopupContent } from "@/components/map/AreaMap";
 import { buildAreaHref, buildEventHref, buildToolHref, type AreaBasePath, type AreaTool } from "@/lib/area-params";
@@ -20,10 +20,9 @@ import { planAreasLayer } from "@/lib/map/layers/plan-areas";
 import { radiusLayer } from "@/lib/map/layers/radius";
 import { bindLayer } from "@/lib/map/layers/types";
 import type { AreaEvent, AreaSort } from "@/types/event";
-import { buildAreaSummary } from "@/lib/area-summary";
-import { AreaSummary } from "./AreaSummary";
+import { findTheme, mapFocus, themeHref, themesFor } from "@/lib/area-themes";
 import { PropertyCard, type PropertyState } from "./PropertyCard";
-import { AreaFacts } from "./AreaFacts";
+import { AreaPanel } from "./AreaPanel";
 import { MapSelectionProvider } from "./map-selection";
 import { ChangeLocation } from "./ChangeLocation";
 import { EventFeed } from "./EventFeed";
@@ -54,8 +53,10 @@ interface AreaExplorerProps {
   skolekrets?: React.ReactNode;
   /** Spesialverktøyet søket kom fra (/tilfluktsrom, /skolekrets). Følger med når radius endres. */
   tool?: AreaTool;
-  /** «Friluft i nærheten», rendret på serveren. Står sist blant seksjonene. Se AreaFacts. */
+  /** «Friluft i nærheten», rendret på serveren. Vises når temaet Friluft er valgt. */
   friluft?: React.ReactNode;
+  /** Én linje om friluft til temaoversikten, rendret på serveren. */
+  friluftSummary?: React.ReactNode;
   /**
    * Innhold som legges **over** resultatet, før de offentlige seksjonene.
    *
@@ -122,51 +123,6 @@ function useStream<T>(promise: Promise<T>): Stream<T> {
 
 
 
-/**
- * Oppsummeringen, strømmet i samme takt som seksjonene.
- *
- * Den leser de samme løftene med `use`, så linjene står i HTML-en fra serveren og kommer ikke
- * etter seksjonene de oppsummerer. Tre trinn: alt venter, databasen og plansakene har svart, og
- * til slutt de direkte oppslagene (støy, naturfare, infrastruktur), som kan bruke flere sekunder.
- */
-function SummaryStream(props: {
-  stored: Promise<AreaFactsResult>;
-  lookups: Promise<AreaFactsResult>;
-  events: Promise<AreaEventsResult>;
-  radius: number;
-}) {
-  const venter = buildAreaSummary({ stored: null, lookups: null, events: null, radius: props.radius });
-  return (
-    <Suspense fallback={<AreaSummary items={venter} />}>
-      <SummaryPartial {...props} />
-    </Suspense>
-  );
-}
-
-function SummaryPartial({ stored, lookups, events, radius }: Parameters<typeof SummaryStream>[0]) {
-  const db = use(stored);
-  const saker = use(events);
-  return (
-    <Suspense fallback={<AreaSummary items={buildAreaSummary({ stored: db, lookups: null, events: saker, radius })} />}>
-      <SummaryFull db={db} saker={saker} lookups={lookups} radius={radius} />
-    </Suspense>
-  );
-}
-
-function SummaryFull({
-  db,
-  saker,
-  lookups,
-  radius,
-}: {
-  db: AreaFactsResult;
-  saker: AreaEventsResult;
-  lookups: Promise<AreaFactsResult>;
-  radius: number;
-}) {
-  return <AreaSummary items={buildAreaSummary({ stored: db, lookups: use(lookups), events: saker, radius })} />;
-}
-
 const NO_EVENTS: AreaEvent[] = [];
 const NO_SITES: AreaMapFeature[] = [];
 const NO_INTERNAL: readonly InternalMapFeature[] = [];
@@ -207,6 +163,7 @@ export function AreaExplorer({
   skolekrets,
   tool,
   friluft,
+  friluftSummary,
   leadSections,
   extraSections,
   internalFeatures = NO_INTERNAL,
@@ -241,6 +198,40 @@ export function AreaExplorer({
   const [zoom, setZoom] = useState(0);
   // Sortering navigerer, og saksgruppen bygges da på nytt. Tilstanden må derfor bo her.
   const [eventsExpanded, setEventsExpanded] = useState<boolean | null>(null);
+  /*
+   * Valgt tema ligger i URL-en (`tema=`), ikke i et anker: panelet bytter innhold, og ingenting
+   * ruller. Nettleserens tilbakeknapp går til oversikten. Kom søket fra et spesialverktøy, åpner
+   * siden på temaet brukeren spurte om; `tema=oversikt` er da veien tilbake til oversikten.
+   */
+  const pathname = usePathname() ?? "/omrade";
+  const searchParams = useSearchParams();
+  const search = searchParams?.toString() ?? "";
+  const temaParam = searchParams?.get("tema") ?? null;
+  const verktoyTema = tool === "tilfluktsrom" ? "tilfluktsrom" : tool === "skolekrets" ? "skoler" : null;
+  const themeId = temaParam ?? verktoyTema;
+  const storedData = storedStream.status === "ready" ? storedStream.data : null;
+  const theme = useMemo(() => findTheme(themesFor(storedData), themeId), [storedData, themeId]);
+  const hrefForTheme = useCallback(
+    (id: string | null) => themeHref(pathname, search, id ?? (verktoyTema ? "oversikt" : null)),
+    [pathname, search, verktoyTema],
+  );
+  const selectTheme = useCallback(
+    (id: string | null) => {
+      window.history.pushState(null, "", hrefForTheme(id));
+      setSelection(null);
+    },
+    [hrefForTheme],
+  );
+  const panelRef = useRef<HTMLDivElement>(null);
+  // Nytt tema starter øverst i panelet. På mobil ligger panelet under kartet, og rulles akkurat
+  // langt nok til at toppen av temaet er synlig — aldri nedover siden.
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+    panel.scrollTop = 0;
+    if (panel.getBoundingClientRect().top < 64) panel.scrollIntoView({ block: "start" });
+  }, [themeId]);
+
   const propertyRequest = useRef<AbortController | null>(null);
   const propertyRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -249,8 +240,8 @@ export function AreaExplorer({
   const events = result?.status === "ok" ? result.events : NO_EVENTS;
   const mapFeatures = facts?.status === "ok" ? facts.mapFeatures : NO_SITES;
   // Flater tegnes som flater, punkter som markører. Kategorien avgjør hvilket lag.
-  const sites = useMemo(() => mapFeatures.filter((f) => f.geometry.type !== "Point"), [mapFeatures]);
-  const places = useMemo(() => mapFeatures.filter((f) => f.geometry.type === "Point"), [mapFeatures]);
+  const allSites = useMemo(() => mapFeatures.filter((f) => f.geometry.type !== "Point"), [mapFeatures]);
+  const allPlaces = useMemo(() => mapFeatures.filter((f) => f.geometry.type === "Point"), [mapFeatures]);
   // Valget gjelder bare så lenge objektet finnes i gjeldende resultat.
   const selectedId =
     selection &&
@@ -271,6 +262,18 @@ export function AreaExplorer({
   const navigateToLocation = useCallback((href: string) => startTransition(() => router.push(href)), [router]);
 
   const propertyGeometry = property.status === "ok" ? property.property.geometry : null;
+
+  // Kartet følger temaet: uten valg vises alt, med et tema bare det temaet eier (lib/area-themes.ts).
+  const focus = useMemo(() => mapFocus(theme), [theme]);
+  const sites = useMemo(
+    () => (focus.categories ? allSites.filter((f) => focus.categories!.has(f.category)) : allSites),
+    [allSites, focus],
+  );
+  const places = useMemo(
+    () => (focus.categories ? allPlaces.filter((f) => focus.categories!.has(f.category)) : allPlaces),
+    [allPlaces, focus],
+  );
+  const mapEvents = focus.plans ? events : NO_EVENTS;
 
 
   /** Klikk i tomt kartområde: finn eiendommen under punktet. Markører har allerede forrang. */
@@ -328,14 +331,14 @@ export function AreaExplorer({
       bindLayer(radiusLayer, { lat, lng, radiusM: radius }),
       // Lokaliteter tegnes under planområdene, som er hovedinnholdet.
       bindLayer(contaminatedSitesLayer, sites),
-      bindLayer(planAreasLayer, events),
+      bindLayer(planAreasLayer, mapEvents),
       bindLayer(nearbyPlacesLayer, places),
       // Interne funn ligger over de offentlige punktene, men i en markør som ikke kan forveksles.
       bindLayer(internalFindingsLayer, internalFeatures),
       // Valgt eiendom tegnes øverst, men med lav fyllopasitet.
       bindLayer(selectedPropertyLayer, { geometry: propertyGeometry }),
     ],
-    [lat, lng, radius, events, sites, places, internalFeatures, propertyGeometry],
+    [lat, lng, radius, mapEvents, sites, places, internalFeatures, propertyGeometry],
   );
 
   const popupFor = useCallback(
@@ -406,38 +409,41 @@ export function AreaExplorer({
     mapRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [selection, selectedId]);
 
+  const radiusHref = (r: number) => {
+    const href = buildAreaHref({ ...context, radius: r });
+    return temaParam ? `${href}&tema=${encodeURIComponent(temaParam)}` : href;
+  };
+
   return (
-    // Todelingen starter på 1024 px. Under det står kartet i flyten, etter oppsummeringen.
-    // Mellom 1024 og 1280 deler kolonnene plassen likt; over det har teksten fast lesebredde.
-    <main className="mx-auto w-full max-w-[100rem] lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] xl:grid-cols-[minmax(0,39rem)_minmax(0,1fr)] 2xl:grid-cols-[minmax(0,42rem)_minmax(0,1fr)]">
-      <section className="gutter pt-7 pb-7 lg:col-start-1 lg:row-start-1 lg:pt-9 lg:pb-5">
-        {/* Adressen alene, og stedet under. Radien står på velgeren og ved hvert funn. */}
-        <p className="type-meta">Områdesjekk</p>
-        <h1 className="type-h1 mt-1 text-ink [overflow-wrap:anywhere]">{gate}</h1>
-        {sted && <p className="mt-1.5 text-lg text-muted">{sted}</p>}
-        <div className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-2">
-          <RadiusPicker
-            radius={radius}
-            hrefFor={(r) => buildAreaHref({ ...context, radius: r })}
-            onNavigate={navigate}
-            pending={pending}
-          />
+    /*
+     * Arbeidsflaten. Fra 1024 px: panel til venstre (ca. 40 %), kart til høyre, begge i én
+     * skjermhøyde. Panelet ruller for seg; kartet står stille. Under 1024 px: adresse, kart og
+     * panel under hverandre i vanlig sideflyt.
+     */
+    <main className="lg:grid lg:h-[calc(100dvh-4rem)] lg:min-h-[34rem] lg:grid-cols-[minmax(24rem,40%)_minmax(0,1fr)] lg:grid-rows-[auto_minmax(0,1fr)]">
+      <header className="gutter border-line pt-5 pb-4 lg:col-start-1 lg:row-start-1 lg:border-r lg:border-b lg:px-6">
+        <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+          <div className="min-w-0">
+            <h1 className="text-[1.625rem] leading-tight font-semibold tracking-[-0.03em] text-ink [overflow-wrap:anywhere]">
+              {gate}
+            </h1>
+            {sted && <p className="type-support">{sted}</p>}
+          </div>
           <ChangeLocation radius={radius} onNavigate={navigateToLocation} basePath={basePath} />
         </div>
-        <SummaryStream stored={storedFactsPromise} lookups={lookupFactsPromise} events={eventsPromise} radius={radius} />
-      </section>
+        <div className="mt-3">
+          <RadiusPicker radius={radius} hrefFor={radiusHref} onNavigate={navigate} pending={pending} />
+        </div>
+      </header>
 
       <div
         ref={mapRef}
-        // Kartet følger med nedover på desktop. Det ligger i samme rutenett som innholdet, så det
-        // slipper taket når innholdet er slutt og går aldri over bunnteksten. Høyden har et tak,
-        // slik at det ikke fyller en høy skjerm alene.
-        className="gutter scroll-mt-20 lg:sticky lg:top-16 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:h-[min(calc(100dvh-4rem),58rem)] lg:self-start lg:py-5 lg:pr-5 lg:pl-0"
+        className="gutter scroll-mt-20 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:h-full lg:p-0"
       >
-        <div className="relative h-[52vh] min-h-80 overflow-hidden rounded-panel border border-line-strong/70 bg-sunken shadow-float lg:h-full">
+        <div className="relative h-[44vh] min-h-72 overflow-hidden rounded-panel border border-line-strong/70 bg-sunken lg:h-full lg:rounded-none lg:border-0">
           <AreaMap
             tiles={tiles}
-            title={`Kart over området innen ${formatRadius(radius)} fra ${label}${events.length ? `, ${events.length} planområder` : ""}${sites.length ? `, ${sites.length} registrerte lokaliteter med forurenset grunn` : ""}${places.length ? `, ${places.length} steder i nærområdet` : ""}`}
+            title={`Kart over området innen ${formatRadius(radius)} fra ${label}${theme ? `, tema ${theme.label}` : ""}${mapEvents.length ? `, ${mapEvents.length} planområder` : ""}${sites.length ? `, ${sites.length} registrerte lokaliteter` : ""}${places.length ? `, ${places.length} steder` : ""}`}
             layers={layers}
             fitBounds={radiusBounds(lat, lng, radius)}
             fitKey={`${lat},${lng},${radius}`}
@@ -449,6 +455,21 @@ export function AreaExplorer({
             popupFor={popupFor}
             onNavigate={(href) => router.push(href)}
           />
+          {/* Hva kartet viser akkurat nå. Samme farge som temaet i panelet. */}
+          <p className="pointer-events-none absolute top-3 left-3 flex max-w-[calc(100%-5rem)] items-center gap-2 rounded-full bg-surface/95 py-1.5 pr-3.5 pl-3 text-sm font-medium text-ink shadow-float">
+            <span
+              aria-hidden="true"
+              className="size-2.5 shrink-0 rounded-full"
+              style={{ backgroundColor: theme ? theme.color : "var(--color-accent)" }}
+            />
+            <span className="truncate">
+              {!theme
+                ? "Viser: alle temaer"
+                : places.length + sites.length + mapEvents.length > 0
+                  ? `Viser: ${theme.label}`
+                  : `${theme.label}: ingen steder å vise i kartet`}
+            </span>
+          </p>
           {zoom > 0 && zoom < MIN_PROPERTY_ZOOM && (
             <p className="pointer-events-none absolute inset-x-0 bottom-3 text-center text-sm text-muted">
               <span className="rounded-full bg-surface/95 px-3 py-1.5 shadow-float">Zoom inn for å utforske eiendommer</span>
@@ -457,8 +478,11 @@ export function AreaExplorer({
         </div>
       </div>
 
-      <div className="gutter pt-9 pb-16 lg:col-start-1 lg:row-start-2 lg:pt-3">
-        <div ref={propertyRef} className={property.status === "idle" ? "" : "mb-8"}>
+      <div
+        ref={panelRef}
+        className="gutter scroll-mt-16 border-line pt-6 pb-12 lg:col-start-1 lg:row-start-2 lg:overflow-y-auto lg:overscroll-contain lg:border-r lg:px-6 lg:pt-5 lg:pb-8"
+      >
+        <div ref={propertyRef} className={property.status === "idle" ? "" : "mb-6"}>
           <PropertyCard
             state={property}
             coveringPlans={coveringPlans}
@@ -469,36 +493,39 @@ export function AreaExplorer({
           />
         </div>
         <MapSelectionProvider selectedId={selectedId} onSelect={velgFraListe} ids={mapFeatureIds}>
-          <div className="flex flex-col gap-9">
-            {leadSections}
-            <AreaFacts
-              storedFacts={storedFactsPromise}
-              lookupFacts={lookupFactsPromise}
-              radius={radius}
-              pending={pending}
-              nearestShelterHref={buildToolHref({ ...context, tool: "tilfluktsrom" })}
-              friluft={friluft}
-              skolekrets={skolekrets}
-              saker={
-                <EventFeed
-                  events={eventsPromise}
-                  radius={radius}
-                  sort={sort}
-                  pending={pending}
-                  selectedId={selectedId}
-                  onSelect={(id) => setSelection({ id, from: "list" })}
-                  expanded={eventsExpanded}
-                  onExpandedChange={setEventsExpanded}
-                  hrefForEvent={(event) => buildEventHref(event.id, context)}
-                  hrefForSort={(s) => buildAreaHref({ ...context, sort: s })}
-                  hrefForRadius={(r) => buildAreaHref({ ...context, radius: r })}
-                  onNavigate={navigate}
-                  cardRefs={cardRefs}
-                />
-              }
-            />
-            {extraSections}
-          </div>
+          <AreaPanel
+            storedFacts={storedFactsPromise}
+            lookupFacts={lookupFactsPromise}
+            events={eventsPromise}
+            radius={radius}
+            pending={pending}
+            themeId={themeId}
+            hrefForTheme={hrefForTheme}
+            onSelectTheme={selectTheme}
+            nearestShelterHref={buildToolHref({ ...context, tool: "tilfluktsrom" })}
+            friluft={friluft}
+            friluftSummary={friluftSummary}
+            skolekrets={skolekrets}
+            lead={leadSections}
+            extra={extraSections}
+            saker={
+              <EventFeed
+                events={eventsPromise}
+                radius={radius}
+                sort={sort}
+                pending={pending}
+                selectedId={selectedId}
+                onSelect={(id) => setSelection({ id, from: "list" })}
+                expanded={eventsExpanded}
+                onExpandedChange={setEventsExpanded}
+                hrefForEvent={(event) => buildEventHref(event.id, context)}
+                hrefForSort={(s) => buildAreaHref({ ...context, sort: s })}
+                hrefForRadius={(r) => buildAreaHref({ ...context, radius: r })}
+                onNavigate={navigate}
+                cardRefs={cardRefs}
+              />
+            }
+          />
         </MapSelectionProvider>
       </div>
     </main>

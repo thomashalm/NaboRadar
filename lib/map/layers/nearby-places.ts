@@ -2,18 +2,24 @@ import type { ExpressionSpecification, GeoJSONSource, Map as MapLibreMap } from 
 import type { AreaMapFeature } from "@/lib/facts/queries";
 import type { MapLayer } from "./types";
 
-export const PLACE_COLOR = "#6b5bd2";
-/** Én farge per hovedtype, alle i samme dempede register: dette er steder, ikke varsler. */
-export const OPPVEKST_COLOR = "#0d7a6b";
-export const HELSE_COLOR = "#2563a8";
-export const SERVERING_COLOR = "#b4622a";
-/** Omsorgstilbud: tydelig, men rolig — og forskjellig fra sykehus, skole og servering. */
-export const OMSORG_COLOR = "#8c5570";
+import { THEME_COLORS } from "@/lib/area-themes";
+
+/**
+ * Én farge per tema, de samme som i panelet (lib/area-themes.ts): en markør har fargen til temaet
+ * den hører til. Alle i samme dempede register — dette er steder, ikke varsler.
+ */
+export const PLACE_COLOR = THEME_COLORS.anlegg;
+export const OPPVEKST_COLOR = THEME_COLORS.skole;
+/** Sykehus og omsorgstilbud er ett tema, «Helse og omsorg», og har samme farge. */
+export const HELSE_COLOR = THEME_COLORS.helse;
+export const SERVERING_COLOR = THEME_COLORS.servering;
+export const OMSORG_COLOR = THEME_COLORS.helse;
+export const INFRASTRUKTUR_COLOR = THEME_COLORS.infrastruktur;
 /**
  * Tilfluktsrom. Bevisst en dempet grå-blå i samme register som resten, ikke rødt eller
  * militært: dette er referanseinformasjon om beredskap, ikke et varsel.
  */
-export const TILFLUKTSROM_COLOR = "#4a5568";
+export const TILFLUKTSROM_COLOR = THEME_COLORS.tilfluktsrom;
 
 const SOURCE = "nearby-places";
 
@@ -53,6 +59,8 @@ export const nearbyPlacesLayer: MapLayer<AreaMapFeature[]> = {
           SERVERING_COLOR,
           "tilfluktsrom",
           TILFLUKTSROM_COLOR,
+          "infrastruktur",
+          INFRASTRUKTUR_COLOR,
           PLACE_COLOR,
         ],
         "circle-opacity": 0.9,

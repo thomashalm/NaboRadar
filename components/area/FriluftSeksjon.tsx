@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Suspense } from "react";
+import { cache, Suspense } from "react";
 import { getHutsNear, type Hut } from "@/lib/huts/queries";
 import { buildHutHref, buildHutMapHref } from "@/lib/huts/href";
 import { HUT_SECTION_LABEL, hutCountLine, hutDetailLines, hutStatusBadge, hutSummaryLine } from "@/lib/huts/wording";
@@ -19,6 +19,27 @@ import { SectionShell } from "./SectionShell";
  * Rendres på serveren og vises ikke i det hele tatt når det ikke finnes hytter, når
  * kategorien ikke er publisert, eller når oppslaget feiler. Fravær av data er ikke et svar.
  */
+/** Seksjonen og oversiktslinjen spør om det samme. Ett oppslag per forespørsel. */
+const hutsNear = cache((lat: number, lng: number) => getHutsNear({ lat, lng }));
+
+/**
+ * Én linje til temaoversikten: «9 hytter og koier innen 10 km». Rendrer ingenting når det ikke
+ * finnes noe — da skjuler oversikten hele raden (`data-finnes`).
+ */
+export function FriluftOppsummering({ lat, lng }: { lat: number; lng: number }) {
+  return (
+    <Suspense fallback={null}>
+      <FriluftLinje lat={lat} lng={lng} />
+    </Suspense>
+  );
+}
+
+async function FriluftLinje({ lat, lng }: { lat: number; lng: number }) {
+  const resultat = await hutsNear(lat, lng);
+  if (resultat.status !== "ok" || resultat.count === 0) return null;
+  return <span data-finnes>{hutCountLine(resultat.count, resultat.radiusM, resultat.capped)}</span>;
+}
+
 export function FriluftSeksjon({ lat, lng, label }: { lat: number; lng: number; /** Adressen, slik den står i overskriften. */ label?: string }) {
   return (
     <Suspense fallback={null}>
@@ -28,15 +49,17 @@ export function FriluftSeksjon({ lat, lng, label }: { lat: number; lng: number; 
 }
 
 async function FriluftInnhold({ lat, lng, label }: { lat: number; lng: number; label?: string }) {
-  const resultat = await getHutsNear({ lat, lng });
+  const resultat = await hutsNear(lat, lng);
   if (resultat.status !== "ok" || resultat.count === 0) return null;
 
   // Kartet åpnes i samme radius som hyttene er talt opp i, og med adressen som utgangspunkt.
   const kartHref = buildHutMapHref({ lat, lng, from: label ?? "valgt sted", radiusM: resultat.radiusM });
 
   return (
-    <SectionShell label={HUT_SECTION_LABEL} id="friluft">
-      <p className="type-support">{hutCountLine(resultat.count, resultat.radiusM, resultat.capped)}</p>
+    <SectionShell label={HUT_SECTION_LABEL} id="friluft" hideLabel>
+      <p className="text-[17px] leading-snug font-semibold text-ink">
+        {hutCountLine(resultat.count, resultat.radiusM, resultat.capped)}
+      </p>
       {/* Hytter har sin egen radius. Uten denne linjen leses «innen 10 km» mot sirkelen i kartet. */}
       <p className="type-meta">Luftlinje fra adressen, i større radius enn resten av siden.</p>
       <ul className="mt-2 divide-y divide-line">

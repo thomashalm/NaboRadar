@@ -36,7 +36,8 @@ interface EventFeedProps {
 
 const MONTHS = DEFAULT_ANNOUNCED_WITHIN_MONTHS;
 const SEKSJON = "Planer og saker";
-const Overskrift = () => <h3 className="type-h3 text-ink">{SEKSJON}</h3>;
+/** Temaoverskriften «Planer» står i panelet. Innholdet trenger ikke en egen. */
+const Overskrift = () => null;
 /** Kilden har bare varselet. Hva som skjedde etterpå, står ikke der. */
 export { STATUS_FORBEHOLD };
 /** Hvor mange saker som vises når gruppen åpnes. Resten ligger bak «Se alle saker». */
@@ -47,7 +48,7 @@ export function EventFeed(props: EventFeedProps) {
 
   return (
     // Samme ramme som de andre seksjonene: overskrift, innhold, detaljer bak utvider.
-    // Raden bærer overskriften selv, som gruppene ellers på siden.
+    // Temaoverskriften står i panelet over. Her er bare innholdet.
     <SectionShell label={SEKSJON} hideLabel>
       {pending && (
         <p role="status" className="type-meta mb-3 flex items-center gap-2">
@@ -109,8 +110,12 @@ function EventFeedBody(props: EventFeedProps) {
           // To linjer: hva som ikke ble funnet, og avgrensningene under. Ingen av dem er tatt bort.
           <div>
             <Overskrift />
-            <p className="type-support mt-0.5 text-ink">{eventEmptyParts(radius).headline}</p>
-            <p className="type-meta">{eventEmptyParts(radius).detail}</p>
+            <p className="text-[17px] leading-snug font-semibold text-ink">{eventEmptyParts(radius).headline}</p>
+            <ul className="type-support mt-1">
+              {eventEmptyParts(radius).detail.split(" · ").map((del) => (
+                <li key={del}>{del}</li>
+              ))}
+            </ul>
             {radius < 3000 && (
               <>
                 <Link
@@ -129,56 +134,44 @@ function EventFeedBody(props: EventFeedProps) {
             )}
           </div>
         ) : (
-          // Antallet først, sakene når man åpner — samme mønster som gruppene ellers på siden.
-          <details
-            className="disclosure"
-            open={expanded ?? result.events.length <= PREVIEW}
-            onToggle={(event) => onExpandedChange(event.currentTarget.open)}
-          >
-            <summary className="-mx-2 flex items-start gap-3 rounded-control px-2 py-1.5 hover:bg-sunken">
-              <span className="min-w-0 flex-1">
-                <Overskrift />
-                <span className="type-support mt-0.5 block">
-                  {eventCountLabel(result.events, radius)} · siste {MONTHS} måneder
-                </span>
-              </span>
-              <Chevron className="mt-1.5" />
-            </summary>
-
-            <div className="pt-3">
-              <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
-                {/* Én gang for hele lista, ikke på hver sak. */}
-                <p className="type-meta max-w-prose flex-1 basis-64">{STATUS_FORBEHOLD}</p>
-                {result.events.length > 1 && (
-                  <SortToggle sort={sort} hrefForSort={hrefForSort} onNavigate={onNavigate} />
-                )}
-              </div>
-
-              <EventList
-                events={result.events.slice(0, PREVIEW)}
-                hrefForEvent={hrefForEvent}
-                selectedId={selectedId}
-                onSelect={onSelect}
-                cardRefs={cardRefs}
-              />
-
-              {result.events.length > PREVIEW && (
-                <details className="disclosure">
-                  <summary className="link inline-flex min-h-11 items-center gap-1 text-[15px]">
-                    Se alle saker ({result.events.length})
-                    <Chevron className="size-3.5 text-accent" />
-                  </summary>
-                  <EventList
-                    events={result.events.slice(PREVIEW)}
-                    hrefForEvent={hrefForEvent}
-                    selectedId={selectedId}
-                    onSelect={onSelect}
-                    cardRefs={cardRefs}
-                  />
-                </details>
-              )}
+          // Sakene som en tidslinje: dato til venstre, saken til høyre. Trykk velger planområdet i kartet.
+          <div>
+            <p className="text-[17px] leading-snug font-semibold text-ink">{eventCountLabel(result.events, radius)}</p>
+            <p className="type-meta">Siste {MONTHS} måneder</p>
+            <div className="mt-3 flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+              {/* Én gang for hele lista, ikke på hver sak. */}
+              <p className="type-meta max-w-prose flex-1 basis-64">{STATUS_FORBEHOLD}</p>
+              {result.events.length > 1 && <SortToggle sort={sort} hrefForSort={hrefForSort} onNavigate={onNavigate} />}
             </div>
-          </details>
+
+            <EventList
+              events={result.events.slice(0, PREVIEW)}
+              hrefForEvent={hrefForEvent}
+              selectedId={selectedId}
+              onSelect={onSelect}
+              cardRefs={cardRefs}
+            />
+
+            {result.events.length > PREVIEW && (
+              <details
+                className="disclosure"
+                open={expanded ?? false}
+                onToggle={(event) => onExpandedChange(event.currentTarget.open)}
+              >
+                <summary className="link inline-flex min-h-11 items-center gap-1 text-[15px]">
+                  Se alle saker ({result.events.length})
+                  <Chevron className="size-3.5 text-accent" />
+                </summary>
+                <EventList
+                  events={result.events.slice(PREVIEW)}
+                  hrefForEvent={hrefForEvent}
+                  selectedId={selectedId}
+                  onSelect={onSelect}
+                  cardRefs={cardRefs}
+                />
+              </details>
+            )}
+          </div>
         )}
 
       {/*
@@ -190,7 +183,7 @@ function EventFeedBody(props: EventFeedProps) {
         sak å ta forbehold om.
       */}
       {result.status === "ok" && result.dataUpdatedAt && (
-        <details className="disclosure mt-2">
+        <details className="disclosure mt-4 border-t border-line pt-2">
           <summary className="inline-flex min-h-9 items-center gap-1 text-sm font-medium text-muted hover:text-ink">
             Kilde og metode
             <Chevron className="size-3.5" />
@@ -243,7 +236,7 @@ function EventList({
   cardRefs: RefObject<Map<string, HTMLElement>>;
 }) {
   return (
-    <ul className="mt-2 divide-y divide-line">
+    <ul className="mt-3 border-l border-line-strong">
       {events.map((event) => (
         <li key={event.id}>
           <EventCard

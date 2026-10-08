@@ -2,7 +2,8 @@ import type { ExpressionSpecification, GeoJSONSource, Map as MapLibreMap } from 
 import type { AreaEvent } from "@/types/event";
 import type { MapLayer } from "./types";
 
-export const PLAN_COLOR = "#c2410c";
+/** Temaet «Planer» (lib/area-themes.ts). */
+export const PLAN_COLOR = "#2b5fb0";
 
 export type PlanAreaData = Pick<AreaEvent, "id" | "title" | "geometry" | "centroid">[];
 

@@ -31,14 +31,25 @@ export const EventCard = forwardRef<HTMLElement, EventCardProps>(function EventC
     <article
       ref={ref}
       onClick={onSelect}
-      className={`relative -mx-2 cursor-pointer scroll-mt-24 rounded-control px-2 py-4 transition-colors ${
-        selected ? "bg-plan-soft" : "hover:bg-sunken"
+      className={`relative ml-4 cursor-pointer rounded-control border px-3 py-3 transition-colors ${
+        selected ? "border-tema-planer bg-tema-planer/6" : "border-transparent hover:bg-sunken"
       }`}
     >
-      {/* Tiltakstypen og avstanden på én linje. Prikken er samme farge som planområdet i kartet. */}
+      {/* Punktet på tidslinjen. Samme farge som planområdet i kartet. */}
+      <span
+        aria-hidden="true"
+        className={`absolute top-[1.15rem] -left-[1.3rem] size-2.5 rounded-full ring-4 ring-canvas ${
+          selected ? "bg-tema-planer" : "bg-tema-planer/60"
+        }`}
+      />
       <p className="flex items-baseline justify-between gap-3 text-sm">
-        <span className="flex items-center gap-2 font-medium text-muted">
-          <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-plan" />
+        <span className="font-medium text-muted">
+          {date ? (
+            <span className="text-ink tabular-nums">
+              {EVENT_CARD_DATE_LABELS[event.type]} {date}
+            </span>
+          ) : null}
+          {date ? " · " : ""}
           {tiltakLabel(event)}
         </span>
         <span className="shrink-0 text-subtle tabular-nums">{formatDistance(event.distanceM)}</span>
@@ -64,15 +75,9 @@ export const EventCard = forwardRef<HTMLElement, EventCardProps>(function EventC
         </p>
       )}
       <p className="type-meta mt-1.5 flex flex-wrap items-center gap-x-2">
-        {date && (
-          <span>
-            {EVENT_CARD_DATE_LABELS[event.type]} {date}
-          </span>
-        )}
         {event.earlier && event.earlier.count > 0 && (
           // Samme plan er varslet flere ganger. Vi viser det nyeste varselet og sier fra om resten.
           <span>
-            {date ? "· " : ""}
             {event.earlier.count === 1 ? "Varslet én gang før" : `Varslet ${event.earlier.count} ganger før`}
             {formatDate(event.earlier.firstAnnouncedAt)
               ? `, første gang ${formatDate(event.earlier.firstAnnouncedAt)}`
