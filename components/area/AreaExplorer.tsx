@@ -444,11 +444,11 @@ export function AreaExplorer({
 
   return (
     /*
-     * Arbeidsflaten. Fra 1024 px: panel til venstre (ca. 40 %), kart til høyre, begge i én
+     * Arbeidsflaten. Fra 1024 px: panel til venstre (45 %, høyst 46 rem), kart til høyre, begge i én
      * skjermhøyde. Panelet ruller for seg; kartet står stille. Under 1024 px: adresse, kart og
      * panel under hverandre i vanlig sideflyt.
      */
-    <main className="lg:grid lg:h-[calc(100dvh-4rem)] lg:min-h-[34rem] lg:grid-cols-[minmax(24rem,40%)_minmax(0,1fr)] lg:grid-rows-[auto_minmax(0,1fr)]">
+    <main className="lg:grid lg:h-[calc(100dvh-4rem)] lg:min-h-[34rem] lg:grid-cols-[minmax(24rem,min(45%,46rem))_minmax(0,1fr)] lg:grid-rows-[auto_minmax(0,1fr)]">
       <header className="gutter border-line pt-5 pb-4 lg:col-start-1 lg:row-start-1 lg:border-r lg:border-b lg:px-6">
         <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
           <div className="min-w-0">

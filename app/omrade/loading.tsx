@@ -5,7 +5,7 @@ export default function AreaLoading() {
   return (
     <AreaShell>
       <div
-        className="animate-pulse lg:grid lg:h-[calc(100dvh-4rem)] lg:grid-cols-[minmax(24rem,40%)_minmax(0,1fr)]"
+        className="animate-pulse lg:grid lg:h-[calc(100dvh-4rem)] lg:grid-cols-[minmax(24rem,min(45%,46rem))_minmax(0,1fr)]"
         role="status"
         aria-label="Laster området"
       >
