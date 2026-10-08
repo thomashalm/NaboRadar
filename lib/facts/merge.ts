@@ -41,6 +41,7 @@ export function mergeFactResults(db: AreaFactsResult, lookups: AreaFactsResult):
     mapFeatures: [...db.mapFeatures, ...lookups.mapFeatures],
     sources: [...new Map([...db.sources, ...lookups.sources].map((kilde) => [kilde.name, kilde])).values()],
     unavailableSources: [...new Set([...db.unavailableSources, ...lookups.unavailableSources])],
+    staleSources: [...new Set([...db.staleSources, ...lookups.staleSources])],
   };
 }
 

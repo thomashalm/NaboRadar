@@ -19,8 +19,8 @@ import { assembleSection } from "@/lib/facts/assemble";
 import { mergeFactResults } from "@/lib/facts/merge";
 import { noiseFloor, noiseScale, scalePosition, type NoiseFloor, type NoiseScale } from "@/lib/facts/noise-scale";
 import type { AreaFactsResult, FactCluster, OverviewItem, SectionOverview } from "@/lib/facts/queries";
-import { formatRadius } from "@/lib/format";
-import { TILFLUKTSROM_NAERMESTE_LENKE } from "@/lib/facts/wording";
+import { formatDate, formatRadius } from "@/lib/format";
+import { describeStaleSources, TILFLUKTSROM_NAERMESTE_LENKE } from "@/lib/facts/wording";
 import type { AreaFact } from "@/types/area-feature";
 
 /**
@@ -290,6 +290,8 @@ function SectionDetail({
     return <p className="type-support">Kunne ikke hente {theme.label.toLowerCase()} akkurat nå.</p>;
   }
 
+  // Vises et lagret svar fordi kilden ikke svarte nå, står det også her — ikke bare i oversikten.
+  const lagret = theme.id === "stoy" && lookups?.status === "ok" ? lookups.staleSources : [];
   const clusters = clustersFor(theme, deler, radius);
   // Løse funn og samlet oversikt hører til seksjonen som helhet, ikke til en gruppe i den.
   const hele = theme.source.clusterId ? null : assembleSection(deler, theme.source.sectionId, radius);
@@ -326,6 +328,7 @@ function SectionDetail({
           <OverviewDetails overview={hele.overview} />
         </div>
       )}
+      {lagret.length > 0 && <p className="type-meta border-t border-line pt-3">{describeStaleSources(lagret)}</p>}
     </div>
   );
 }
@@ -654,6 +657,10 @@ function Kildelinjer({
           fullstendig.
         </p>
       )}
+      {samlet.staleSources.length > 0 && (
+        // Ikke en feil: svaret er gyldig, bare ikke hentet akkurat nå.
+        <p className="type-meta mb-3">{describeStaleSources(samlet.staleSources)}</p>
+      )}
       {samlet.sources.length > 0 && (
         /*
          * Samlet provenance, bak en utvider. Listen er komplett og ett trykk unna, men skal ikke
@@ -683,6 +690,10 @@ function Kildelinjer({
                   {source.owner} · {source.licenseName}
                 </span>
                 {source.method && <span className="type-meta mt-0.5 block">{source.method}</span>}
+                {source.fetchedAt && formatDate(source.fetchedAt) && (
+                  // Når vi hentet svaret — ikke når kildens data gjelder. Det står i linjen over.
+                  <span className="type-meta mt-0.5 block">NaboRadar hentet svaret fra kilden {formatDate(source.fetchedAt)}.</span>
+                )}
               </li>
             ))}
           </ul>

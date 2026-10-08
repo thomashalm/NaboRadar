@@ -26,7 +26,7 @@ const ok = (groups: AreaFactGroup[], order = AREA_SECTIONS.map((s) => s.id)): Ar
   order,
   mapFeatures: [],
   sources: [],
-  unavailableSources: [],
+  unavailableSources: [], staleSources: [],
 });
 
 const nede: AreaFactsResult = { status: "unavailable", devReason: "test" };

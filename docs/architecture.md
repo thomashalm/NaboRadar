@@ -320,7 +320,7 @@ UI-et skal formulere seg etter dette, for eksempel «Oppstart varslet for 8 mån
 |---|---|
 | **Klient** | MapLibre-kart, autocomplete-input, radiusvalg, feed-interaksjon |
 | **Server (RSC / route handlers)** | `/api/geocode` (proxy og cache mot Kartverket), resultat- og detaljsider via `events_within()` med anon-nøkkel og RLS |
-| **Kun server, hemmelig** | `SUPABASE_SECRET_KEY` — kun i GitHub Actions, aldri i Netlify og aldri i klienten. Webappen har ingen skrivenøkkel; `/admin` bruker brukerens egen Supabase-sesjon, og databasefunksjonene sjekker `is_admin()` selv |
+| **Kun server, hemmelig** | `SUPABASE_SECRET_KEY` — kun i GitHub Actions, aldri i Netlify og aldri i klienten. Webappen har ingen skrivenøkkel til databasen. Unntaket er `NOISE_CACHE_WRITE_TOKEN`, som bare kan skrive støycache-rader gjennom én funksjon (håndboka, «Støycachen»); `/admin` bruker brukerens egen Supabase-sesjon, og databasefunksjonene sjekker `is_admin()` selv |
 | **Database** | Geo-spørringer, dedup-constraints, dokument-allowlist, RLS |
 | **Cron** | Supabase `pg_cron` kaller `trigger_sync_workflow()`, som utløser GitHub-workflowen. Ingen cron-endepunkt i webappen |
 

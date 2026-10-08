@@ -48,6 +48,11 @@ export interface SourceInfo {
    * i «Kilder og metode», i stedet for på hvert kort eller i en seksjonsingress.
    */
   method?: string;
+  /**
+   * Når NaboRadar hentet dette svaret fra kilden. Bare for kilder med langlivet cache. Det er
+   * ikke når kildens data gjelder — det står i `method`.
+   */
+  fetchedAt?: string;
 }
 
 /** Kilde per provider/lookup. Vises alltid sammen med faktaene. */
@@ -174,7 +179,7 @@ export const SOURCES: Record<string, SourceInfo> = {
     licenseName: "NLOD",
     licenseUrl: "https://data.norge.no/nlod/no/1.0",
     method:
-      "Strategisk støykartlegging etter EU-støydirektivet, kartlagt 2022. Modellberegning for området, ikke måling ved boligen.",
+      "Strategisk støykartlegging etter EU-støydirektivet. Veitrafikk: situasjonen i 2022. Jernbane: situasjonen i 2017. Modellberegning for området, ikke måling ved boligen.",
   },
   "svv-stoysone-veg": {
     name: "Støyvarselkart for veg",
@@ -555,6 +560,19 @@ export function describeStoyStatus(a: AreaAttributes): { text: string; detail: s
   return null;
 }
 
+/** «Støykartet viser situasjonen i 2017.» Året modellen beskriver, aldri hentetidspunktet. */
+export function describeStoyKartleggingsaar(aar: number): string {
+  return `Støykartet viser situasjonen i ${aar}.`;
+}
+
+/**
+ * Når kilden ikke svarer og vi viser sist lagrede svar. Nøytral: svaret er gyldig, og
+ * brukeren skal bare vite hvor det kom fra.
+ */
+export function describeStaleSources(kilder: readonly string[]): string {
+  return `Viser sist tilgjengelige svar fra NaboRadars cache for ${kilder.join(", ")}. Kilden svarte ikke akkurat nå.`;
+}
+
 export const STOY_IKKE_KARTLAGT = "Området er ikke med i den strategiske støykartleggingen av vei og bane.";
 
 /** Storbylaget modellerer alle gater. Uten dette leses treffet som støy fra en stor vei. */
@@ -859,11 +877,18 @@ export function describeFact(input: {
       if (!level) return null;
       const kortKilde = subtype === "stoy_strategisk_veg" ? "veitrafikk" : "bane";
       const referanse = describeStoyReferanse(subtype, num(a.ovre));
+      // Vei og bane er fra hver sin kartleggingsrunde (2022 og 2017), så året står på hvert funn.
+      // Det er året støymodellen beskriver — ikke når NaboRadar hentet svaret.
+      const aar = num(a.kartlagtAar);
       return {
         // Forbeholdet og Lden-forklaringen står én gang i gruppen (lib/facts/clusters.ts).
-        // Metode og kartleggingsår står i «Kilder og metode».
+        // Metoden står i «Kilder og metode».
         headline: `Beregnet støy fra ${kilde}: Lden ${level}`,
-        details: [referanse, a.byomrade === true ? STOY_BYOMRADE : null].filter((linje): linje is string => linje !== null),
+        details: [
+          referanse,
+          a.byomrade === true ? STOY_BYOMRADE : null,
+          aar !== null ? describeStoyKartleggingsaar(aar) : null,
+        ].filter((linje): linje is string => linje !== null),
         caveat: null,
         // Står kortet alene, bærer referansen linjen under nivået.
         compact: { headline: `Støy fra ${kortKilde} · Lden ${level}`, context: referanse ?? STOY_KARTNIVA },

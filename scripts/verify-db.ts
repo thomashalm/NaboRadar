@@ -41,7 +41,10 @@ async function main() {
   // trigger_sync_workflow() gjorde til 2026-09-25.
   // Hyttefunksjonene er åpne for anon, men svarer bare når kategorien `hytte` er publisert.
   const HUTS = ["huts_near", "huts_in_bbox", "huts_in_municipality", "huts_search", "get_hut", "hut_index", "hut_municipality_counts"];
-  const ANON_OK = new Set(["data_status", "events_within", "features_near", "features_count_near", "get_event", ...HUTS]);
+  // Støycachen: lesing gir ett punkts støysvar. Skriving er kallbar, men virker bare med riktig
+  // token (app_write_tokens) — se migrasjon 20261114000000.
+  const NOISE_CACHE = ["noise_cache_get", "noise_cache_put"];
+  const ANON_OK = new Set(["data_status", "events_within", "features_near", "features_count_near", "get_event", ...HUTS, ...NOISE_CACHE]);
   // Research er admin-only, men går gjennom authenticated-rollen — is_admin() inne i hver
   // funksjon er det som faktisk stenger, ikke grantet. Anon skal aldri ha noen av dem.
   // explore_area_features og explore_events er lesefunksjonene bak Utforsk data: samme regel, og

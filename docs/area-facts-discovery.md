@@ -11,7 +11,7 @@ Hvordan data presenteres er like viktig som hvilke data vi har. Hver kilde har h
 
 | Kategori | Kilde | API | Lisens | Dekning | Oppdatering | Stabilitet | Bruk i MVP |
 |---|---|---|---|---|---|---|---|
-| Støy veg, strategisk (Lden/Lnight) | Miljødirektoratet (EU-støydirektivet) | ArcGIS REST, punkt-i-polygon [T] | NLOD | Byområder + større veger | Kartlagt 2022 | ✅ | ✅ |
+| Støy veg, strategisk (Lden/Lnight) | Miljødirektoratet (EU-støydirektivet) | ArcGIS REST, punkt-i-polygon [T] | NLOD | Byområder + større veger | Vei: situasjonen i 2022. Bane: 2017 | ✅ | ✅ |
 | Støysone veg T-1442 (gul/rød) | Statens vegvesen | WFS (GML), bbox [T]. Punktfilter i URL gir 403 | NLOD | Bare E/R/F-veg, prognose 2040 | Beregnet 2019 | ✅ | ✅ |
 | Støysone bane T-1442 | Bane NOR | WFS (GML), bbox [T] | «No conditions» | Statlig jernbane | Beregnet 2016 (gammel) | ⚠️ | ⚠️ |
 | Støy bane, strategisk | Miljødirektoratet | ArcGIS REST [T] | NLOD | Storby inkl. T-bane (Majorstuen: Lden 70) | 2022, proveniens uklar | ⚠️ | ⚠️ |

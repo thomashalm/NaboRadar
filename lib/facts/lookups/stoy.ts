@@ -1,3 +1,4 @@
+import { NOISE_SOURCE_ROUND } from "../noise-cache";
 import { z } from "zod";
 import { ArcgisClient, arcgisFeatureSchema } from "@/lib/providers/arcgis";
 import { fetchJson } from "@/lib/http";
@@ -57,7 +58,11 @@ const strategiskProps = z.object({
 const BYOMRADE = "roadsInAgglomeration";
 
 /**
- * Miljødirektoratets strategiske støykartlegging (EU-støydirektivet, kartlagt 2022).
+ * Miljødirektoratets strategiske støykartlegging (EU-støydirektivet).
+ *
+ * Kartleggingsrundene er ikke de samme for de to støykildene: veikartene viser situasjonen i
+ * 2022, banekartene situasjonen i 2017 (jernbanedata mangler i 2022-runden). Se
+ * NOISE_SOURCE_ROUND og docs/research/stoy-strategisk-cache.md.
  * Polygonene er ~300 MB nasjonalt og spørres derfor direkte, punkt-i-polygon.
  * Storbylagene (5) dekker Oslo; lag 7 dekker øvrige kartlagte veger.
  *
@@ -94,8 +99,8 @@ export class StrategiskStoyLookup implements AreaLookup {
 
   async run({ lat, lng, signal }: LookupContext): Promise<LookupHit[]> {
     const sources = [
-      { service: `${MDIR_STOY}/stoykart_strategisk_veg/MapServer`, subtype: "stoy_strategisk_veg", title: "Beregnet veitrafikkstøy" },
-      { service: `${MDIR_STOY}/stoykart_strategisk_bane/MapServer`, subtype: "stoy_strategisk_bane", title: "Beregnet banestøy" },
+      { service: `${MDIR_STOY}/stoykart_strategisk_veg/MapServer`, subtype: "stoy_strategisk_veg", title: "Beregnet veitrafikkstøy", round: NOISE_SOURCE_ROUND.road },
+      { service: `${MDIR_STOY}/stoykart_strategisk_bane/MapServer`, subtype: "stoy_strategisk_bane", title: "Beregnet banestøy", round: NOISE_SOURCE_ROUND.rail },
     ];
 
     // Dekningen hentes sammen med nivåene. Feiler ett kall, feiler hele oppslaget (Promise.all).
@@ -145,7 +150,8 @@ export class StrategiskStoyLookup implements AreaLookup {
           ovre: band.upper,
           byomrade: p.source === BYOMRADE,
           enhet: "Lden",
-          kartlagtAar: 2022,
+          // Året støymodellen beskriver. Vei og bane er fra hver sin kartleggingsrunde.
+          kartlagtAar: source.round,
         },
         distanceM: 0,
         contains: true,

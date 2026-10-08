@@ -93,7 +93,8 @@ uendret.
   områdene der de mest trafikkerte veiene og banene er kartlagt, slik navnet og
   tjenestebeskrivelsen tilsier.
 - Tjenestebeskrivelsen for bane sier at kartene viser situasjonen i 2017, mens vår metodetekst
-  sier «kartlagt 2022» for hele kilden. Ikke avklart.
+  sier «kartlagt 2022» for hele kilden. Avklart 2026-10-08: banekartene viser situasjonen i
+  2017, og tekstene er rettet. Se [stoy-strategisk-cache.md](stoy-strategisk-cache.md).
 - Oppslaget gjør åtte kall i stedet for fire. Målt svartid var uendret, rundt fire sekunder i
   Oslo og ett sekund utenfor byområdene.
 

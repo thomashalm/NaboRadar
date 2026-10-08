@@ -6,6 +6,8 @@ import {
 } from "./naturfare";
 import { NveHoyspentDistribusjonLookup, NveKvikkleireAktsomhetLookup } from "./nve";
 import { FlystoyLookup, StoyvarselVegLookup, StrategiskStoyLookup } from "./stoy";
+import { getReadDb } from "@/lib/db";
+import { CachedNoiseLookup, createDbNoiseCacheStore } from "../noise-cache";
 import type { AreaLookup } from "./types";
 
 /**
@@ -23,10 +25,14 @@ export const areaLookups: readonly AreaLookup[] = [
   new NveSkredLookup(),
   new NguRadonLookup(),
   new KartverketStormfloLookup(),
-  new StrategiskStoyLookup(),
+  // Strategisk støykartlegging har en langlivet databasecache foran seg (lib/facts/noise-cache.ts).
+  new CachedNoiseLookup(
+    new StrategiskStoyLookup(),
+    createDbNoiseCacheStore(getReadDb, process.env.NOISE_CACHE_WRITE_TOKEN),
+  ),
   new StoyvarselVegLookup(),
   new FlystoyLookup(),
   new NveHoyspentDistribusjonLookup(),
 ];
 
-export type { AreaLookup, LookupContext, LookupHit } from "./types";
+export type { AreaLookup, DetailedLookupOutcome, LookupContext, LookupHit } from "./types";

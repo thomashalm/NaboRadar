@@ -187,6 +187,11 @@ export type AreaFactsResult =
       sources: SourceInfo[];
       /** Kilder som ikke svarte. Vises som en nøytral merknad. */
       unavailableSources: string[];
+      /**
+       * Kilder som ikke svarte nå, men der vi viser sist lagrede svar. De står ikke i
+       * `unavailableSources`: brukeren har et gyldig svar, og skal bare vite hvor det kom fra.
+       */
+      staleSources: string[];
     }
   | { status: "unavailable"; devReason: string };
 
@@ -1108,7 +1113,13 @@ export async function getAreaFacts(params: {
     groups,
     order: sections.map((section) => section.id),
     mapFeatures,
-    sources: [...usedSources].flatMap((id) => (SOURCES[id] ? [SOURCES[id]] : [])),
+    sources: [...usedSources].flatMap((id) => {
+      const kilde = SOURCES[id];
+      if (!kilde) return [];
+      const hentet = lookupResults.find((result) => result.lookupId === id)?.fetchedAt;
+      return [hentet ? { ...kilde, fetchedAt: hentet } : kilde];
+    }),
     unavailableSources: unavailable,
+    staleSources: lookupResults.filter((result) => result.stale).map((result) => SOURCES[result.lookupId]?.name ?? result.lookupId),
   };
 }

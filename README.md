@@ -114,6 +114,7 @@ Netlify bygger fra GitHub (`main`) med `netlify.toml`: `npm run build`, Node 24,
 | `NEXT_PUBLIC_SUPABASE_URL` | **Ja** | `/omrade` og `/sak` leser plansaker (`events_within`, `get_event`, `data_status`) |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | **Ja** | Samme. Publishable key, der RLS og funksjons-grants begrenser tilgangen |
 | `SUPABASE_SECRET_KEY` | **Nei** | Brukes bare av `npm run sync:dibk` og `/dev`, som gir 404 i produksjon |
+| `NOISE_CACHE_WRITE_TOKEN` | **Ja, når støycachen er i drift** | Lar webappen skrive støycache-rader, og ingenting annet. Uten den leses cachen, men fylles ikke. Se håndboka, «Støycachen» |
 | `SUPABASE_DB_URL` | **Nei** | Brukes bare av `db:push` og `db:verify` lokalt |
 | `LOCAL_DATABASE` | **Nei** | Kun development. Ignoreres uansett når `NODE_ENV=production` |
 | `NEXT_PUBLIC_MAP_TILE_URL` / `NEXT_PUBLIC_MAP_ATTRIBUTION` | Valgfritt | Standard er Kartverket topograatone |

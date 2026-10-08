@@ -869,7 +869,7 @@ For store til å synke, eller svarer bare på «ligger punktet innenfor?».
 | Kilde | Leverandør | Brukes til | Merknad |
 |---|---|---|---|
 | Kvikkleire-aktsomhet | NVE (aktsomhetskart 2024) | Marin leire i skrånende terreng | Ingen dekning → ingen uttalelse. «Utenfor aktsomhetsområde» ville vært misvisende |
-| Strategisk støykartlegging | Miljødirektoratet | Lden ved søkepunktet | Modellberegnet, kartlagt 2022 |
+| Strategisk støykartlegging | Miljødirektoratet | Lden ved søkepunktet | Modellberegnet. **Vei: situasjonen i 2022. Bane: situasjonen i 2017.** Langlivet databasecache foran, se [Støycachen](#støycachen) |
 | Støysoner veg | Statens vegvesen | Gul/rød sone langs veg | Geonorge blokkerer punktfilter, så Vegvesenets egen tjeneste brukes |
 | Støysoner fly | Avinor | Gul/rød sone rundt Avinors 44 lufthavner | Geonorge-WMS `wms.stoylufthavn`, `GetFeatureInfo` i EPSG:4326 (lat,lon). Lufthavnens navn fra `lib/facts/lufthavner.ts`, aldri ICAO-koden. Forsvarets flyplasser (Ørland m.fl.) er ikke med. [ADR 015](adr/015-publikumsprodukt-wms-og-kildefeil.md) |
 | Flomsoner og flomaktsomhet | NVE | Kartlagt flomsone og aktsomhetsområde for flom | Ett `identify`-kall dekker alle gjentaksintervallene. Analyseområdet avgjør om «utenfor sone» kan sies |
@@ -1016,6 +1016,52 @@ barneskolen lå bak «Se alle». Fra 2026-10-04 velges de tre første slik
   der kveld og natt teller ekstra.»
 - Kortene gjentar ikke «ved søkepunktet» når gruppen sier det. En sone i nærheten beholder avstanden.
 - De rene T-1442-sonekortene (støyvarselkart for veg, flystøy) er uendret.
+
+
+#### Støycachen
+
+Strategiske støykart lages i runder på rundt fem år, og svaret for et punkt endrer seg ikke
+mellom rundene. Miljødirektoratets karttjeneste er samtidig treg og til tider nede (målt
+2026-10-08: 21 sekunder eller ingen respons, mot vår grense på 6). Svaret lagres derfor per
+søkepunkt (`lib/facts/noise-cache.ts`, migrasjon `20261114000000_noise_cache.sql`).
+
+| Lag | Hva | Levetid |
+|---|---|---|
+| L1 | Minnecachen i `lookup-runner`, per serverinstans | 5 minutter |
+| L2 | `noise_cache` i databasen | 90 dager |
+| L3 | Miljødirektoratet | — |
+
+| Situasjon | Hva som skjer |
+|---|---|
+| Ferskt svar i L2 (under 90 dager) | Brukes. Kilden spørres ikke |
+| Ingenting lagret, eller svaret er gammelt | Kilden spørres. Gyldig svar lagres |
+| Kilden feiler, gammelt svar finnes | Det gamle svaret vises, med linjen «Viser sist tilgjengelige svar fra NaboRadars cache … Kilden svarte ikke akkurat nå.» Raden røres ikke |
+| Kilden feiler, ingenting lagret | Som før: kilden står som «svarte ikke» |
+
+Reglene:
+
+- **Bare gyldige svar lagres.** «Under laveste nivå» og «ikke dekket av kartleggingen» er svar og
+  lagres. En kildefeil er ikke et svar; tabellen har ingen tilstand for den, så en feil kan ikke
+  overskrive et godt svar.
+- **Kartleggingsår er ikke hentetidspunkt.** Vei gjelder situasjonen i 2022, bane i 2017
+  (jernbanedata mangler i 2022-runden). Året står på hvert funn («Støykartet viser situasjonen i
+  2017.») og i «Kilder og metode». `fetched_at` er når NaboRadar hentet svaret, vises bare i
+  «Kilder og metode», og gjør aldri dataene nyere. Fram til 2026-10-08 sto hele kilden som
+  «kartlagt 2022».
+- **Nøkkelen er søkepunktet**, bredde og lengde med fem desimaler (ca. 1 m) — den samme
+  koordinaten kilden blir spurt om. Grovere avrunding ville slått sammen nabobygg: støybåndene
+  langs en boliggate er 5–20 m brede (se [Langmyrgrenda](research/stoy-langmyrgrenda.md)).
+- **Ny kartleggingsrunde:** rundene står i `NOISE_SOURCE_ROUND`. Endres de, regnes alle lagrede
+  rader som gamle, og hentes på nytt etter hvert som noen søker.
+- **Har vi et gammelt svar, får kilden 3 sekunder** i stedet for de vanlige 6. Uten lagret svar
+  er grensene uendret.
+- **Vei og bane hentes fortsatt samlet.** Feiler ett av kallene, feiler hele oppslaget, som før.
+- **Ingenting fylles på forhånd.** Cachen vokser bare når noen søker.
+- **Skriving:** webappen har ingen skrivenøkkel til databasen. `noise_cache_put` krever
+  `NOISE_CACHE_WRITE_TOKEN`, en egen nøkkel som bare kan skrive støycache-rader. Databasen har
+  bare SHA-256 av den (`app_write_tokens`). Uten token leses cachen, men ingenting lagres.
+- Forskningen bak valget (cache framfor full import): [research](research/stoy-strategisk-cache.md).
+  QA mot den ekte kilden: `npm run qa:stoy-cache`.
 
 ### Forurenset grunn
 
@@ -1921,6 +1967,9 @@ timeout og fallback:
 | Direkte oppslag | 12 s | NVE-aktsomhet, støy, distribusjonsnett |
 
 **Direkte oppslag caches per kilde** (`lib/facts/lookup-runner.ts`), fem minutter per punkt og radius.
+Punktet er koordinaten med fem desimaler (ca. 1 m), samme avrunding som `/omrade` gjør. Fram til
+2026-10-08 var nøkkelen fire desimaler (ca. 10 m), som lot to nabobygg dele svar i fem minutter.
+Strategisk støykartlegging har i tillegg en langlivet cache i databasen, se [Støycachen](#støycachen).
 Feiler én kilde, caches de andre likevel, og neste besøk spør bare den som feilet. En kilde som nettopp
 feilet, får 30 sekunders pause per serverinstans: den rapporteres som «svarte ikke» med en gang i
 stedet for at hvert besøk venter på tidsavbruddet. **Bare et gyldig svar kan bety «ingen treff».**
@@ -2369,6 +2418,7 @@ Kun navn og plassering. Ingen verdier.
 | `NEXT_PUBLIC_SUPABASE_URL` | Netlify + lokal `.env.local` | Webappen. Ikke hemmelig | Ja |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Netlify + lokal `.env.local` | Webappen. Ikke hemmelig — RLS og grants begrenser den | Ja |
 | `SUPABASE_SECRET_KEY` | **Kun GitHub Actions Secrets** + lokal `.env.local` | Sync-workeren (service_role). **Aldri i Netlify** | Ja |
+| `NOISE_CACHE_WRITE_TOKEN` | Netlify + lokal `.env.local` | Webappen, bare for å skrive støycache-rader (`noise_cache_put`). Databasen har bare SHA-256 av den. Gir ingen annen tilgang | Når støycachen er satt i drift |
 | `SUPABASE_DB_URL` | **Kun lokalt** | `db:push`, `db:verify`. Inneholder databasepassordet | Ja |
 | `HEALTHCHECK_URL` | **Kun GitHub Actions Secrets** | Heartbeat i workflowen | Ja |
 | GitHub PAT | **Kun Supabase Vault**, navn `github_workflow_dispatch_token` | `trigger_sync_workflow()` | Ja |

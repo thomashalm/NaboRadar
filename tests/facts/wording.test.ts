@@ -159,9 +159,14 @@ describe("støy", () => {
   it("viser dB-intervall og skiller strategisk kartlegging fra T-1442", () => {
     const strategisk = describe_("stoy_strategisk_veg", { niva: "55–59 dB" }, true)!;
     expect(strategisk.headline).toContain("Lden 55–59 dB");
-    // Metode og kartleggingsår står én gang i «Kilder og metode», ikke på hvert kort.
+    // Metoden står én gang i «Kilder og metode», ikke på hvert kort.
     expect(strategisk.details).toEqual(["Gul støysone fra 55 dB, rød fra 65 dB (T-1442)"]);
-    expect(SOURCES["mdir-stoy-strategisk"]!.method).toContain("EU-støydirektivet, kartlagt 2022");
+    // Rettet 2026-10-08: kilden sto som «kartlagt 2022» samlet, men banekartene viser 2017.
+    expect(SOURCES["mdir-stoy-strategisk"]!.method).toContain("Veitrafikk: situasjonen i 2022. Jernbane: situasjonen i 2017.");
+    // Året står på funnet når oppslaget oppgir det, og er da kildens år for akkurat den støykilden.
+    expect(describe_("stoy_strategisk_bane", { niva: "55–59 dB", kartlagtAar: 2017 }, true)!.details).toContain(
+      "Støykartet viser situasjonen i 2017.",
+    );
     expect(strategisk.headline).not.toContain("søkepunktet");
 
     const varsel = describe_("stoysone_veg_t1442", { sone: "gul", kilde: "ERF-veger", prognoseAar: 2040 }, true)!;
